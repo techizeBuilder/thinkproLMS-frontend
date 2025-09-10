@@ -6,6 +6,8 @@ import Login from "../pages/Auth/Login";
 import Setup from "../pages/Auth/Setup";
 import SuperAdmin from "../pages/Dashboard/SuperAdmin";
 import Admin from "../pages/Dashboard/Admin";
+import AdminsPage from "../pages/Dashboard/SuperAdmin/Admins";
+import CreateAdminPage from "../pages/Dashboard/SuperAdmin/Admins/Create";
 // import Student from "../pages/Dashboard/Student";
 // import Mentor from "../pages/Dashboard/Mentor";
 
@@ -40,7 +42,10 @@ export default function AppRouter() {
               <SuperAdmin />
             </ProtectedRoute>
           }
-        />
+        >
+          <Route path="admins" element={<AdminsPage />} />
+          <Route path="admins/create" element={<CreateAdminPage />} />
+        </Route>
 
         {/* Admin */}
         <Route

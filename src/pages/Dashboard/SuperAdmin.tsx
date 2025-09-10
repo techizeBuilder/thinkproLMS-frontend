@@ -1,22 +1,10 @@
-import axiosInstance from "@/api/axiosInstance";
-import { Button } from "@/components/ui/button";
+import { Outlet } from "react-router-dom";
 
 export default function SuperAdmin() {
-  const testAPI = async () => {
-    try {
-      const data = await axiosInstance.post("/users/admin", {
-        name: "Admin User",
-        email: "admin@example.com",
-      });
-      console.log(data);
-    } catch (error) {
-      console.log(error);
-    }
-  };
   return (
-    <div>
+    <div className="min-h-screen bg-background">
       SuperAdmin
-      <Button onClick={testAPI}>Create Admin</Button>
+      <Outlet />
     </div>
   );
 }

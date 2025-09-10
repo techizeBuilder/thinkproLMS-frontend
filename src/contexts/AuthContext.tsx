@@ -19,6 +19,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     const stored = localStorage.getItem("user");
     if (stored) setUser(JSON.parse(stored));
+
+    const token = localStorage.getItem("token");
+    axiosInstance.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+
     setLoading(false);
   }, []);
 
