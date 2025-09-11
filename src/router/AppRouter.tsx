@@ -22,7 +22,8 @@ function ProtectedRoute({
 
   if (loading) return <div>Loading...</div>;
   if (!user) return <Navigate to="/login" replace />;
-  if (role && user.role !== role) return <Navigate to="/login" replace />;
+  if (role && user.role !== role)
+    return <Navigate to={`/${user.role}`} replace />;
   return children;
 }
 

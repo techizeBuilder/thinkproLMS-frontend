@@ -20,7 +20,7 @@ const CreateAdminPage = () => {
     setIsLoading(true)
 
     try {
-      await axiosInstance.post("/users/create-admin", formData)
+      await axiosInstance.post("/admins", formData)
       toast.success("Admin created and invited successfully!")
       navigate("/superadmin/admins")
     } catch (error: any) {

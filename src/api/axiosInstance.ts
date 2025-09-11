@@ -9,7 +9,8 @@ const axiosInstance = axios.create({
 axiosInstance.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401) {
+    // Only handle 401s if we have a token (meaning we're trying to access an authenticated route)
+    if (error.response?.status === 401 && localStorage.getItem("token")) {
       localStorage.removeItem("user");
       localStorage.removeItem("token");
       window.location.reload(); // forces reloading the app and redirecting to login
