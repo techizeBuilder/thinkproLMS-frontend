@@ -12,12 +12,12 @@ import {
   SidebarFooter,
   useSidebar
 } from "@/components/ui/collapsible-sidebar"
-import { Building2, HomeIcon, Settings, Users, LogOut, User, School, UserCheck, Crown } from "lucide-react"
+import { HomeIcon, Settings, LogOut, User, UserCheck, Crown } from "lucide-react"
 import { Button } from "@/components/ui/button"
 
-interface SuperAdminSidebarProps extends React.HTMLAttributes<HTMLDivElement> {}
+interface LeadMentorSidebarProps extends React.HTMLAttributes<HTMLDivElement> {}
 
-export function SuperAdminSidebar({ className }: SuperAdminSidebarProps) {
+export function LeadMentorSidebar({ className }: LeadMentorSidebarProps) {
   const { isCollapsed } = useSidebar()
 
   return (
@@ -30,7 +30,7 @@ export function SuperAdminSidebar({ className }: SuperAdminSidebarProps) {
       <SidebarContent className="space-y-4">
         <SidebarGroup label="Dashboard">
           <SidebarNav>
-            <SidebarNavItem to="/superadmin" icon={HomeIcon}>
+            <SidebarNavItem to="/leadmentor" icon={HomeIcon}>
               Dashboard
             </SidebarNavItem>
           </SidebarNav>
@@ -38,32 +38,18 @@ export function SuperAdminSidebar({ className }: SuperAdminSidebarProps) {
 
         <SidebarGroup label="School Management">
           <SidebarNav>
-            <SidebarNavItem to="/superadmin/schools" icon={School}>
-              Schools
-            </SidebarNavItem>
-            <SidebarNavItem to="/superadmin/school-admins" icon={UserCheck}>
+            <SidebarNavItem to="/leadmentor/school-admins" icon={UserCheck}>
               School Admins
             </SidebarNavItem>
-            <SidebarNavItem to="/superadmin/lead-mentors" icon={Crown}>
+            <SidebarNavItem to="/leadmentor/lead-mentors" icon={Crown}>
               Lead Mentors
-            </SidebarNavItem>
-          </SidebarNav>
-        </SidebarGroup>
-
-        <SidebarGroup label="User Management">
-          <SidebarNav>
-            <SidebarNavItem to="/superadmin/admins" icon={Building2}>
-              SuperAdmins
-            </SidebarNavItem>
-            <SidebarNavItem to="/superadmin/users" icon={Users}>
-              All Users
             </SidebarNavItem>
           </SidebarNav>
         </SidebarGroup>
 
         <SidebarGroup label="System">
           <SidebarNav>
-            <SidebarNavItem to="/superadmin/settings" icon={Settings}>
+            <SidebarNavItem to="/leadmentor/settings" icon={Settings}>
               Settings
             </SidebarNavItem>
           </SidebarNav>
