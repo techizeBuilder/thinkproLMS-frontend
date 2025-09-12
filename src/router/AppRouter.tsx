@@ -4,6 +4,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 
 import Login from "../pages/Auth/Login";
 import Setup from "../pages/Auth/Setup";
+import NotFound from "../pages/NotFound";
 import SuperAdmin from "../pages/Dashboard/SuperAdmin";
 import Admin from "../pages/Dashboard/Admin";
 import LeadMentor from "../pages/Dashboard/LeadMentor";
@@ -42,15 +43,61 @@ function ProtectedRoute({
 
   if (loading) return <div>Loading...</div>;
   if (!user) return <Navigate to="/login" replace />;
-  if (role && user.role !== role)
-    return <Navigate to={`/${user.role}`} replace />;
+  
+  if (role && user.role !== role) {
+    // Special case: allow schooladmin to access admin routes
+    if (role === "admin" && user.role === "schooladmin") {
+      return children;
+    }
+    
+    // Map roles to their appropriate routes for redirection
+    const roleRouteMap: { [key: string]: string } = {
+      superadmin: "/superadmin",
+      leadmentor: "/leadmentor", 
+      schooladmin: "/admin",
+      admin: "/admin",
+      mentor: "/mentor",
+      student: "/student"
+    };
+    
+    const route = roleRouteMap[user.role] || "/login";
+    return <Navigate to={route} replace />;
+  }
+  
   return children;
+}
+
+function RootRoute() {
+  const { user, loading } = useAuth();
+
+  if (loading) return <div>Loading...</div>;
+  
+  if (!user) {
+    return <Navigate to="/login" replace />;
+  }
+
+  // Redirect to user's role-based dashboard
+  // Map schooladmin to admin since they share the same dashboard
+  const roleRouteMap: { [key: string]: string } = {
+    superadmin: "/superadmin",
+    leadmentor: "/leadmentor", 
+    schooladmin: "/admin",
+    admin: "/admin",
+    mentor: "/mentor",
+    student: "/student"
+  };
+
+  const route = roleRouteMap[user.role] || "/login";
+  return <Navigate to={route} replace />;
 }
 
 export default function AppRouter() {
   return (
     <BrowserRouter>
       <Routes>
+        {/* Root Route - Authentication Check */}
+        <Route path="/" element={<RootRoute />} />
+        
         {/* Public */}
         <Route path="/login" element={<Login />} />
         <Route path="/setup/:token" element={<Setup />} />
@@ -82,7 +129,7 @@ export default function AppRouter() {
           <Route path="lead-mentors/:id/edit" element={<EditLeadMentorPage />} />
         </Route>
 
-        {/* Admin */}
+        {/* Admin & School Admin */}
         <Route
           path="/admin"
           element={
@@ -131,17 +178,7 @@ export default function AppRouter() {
         /> */}
 
         {/* Fallback */}
-        <Route
-          path="*"
-          element={
-            <div>
-              <h1 className="text-3xl font-bold">404 - Not Found</h1>
-              <p className="mt-4">
-                The page you are looking for does not exist.
-              </p>
-            </div>
-          }
-        />
+        <Route path="*" element={<NotFound />} />
       </Routes>
     </BrowserRouter>
   );

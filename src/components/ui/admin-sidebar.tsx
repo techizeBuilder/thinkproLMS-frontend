@@ -12,8 +12,9 @@ import {
   SidebarFooter,
   useSidebar
 } from "@/components/ui/collapsible-sidebar"
-import { BookOpen, HomeIcon, Settings, Users, LogOut, User, GraduationCap } from "lucide-react"
+import { BookOpen, HomeIcon, Settings, Users, User, GraduationCap } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { LogoutButton } from "@/components/ui/logout-button"
 
 interface AdminSidebarProps extends React.HTMLAttributes<HTMLDivElement> {}
 
@@ -67,10 +68,11 @@ export function AdminSidebar({ className }: AdminSidebarProps) {
                 <User className="mr-3 h-4 w-4" />
                 Profile
               </Button>
-              <Button variant="ghost" className="w-full justify-start text-sm text-red-600 hover:text-red-700 hover:bg-red-50">
-                <LogOut className="mr-3 h-4 w-4" />
-                Logout
-              </Button>
+              <LogoutButton 
+                variant="ghost" 
+                className="w-full justify-start text-sm" 
+                isCollapsed={false}
+              />
             </>
           ) : (
             <>
@@ -78,10 +80,12 @@ export function AdminSidebar({ className }: AdminSidebarProps) {
                 <User className="h-4 w-4" />
                 <span className="sr-only">Profile</span>
               </Button>
-              <Button variant="ghost" size="icon" className="w-full text-red-600 hover:text-red-700 hover:bg-red-50">
-                <LogOut className="h-4 w-4" />
-                <span className="sr-only">Logout</span>
-              </Button>
+              <LogoutButton 
+                variant="ghost" 
+                size="icon" 
+                className="w-full" 
+                isCollapsed={true}
+              />
             </>
           )}
         </div>

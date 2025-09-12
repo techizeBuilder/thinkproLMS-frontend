@@ -12,8 +12,9 @@ import {
   SidebarFooter,
   useSidebar
 } from "@/components/ui/collapsible-sidebar"
-import { HomeIcon, Settings, LogOut, User, UserCheck, Crown } from "lucide-react"
+import { HomeIcon, Settings, User, UserCheck, Crown } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { LogoutButton } from "@/components/ui/logout-button"
 
 interface LeadMentorSidebarProps extends React.HTMLAttributes<HTMLDivElement> {}
 
@@ -64,10 +65,11 @@ export function LeadMentorSidebar({ className }: LeadMentorSidebarProps) {
                 <User className="mr-3 h-4 w-4" />
                 Profile
               </Button>
-              <Button variant="ghost" className="w-full justify-start text-sm text-red-600 hover:text-red-700 hover:bg-red-50">
-                <LogOut className="mr-3 h-4 w-4" />
-                Logout
-              </Button>
+              <LogoutButton 
+                variant="ghost" 
+                className="w-full justify-start text-sm" 
+                isCollapsed={false}
+              />
             </>
           ) : (
             <>
@@ -75,10 +77,12 @@ export function LeadMentorSidebar({ className }: LeadMentorSidebarProps) {
                 <User className="h-4 w-4" />
                 <span className="sr-only">Profile</span>
               </Button>
-              <Button variant="ghost" size="icon" className="w-full text-red-600 hover:text-red-700 hover:bg-red-50">
-                <LogOut className="h-4 w-4" />
-                <span className="sr-only">Logout</span>
-              </Button>
+              <LogoutButton 
+                variant="ghost" 
+                size="icon" 
+                className="w-full" 
+                isCollapsed={true}
+              />
             </>
           )}
         </div>
