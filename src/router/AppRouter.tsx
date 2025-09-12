@@ -26,6 +26,14 @@ import EditLeadMentorPage from "../pages/Dashboard/SuperAdmin/LeadMentors/Edit";
 import LeadMentorEditSchoolAdminPage from "../pages/Dashboard/LeadMentor/SchoolAdmins/Edit";
 import LeadMentorEditLeadMentorPage from "../pages/Dashboard/LeadMentor/LeadMentors/Edit";
 
+// LeadMentor Mentor & Student Management
+import MentorsPage from "../pages/Dashboard/LeadMentor/Mentors";
+import CreateMentorPage from "../pages/Dashboard/LeadMentor/Mentors/Create";
+import StudentsPage from "../pages/Dashboard/LeadMentor/Students";
+import CreateStudentPage from "../pages/Dashboard/LeadMentor/Students/Create";
+import EditStudentPage from "../pages/Dashboard/LeadMentor/Students/Edit";
+import BulkUploadStudentsPage from "../pages/Dashboard/LeadMentor/Students/BulkUpload";
+
 // Dashboard Components
 import SuperAdminDashboard from "../pages/Dashboard/SuperAdmin/Dashboard";
 import LeadMentorDashboard from "../pages/Dashboard/LeadMentor/Dashboard";
@@ -155,6 +163,16 @@ export default function AppRouter() {
           <Route path="lead-mentors" element={<LeadMentorsPage />} />
           <Route path="lead-mentors/create" element={<CreateLeadMentorPage />} />
           <Route path="lead-mentors/:id/edit" element={<LeadMentorEditLeadMentorPage />} />
+          
+          {/* Mentor Management */}
+          <Route path="mentors" element={<MentorsPage />} />
+          <Route path="mentors/create" element={<CreateMentorPage />} />
+          
+          {/* Student Management */}
+          <Route path="students" element={<StudentsPage />} />
+          <Route path="students/create" element={<CreateStudentPage />} />
+          <Route path="students/:id/edit" element={<EditStudentPage />} />
+          <Route path="students/bulk-upload" element={<BulkUploadStudentsPage />} />
         </Route>
 
         {/* Mentor */}
