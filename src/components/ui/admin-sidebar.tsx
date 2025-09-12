@@ -1,46 +1,91 @@
-import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
-import { BookOpen, HomeIcon, Settings, Users } from "lucide-react";
-import { NavLink } from "react-router-dom";
+import * as React from "react"
+import { cn } from "@/lib/utils"
+import { 
+  Sidebar,
+  SidebarContent,
+  SidebarHeader,
+  SidebarNav,
+  SidebarNavItem,
+  SidebarTitle,
+  SidebarToggle,
+  SidebarGroup,
+  SidebarFooter,
+  useSidebar
+} from "@/components/ui/collapsible-sidebar"
+import { BookOpen, HomeIcon, Settings, Users, LogOut, User, GraduationCap } from "lucide-react"
+import { Button } from "@/components/ui/button"
 
 interface AdminSidebarProps extends React.HTMLAttributes<HTMLDivElement> {}
 
 export function AdminSidebar({ className }: AdminSidebarProps) {
+  const { isCollapsed } = useSidebar()
+
   return (
-    <div className={cn("pb-12", className)}>
-      <div className="space-y-4 py-4">
-        <div className="px-3 py-2">
-          <h2 className="mb-2 px-4 text-lg font-semibold tracking-tight">
-            Admin Dashboard
-          </h2>
-          <div className="space-y-1">
-            <NavLink to="/admin">
-              <Button variant="secondary" className="w-full justify-start">
-                <HomeIcon className="mr-2 h-4 w-4" />
-                Dashboard
+    <Sidebar className={cn("", className)}>
+      <SidebarHeader>
+        <SidebarTitle>Admin Panel</SidebarTitle>
+        <SidebarToggle />
+      </SidebarHeader>
+      
+      <SidebarContent>
+        <SidebarGroup label="Dashboard">
+          <SidebarNav>
+            <SidebarNavItem to="/admin" icon={HomeIcon}>
+              Dashboard
+            </SidebarNavItem>
+          </SidebarNav>
+        </SidebarGroup>
+
+        <SidebarGroup label="Content">
+          <SidebarNav>
+            <SidebarNavItem to="/admin/courses" icon={BookOpen}>
+              Courses
+            </SidebarNavItem>
+            <SidebarNavItem to="/admin/students" icon={GraduationCap}>
+              Students
+            </SidebarNavItem>
+          </SidebarNav>
+        </SidebarGroup>
+
+        <SidebarGroup label="Management">
+          <SidebarNav>
+            <SidebarNavItem to="/admin/users" icon={Users}>
+              Users
+            </SidebarNavItem>
+            <SidebarNavItem to="/admin/settings" icon={Settings}>
+              Settings
+            </SidebarNavItem>
+          </SidebarNav>
+        </SidebarGroup>
+      </SidebarContent>
+
+      <SidebarFooter>
+        <div className="space-y-1">
+          {!isCollapsed ? (
+            <>
+              <Button variant="ghost" className="w-full justify-start text-sm">
+                <User className="mr-3 h-4 w-4" />
+                Profile
               </Button>
-            </NavLink>
-            <NavLink to="/admin/courses">
-              <Button variant="ghost" className="w-full justify-start">
-                <BookOpen className="mr-2 h-4 w-4" />
-                Courses
+              <Button variant="ghost" className="w-full justify-start text-sm text-red-600 hover:text-red-700 hover:bg-red-50">
+                <LogOut className="mr-3 h-4 w-4" />
+                Logout
               </Button>
-            </NavLink>
-            <NavLink to="/admin/students">
-              <Button variant="ghost" className="w-full justify-start">
-                <Users className="mr-2 h-4 w-4" />
-                Students
+            </>
+          ) : (
+            <>
+              <Button variant="ghost" size="icon" className="w-full">
+                <User className="h-4 w-4" />
+                <span className="sr-only">Profile</span>
               </Button>
-            </NavLink>
-            <NavLink to="/admin/settings">
-              <Button variant="ghost" className="w-full justify-start">
-                <Settings className="mr-2 h-4 w-4" />
-                Settings
+              <Button variant="ghost" size="icon" className="w-full text-red-600 hover:text-red-700 hover:bg-red-50">
+                <LogOut className="h-4 w-4" />
+                <span className="sr-only">Logout</span>
               </Button>
-            </NavLink>
-          </div>
+            </>
+          )}
         </div>
-      </div>
-    </div>
-  );
+      </SidebarFooter>
+    </Sidebar>
+  )
 }

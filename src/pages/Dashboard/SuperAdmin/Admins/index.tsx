@@ -1,95 +1,229 @@
 import { useEffect, useState } from "react";
-import { Card } from "@/components/ui/card";
+import { Link } from "react-router-dom";
+import { 
+  Card, 
+  CardContent, 
+  CardDescription, 
+  CardHeader, 
+  CardTitle 
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import { Badge } from "@/components/ui/badge";
 import axiosInstance from "@/api/axiosInstance";
 import { toast } from "sonner";
+import { Plus, Trash2, Shield, Users, Loader2 } from "lucide-react";
 
-interface Admin {
+interface SuperAdmin {
   _id: string;
   name: string;
   email: string;
   isVerified: boolean;
+  isSystemAdmin?: boolean;
   createdAt: string;
 }
 
-const AdminsPage = () => {
-  const [admins, setAdmins] = useState<Admin[]>([]);
+const SuperAdminsPage = () => {
+  const [superAdmins, setSuperAdmins] = useState<SuperAdmin[]>([]);
   const [loading, setLoading] = useState(true);
+  const [deleteLoading, setDeleteLoading] = useState<string | null>(null);
 
   useEffect(() => {
-    const fetchAdmins = async () => {
+    const fetchSuperAdmins = async () => {
       try {
-        const response = await axiosInstance.get("/admins");
-        setAdmins(response.data.data);
+        const response = await axiosInstance.get("/superadmins");
+        setSuperAdmins(response.data.data);
       } catch (error) {
-        toast.error("Failed to fetch admins");
+        toast.error("Failed to fetch superadmins");
       } finally {
         setLoading(false);
       }
     };
 
-    fetchAdmins();
+    fetchSuperAdmins();
   }, []);
 
+  const handleDelete = async (id: string, name: string) => {
+    setDeleteLoading(id);
+    try {
+      await axiosInstance.delete(`/superadmins/${id}`);
+      setSuperAdmins(prev => prev.filter(admin => admin._id !== id));
+      toast.success(`${name} has been deleted successfully`);
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || "Failed to delete superadmin");
+    } finally {
+      setDeleteLoading(null);
+    }
+  };
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+    });
+  };
+
+  if (loading) {
+    return (
+      <Card>
+        <CardContent className="flex items-center justify-center py-12">
+          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+          <span className="ml-2 text-muted-foreground">Loading superadmins...</span>
+        </CardContent>
+      </Card>
+    );
+  }
+
   return (
-    <div className="container mx-auto p-6">
-      <Card className="p-6">
-        <h1 className="text-2xl font-bold mb-4">Admins Management</h1>
-        <div className="flex justify-end mb-6">
-          <a
-            href="/superadmin/admins/create"
-            className="bg-primary text-white px-4 py-2 rounded-md hover:bg-primary/90 transition-colors"
-          >
-            Add New Admin
-          </a>
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">SuperAdmins</h1>
+          <p className="text-muted-foreground">
+            Manage system superadmins and their permissions
+          </p>
         </div>
-        {loading ? (
-          <div className="text-center py-8">Loading...</div>
-        ) : admins.length === 0 ? (
-          <div className="text-muted-foreground text-center py-8">
-            No admins found. Create one to get started.
-          </div>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full border-collapse">
-              <thead>
-                <tr className="bg-muted">
-                  <th className="p-4 text-left font-medium">Name</th>
-                  <th className="p-4 text-left font-medium">Email</th>
-                  <th className="p-4 text-left font-medium">Status</th>
-                  <th className="p-4 text-left font-medium">Created At</th>
-                </tr>
-              </thead>
-              <tbody>
-                {admins.map((admin) => (
-                  <tr
-                    key={admin._id}
-                    className="border-b border-border hover:bg-muted/50"
-                  >
-                    <td className="p-4">{admin.name}</td>
-                    <td className="p-4">{admin.email}</td>
-                    <td className="p-4">
-                      <span
-                        className={`px-2 py-1 rounded-full text-sm ${
-                          admin.isVerified
-                            ? "bg-green-100 text-green-800"
-                            : "bg-yellow-100 text-yellow-800"
-                        }`}
+        <Button asChild>
+          <Link to="/superadmin/admins/create">
+            <Plus className="mr-2 h-4 w-4" />
+            Add SuperAdmin
+          </Link>
+        </Button>
+      </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Users className="h-5 w-5" />
+            SuperAdmins Management
+          </CardTitle>
+          <CardDescription>
+            A list of all superadmins in the system. System superadmin cannot be deleted.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          {superAdmins.length === 0 ? (
+            <div className="text-center py-12">
+              <Users className="mx-auto h-12 w-12 text-muted-foreground" />
+              <h3 className="mt-4 text-lg font-semibold">No superadmins found</h3>
+              <p className="text-muted-foreground">
+                Get started by creating your first superadmin.
+              </p>
+              <Button asChild className="mt-4">
+                <Link to="/superadmin/admins/create">
+                  <Plus className="mr-2 h-4 w-4" />
+                  Add SuperAdmin
+                </Link>
+              </Button>
+            </div>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Name</TableHead>
+                  <TableHead>Email</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Created</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {superAdmins.map((superAdmin) => (
+                  <TableRow key={superAdmin._id}>
+                    <TableCell className="font-medium">
+                      <div className="flex items-center gap-2">
+                        {superAdmin.name}
+                        {superAdmin.isSystemAdmin && (
+                          <Badge variant="info" className="text-xs">
+                            <Shield className="mr-1 h-3 w-3" />
+                            System
+                          </Badge>
+                        )}
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-muted-foreground">
+                      {superAdmin.email}
+                    </TableCell>
+                    <TableCell>
+                      <Badge
+                        variant={superAdmin.isVerified ? "success" : "warning"}
                       >
-                        {admin.isVerified ? "Verified" : "Pending"}
-                      </span>
-                    </td>
-                    <td className="p-4">
-                      {new Date(admin.createdAt).toLocaleDateString()}
-                    </td>
-                  </tr>
+                        {superAdmin.isVerified ? "Verified" : "Pending"}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="text-muted-foreground">
+                      {formatDate(superAdmin.createdAt)}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      {!superAdmin.isSystemAdmin ? (
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                              disabled={deleteLoading === superAdmin._id}
+                            >
+                              {deleteLoading === superAdmin._id ? (
+                                <Loader2 className="h-4 w-4 animate-spin" />
+                              ) : (
+                                <Trash2 className="h-4 w-4" />
+                              )}
+                            </Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>Delete SuperAdmin</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                Are you sure you want to delete <strong>{superAdmin.name}</strong>? 
+                                This action cannot be undone and will permanently remove their access to the system.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>Cancel</AlertDialogCancel>
+                              <AlertDialogAction
+                                onClick={() => handleDelete(superAdmin._id, superAdmin.name)}
+                                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                              >
+                                Delete
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
+                      ) : (
+                        <Badge variant="outline" className="text-muted-foreground">
+                          Protected
+                        </Badge>
+                      )}
+                    </TableCell>
+                  </TableRow>
                 ))}
-              </tbody>
-            </table>
-          </div>
-        )}
+              </TableBody>
+            </Table>
+          )}
+        </CardContent>
       </Card>
     </div>
   );
 };
 
-export default AdminsPage;
+export default SuperAdminsPage;
