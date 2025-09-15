@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
   Plus,
@@ -12,6 +12,7 @@ import {
   Upload,
   User,
   GraduationCap,
+  Eye,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import axiosInstance from "@/api/axiosInstance";
@@ -51,6 +52,12 @@ export default function StudentsPage() {
   const [selectedSchool, setSelectedSchool] = useState("");
   const [selectedGrade, setSelectedGrade] = useState("");
   const [schools, setSchools] = useState<School[]>([]);
+  const [showPassword, setShowPassword] = useState<{ [key: string]: string }>(
+    {}
+  );
+  const [loadingPassword, setLoadingPassword] = useState<{
+    [key: string]: boolean;
+  }>({});
   const navigate = useNavigate();
 
   const grades = [
@@ -142,9 +149,12 @@ export default function StudentsPage() {
       if (selectedSchool) queryParams.append("schoolId", selectedSchool);
       queryParams.append("format", format);
 
-      const response = await axiosInstance.get(`/students/download?${queryParams}`, {
-        responseType: format === 'excel' ? 'blob' : 'json',
-      });
+      const response = await axiosInstance.get(
+        `/students/download?${queryParams}`,
+        {
+          responseType: format === "excel" ? "blob" : "json",
+        }
+      );
 
       if (format === "excel") {
         const url = window.URL.createObjectURL(new Blob([response.data]));
@@ -161,6 +171,29 @@ export default function StudentsPage() {
       }
     } catch (error) {
       console.error("Error downloading student list:", error);
+    }
+  };
+
+  const handleShowPassword = async (studentId: string) => {
+    setLoadingPassword((prev) => ({ ...prev, [studentId]: true }));
+    try {
+      const response = await axiosInstance.get(
+        `/students/${studentId}/password`
+      );
+      console.log(response.data);
+      const passwordData = response.data.data;
+      setShowPassword((prev) => ({
+        ...prev,
+        [studentId]: passwordData.generatedPassword || "No password available",
+      }));
+    } catch (error: any) {
+      console.error("Error fetching student password:", error);
+      setShowPassword((prev) => ({
+        ...prev,
+        [studentId]: "Error loading password",
+      }));
+    } finally {
+      setLoadingPassword((prev) => ({ ...prev, [studentId]: false }));
     }
   };
 
@@ -294,9 +327,24 @@ export default function StudentsPage() {
                           `• ${student.parentPhoneNumber}`}
                       </div>
                     )}
+                    {showPassword[student._id] && (
+                      <div className="text-sm text-green-600 mt-2 font-mono bg-green-50 p-2 rounded border">
+                        Password: {showPassword[student._id]}
+                      </div>
+                    )}
                   </div>
                 </div>
                 <div className="flex gap-2">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => handleShowPassword(student._id)}
+                    disabled={loadingPassword[student._id]}
+                    className="text-blue-600 hover:text-blue-700"
+                    title="Show password"
+                  >
+                    <Eye className="h-4 w-4" />
+                  </Button>
                   <Button
                     variant="ghost"
                     size="sm"
