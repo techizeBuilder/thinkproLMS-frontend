@@ -5,15 +5,18 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ArrowLeft } from "lucide-react";
-import { schoolService, type School, type UpdateSchoolData } from "@/api/schoolService";
+import { ArrowLeft, Upload } from "lucide-react";
+import { schoolService, type School, type UpdateSchoolData, type SchoolHead, type ServiceDetails } from "@/api/schoolService";
 import { toast } from "sonner";
+import SchoolHeadForm from "@/components/SchoolHeadForm";
+import ServiceForm from "@/components/ServiceForm";
 
 export default function EditSchoolPage() {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
   const [loading, setLoading] = useState(false);
   const [fetchLoading, setFetchLoading] = useState(true);
+  const [contractDocumentFile, setContractDocumentFile] = useState<File | null>(null);
   const [formData, setFormData] = useState<UpdateSchoolData>({
     name: "",
     address: "",
@@ -24,6 +27,12 @@ export default function EditSchoolPage() {
     logo: "",
     affiliatedTo: "",
     branchName: "",
+    contractStartDate: "",
+    contractEndDate: "",
+    projectStartDate: "",
+    projectEndDate: "",
+    schoolHeads: [],
+    serviceDetails: null,
   });
 
   useEffect(() => {
@@ -47,6 +56,12 @@ export default function EditSchoolPage() {
           logo: school.logo || "",
           affiliatedTo: school.affiliatedTo || "",
           branchName: school.branchName || "",
+          contractStartDate: school.contractStartDate ? new Date(school.contractStartDate).toISOString().split('T')[0] : "",
+          contractEndDate: school.contractEndDate ? new Date(school.contractEndDate).toISOString().split('T')[0] : "",
+          projectStartDate: school.projectStartDate ? new Date(school.projectStartDate).toISOString().split('T')[0] : "",
+          projectEndDate: school.projectEndDate ? new Date(school.projectEndDate).toISOString().split('T')[0] : "",
+          schoolHeads: school.schoolHeads || [],
+          serviceDetails: school.serviceDetails || null,
         });
       }
     } catch (error: any) {
@@ -65,6 +80,29 @@ export default function EditSchoolPage() {
     }));
   };
 
+  const handleContractDocumentUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0] || null;
+    setContractDocumentFile(file);
+    setFormData(prev => ({
+      ...prev,
+      contractDocument: file || undefined
+    }));
+  };
+
+  const handleSchoolHeadsChange = (schoolHeads: SchoolHead[]) => {
+    setFormData(prev => ({
+      ...prev,
+      schoolHeads
+    }));
+  };
+
+  const handleServiceDetailsChange = (serviceDetails: ServiceDetails | null) => {
+    setFormData(prev => ({
+      ...prev,
+      serviceDetails
+    }));
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!id) return;
@@ -72,14 +110,7 @@ export default function EditSchoolPage() {
     setLoading(true);
 
     try {
-      // Remove empty optional fields
-      const submitData = { ...formData };
-      if (!submitData.image) delete submitData.image;
-      if (!submitData.logo) delete submitData.logo;
-      if (!submitData.affiliatedTo) delete submitData.affiliatedTo;
-      if (!submitData.branchName) delete submitData.branchName;
-
-      const response = await schoolService.update(id, submitData);
+      const response = await schoolService.update(id, formData);
       
       if (response.success) {
         toast.success(response.message || "School updated successfully");
@@ -116,12 +147,13 @@ export default function EditSchoolPage() {
         </div>
       </div>
 
-      <Card className="max-w-2xl">
-        <CardHeader>
-          <CardTitle>School Information</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-6">
+      <form onSubmit={handleSubmit} className="space-y-6">
+        {/* Basic School Information */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Basic School Information</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="name">School Name *</Label>
@@ -192,26 +224,28 @@ export default function EditSchoolPage() {
               </div>
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="branchName">Branch Name</Label>
-              <Input
-                id="branchName"
-                name="branchName"
-                value={formData.branchName}
-                onChange={handleInputChange}
-                placeholder="Enter branch name (optional)"
-              />
-            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="branchName">Branch Name</Label>
+                <Input
+                  id="branchName"
+                  name="branchName"
+                  value={formData.branchName}
+                  onChange={handleInputChange}
+                  placeholder="Enter branch name (optional)"
+                />
+              </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="affiliatedTo">Affiliated To</Label>
-              <Input
-                id="affiliatedTo"
-                name="affiliatedTo"
-                value={formData.affiliatedTo}
-                onChange={handleInputChange}
-                placeholder="Enter affiliation details (optional)"
-              />
+              <div className="space-y-2">
+                <Label htmlFor="affiliatedTo">Affiliated To</Label>
+                <Input
+                  id="affiliatedTo"
+                  name="affiliatedTo"
+                  value={formData.affiliatedTo}
+                  onChange={handleInputChange}
+                  placeholder="Enter affiliation details (optional)"
+                />
+              </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -237,22 +271,150 @@ export default function EditSchoolPage() {
                 />
               </div>
             </div>
+          </CardContent>
+        </Card>
 
-            <div className="flex gap-4 pt-4">
-              <Button type="submit" disabled={loading}>
-                {loading ? "Updating..." : "Update School"}
-              </Button>
-              <Button 
-                type="button" 
-                variant="outline" 
-                onClick={() => navigate("/superadmin/schools")}
-              >
-                Cancel
-              </Button>
+        {/* Contract and Project Dates */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Contract & Project Information</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="contractStartDate">Contract Start Date</Label>
+                <Input
+                  id="contractStartDate"
+                  name="contractStartDate"
+                  type="date"
+                  value={formData.contractStartDate}
+                  onChange={handleInputChange}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="contractEndDate">Contract End Date</Label>
+                <Input
+                  id="contractEndDate"
+                  name="contractEndDate"
+                  type="date"
+                  value={formData.contractEndDate}
+                  onChange={handleInputChange}
+                />
+              </div>
             </div>
-          </form>
-        </CardContent>
-      </Card>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="projectStartDate">Project Start Date</Label>
+                <Input
+                  id="projectStartDate"
+                  name="projectStartDate"
+                  type="date"
+                  value={formData.projectStartDate}
+                  onChange={handleInputChange}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="projectEndDate">Project End Date</Label>
+                <Input
+                  id="projectEndDate"
+                  name="projectEndDate"
+                  type="date"
+                  value={formData.projectEndDate}
+                  onChange={handleInputChange}
+                />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="contractDocument">Contract Signed Document</Label>
+              <div className="flex items-center gap-4">
+                <input
+                  id="contractDocument"
+                  type="file"
+                  accept=".pdf,.doc,.docx"
+                  onChange={handleContractDocumentUpload}
+                  className="hidden"
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => document.getElementById('contractDocument')?.click()}
+                  className="flex items-center gap-2"
+                >
+                  <Upload className="h-4 w-4" />
+                  Upload Contract Document
+                </Button>
+                {contractDocumentFile && (
+                  <span className="text-sm text-green-600">
+                    {contractDocumentFile.name}
+                  </span>
+                )}
+                {formData.contractDocument && !contractDocumentFile && (
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm text-blue-600">Current document uploaded</span>
+                    <a 
+                      href={formData.contractDocument} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="text-sm text-blue-600 underline hover:text-blue-800"
+                    >
+                      View Document
+                    </a>
+                  </div>
+                )}
+              </div>
+              <p className="text-xs text-gray-500">
+                Supported formats: PDF, DOC, DOCX (Max 10MB)
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* School Heads */}
+        <Card>
+          <CardHeader>
+            <CardTitle>School Heads</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <SchoolHeadForm
+              schoolHeads={formData.schoolHeads || []}
+              onChange={handleSchoolHeadsChange}
+            />
+          </CardContent>
+        </Card>
+
+        {/* Service Details */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Service Details</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ServiceForm
+              serviceDetails={formData.serviceDetails}
+              onChange={handleServiceDetailsChange}
+            />
+          </CardContent>
+        </Card>
+
+        {/* Submit Buttons */}
+        <div className="flex gap-4 pt-4">
+          <Button type="submit" disabled={loading} size="lg">
+            {loading ? "Updating..." : "Update School"}
+          </Button>
+          <Button 
+            type="button" 
+            variant="outline" 
+            size="lg"
+            onClick={() => navigate("/superadmin/schools")}
+          >
+            Cancel
+          </Button>
+        </div>
+      </form>
     </div>
   );
 }
