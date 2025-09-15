@@ -38,8 +38,8 @@ import QuestionBankPage from "../pages/Dashboard/LeadMentor/QuestionBank";
 // Dashboard Components
 import SuperAdminDashboard from "../pages/Dashboard/SuperAdmin/Dashboard";
 import LeadMentorDashboard from "../pages/Dashboard/LeadMentor/Dashboard";
-// import Student from "../pages/Dashboard/Student";
-// import Mentor from "../pages/Dashboard/Mentor";
+import Student from "../pages/Dashboard/Student";
+import Mentor from "../pages/Dashboard/Mentor";
 
 function ProtectedRoute({
   children,
@@ -183,24 +183,24 @@ export default function AppRouter() {
         </Route>
 
         {/* Mentor */}
-        {/* <Route
+        <Route
           path="/mentor"
           element={
             <ProtectedRoute role="mentor">
               <Mentor />
             </ProtectedRoute>
           }
-        /> */}
+        />
 
         {/* Student */}
-        {/* <Route
+        <Route
           path="/student"
           element={
             <ProtectedRoute role="student">
               <Student />
             </ProtectedRoute>
           }
-        /> */}
+        />
 
         {/* Fallback */}
         <Route path="*" element={<NotFound />} />
