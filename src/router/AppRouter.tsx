@@ -33,6 +33,7 @@ import StudentsPage from "../pages/Dashboard/LeadMentor/Students";
 import CreateStudentPage from "../pages/Dashboard/LeadMentor/Students/Create";
 import EditStudentPage from "../pages/Dashboard/LeadMentor/Students/Edit";
 import BulkUploadStudentsPage from "../pages/Dashboard/LeadMentor/Students/BulkUpload";
+import QuestionBankPage from "../pages/Dashboard/LeadMentor/QuestionBank";
 
 // Dashboard Components
 import SuperAdminDashboard from "../pages/Dashboard/SuperAdmin/Dashboard";
@@ -135,6 +136,9 @@ export default function AppRouter() {
           <Route path="lead-mentors" element={<LeadMentorsPage />} />
           <Route path="lead-mentors/create" element={<CreateLeadMentorPage />} />
           <Route path="lead-mentors/:id/edit" element={<EditLeadMentorPage />} />
+          
+          {/* Question Bank */}
+          <Route path="question-bank" element={<QuestionBankPage />} />
         </Route>
 
         {/* Admin & School Admin */}
@@ -173,6 +177,9 @@ export default function AppRouter() {
           <Route path="students/create" element={<CreateStudentPage />} />
           <Route path="students/:id/edit" element={<EditStudentPage />} />
           <Route path="students/bulk-upload" element={<BulkUploadStudentsPage />} />
+          
+          {/* Question Bank */}
+          <Route path="question-bank" element={<QuestionBankPage />} />
         </Route>
 
         {/* Mentor */}

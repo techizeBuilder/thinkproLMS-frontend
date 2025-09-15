@@ -12,7 +12,7 @@ import {
   SidebarFooter,
   useSidebar
 } from "@/components/ui/collapsible-sidebar"
-import { HomeIcon, Settings, User, UserCheck, Crown, Users, GraduationCap } from "lucide-react"
+import { HomeIcon, Settings, User, UserCheck, Crown, Users, GraduationCap, BookOpen } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { LogoutButton } from "@/components/ui/logout-button"
 
@@ -55,6 +55,14 @@ export function LeadMentorSidebar({ className }: LeadMentorSidebarProps) {
             </SidebarNavItem>
             <SidebarNavItem to="/leadmentor/students" icon={GraduationCap}>
               Students
+            </SidebarNavItem>
+          </SidebarNav>
+        </SidebarGroup>
+
+        <SidebarGroup label="Assessment">
+          <SidebarNav>
+            <SidebarNavItem to="/leadmentor/question-bank" icon={BookOpen}>
+              Question Bank
             </SidebarNavItem>
           </SidebarNav>
         </SidebarGroup>
