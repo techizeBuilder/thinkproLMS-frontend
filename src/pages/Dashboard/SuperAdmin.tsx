@@ -28,7 +28,7 @@ export default function SuperAdmin() {
           <main className="flex-1 overflow-auto">
             <div className="p-6 space-y-6">
               {/* Dashboard Stats - Only show on main routes */}
-              {showDashboardStats && (
+              {/* {showDashboardStats && (
                 <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
                   <Card>
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -90,7 +90,7 @@ export default function SuperAdmin() {
                     </CardContent>
                   </Card>
                 </div>
-              )}
+              )} */}
 
               {/* Outlet for nested routes */}
               <Outlet />

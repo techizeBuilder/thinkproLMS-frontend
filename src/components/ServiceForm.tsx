@@ -1,71 +1,86 @@
 import { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Plus, Trash2, X } from "lucide-react";
-import { ServiceDetails, ServiceSection } from "@/api/schoolService";
+import { Plus, X } from "lucide-react";
+import type { ServiceDetails, GradeWithSections } from "@/api/schoolService";
 
 interface ServiceFormProps {
-  serviceDetails: ServiceDetails | null;
+  serviceDetails: ServiceDetails | null | undefined;
   onChange: (serviceDetails: ServiceDetails | null) => void;
 }
 
 const COMMON_SUBJECTS = [
-  "Mathematics",
-  "Science",
-  "English",
-  "Hindi",
-  "Social Studies",
-  "Computer Science",
-  "Physical Education",
-  "Art",
-  "Music",
-  "Economics",
-  "Business Studies",
-  "Accountancy",
-  "Physics",
-  "Chemistry",
-  "Biology",
-  "History",
-  "Geography",
-  "Political Science",
-  "Psychology",
-  "Sociology",
+  "Robotics",
+  "Artificial Intelligence",
+  "Machine Learning",
 ];
 
-export default function ServiceForm({ serviceDetails, onChange }: ServiceFormProps) {
+export default function ServiceForm({
+  serviceDetails,
+  onChange,
+}: ServiceFormProps) {
   const [customSubject, setCustomSubject] = useState("");
+  const [selectedGrades, setSelectedGrades] = useState<number[]>([]);
 
   const updateServiceDetails = (updates: Partial<ServiceDetails>) => {
     const current = serviceDetails || {
       serviceType: "",
       mentors: [],
-      grades: [],
       subjects: [],
-      sections: [],
+      grades: [],
     };
     onChange({ ...current, ...updates });
   };
 
-  const handleMentorChange = (mentor: "School Mentor" | "Thinker Mentor", checked: boolean) => {
+  const handleMentorChange = (
+    mentor: "School Mentor" | "Thinker Mentor",
+    checked: boolean
+  ) => {
     const currentMentors = serviceDetails?.mentors || [];
     if (checked) {
       updateServiceDetails({ mentors: [...currentMentors, mentor] });
     } else {
-      updateServiceDetails({ mentors: currentMentors.filter(m => m !== mentor) });
+      updateServiceDetails({
+        mentors: currentMentors.filter((m) => m !== mentor),
+      });
     }
   };
 
   const handleGradeChange = (grade: number, checked: boolean) => {
-    const currentGrades = serviceDetails?.grades || [];
+    let newSelectedGrades;
     if (checked) {
-      updateServiceDetails({ grades: [...currentGrades, grade].sort() });
+      newSelectedGrades = [...selectedGrades, grade].sort();
     } else {
-      updateServiceDetails({ grades: currentGrades.filter(g => g !== grade) });
+      newSelectedGrades = selectedGrades.filter((g) => g !== grade);
     }
+    setSelectedGrades(newSelectedGrades);
+
+    // Update service details with grades that have sections
+    const currentGrades = serviceDetails?.grades || [];
+    const updatedGrades = currentGrades.filter((g) =>
+      newSelectedGrades.includes(g.grade)
+    );
+    updateServiceDetails({ grades: updatedGrades });
+  };
+
+  const handleSelectAllGrades = () => {
+    const allGrades = Array.from({ length: 10 }, (_, i) => i + 1);
+    setSelectedGrades(allGrades);
+
+    // Initialize grades with default section "A"
+    const gradesWithSections = allGrades.map((grade) => ({
+      grade,
+      sections: ["A"],
+    }));
+    updateServiceDetails({ grades: gradesWithSections });
+  };
+
+  const handleDeselectAllGrades = () => {
+    setSelectedGrades([]);
+    updateServiceDetails({ grades: [] });
   };
 
   const handleSubjectChange = (subject: string, checked: boolean) => {
@@ -73,39 +88,84 @@ export default function ServiceForm({ serviceDetails, onChange }: ServiceFormPro
     if (checked) {
       updateServiceDetails({ subjects: [...currentSubjects, subject] });
     } else {
-      updateServiceDetails({ subjects: currentSubjects.filter(s => s !== subject) });
+      updateServiceDetails({
+        subjects: currentSubjects.filter((s) => s !== subject),
+      });
     }
   };
 
   const addCustomSubject = () => {
-    if (customSubject.trim() && !serviceDetails?.subjects.includes(customSubject.trim())) {
+    if (
+      customSubject.trim() &&
+      !serviceDetails?.subjects.includes(customSubject.trim())
+    ) {
       const currentSubjects = serviceDetails?.subjects || [];
-      updateServiceDetails({ subjects: [...currentSubjects, customSubject.trim()] });
+      updateServiceDetails({
+        subjects: [...currentSubjects, customSubject.trim()],
+      });
       setCustomSubject("");
     }
   };
 
   const removeSubject = (subject: string) => {
     const currentSubjects = serviceDetails?.subjects || [];
-    updateServiceDetails({ subjects: currentSubjects.filter(s => s !== subject) });
+    updateServiceDetails({
+      subjects: currentSubjects.filter((s) => s !== subject),
+    });
   };
 
-  const addSection = () => {
-    const currentSections = serviceDetails?.sections || [];
-    const newSection: ServiceSection = { grade: 1, numberOfSections: 1 };
-    updateServiceDetails({ sections: [...currentSections, newSection] });
+  const addSectionToGrade = (grade: number) => {
+    const currentGrades = serviceDetails?.grades || [];
+    const gradeIndex = currentGrades.findIndex((g) => g.grade === grade);
+
+    if (gradeIndex >= 0) {
+      const updatedGrades = [...currentGrades];
+      updatedGrades[gradeIndex].sections.push("");
+      updateServiceDetails({ grades: updatedGrades });
+    } else {
+      // Add new grade with sections
+      const newGrade: GradeWithSections = { grade, sections: [""] };
+      updateServiceDetails({ grades: [...currentGrades, newGrade] });
+    }
   };
 
-  const updateSection = (index: number, field: keyof ServiceSection, value: number) => {
-    const currentSections = serviceDetails?.sections || [];
-    const updatedSections = [...currentSections];
-    updatedSections[index] = { ...updatedSections[index], [field]: value };
-    updateServiceDetails({ sections: updatedSections });
+  const updateSectionName = (
+    grade: number,
+    sectionIndex: number,
+    value: string
+  ) => {
+    const currentGrades = serviceDetails?.grades || [];
+    const gradeIndex = currentGrades.findIndex((g) => g.grade === grade);
+
+    if (gradeIndex >= 0) {
+      const updatedGrades = [...currentGrades];
+      updatedGrades[gradeIndex].sections[sectionIndex] = value;
+      updateServiceDetails({ grades: updatedGrades });
+    }
   };
 
-  const removeSection = (index: number) => {
-    const currentSections = serviceDetails?.sections || [];
-    updateServiceDetails({ sections: currentSections.filter((_, i) => i !== index) });
+  const removeSectionFromGrade = (grade: number, sectionIndex: number) => {
+    const currentGrades = serviceDetails?.grades || [];
+    const gradeIndex = currentGrades.findIndex((g) => g.grade === grade);
+
+    if (gradeIndex >= 0) {
+      const updatedGrades = [...currentGrades];
+      updatedGrades[gradeIndex].sections.splice(sectionIndex, 1);
+
+      // If no sections left, remove the grade
+      if (updatedGrades[gradeIndex].sections.length === 0) {
+        updatedGrades.splice(gradeIndex, 1);
+        setSelectedGrades(selectedGrades.filter((g) => g !== grade));
+      }
+
+      updateServiceDetails({ grades: updatedGrades });
+    }
+  };
+
+  const getGradeSections = (grade: number) => {
+    const currentGrades = serviceDetails?.grades || [];
+    const gradeData = currentGrades.find((g) => g.grade === grade);
+    return gradeData ? gradeData.sections : [];
   };
 
   return (
@@ -118,7 +178,9 @@ export default function ServiceForm({ serviceDetails, onChange }: ServiceFormPro
         <Input
           id="serviceType"
           value={serviceDetails?.serviceType || ""}
-          onChange={(e) => updateServiceDetails({ serviceType: e.target.value })}
+          onChange={(e) =>
+            updateServiceDetails({ serviceType: e.target.value })
+          }
           placeholder="Enter service type"
           required
         />
@@ -131,16 +193,24 @@ export default function ServiceForm({ serviceDetails, onChange }: ServiceFormPro
           <div className="flex items-center space-x-2">
             <Checkbox
               id="school-mentor"
-              checked={serviceDetails?.mentors.includes("School Mentor") || false}
-              onCheckedChange={(checked) => handleMentorChange("School Mentor", checked as boolean)}
+              checked={
+                serviceDetails?.mentors.includes("School Mentor") || false
+              }
+              onCheckedChange={(checked) =>
+                handleMentorChange("School Mentor", checked as boolean)
+              }
             />
             <Label htmlFor="school-mentor">School Mentor</Label>
           </div>
           <div className="flex items-center space-x-2">
             <Checkbox
               id="thinker-mentor"
-              checked={serviceDetails?.mentors.includes("Thinker Mentor") || false}
-              onCheckedChange={(checked) => handleMentorChange("Thinker Mentor", checked as boolean)}
+              checked={
+                serviceDetails?.mentors.includes("Thinker Mentor") || false
+              }
+              onCheckedChange={(checked) =>
+                handleMentorChange("Thinker Mentor", checked as boolean)
+              }
             />
             <Label htmlFor="thinker-mentor">Thinker Mentor</Label>
           </div>
@@ -149,14 +219,38 @@ export default function ServiceForm({ serviceDetails, onChange }: ServiceFormPro
 
       {/* Grade Selection */}
       <div className="space-y-3">
-        <Label>Grades Opted *</Label>
+        <div className="flex items-center justify-between">
+          <Label>Select Grades *</Label>
+          <div className="flex gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={handleSelectAllGrades}
+              className="text-xs"
+            >
+              Select All
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={handleDeselectAllGrades}
+              className="text-xs"
+            >
+              Deselect All
+            </Button>
+          </div>
+        </div>
         <div className="grid grid-cols-5 gap-2">
           {Array.from({ length: 10 }, (_, i) => i + 1).map((grade) => (
             <div key={grade} className="flex items-center space-x-2">
               <Checkbox
                 id={`grade-${grade}`}
-                checked={serviceDetails?.grades.includes(grade) || false}
-                onCheckedChange={(checked) => handleGradeChange(grade, checked as boolean)}
+                checked={selectedGrades.includes(grade)}
+                onCheckedChange={(checked) =>
+                  handleGradeChange(grade, checked as boolean)
+                }
               />
               <Label htmlFor={`grade-${grade}`} className="text-sm">
                 Grade {grade}
@@ -175,7 +269,9 @@ export default function ServiceForm({ serviceDetails, onChange }: ServiceFormPro
               <Checkbox
                 id={`subject-${subject}`}
                 checked={serviceDetails?.subjects.includes(subject) || false}
-                onCheckedChange={(checked) => handleSubjectChange(subject, checked as boolean)}
+                onCheckedChange={(checked) =>
+                  handleSubjectChange(subject, checked as boolean)
+                }
               />
               <Label htmlFor={`subject-${subject}`} className="text-sm">
                 {subject}
@@ -190,9 +286,14 @@ export default function ServiceForm({ serviceDetails, onChange }: ServiceFormPro
             value={customSubject}
             onChange={(e) => setCustomSubject(e.target.value)}
             placeholder="Add custom subject"
-            onKeyPress={(e) => e.key === 'Enter' && addCustomSubject()}
+            onKeyPress={(e) => e.key === "Enter" && addCustomSubject()}
           />
-          <Button type="button" variant="outline" size="sm" onClick={addCustomSubject}>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={addCustomSubject}
+          >
             <Plus className="h-4 w-4" />
           </Button>
         </div>
@@ -222,78 +323,84 @@ export default function ServiceForm({ serviceDetails, onChange }: ServiceFormPro
         )}
       </div>
 
-      {/* Sections */}
-      <div className="space-y-3">
-        <div className="flex items-center justify-between">
-          <Label>Number of Sections by Grade *</Label>
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            onClick={addSection}
-            className="flex items-center gap-2"
-          >
-            <Plus className="h-4 w-4" />
-            Add Section
-          </Button>
-        </div>
+      {/* Sections for Selected Grades */}
+      {selectedGrades.length > 0 && (
+        <div className="space-y-4">
+          <Label>Create Sections for Selected Grades *</Label>
+          <div className="space-y-4">
+            {selectedGrades.map((grade) => {
+              const sections = getGradeSections(grade);
+              return (
+                <Card key={grade} className="p-4">
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <h4 className="font-medium">Grade {grade}</h4>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => addSectionToGrade(grade)}
+                        className="flex items-center gap-1"
+                      >
+                        <Plus className="h-3 w-3" />
+                        Add Section
+                      </Button>
+                    </div>
 
-        {serviceDetails?.sections && serviceDetails.sections.length > 0 ? (
-          <div className="space-y-3">
-            {serviceDetails.sections.map((section, index) => (
-              <Card key={index} className="p-4">
-                <div className="flex items-center gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor={`section-grade-${index}`}>Grade</Label>
-                    <Select
-                      value={section.grade.toString()}
-                      onValueChange={(value) => updateSection(index, 'grade', parseInt(value))}
-                    >
-                      <SelectTrigger className="w-24">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {Array.from({ length: 10 }, (_, i) => i + 1).map((grade) => (
-                          <SelectItem key={grade} value={grade.toString()}>
-                            {grade}
-                          </SelectItem>
+                    {sections.length > 0 ? (
+                      <div className="space-y-2">
+                        {sections.map((sectionName, sectionIndex) => (
+                          <div
+                            key={sectionIndex}
+                            className="flex items-center gap-2"
+                          >
+                            <Input
+                              value={sectionName}
+                              onChange={(e) =>
+                                updateSectionName(
+                                  grade,
+                                  sectionIndex,
+                                  e.target.value
+                                )
+                              }
+                              placeholder="A, B, C"
+                              className="flex-1"
+                            />
+                            {sections.length > 1 && (
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                size="sm"
+                                onClick={() =>
+                                  removeSectionFromGrade(grade, sectionIndex)
+                                }
+                                className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                              >
+                                <X className="h-4 w-4" />
+                              </Button>
+                            )}
+                          </div>
                         ))}
-                      </SelectContent>
-                    </Select>
+                      </div>
+                    ) : (
+                      <div className="text-center py-2 text-gray-500 text-sm">
+                        No sections added yet. Click "Add Section" to create
+                        sections for Grade {grade}.
+                      </div>
+                    )}
                   </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor={`section-count-${index}`}>Number of Sections</Label>
-                    <Input
-                      id={`section-count-${index}`}
-                      type="number"
-                      min="1"
-                      value={section.numberOfSections}
-                      onChange={(e) => updateSection(index, 'numberOfSections', parseInt(e.target.value) || 1)}
-                      className="w-32"
-                    />
-                  </div>
-
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => removeSection(index)}
-                    className="text-red-600 hover:text-red-700 hover:bg-red-50 mt-6"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                </div>
-              </Card>
-            ))}
+                </Card>
+              );
+            })}
           </div>
-        ) : (
-          <div className="text-center py-4 text-gray-500">
-            <p>No sections added yet.</p>
-            <p className="text-sm">Click "Add Section" to specify grade-wise sections.</p>
-          </div>
-        )}
-      </div>
+        </div>
+      )}
+
+      {selectedGrades.length === 0 && (
+        <div className="text-center py-4 text-gray-500">
+          <p>Please select grades first to create sections.</p>
+        </div>
+      )}
     </div>
   );
 }

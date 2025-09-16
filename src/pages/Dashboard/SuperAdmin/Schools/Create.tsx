@@ -4,9 +4,20 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { ArrowLeft, Upload } from "lucide-react";
-import { schoolService, type CreateSchoolData, type SchoolHead, type ServiceDetails } from "@/api/schoolService";
+import {
+  schoolService,
+  type CreateSchoolData,
+  type SchoolHead,
+  type ServiceDetails,
+} from "@/api/schoolService";
 import { toast } from "sonner";
 import SchoolHeadForm from "@/components/SchoolHeadForm";
 import ServiceForm from "@/components/ServiceForm";
@@ -14,7 +25,9 @@ import ServiceForm from "@/components/ServiceForm";
 export default function CreateSchoolPage() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
-  const [contractDocumentFile, setContractDocumentFile] = useState<File | null>(null);
+  const [contractDocumentFile, setContractDocumentFile] = useState<File | null>(
+    null
+  );
   const [formData, setFormData] = useState<CreateSchoolData>({
     name: "",
     address: "",
@@ -30,37 +43,43 @@ export default function CreateSchoolPage() {
     projectStartDate: "",
     projectEndDate: "",
     schoolHeads: [],
-    serviceDetails: null,
+    serviceDetails: undefined,
   });
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
   };
 
-  const handleContractDocumentUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleContractDocumentUpload = (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
     const file = e.target.files?.[0] || null;
     setContractDocumentFile(file);
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      contractDocument: file || undefined
+      contractDocument: file || undefined,
     }));
   };
 
   const handleSchoolHeadsChange = (schoolHeads: SchoolHead[]) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      schoolHeads
+      schoolHeads,
     }));
   };
 
-  const handleServiceDetailsChange = (serviceDetails: ServiceDetails | null) => {
-    setFormData(prev => ({
+  const handleServiceDetailsChange = (
+    serviceDetails: ServiceDetails | null
+  ) => {
+    setFormData((prev) => ({
       ...prev,
-      serviceDetails
+      serviceDetails: serviceDetails || undefined,
     }));
   };
 
@@ -70,7 +89,7 @@ export default function CreateSchoolPage() {
 
     try {
       const response = await schoolService.create(formData);
-      
+
       if (response.success) {
         toast.success(response.message || "School created successfully");
         navigate("/superadmin/schools");
@@ -85,8 +104,8 @@ export default function CreateSchoolPage() {
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-4">
-        <Button 
-          variant="outline" 
+        <Button
+          variant="outline"
           size="icon"
           onClick={() => navigate("/superadmin/schools")}
         >
@@ -120,9 +139,11 @@ export default function CreateSchoolPage() {
 
               <div className="space-y-2">
                 <Label htmlFor="board">Board *</Label>
-                <Select 
-                  value={formData.board} 
-                  onValueChange={(value) => setFormData(prev => ({ ...prev, board: value as any }))}
+                <Select
+                  value={formData.board}
+                  onValueChange={(value) =>
+                    setFormData((prev) => ({ ...prev, board: value as any }))
+                  }
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Select board" />
@@ -293,7 +314,9 @@ export default function CreateSchoolPage() {
                   type="button"
                   variant="outline"
                   size="sm"
-                  onClick={() => document.getElementById('contractDocument')?.click()}
+                  onClick={() =>
+                    document.getElementById("contractDocument")?.click()
+                  }
                   className="flex items-center gap-2"
                 >
                   <Upload className="h-4 w-4" />
@@ -343,9 +366,9 @@ export default function CreateSchoolPage() {
           <Button type="submit" disabled={loading} size="lg">
             {loading ? "Creating..." : "Create School"}
           </Button>
-          <Button 
-            type="button" 
-            variant="outline" 
+          <Button
+            type="button"
+            variant="outline"
             size="lg"
             onClick={() => navigate("/superadmin/schools")}
           >

@@ -8,17 +8,16 @@ export interface SchoolHead {
   profilePic?: string;
 }
 
-export interface ServiceSection {
+export interface GradeWithSections {
   grade: number;
-  numberOfSections: number;
+  sections: string[];
 }
 
 export interface ServiceDetails {
   serviceType: string;
   mentors: ("School Mentor" | "Thinker Mentor")[];
-  grades: number[];
   subjects: string[];
-  sections: ServiceSection[];
+  grades: GradeWithSections[];
 }
 
 export interface School {
@@ -68,8 +67,13 @@ export interface UpdateSchoolData extends Partial<CreateSchoolData> {}
 // School API functions
 export const schoolService = {
   // Get all schools
-  getAll: async (): Promise<{ success: boolean; data: School[] }> => {
-    const response = await axiosInstance.get("/schools");
+  getAll: async (filters?: { state?: string; city?: string; includeInactive?: boolean }): Promise<{ success: boolean; data: School[] }> => {
+    const params = new URLSearchParams();
+    if (filters?.state && filters.state !== 'all') params.append('state', filters.state);
+    if (filters?.city && filters.city !== 'all') params.append('city', filters.city);
+    if (filters?.includeInactive) params.append('includeInactive', 'true');
+    
+    const response = await axiosInstance.get(`/schools?${params.toString()}`);
     return response.data;
   },
 
@@ -143,6 +147,12 @@ export const schoolService = {
   // Delete school
   delete: async (id: string): Promise<{ success: boolean; message: string }> => {
     const response = await axiosInstance.delete(`/schools/${id}`);
+    return response.data;
+  },
+
+  // Toggle school activation status
+  toggleStatus: async (id: string, isActive: boolean): Promise<{ success: boolean; data: School; message: string }> => {
+    const response = await axiosInstance.patch(`/schools/${id}/toggle-status`, { isActive });
     return response.data;
   },
 };
