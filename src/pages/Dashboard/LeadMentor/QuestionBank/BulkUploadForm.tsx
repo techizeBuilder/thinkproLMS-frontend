@@ -8,7 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Upload, Download, CheckCircle, XCircle, AlertCircle, FileSpreadsheet } from 'lucide-react';
-import { bulkUploadService, BulkQuestionData } from '@/api/questionBankService';
+import { bulkUploadService, type BulkQuestionData } from '@/api/questionBankService';
 import { toast } from 'sonner';
 
 interface BulkUploadFormProps {

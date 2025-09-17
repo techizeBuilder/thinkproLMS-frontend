@@ -7,8 +7,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Plus, Trash2, Check, X } from 'lucide-react';
-import { questionBankService, CreateQuestionData, Question } from '@/api/questionBankService';
+import { Plus, Trash2, Check } from 'lucide-react';
+import { questionBankService, type CreateQuestionData, type Question } from '@/api/questionBankService';
 import { toast } from 'sonner';
 
 interface EditQuestionFormProps {

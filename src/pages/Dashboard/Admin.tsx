@@ -3,7 +3,6 @@ import { SidebarProvider } from "@/components/ui/collapsible-sidebar"
 import { 
   Card, 
   CardContent, 
-  CardDescription, 
   CardHeader, 
   CardTitle 
 } from "@/components/ui/card"

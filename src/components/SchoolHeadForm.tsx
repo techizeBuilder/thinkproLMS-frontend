@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Plus, Trash2, Upload } from "lucide-react";
-import { SchoolHead } from "@/api/schoolService";
+import { type SchoolHead } from "@/api/schoolService";
 
 interface SchoolHeadFormProps {
   schoolHeads: SchoolHead[];

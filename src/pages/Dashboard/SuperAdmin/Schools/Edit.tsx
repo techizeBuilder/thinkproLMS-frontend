@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ArrowLeft, Upload } from "lucide-react";
-import { schoolService, type School, type UpdateSchoolData, type SchoolHead, type ServiceDetails } from "@/api/schoolService";
+import { schoolService, type UpdateSchoolData, type SchoolHead, type ServiceDetails } from "@/api/schoolService";
 import { toast } from "sonner";
 import SchoolHeadForm from "@/components/SchoolHeadForm";
 import ServiceForm from "@/components/ServiceForm";
@@ -32,7 +32,7 @@ export default function EditSchoolPage() {
     projectStartDate: "",
     projectEndDate: "",
     schoolHeads: [],
-    serviceDetails: null,
+    serviceDetails: undefined,
   });
 
   useEffect(() => {
@@ -61,7 +61,7 @@ export default function EditSchoolPage() {
           projectStartDate: school.projectStartDate ? new Date(school.projectStartDate).toISOString().split('T')[0] : "",
           projectEndDate: school.projectEndDate ? new Date(school.projectEndDate).toISOString().split('T')[0] : "",
           schoolHeads: school.schoolHeads || [],
-          serviceDetails: school.serviceDetails || null,
+          serviceDetails: school.serviceDetails || undefined,
         });
       }
     } catch (error: any) {
@@ -99,7 +99,7 @@ export default function EditSchoolPage() {
   const handleServiceDetailsChange = (serviceDetails: ServiceDetails | null) => {
     setFormData(prev => ({
       ...prev,
-      serviceDetails
+      serviceDetails: serviceDetails || undefined
     }));
   };
 
@@ -353,7 +353,7 @@ export default function EditSchoolPage() {
                     {contractDocumentFile.name}
                   </span>
                 )}
-                {formData.contractDocument && !contractDocumentFile && (
+                {formData.contractDocument && !contractDocumentFile && typeof formData.contractDocument === 'string' && (
                   <div className="flex items-center gap-2">
                     <span className="text-sm text-blue-600">Current document uploaded</span>
                     <a 

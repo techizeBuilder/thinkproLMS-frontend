@@ -1,16 +1,9 @@
-import { Outlet, useLocation } from "react-router-dom";
+import { Outlet } from "react-router-dom";
 import { SuperAdminSidebar } from "@/components/ui/super-admin-sidebar";
 import { SidebarProvider } from "@/components/ui/collapsible-sidebar";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Users, Building2, BookOpen, DollarSign } from "lucide-react";
 
 export default function SuperAdmin() {
-  const location = useLocation();
 
-  // Show dashboard stats only on main routes, not nested routes like /create, /edit
-  const showDashboardStats =
-    location.pathname === "/superadmin" ||
-    location.pathname === "/superadmin/admins";
 
   return (
     <SidebarProvider defaultCollapsed={false}>

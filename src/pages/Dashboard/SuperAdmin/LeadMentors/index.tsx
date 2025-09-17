@@ -3,7 +3,7 @@ import { Link, useLocation } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Edit, Trash2, Mail, Phone, CheckCircle, Crown, Globe } from "lucide-react";
+import { Plus, Edit, Trash2, Mail, Phone, Crown, Globe } from "lucide-react";
 import { leadMentorService, type LeadMentor } from "@/api/leadMentorService";
 import {
   AlertDialog,
