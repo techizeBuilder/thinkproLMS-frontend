@@ -12,7 +12,7 @@ import {
   SidebarFooter,
   useSidebar
 } from "@/components/ui/collapsible-sidebar"
-import { BookOpen, HomeIcon, Settings, User, Users, MessageSquare, BarChart3, FileText } from "lucide-react"
+import { BookOpen, HomeIcon, Settings, User, Users, MessageSquare, BarChart3, FileText, FolderOpen } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { LogoutButton } from "@/components/ui/logout-button"
 
@@ -41,6 +41,9 @@ export function MentorSidebar({ className }: MentorSidebarProps) {
           <SidebarNav>
             <SidebarNavItem to="/mentor/courses" icon={BookOpen}>
               My Courses
+            </SidebarNavItem>
+            <SidebarNavItem to="/mentor/resources" icon={FolderOpen}>
+              Resources
             </SidebarNavItem>
             <SidebarNavItem to="/mentor/students" icon={Users}>
               My Students

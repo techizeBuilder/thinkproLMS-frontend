@@ -40,6 +40,16 @@ import CreateModulePage from "../pages/Dashboard/Modules/Create";
 import EditModulePage from "../pages/Dashboard/Modules/Edit";
 import { ProtectedRoute as PermissionProtectedRoute } from "../components/ProtectedRoute";
 
+// Resources Management Components
+import ResourcesPage from "../pages/Dashboard/Resources";
+import AddResourcePage from "../pages/Dashboard/Resources/Add";
+import EditResourcePage from "../pages/Dashboard/Resources/Edit";
+import ViewResourcePage from "../pages/Dashboard/Resources/View";
+import StudentResourcesPage from "../pages/Dashboard/Student/Resources";
+import StudentResourceViewPage from "../pages/Dashboard/Student/ResourceView";
+import MentorResourcesPage from "../pages/Dashboard/Mentor/Resources";
+import MentorResourceViewPage from "../pages/Dashboard/Mentor/ResourceView";
+
 // Dashboard Components
 import SuperAdminDashboard from "../pages/Dashboard/SuperAdmin/Dashboard";
 import LeadMentorDashboard from "../pages/Dashboard/LeadMentor/Dashboard";
@@ -145,6 +155,40 @@ export default function AppRouter() {
           {/* Question Bank */}
           <Route path="question-bank" element={<QuestionBankPage />} />
           
+          {/* Resources Management */}
+          <Route 
+            path="resources" 
+            element={
+              <PermissionProtectedRoute requiredPermission="add_resources">
+                <ResourcesPage />
+              </PermissionProtectedRoute>
+            } 
+          />
+          <Route 
+            path="resources/add" 
+            element={
+              <PermissionProtectedRoute requiredPermission="add_resources">
+                <AddResourcePage />
+              </PermissionProtectedRoute>
+            } 
+          />
+          <Route 
+            path="resources/:id/edit" 
+            element={
+              <PermissionProtectedRoute requiredPermission="add_resources">
+                <EditResourcePage />
+              </PermissionProtectedRoute>
+            } 
+          />
+          <Route 
+            path="resources/:id/view" 
+            element={
+              <PermissionProtectedRoute requiredPermission="add_resources">
+                <ViewResourcePage />
+              </PermissionProtectedRoute>
+            } 
+          />
+          
           {/* Resource & Modules Management */}
           <Route 
             path="subjects" 
@@ -220,6 +264,40 @@ export default function AppRouter() {
           {/* Question Bank */}
           <Route path="question-bank" element={<QuestionBankPage />} />
           
+          {/* Resources Management */}
+          <Route 
+            path="resources" 
+            element={
+              <PermissionProtectedRoute requiredPermission="add_resources">
+                <ResourcesPage />
+              </PermissionProtectedRoute>
+            } 
+          />
+          <Route 
+            path="resources/add" 
+            element={
+              <PermissionProtectedRoute requiredPermission="add_resources">
+                <AddResourcePage />
+              </PermissionProtectedRoute>
+            } 
+          />
+          <Route 
+            path="resources/:id/edit" 
+            element={
+              <PermissionProtectedRoute requiredPermission="add_resources">
+                <EditResourcePage />
+              </PermissionProtectedRoute>
+            } 
+          />
+          <Route 
+            path="resources/:id/view" 
+            element={
+              <PermissionProtectedRoute requiredPermission="add_resources">
+                <ViewResourcePage />
+              </PermissionProtectedRoute>
+            } 
+          />
+          
           {/* Resource & Modules Management */}
           <Route 
             path="subjects" 
@@ -263,7 +341,10 @@ export default function AppRouter() {
               <Mentor />
             </ProtectedRoute>
           }
-        />
+        >
+          <Route path="resources" element={<MentorResourcesPage />} />
+          <Route path="resources/:id/view" element={<MentorResourceViewPage />} />
+        </Route>
 
         {/* Student */}
         <Route
@@ -273,7 +354,10 @@ export default function AppRouter() {
               <Student />
             </ProtectedRoute>
           }
-        />
+        >
+          <Route path="resources" element={<StudentResourcesPage />} />
+          <Route path="resources/:id/view" element={<StudentResourceViewPage />} />
+        </Route>
 
         {/* Fallback */}
         <Route path="*" element={<NotFound />} />

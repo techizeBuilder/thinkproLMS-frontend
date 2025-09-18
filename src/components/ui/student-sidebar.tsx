@@ -12,7 +12,7 @@ import {
   SidebarFooter,
   useSidebar
 } from "@/components/ui/collapsible-sidebar"
-import { BookOpen, HomeIcon, Settings, User, Award, Clock, FileText } from "lucide-react"
+import { BookOpen, HomeIcon, Settings, User, Award, Clock, FileText, FolderOpen } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { LogoutButton } from "@/components/ui/logout-button"
 
@@ -41,6 +41,9 @@ export function StudentSidebar({ className }: StudentSidebarProps) {
           <SidebarNav>
             <SidebarNavItem to="/student/courses" icon={BookOpen}>
               My Courses
+            </SidebarNavItem>
+            <SidebarNavItem to="/student/resources" icon={FolderOpen}>
+              Resources
             </SidebarNavItem>
             <SidebarNavItem to="/student/assignments" icon={FileText}>
               Assignments
