@@ -39,6 +39,7 @@ import ModulesPage from "../pages/Dashboard/Modules";
 import CreateModulePage from "../pages/Dashboard/Modules/Create";
 import EditModulePage from "../pages/Dashboard/Modules/Edit";
 import { ProtectedRoute as PermissionProtectedRoute } from "../components/ProtectedRoute";
+import FileUploadTest from "../pages/Test/FileUploadTest";
 
 // Dashboard Components
 import SuperAdminDashboard from "../pages/Dashboard/SuperAdmin/Dashboard";
@@ -271,6 +272,16 @@ export default function AppRouter() {
           element={
             <ProtectedRoute role="student">
               <Student />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Test Routes */}
+        <Route
+          path="/test/upload"
+          element={
+            <ProtectedRoute>
+              <FileUploadTest />
             </ProtectedRoute>
           }
         />
