@@ -13,6 +13,7 @@ import {
   User,
   GraduationCap,
   Eye,
+  ArrowUp,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import axiosInstance from "@/api/axiosInstance";
@@ -210,6 +211,14 @@ export default function StudentsPage() {
           <p className="text-gray-600">Manage student accounts and records</p>
         </div>
         <div className="flex gap-2">
+          <Button
+            variant="outline"
+            onClick={() => navigate("/leadmentor/students/promote")}
+            className="flex items-center gap-2"
+          >
+            <ArrowUp className="h-4 w-4" />
+            Promote Grade
+          </Button>
           <Button
             variant="outline"
             onClick={() => navigate("/leadmentor/students/bulk-upload")}

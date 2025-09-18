@@ -33,6 +33,7 @@ import StudentsPage from "../pages/Dashboard/LeadMentor/Students";
 import CreateStudentPage from "../pages/Dashboard/LeadMentor/Students/Create";
 import EditStudentPage from "../pages/Dashboard/LeadMentor/Students/Edit";
 import BulkUploadStudentsPage from "../pages/Dashboard/LeadMentor/Students/BulkUpload";
+import PromoteGradePage from "../pages/Dashboard/LeadMentor/Students/Promote";
 import QuestionBankPage from "../pages/Dashboard/LeadMentor/QuestionBank";
 import SubjectsPage from "../pages/Dashboard/Subjects";
 import ModulesPage from "../pages/Dashboard/Modules";
@@ -260,6 +261,7 @@ export default function AppRouter() {
           <Route path="students/create" element={<CreateStudentPage />} />
           <Route path="students/:id/edit" element={<EditStudentPage />} />
           <Route path="students/bulk-upload" element={<BulkUploadStudentsPage />} />
+          <Route path="students/promote" element={<PromoteGradePage />} />
           
           {/* Question Bank */}
           <Route path="question-bank" element={<QuestionBankPage />} />
