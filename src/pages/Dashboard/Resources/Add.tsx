@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -17,7 +17,7 @@ import {
   X,
   Plus
 } from 'lucide-react';
-import { CreateResourceData, ResourceType, UserType, BucketType } from '@/types/resources';
+import type { CreateResourceData, ResourceType, UserType } from '@/types/resources';
 
 export default function AddResourcePage() {
   const navigate = useNavigate();
@@ -89,9 +89,6 @@ export default function AddResourcePage() {
     }
   };
 
-  const getBucketType = (): BucketType => {
-    return formData.type === 'video' ? 'videos' : 'documents';
-  };
 
   return (
     <div className="container mx-auto p-6 max-w-4xl">
@@ -162,7 +159,7 @@ export default function AddResourcePage() {
 
             <div className="space-y-2">
               <Label>Resource Type *</Label>
-              <Tabs value={formData.type} onValueChange={(value: ResourceType) => handleInputChange('type', value)}>
+              <Tabs value={formData.type} onValueChange={(value: string) => handleInputChange('type', value as ResourceType)}>
                 <TabsList className="grid w-full grid-cols-2">
                   <TabsTrigger value="document" className="flex items-center gap-2">
                     <FileText className="h-4 w-4" />

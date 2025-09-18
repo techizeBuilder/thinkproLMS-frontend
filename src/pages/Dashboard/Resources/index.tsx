@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -12,9 +12,8 @@ import {
   GraduationCap,
   FolderOpen,
   Eye,
-  EyeOff
 } from 'lucide-react';
-import { Resource, UserType, BucketType } from '@/types/resources';
+import type { Resource, UserType, BucketType } from '@/types/resources';
 import { useNavigate } from 'react-router-dom';
 
 // Mock data for demonstration

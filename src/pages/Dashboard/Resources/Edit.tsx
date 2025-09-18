@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -18,7 +18,7 @@ import {
   Plus,
   Trash2
 } from 'lucide-react';
-import { UpdateResourceData, Resource, ResourceType, UserType } from '@/types/resources';
+import type { UpdateResourceData, Resource, ResourceType, UserType } from '@/types/resources';
 
 // Mock resource data - in real app, this would come from API
 const mockResource: Resource = {
@@ -246,7 +246,7 @@ export default function EditResourcePage() {
 
             <div className="space-y-2">
               <Label>Resource Type *</Label>
-              <Tabs value={formData.type} onValueChange={(value: ResourceType) => handleInputChange('type', value)}>
+              <Tabs value={formData.type} onValueChange={(value: string) => handleInputChange('type', value as ResourceType)}>
                 <TabsList className="grid w-full grid-cols-2">
                   <TabsTrigger value="document" className="flex items-center gap-2">
                     <FileText className="h-4 w-4" />

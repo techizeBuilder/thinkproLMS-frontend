@@ -1,18 +1,17 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { 
   ArrowLeft, 
   ExternalLink, 
   Play, 
-  Download,
   Eye,
   Calendar,
   User
 } from 'lucide-react';
-import { Resource } from '@/types/resources';
+import type { Resource } from '@/types/resources';
 
 // Mock resource data - in real app, this would come from API
 const mockResource: Resource = {

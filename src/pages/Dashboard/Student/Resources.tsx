@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -6,14 +6,12 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { 
   FileText, 
   Video, 
-  Users, 
-  GraduationCap,
   FolderOpen,
   Eye,
   ExternalLink,
   Download
 } from 'lucide-react';
-import { Resource } from '@/types/resources';
+import type { Resource } from '@/types/resources';
 import { useNavigate } from 'react-router-dom';
 
 // Mock data for student resources only
@@ -149,7 +147,7 @@ export default function StudentResourcesPage() {
         </div>
       </div>
 
-      <Tabs value={selectedBucket} onValueChange={(value: 'documents' | 'videos') => setSelectedBucket(value)}>
+      <Tabs value={selectedBucket} onValueChange={(value: string) => setSelectedBucket(value as 'documents' | 'videos')}>
         <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="documents" className="flex items-center gap-2">
             <FileText className="h-4 w-4" />
