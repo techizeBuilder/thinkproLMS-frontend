@@ -4,9 +4,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { ArrowLeft, Globe } from "lucide-react";
+import { ArrowLeft, Globe, Shield } from "lucide-react";
 import { leadMentorService, type CreateLeadMentorData } from "@/api/leadMentorService";
 import { schoolService, type School } from "@/api/schoolService";
+import { PERMISSIONS, PERMISSION_LABELS, PERMISSION_DESCRIPTIONS } from "@/constants/permissions";
 import { toast } from "sonner";
 
 export default function CreateLeadMentorPage() {
@@ -25,6 +26,7 @@ export default function CreateLeadMentorPage() {
     phoneNumber: "",
     assignedSchools: [],
     hasAccessToAllSchools: false,
+    permissions: [],
   });
 
   useEffect(() => {
@@ -66,6 +68,29 @@ export default function CreateLeadMentorPage() {
       ...prev,
       hasAccessToAllSchools: checked,
       assignedSchools: checked ? [] : prev.assignedSchools
+    }));
+  };
+
+  const handlePermissionToggle = (permission: string) => {
+    setFormData(prev => ({
+      ...prev,
+      permissions: prev.permissions?.includes(permission)
+        ? prev.permissions.filter(p => p !== permission)
+        : [...(prev.permissions || []), permission]
+    }));
+  };
+
+  const handleSelectAllPermissions = () => {
+    setFormData(prev => ({
+      ...prev,
+      permissions: Object.values(PERMISSIONS)
+    }));
+  };
+
+  const handleClearAllPermissions = () => {
+    setFormData(prev => ({
+      ...prev,
+      permissions: []
     }));
   };
 
@@ -197,6 +222,58 @@ export default function CreateLeadMentorPage() {
                   )}
                 </div>
               )}
+            </div>
+
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <Label className="flex items-center gap-2">
+                  <Shield className="h-4 w-4 text-green-600" />
+                  Permissions
+                </Label>
+                <div className="flex gap-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={handleSelectAllPermissions}
+                  >
+                    Select All
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={handleClearAllPermissions}
+                  >
+                    Clear All
+                  </Button>
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-1 gap-3 border rounded-md p-4">
+                {Object.values(PERMISSIONS).map((permission) => (
+                  <div key={permission} className="flex items-start space-x-3">
+                    <input
+                      type="checkbox"
+                      id={`permission-${permission}`}
+                      checked={formData.permissions?.includes(permission) || false}
+                      onChange={() => handlePermissionToggle(permission)}
+                      className="mt-1 rounded border-gray-300"
+                    />
+                    <div className="flex-1">
+                      <Label 
+                        htmlFor={`permission-${permission}`} 
+                        className="cursor-pointer font-medium"
+                      >
+                        {PERMISSION_LABELS[permission as keyof typeof PERMISSION_LABELS]}
+                      </Label>
+                      <p className="text-sm text-gray-600 mt-1">
+                        {PERMISSION_DESCRIPTIONS[permission as keyof typeof PERMISSION_DESCRIPTIONS]}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
 
             <div className="bg-blue-50 p-4 rounded-lg">

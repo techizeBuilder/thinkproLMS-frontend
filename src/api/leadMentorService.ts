@@ -15,6 +15,7 @@ export interface LeadMentor {
   phoneNumber: string;
   assignedSchools: School[];
   hasAccessToAllSchools: boolean;
+  permissions: string[];
   isActive: boolean;
   createdAt: string;
   updatedAt: string;
@@ -26,12 +27,14 @@ export interface CreateLeadMentorData {
   phoneNumber: string;
   assignedSchools?: string[];
   hasAccessToAllSchools?: boolean;
+  permissions?: string[];
 }
 
 export interface UpdateLeadMentorData {
   phoneNumber?: string;
   assignedSchools?: string[];
   hasAccessToAllSchools?: boolean;
+  permissions?: string[];
   isActive?: boolean;
 }
 
