@@ -12,14 +12,19 @@ import {
   SidebarFooter,
   useSidebar
 } from "@/components/ui/collapsible-sidebar"
-import { HomeIcon, Settings, User, UserCheck, Crown, Users, GraduationCap, BookOpen } from "lucide-react"
+import { HomeIcon, Settings, User, UserCheck, Crown, Users, GraduationCap, BookOpen, FolderOpen, Layers } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { LogoutButton } from "@/components/ui/logout-button"
+import { useAuth } from "@/contexts/AuthContext"
 
 interface LeadMentorSidebarProps extends React.HTMLAttributes<HTMLDivElement> {}
 
 export function LeadMentorSidebar({ className }: LeadMentorSidebarProps) {
   const { isCollapsed } = useSidebar()
+  const { user } = useAuth()
+  
+  // Check if user has permission to manage modules
+  const hasModulePermission = user?.permissions?.includes('add_modules')
 
   return (
     <Sidebar className={cn("h-screen", className)}>
@@ -66,6 +71,19 @@ export function LeadMentorSidebar({ className }: LeadMentorSidebarProps) {
             </SidebarNavItem>
           </SidebarNav>
         </SidebarGroup>
+
+        {hasModulePermission && (
+          <SidebarGroup label="Resource & Modules">
+            <SidebarNav>
+              <SidebarNavItem to="/leadmentor/subjects" icon={FolderOpen}>
+                Subjects
+              </SidebarNavItem>
+              <SidebarNavItem to="/leadmentor/modules" icon={Layers}>
+                Modules
+              </SidebarNavItem>
+            </SidebarNav>
+          </SidebarGroup>
+        )}
 
         <SidebarGroup label="System">
           <SidebarNav>

@@ -34,6 +34,11 @@ import CreateStudentPage from "../pages/Dashboard/LeadMentor/Students/Create";
 import EditStudentPage from "../pages/Dashboard/LeadMentor/Students/Edit";
 import BulkUploadStudentsPage from "../pages/Dashboard/LeadMentor/Students/BulkUpload";
 import QuestionBankPage from "../pages/Dashboard/LeadMentor/QuestionBank";
+import SubjectsPage from "../pages/Dashboard/Subjects";
+import ModulesPage from "../pages/Dashboard/Modules";
+import CreateModulePage from "../pages/Dashboard/Modules/Create";
+import EditModulePage from "../pages/Dashboard/Modules/Edit";
+import { ProtectedRoute as PermissionProtectedRoute } from "../components/ProtectedRoute";
 
 // Dashboard Components
 import SuperAdminDashboard from "../pages/Dashboard/SuperAdmin/Dashboard";
@@ -139,6 +144,40 @@ export default function AppRouter() {
           
           {/* Question Bank */}
           <Route path="question-bank" element={<QuestionBankPage />} />
+          
+          {/* Resource & Modules Management */}
+          <Route 
+            path="subjects" 
+            element={
+              <PermissionProtectedRoute requiredPermission="add_modules">
+                <SubjectsPage />
+              </PermissionProtectedRoute>
+            } 
+          />
+          <Route 
+            path="modules" 
+            element={
+              <PermissionProtectedRoute requiredPermission="add_modules">
+                <ModulesPage />
+              </PermissionProtectedRoute>
+            } 
+          />
+          <Route 
+            path="modules/create" 
+            element={
+              <PermissionProtectedRoute requiredPermission="add_modules">
+                <CreateModulePage />
+              </PermissionProtectedRoute>
+            } 
+          />
+          <Route 
+            path="modules/:id/edit" 
+            element={
+              <PermissionProtectedRoute requiredPermission="add_modules">
+                <EditModulePage />
+              </PermissionProtectedRoute>
+            } 
+          />
         </Route>
 
         {/* Admin & School Admin */}
@@ -180,6 +219,40 @@ export default function AppRouter() {
           
           {/* Question Bank */}
           <Route path="question-bank" element={<QuestionBankPage />} />
+          
+          {/* Resource & Modules Management */}
+          <Route 
+            path="subjects" 
+            element={
+              <PermissionProtectedRoute requiredPermission="add_modules">
+                <SubjectsPage />
+              </PermissionProtectedRoute>
+            } 
+          />
+          <Route 
+            path="modules" 
+            element={
+              <PermissionProtectedRoute requiredPermission="add_modules">
+                <ModulesPage />
+              </PermissionProtectedRoute>
+            } 
+          />
+          <Route 
+            path="modules/create" 
+            element={
+              <PermissionProtectedRoute requiredPermission="add_modules">
+                <CreateModulePage />
+              </PermissionProtectedRoute>
+            } 
+          />
+          <Route 
+            path="modules/:id/edit" 
+            element={
+              <PermissionProtectedRoute requiredPermission="add_modules">
+                <EditModulePage />
+              </PermissionProtectedRoute>
+            } 
+          />
         </Route>
 
         {/* Mentor */}
