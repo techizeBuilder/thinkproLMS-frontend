@@ -39,7 +39,7 @@ export default function ResourcesPage() {
   });
 
   // Check if user can see mentor resources
-  const canViewMentorResources = user?.role === 'leadmentor' || user?.role === 'mentor';
+  const canViewMentorResources = user?.role === 'superadmin' || user?.role === 'leadmentor' || user?.role === 'mentor';
 
   // Fetch resources from API
   const fetchResources = async (page = 1) => {
@@ -70,16 +70,19 @@ export default function ResourcesPage() {
   }, [selectedUserType, selectedBucket, searchTerm]);
 
   const handleAddResource = () => {
-    navigate(`/leadmentor/resources/add?userType=${selectedUserType}&bucket=${selectedBucket}`);
+    const basePath = user?.role === 'superadmin' ? '/superadmin' : '/leadmentor';
+    navigate(`${basePath}/resources/add?userType=${selectedUserType}&bucket=${selectedBucket}`);
   };
 
   const handleEditResource = (resourceId: string) => {
-    navigate(`/leadmentor/resources/${resourceId}/edit`);
+    const basePath = user?.role === 'superadmin' ? '/superadmin' : '/leadmentor';
+    navigate(`${basePath}/resources/${resourceId}/edit`);
   };
 
   const handleViewResource = (resource: ApiResource) => {
     if (resource.type === 'video') {
-      navigate(`/leadmentor/resources/${resource._id}/view`);
+      const basePath = user?.role === 'superadmin' ? '/superadmin' : '/leadmentor';
+      navigate(`${basePath}/resources/${resource._id}/view`);
     } else {
       // For documents, open in new tab or iframe
       const url = getResourceDisplayUrl(resource);
@@ -157,7 +160,7 @@ export default function ResourcesPage() {
             Manage educational resources for mentors and students
           </p>
         </div>
-        {user?.role === 'leadmentor' && (
+        {(user?.role === 'superadmin' || user?.role === 'leadmentor') && (
           <Button onClick={handleAddResource} className="flex items-center gap-2">
             <Plus className="h-4 w-4" />
             Add Resource

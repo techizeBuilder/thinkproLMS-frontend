@@ -33,7 +33,7 @@ export default function Modules() {
   const [expandedTopics, setExpandedTopics] = useState<Set<string>>(new Set());
 
   // Check if user has permission to manage modules
-  const hasPermission = user?.permissions?.includes('add_modules');
+  const hasPermission = user?.role === 'superadmin' || user?.permissions?.includes('add_modules');
 
   useEffect(() => {
     fetchData();

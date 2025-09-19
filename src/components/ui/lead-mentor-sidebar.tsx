@@ -1,6 +1,6 @@
-import * as React from "react"
-import { cn } from "@/lib/utils"
-import { 
+import * as React from "react";
+import { cn } from "@/lib/utils";
+import {
   Sidebar,
   SidebarContent,
   SidebarHeader,
@@ -10,22 +10,34 @@ import {
   SidebarToggle,
   SidebarGroup,
   SidebarFooter,
-  useSidebar
-} from "@/components/ui/collapsible-sidebar"
-import { HomeIcon, Settings, User, UserCheck, Crown, Users, GraduationCap, BookOpen, FolderOpen, Layers, FileText } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { LogoutButton } from "@/components/ui/logout-button"
-import { useAuth } from "@/contexts/AuthContext"
+  useSidebar,
+} from "@/components/ui/collapsible-sidebar";
+import {
+  HomeIcon,
+  Settings,
+  User,
+  UserCheck,
+  Crown,
+  Users,
+  GraduationCap,
+  BookOpen,
+  FolderOpen,
+  Layers,
+  FileText,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { LogoutButton } from "@/components/ui/logout-button";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface LeadMentorSidebarProps extends React.HTMLAttributes<HTMLDivElement> {}
 
 export function LeadMentorSidebar({ className }: LeadMentorSidebarProps) {
-  const { isCollapsed } = useSidebar()
-  const { user } = useAuth()
-  
+  const { isCollapsed } = useSidebar();
+  const { user } = useAuth();
+
   // Check if user has permission to manage modules and resources
-  const hasModulePermission = user?.permissions?.includes('add_modules')
-  const hasResourcePermission = user?.permissions?.includes('add_resources')
+  const hasModulePermission = user?.permissions?.includes("add_modules");
+  const hasResourcePermission = user?.permissions?.includes("add_resources");
 
   return (
     <Sidebar className={cn("h-screen", className)}>
@@ -33,7 +45,7 @@ export function LeadMentorSidebar({ className }: LeadMentorSidebarProps) {
         <SidebarTitle>ThinkPro LMS</SidebarTitle>
         <SidebarToggle />
       </SidebarHeader>
-      
+
       <SidebarContent className="space-y-4">
         <SidebarGroup label="Dashboard">
           <SidebarNav>
@@ -52,9 +64,6 @@ export function LeadMentorSidebar({ className }: LeadMentorSidebarProps) {
               Lead Mentors
             </SidebarNavItem>
           </SidebarNav>
-        </SidebarGroup>
-
-        <SidebarGroup label="User Management">
           <SidebarNav>
             <SidebarNavItem to="/leadmentor/mentors" icon={Users}>
               School Mentors
@@ -80,19 +89,18 @@ export function LeadMentorSidebar({ className }: LeadMentorSidebarProps) {
                 Resources
               </SidebarNavItem>
             </SidebarNav>
-          </SidebarGroup>
-        )}
-
-        {hasModulePermission && (
-          <SidebarGroup label="Modules">
-            <SidebarNav>
-              <SidebarNavItem to="/leadmentor/subjects" icon={FolderOpen}>
-                Subjects
-              </SidebarNavItem>
-              <SidebarNavItem to="/leadmentor/modules" icon={Layers}>
-                Modules
-              </SidebarNavItem>
-            </SidebarNav>
+            {hasModulePermission && (
+              <>
+                <SidebarNav>
+                  <SidebarNavItem to="/leadmentor/subjects" icon={FolderOpen}>
+                    Subjects
+                  </SidebarNavItem>
+                  <SidebarNavItem to="/leadmentor/modules" icon={Layers}>
+                    Modules
+                  </SidebarNavItem>
+                </SidebarNav>
+              </>
+            )}
           </SidebarGroup>
         )}
 
@@ -113,9 +121,9 @@ export function LeadMentorSidebar({ className }: LeadMentorSidebarProps) {
                 <User className="mr-3 h-4 w-4" />
                 Profile
               </Button>
-              <LogoutButton 
-                variant="ghost" 
-                className="w-full justify-start text-sm" 
+              <LogoutButton
+                variant="ghost"
+                className="w-full justify-start text-sm"
                 isCollapsed={false}
               />
             </>
@@ -125,10 +133,10 @@ export function LeadMentorSidebar({ className }: LeadMentorSidebarProps) {
                 <User className="h-4 w-4" />
                 <span className="sr-only">Profile</span>
               </Button>
-              <LogoutButton 
-                variant="ghost" 
-                size="icon" 
-                className="w-full" 
+              <LogoutButton
+                variant="ghost"
+                size="icon"
+                className="w-full"
                 isCollapsed={true}
               />
             </>
@@ -136,5 +144,5 @@ export function LeadMentorSidebar({ className }: LeadMentorSidebarProps) {
         </div>
       </SidebarFooter>
     </Sidebar>
-  )
+  );
 }

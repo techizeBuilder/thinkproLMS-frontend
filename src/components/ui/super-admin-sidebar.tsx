@@ -12,7 +12,7 @@ import {
   SidebarFooter,
   useSidebar
 } from "@/components/ui/collapsible-sidebar"
-import { Building2, HomeIcon, Settings, Users, User, School, UserCheck, Crown, BookOpen } from "lucide-react"
+import { Building2, HomeIcon, Settings, Users, User, School, UserCheck, Crown, BookOpen, FileText, Layers } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { LogoutButton } from "@/components/ui/logout-button"
 
@@ -69,6 +69,20 @@ export function SuperAdminSidebar({ className }: SuperAdminSidebarProps) {
           <SidebarNav>
             <SidebarNavItem to="/superadmin/question-bank" icon={BookOpen}>
               Question Bank
+            </SidebarNavItem>
+          </SidebarNav>
+        </SidebarGroup>
+
+        <SidebarGroup label="Resources">
+          <SidebarNav>
+            <SidebarNavItem to="/superadmin/resources" icon={FileText}>
+              Resources
+            </SidebarNavItem>
+            <SidebarNavItem to="/superadmin/subjects" icon={BookOpen}>
+              Subjects
+            </SidebarNavItem>
+            <SidebarNavItem to="/superadmin/modules" icon={Layers}>
+              Modules
             </SidebarNavItem>
           </SidebarNav>
         </SidebarGroup>

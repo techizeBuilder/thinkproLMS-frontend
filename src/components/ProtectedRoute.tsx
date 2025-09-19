@@ -20,6 +20,11 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
     return <>{children}</>;
   }
 
+  // Superadmins have access to everything
+  if (user?.role === 'superadmin') {
+    return <>{children}</>;
+  }
+
   // If user doesn't have the required permission, redirect
   if (!user?.permissions?.includes(requiredPermission)) {
     return <Navigate to={fallbackPath} replace />;

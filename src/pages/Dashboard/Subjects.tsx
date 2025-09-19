@@ -36,7 +36,7 @@ export default function Subjects() {
   const [formData, setFormData] = useState({ name: '' });
 
   // Check if user has permission to manage subjects
-  const hasPermission = user?.permissions?.includes('add_modules');
+  const hasPermission = user?.role === 'superadmin' || user?.permissions?.includes('add_modules');
 
   useEffect(() => {
     fetchSubjects();
