@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { ArrowLeft, Plus } from "lucide-react";
 import axiosInstance from "@/api/axiosInstance";
+import { useStudentsPath } from "@/utils/navigation";
 
 interface School {
   _id: string;
@@ -18,6 +19,7 @@ interface School {
 
 export default function CreateStudentPage() {
   const navigate = useNavigate();
+  const studentsPath = useStudentsPath();
   const [loading, setLoading] = useState(false);
   const [schools, setSchools] = useState<School[]>([]);
   const [formData, setFormData] = useState({
@@ -56,7 +58,7 @@ export default function CreateStudentPage() {
 
     try {
       await axiosInstance.post("/students", formData);
-      navigate("/leadmentor/students");
+      navigate(studentsPath);
     } catch (error: any) {
       console.error("Error creating student:", error);
       alert(error.response?.data?.message || "Failed to create student");
@@ -71,7 +73,7 @@ export default function CreateStudentPage() {
       <div className="flex items-center gap-4">
         <Button
           variant="ghost"
-          onClick={() => navigate("/leadmentor/students")}
+          onClick={() => navigate(studentsPath)}
           className="p-2"
         >
           <ArrowLeft className="h-4 w-4" />
@@ -204,7 +206,7 @@ export default function CreateStudentPage() {
           <Button
             type="button"
             variant="outline"
-            onClick={() => navigate("/leadmentor/students")}
+            onClick={() => navigate(studentsPath)}
           >
             Cancel
           </Button>

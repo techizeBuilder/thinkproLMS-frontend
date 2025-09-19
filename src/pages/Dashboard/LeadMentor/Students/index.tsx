@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import axiosInstance from "@/api/axiosInstance";
+import { useStudentsPath } from "@/utils/navigation";
 
 interface School {
   _id: string;
@@ -60,6 +61,7 @@ export default function StudentsPage() {
     [key: string]: boolean;
   }>({});
   const navigate = useNavigate();
+  const studentsPath = useStudentsPath();
 
   const grades = [
     "Grade 1",
@@ -213,7 +215,7 @@ export default function StudentsPage() {
         <div className="flex gap-2">
           <Button
             variant="outline"
-            onClick={() => navigate("/leadmentor/students/promote")}
+            onClick={() => navigate(`${studentsPath}/promote`)}
             className="flex items-center gap-2"
           >
             <ArrowUp className="h-4 w-4" />
@@ -221,7 +223,7 @@ export default function StudentsPage() {
           </Button>
           <Button
             variant="outline"
-            onClick={() => navigate("/leadmentor/students/bulk-upload")}
+            onClick={() => navigate(`${studentsPath}/bulk-upload`)}
             className="flex items-center gap-2"
           >
             <Upload className="h-4 w-4" />
@@ -236,7 +238,7 @@ export default function StudentsPage() {
             Download List
           </Button>
           <Button
-            onClick={() => navigate("/leadmentor/students/create")}
+            onClick={() => navigate(`${studentsPath}/create`)}
             className="flex items-center gap-2"
           >
             <Plus className="h-4 w-4" />
@@ -358,7 +360,7 @@ export default function StudentsPage() {
                     variant="ghost"
                     size="sm"
                     onClick={() =>
-                      navigate(`/leadmentor/students/${student._id}/edit`)
+                      navigate(`${studentsPath}/${student._id}/edit`)
                     }
                   >
                     <Edit className="h-4 w-4" />

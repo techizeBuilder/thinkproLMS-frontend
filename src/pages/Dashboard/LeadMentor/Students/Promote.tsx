@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import axiosInstance from "@/api/axiosInstance";
+import { useStudentsPath } from "@/utils/navigation";
 import { toast } from "sonner";
 
 interface School {
@@ -44,6 +45,8 @@ interface Student {
 }
 
 export default function PromoteGradePage() {
+  const navigate = useNavigate();
+  const studentsPath = useStudentsPath();
   const [schools, setSchools] = useState<School[]>([]);
   const [selectedSchool, setSelectedSchool] = useState("");
   const [selectedGrade, setSelectedGrade] = useState("");
@@ -51,7 +54,6 @@ export default function PromoteGradePage() {
   const [selectedStudents, setSelectedStudents] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(false);
   const [promoting, setPromoting] = useState(false);
-  const navigate = useNavigate();
 
   const grades = [
     "Grade 1",
@@ -197,7 +199,7 @@ export default function PromoteGradePage() {
       <div className="flex items-center gap-4">
         <Button
           variant="ghost"
-          onClick={() => navigate("/leadmentor/students")}
+          onClick={() => navigate(studentsPath)}
           className="flex items-center gap-2"
         >
           <ArrowLeft className="h-4 w-4" />

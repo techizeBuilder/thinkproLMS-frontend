@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { ArrowLeft, Save } from "lucide-react";
 import axiosInstance from "@/api/axiosInstance";
+import { useStudentsPath } from "@/utils/navigation";
 
 interface Student {
   _id: string;
@@ -26,6 +27,7 @@ interface Student {
 
 export default function EditStudentPage() {
   const navigate = useNavigate();
+  const studentsPath = useStudentsPath();
   const { id } = useParams<{ id: string }>();
   const [loading, setLoading] = useState(false);
   const [fetchingStudent, setFetchingStudent] = useState(true);
@@ -59,7 +61,7 @@ export default function EditStudentPage() {
       });
     } catch (error) {
       console.error("Error fetching student:", error);
-      navigate("/leadmentor/students");
+      navigate(studentsPath);
     } finally {
       setFetchingStudent(false);
     }
@@ -76,7 +78,7 @@ export default function EditStudentPage() {
 
     try {
       await axiosInstance.put(`/students/${id}`, formData);
-      navigate("/leadmentor/students");
+      navigate(studentsPath);
     } catch (error: any) {
       console.error("Error updating student:", error);
       alert(error.response?.data?.message || "Failed to update student");
@@ -99,7 +101,7 @@ export default function EditStudentPage() {
       <div className="flex items-center gap-4">
         <Button
           variant="ghost"
-          onClick={() => navigate("/leadmentor/students")}
+          onClick={() => navigate(studentsPath)}
           className="p-2"
         >
           <ArrowLeft className="h-4 w-4" />
@@ -217,7 +219,7 @@ export default function EditStudentPage() {
           <Button
             type="button"
             variant="outline"
-            onClick={() => navigate("/leadmentor/students")}
+            onClick={() => navigate(studentsPath)}
           >
             Cancel
           </Button>

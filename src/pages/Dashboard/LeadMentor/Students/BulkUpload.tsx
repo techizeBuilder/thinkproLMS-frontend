@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { ArrowLeft, Upload, Download, FileSpreadsheet, CheckCircle, XCircle } from "lucide-react";
 import axiosInstance from "@/api/axiosInstance";
 import { schoolService, type School } from "@/api/schoolService";
+import { useStudentsPath } from "@/utils/navigation";
 
 interface BulkUploadResult {
   successful: Array<{
@@ -27,6 +28,7 @@ interface BulkUploadResult {
 
 export default function BulkUploadPage() {
   const navigate = useNavigate();
+  const studentsPath = useStudentsPath();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [loading, setLoading] = useState(false);
   const [generateCredentials, setGenerateCredentials] = useState(false);
@@ -147,7 +149,7 @@ export default function BulkUploadPage() {
       <div className="flex items-center gap-4">
         <Button
           variant="ghost"
-          onClick={() => navigate("/leadmentor/students")}
+          onClick={() => navigate(studentsPath)}
           className="p-2"
         >
           <ArrowLeft className="h-4 w-4" />
@@ -345,7 +347,7 @@ export default function BulkUploadPage() {
                   Download Results
                 </Button>
                 <Button
-                  onClick={() => navigate("/leadmentor/students")}
+                  onClick={() => navigate(studentsPath)}
                   className="flex items-center gap-2"
                 >
                   View Students

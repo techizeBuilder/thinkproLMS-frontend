@@ -174,7 +174,7 @@ export default function ServiceForm({
 
       {/* Service Type */}
       <div className="space-y-2">
-        <Label htmlFor="serviceType">Service Type *</Label>
+        <Label htmlFor="serviceType">Service Type</Label>
         <Input
           id="serviceType"
           value={serviceDetails?.serviceType || ""}
@@ -182,7 +182,6 @@ export default function ServiceForm({
             updateServiceDetails({ serviceType: e.target.value })
           }
           placeholder="Enter service type"
-          required
         />
       </div>
 

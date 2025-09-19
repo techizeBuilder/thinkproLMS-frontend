@@ -167,6 +167,13 @@ export default function AppRouter() {
           <Route path="lead-mentors/create" element={<CreateLeadMentorPage />} />
           <Route path="lead-mentors/:id/edit" element={<EditLeadMentorPage />} />
           
+          {/* Student Management */}
+          <Route path="students" element={<StudentsPage />} />
+          <Route path="students/create" element={<CreateStudentPage />} />
+          <Route path="students/:id/edit" element={<EditStudentPage />} />
+          <Route path="students/bulk-upload" element={<BulkUploadStudentsPage />} />
+          <Route path="students/promote" element={<PromoteGradePage />} />
+          
           {/* Question Bank */}
           <Route path="question-bank" element={<QuestionBankPage />} />
           

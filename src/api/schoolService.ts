@@ -14,7 +14,7 @@ export interface GradeWithSections {
 }
 
 export interface ServiceDetails {
-  serviceType: string;
+  serviceType?: string;
   mentors: ("School Mentor" | "Thinker Mentor")[];
   subjects: string[];
   grades: GradeWithSections[];
