@@ -10,6 +10,7 @@ import { schoolService, type UpdateSchoolData, type SchoolHead, type ServiceDeta
 import { toast } from "sonner";
 import SchoolHeadForm from "@/components/SchoolHeadForm";
 import ServiceForm from "@/components/ServiceForm";
+import { getMediaUrl } from "@/utils/mediaUrl";
 
 export default function EditSchoolPage() {
   const navigate = useNavigate();
@@ -17,14 +18,17 @@ export default function EditSchoolPage() {
   const [loading, setLoading] = useState(false);
   const [fetchLoading, setFetchLoading] = useState(true);
   const [contractDocumentFile, setContractDocumentFile] = useState<File | null>(null);
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [logoFile, setLogoFile] = useState<File | null>(null);
+  const [existingContractDocument, setExistingContractDocument] = useState<string | null>(null);
+  const [existingImage, setExistingImage] = useState<string | null>(null);
+  const [existingLogo, setExistingLogo] = useState<string | null>(null);
   const [formData, setFormData] = useState<UpdateSchoolData>({
     name: "",
     address: "",
     board: "CBSE",
     state: "",
     city: "",
-    image: "",
-    logo: "",
     affiliatedTo: "",
     branchName: "",
     contractStartDate: "",
@@ -52,8 +56,6 @@ export default function EditSchoolPage() {
           board: school.board,
           state: school.state,
           city: school.city,
-          image: school.image || "",
-          logo: school.logo || "",
           affiliatedTo: school.affiliatedTo || "",
           branchName: school.branchName || "",
           contractStartDate: school.contractStartDate ? new Date(school.contractStartDate).toISOString().split('T')[0] : "",
@@ -63,6 +65,11 @@ export default function EditSchoolPage() {
           schoolHeads: school.schoolHeads || [],
           serviceDetails: school.serviceDetails || undefined,
         });
+        
+        // Set existing file paths
+        setExistingContractDocument(school.contractDocument || null);
+        setExistingImage(school.image || null);
+        setExistingLogo(school.logo || null);
       }
     } catch (error: any) {
       toast.error(error.response?.data?.message || "Failed to fetch school");
@@ -86,6 +93,24 @@ export default function EditSchoolPage() {
     setFormData(prev => ({
       ...prev,
       contractDocument: file || undefined
+    }));
+  };
+
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0] || null;
+    setImageFile(file);
+    setFormData(prev => ({
+      ...prev,
+      image: file || undefined
+    }));
+  };
+
+  const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0] || null;
+    setLogoFile(file);
+    setFormData(prev => ({
+      ...prev,
+      logo: file || undefined
     }));
   };
 
@@ -250,25 +275,73 @@ export default function EditSchoolPage() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="logo">Logo URL</Label>
-                <Input
-                  id="logo"
-                  name="logo"
-                  value={formData.logo}
-                  onChange={handleInputChange}
-                  placeholder="Enter logo URL (optional)"
-                />
+                <Label htmlFor="logo">School Logo</Label>
+                <div className="space-y-2">
+                  {existingLogo && (
+                    <div className="text-sm text-blue-600">
+                      Current logo: <a href={getMediaUrl(existingLogo) || '#'} target="_blank" rel="noopener noreferrer" className="underline">View current logo</a>
+                    </div>
+                  )}
+                  <div className="flex items-center gap-4">
+                    <input
+                      id="logo"
+                      type="file"
+                      accept="image/*"
+                      onChange={handleLogoUpload}
+                      className="hidden"
+                    />
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => document.getElementById('logo')?.click()}
+                      className="flex items-center gap-2"
+                    >
+                      <Upload className="h-4 w-4" />
+                      {existingLogo ? 'Replace Logo' : 'Upload Logo'}
+                    </Button>
+                    {logoFile && (
+                      <span className="text-sm text-green-600">
+                        {logoFile.name}
+                      </span>
+                    )}
+                  </div>
+                </div>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="image">School Image URL</Label>
-                <Input
-                  id="image"
-                  name="image"
-                  value={formData.image}
-                  onChange={handleInputChange}
-                  placeholder="Enter image URL (optional)"
-                />
+                <Label htmlFor="image">School Image</Label>
+                <div className="space-y-2">
+                  {existingImage && (
+                    <div className="text-sm text-blue-600">
+                      Current image: <a href={getMediaUrl(existingImage) || '#'} target="_blank" rel="noopener noreferrer" className="underline">View current image</a>
+                    </div>
+                  )}
+                  <div className="flex items-center gap-4">
+                    <input
+                      id="image"
+                      type="file"
+                      accept="image/*"
+                      onChange={handleImageUpload}
+                      className="hidden"
+                    />
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => document.getElementById('image')?.click()}
+                      className="flex items-center gap-2"
+                    >
+                      <Upload className="h-4 w-4" />
+                      {existingImage ? 'Replace Image' : 'Upload Image'}
+                    </Button>
+                    {imageFile && (
+                      <span className="text-sm text-green-600">
+                        {imageFile.name}
+                      </span>
+                    )}
+                  </div>
+                </div>
               </div>
             </div>
           </CardContent>
@@ -330,42 +403,36 @@ export default function EditSchoolPage() {
 
             <div className="space-y-2">
               <Label htmlFor="contractDocument">Contract Signed Document</Label>
-              <div className="flex items-center gap-4">
-                <input
-                  id="contractDocument"
-                  type="file"
-                  accept=".pdf,.doc,.docx"
-                  onChange={handleContractDocumentUpload}
-                  className="hidden"
-                />
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() => document.getElementById('contractDocument')?.click()}
-                  className="flex items-center gap-2"
-                >
-                  <Upload className="h-4 w-4" />
-                  Upload Contract Document
-                </Button>
-                {contractDocumentFile && (
-                  <span className="text-sm text-green-600">
-                    {contractDocumentFile.name}
-                  </span>
-                )}
-                {formData.contractDocument && !contractDocumentFile && typeof formData.contractDocument === 'string' && (
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm text-blue-600">Current document uploaded</span>
-                    <a 
-                      href={formData.contractDocument} 
-                      target="_blank" 
-                      rel="noopener noreferrer"
-                      className="text-sm text-blue-600 underline hover:text-blue-800"
-                    >
-                      View Document
-                    </a>
+              <div className="space-y-2">
+                {existingContractDocument && (
+                  <div className="text-sm text-blue-600">
+                    Current contract: <a href={getMediaUrl(existingContractDocument) || '#'} target="_blank" rel="noopener noreferrer" className="underline">View current contract</a>
                   </div>
                 )}
+                <div className="flex items-center gap-4">
+                  <input
+                    id="contractDocument"
+                    type="file"
+                    accept=".pdf,.doc,.docx"
+                    onChange={handleContractDocumentUpload}
+                    className="hidden"
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => document.getElementById('contractDocument')?.click()}
+                    className="flex items-center gap-2"
+                  >
+                    <Upload className="h-4 w-4" />
+                    {existingContractDocument ? 'Replace Contract Document' : 'Upload Contract Document'}
+                  </Button>
+                  {contractDocumentFile && (
+                    <span className="text-sm text-green-600">
+                      {contractDocumentFile.name}
+                    </span>
+                  )}
+                </div>
               </div>
               <p className="text-xs text-gray-500">
                 Supported formats: PDF, DOC, DOCX (Max 10MB)

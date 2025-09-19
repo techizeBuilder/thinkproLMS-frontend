@@ -47,8 +47,8 @@ export interface CreateSchoolData {
   name: string;
   address: string;
   board: "ICSE" | "CBSE" | "State" | "Other";
-  image?: string;
-  logo?: string;
+  image?: File;
+  logo?: File;
   affiliatedTo?: string;
   state: string;
   city: string;
@@ -103,7 +103,16 @@ export const schoolService = {
     if (data.projectStartDate) formData.append('projectStartDate', data.projectStartDate);
     if (data.projectEndDate) formData.append('projectEndDate', data.projectEndDate);
     if (data.contractDocument) formData.append('contractDocument', data.contractDocument);
-    if (data.schoolHeads) formData.append('schoolHeads', JSON.stringify(data.schoolHeads));
+    
+    // Add school head profile pictures
+    if (data.schoolHeads) {
+      data.schoolHeads.forEach((head, index) => {
+        if (head.profilePic && head.profilePic instanceof File) {
+          formData.append(`schoolHeadProfilePic${index}`, head.profilePic);
+        }
+      });
+      formData.append('schoolHeads', JSON.stringify(data.schoolHeads));
+    }
     if (data.serviceDetails) formData.append('serviceDetails', JSON.stringify(data.serviceDetails));
 
     const response = await axiosInstance.post("/schools", formData, {
@@ -133,7 +142,16 @@ export const schoolService = {
     if (data.projectStartDate !== undefined) formData.append('projectStartDate', data.projectStartDate);
     if (data.projectEndDate !== undefined) formData.append('projectEndDate', data.projectEndDate);
     if (data.contractDocument !== undefined) formData.append('contractDocument', data.contractDocument);
-    if (data.schoolHeads !== undefined) formData.append('schoolHeads', JSON.stringify(data.schoolHeads));
+    
+    // Add school head profile pictures
+    if (data.schoolHeads !== undefined) {
+      data.schoolHeads.forEach((head, index) => {
+        if (head.profilePic && head.profilePic instanceof File) {
+          formData.append(`schoolHeadProfilePic${index}`, head.profilePic);
+        }
+      });
+      formData.append('schoolHeads', JSON.stringify(data.schoolHeads));
+    }
     if (data.serviceDetails !== undefined) formData.append('serviceDetails', JSON.stringify(data.serviceDetails));
 
     const response = await axiosInstance.put(`/schools/${id}`, formData, {

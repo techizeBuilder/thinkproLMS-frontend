@@ -28,14 +28,14 @@ export default function CreateSchoolPage() {
   const [contractDocumentFile, setContractDocumentFile] = useState<File | null>(
     null
   );
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [logoFile, setLogoFile] = useState<File | null>(null);
   const [formData, setFormData] = useState<CreateSchoolData>({
     name: "",
     address: "",
     board: "CBSE",
     state: "",
     city: "",
-    image: "",
-    logo: "",
     affiliatedTo: "",
     branchName: "",
     contractStartDate: "",
@@ -64,6 +64,24 @@ export default function CreateSchoolPage() {
     setFormData((prev) => ({
       ...prev,
       contractDocument: file || undefined,
+    }));
+  };
+
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0] || null;
+    setImageFile(file);
+    setFormData((prev) => ({
+      ...prev,
+      image: file || undefined,
+    }));
+  };
+
+  const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0] || null;
+    setLogoFile(file);
+    setFormData((prev) => ({
+      ...prev,
+      logo: file || undefined,
     }));
   };
 
@@ -222,25 +240,59 @@ export default function CreateSchoolPage() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="logo">Logo URL</Label>
-                <Input
-                  id="logo"
-                  name="logo"
-                  value={formData.logo}
-                  onChange={handleInputChange}
-                  placeholder="Enter logo URL (optional)"
-                />
+                <Label htmlFor="logo">School Logo</Label>
+                <div className="flex items-center gap-4">
+                  <input
+                    id="logo"
+                    type="file"
+                    accept="image/*"
+                    onChange={handleLogoUpload}
+                    className="hidden"
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => document.getElementById('logo')?.click()}
+                    className="flex items-center gap-2"
+                  >
+                    <Upload className="h-4 w-4" />
+                    Upload Logo
+                  </Button>
+                  {logoFile && (
+                    <span className="text-sm text-green-600">
+                      {logoFile.name}
+                    </span>
+                  )}
+                </div>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="image">School Image URL</Label>
-                <Input
-                  id="image"
-                  name="image"
-                  value={formData.image}
-                  onChange={handleInputChange}
-                  placeholder="Enter image URL (optional)"
-                />
+                <Label htmlFor="image">School Image</Label>
+                <div className="flex items-center gap-4">
+                  <input
+                    id="image"
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageUpload}
+                    className="hidden"
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => document.getElementById('image')?.click()}
+                    className="flex items-center gap-2"
+                  >
+                    <Upload className="h-4 w-4" />
+                    Upload Image
+                  </Button>
+                  {imageFile && (
+                    <span className="text-sm text-green-600">
+                      {imageFile.name}
+                    </span>
+                  )}
+                </div>
               </div>
             </div>
           </CardContent>

@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Plus, Trash2, Upload } from "lucide-react";
 import { type SchoolHead } from "@/api/schoolService";
+import { getMediaUrl } from "@/utils/mediaUrl";
 
 interface SchoolHeadFormProps {
   schoolHeads: SchoolHead[];
@@ -45,9 +46,10 @@ export default function SchoolHeadForm({ schoolHeads, onChange }: SchoolHeadForm
     setProfilePicFiles(prev => ({ ...prev, [index]: file }));
     
     if (file) {
-      // Create a preview URL for the profile picture
-      const previewUrl = URL.createObjectURL(file);
-      updateSchoolHead(index, 'profilePic', previewUrl);
+      // Store the file directly in the school head data
+      updateSchoolHead(index, 'profilePic', file as any);
+    } else {
+      updateSchoolHead(index, 'profilePic', '');
     }
   };
 
@@ -167,7 +169,19 @@ export default function SchoolHeadForm({ schoolHeads, onChange }: SchoolHeadForm
                   </span>
                 )}
                 {head.profilePic && !profilePicFiles[index] && (
-                  <span className="text-sm text-blue-600">Photo uploaded</span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm text-blue-600">Photo uploaded</span>
+                    {typeof head.profilePic === 'string' && head.profilePic.startsWith('/uploads/') && (
+                      <a 
+                        href={getMediaUrl(head.profilePic) || '#'} 
+                        target="_blank" 
+                        rel="noopener noreferrer" 
+                        className="text-xs text-blue-600 underline hover:text-blue-800"
+                      >
+                        View
+                      </a>
+                    )}
+                  </div>
                 )}
               </div>
             </div>
