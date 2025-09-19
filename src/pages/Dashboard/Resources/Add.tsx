@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -17,7 +17,19 @@ import {
   X,
   Plus
 } from 'lucide-react';
-import type { CreateResourceData, ResourceType, UserType } from '@/types/resources';
+import type { UserType, BucketType, ResourceType } from '@/types/resources';
+import type { CreateResourceData } from '@/api/resourceService';
+import { resourceService } from '@/api/resourceService';
+import { subjectService } from '@/api/subjectService';
+import { schoolService } from '@/api/schoolService';
+import type { Subject } from '@/api/subjectService';
+import type { School } from '@/api/schoolService';
+import { toast } from 'sonner';
+
+const GRADES = [
+  'Grade 1', 'Grade 2', 'Grade 3', 'Grade 4', 'Grade 5',
+  'Grade 6', 'Grade 7', 'Grade 8', 'Grade 9', 'Grade 10'
+];
 
 export default function AddResourcePage() {
   const navigate = useNavigate();
@@ -27,13 +39,35 @@ export default function AddResourcePage() {
     title: '',
     description: '',
     type: 'document',
-    userType: (searchParams.get('userType') as UserType) || 'student',
+    category: (searchParams.get('userType') as UserType) || 'student',
     url: '',
     tags: []
   });
 
   const [newTag, setNewTag] = useState('');
   const [isUploading, setIsUploading] = useState(false);
+  const [subjects, setSubjects] = useState<Subject[]>([]);
+  const [schools, setSchools] = useState<School[]>([]);
+  const [activeTab, setActiveTab] = useState<'file' | 'url'>('file');
+
+  // Load subjects and schools
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        const [subjectsData, schoolsData] = await Promise.all([
+          subjectService.getAllSubjects(),
+          schoolService.getAllSchools(),
+        ]);
+        setSubjects(subjectsData);
+        setSchools(schoolsData);
+      } catch (error) {
+        console.error('Error loading data:', error);
+        toast.error('Failed to load form data');
+      }
+    };
+
+    loadData();
+  }, []);
 
   const handleInputChange = (field: keyof CreateResourceData, value: any) => {
     setFormData(prev => ({
@@ -74,18 +108,41 @@ export default function AddResourcePage() {
     setIsUploading(true);
 
     try {
-      // TODO: Implement actual API call
-      console.log('Creating resource:', formData);
+      // Validate required fields
+      if (!formData.title || !formData.type || !formData.category) {
+        toast.error('Please fill in all required fields');
+        return;
+      }
+
+      if (activeTab === 'file' && !formData.file) {
+        toast.error('Please select a file to upload');
+        return;
+      }
+
+      if (activeTab === 'url' && !formData.url) {
+        toast.error('Please provide an external URL');
+        return;
+      }
+
+      // Create the resource
+      await resourceService.create(formData);
       
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
-      // Navigate back to resources page
+      toast.success('Resource created successfully!');
       navigate('/leadmentor/resources');
     } catch (error) {
       console.error('Error creating resource:', error);
+      toast.error('Failed to create resource. Please try again.');
     } finally {
       setIsUploading(false);
+    }
+  };
+
+  const handleTabChange = (tab: 'file' | 'url') => {
+    setActiveTab(tab);
+    if (tab === 'file') {
+      setFormData(prev => ({ ...prev, url: '' }));
+    } else {
+      setFormData(prev => ({ ...prev, file: undefined }));
     }
   };
 
@@ -103,7 +160,7 @@ export default function AddResourcePage() {
         <div>
           <h1 className="text-3xl font-bold">Add New Resource</h1>
           <p className="text-muted-foreground">
-            Create a new educational resource for {formData.userType}s
+            Create a new educational resource for {formData.category}s
           </p>
         </div>
       </div>
@@ -130,10 +187,10 @@ export default function AddResourcePage() {
               </div>
               
               <div className="space-y-2">
-                <Label htmlFor="userType">Target Audience *</Label>
+                <Label htmlFor="category">Target Audience *</Label>
                 <Select
-                  value={formData.userType}
-                  onValueChange={(value: UserType) => handleInputChange('userType', value)}
+                  value={formData.category}
+                  onValueChange={(value: UserType) => handleInputChange('category', value)}
                 >
                   <SelectTrigger>
                     <SelectValue />
@@ -183,7 +240,7 @@ export default function AddResourcePage() {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <Tabs value={formData.url ? 'url' : 'file'} className="w-full">
+            <Tabs value={activeTab} onValueChange={(value) => handleTabChange(value as 'file' | 'url')} className="w-full">
               <TabsList className="grid w-full grid-cols-2">
                 <TabsTrigger value="file" className="flex items-center gap-2">
                   <Upload className="h-4 w-4" />

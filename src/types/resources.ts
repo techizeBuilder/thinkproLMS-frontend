@@ -1,3 +1,4 @@
+// Legacy types for backward compatibility
 export interface Resource {
   id: string;
   title: string;
@@ -12,6 +13,45 @@ export interface Resource {
   uploadedBy: string;
   tags?: string[];
   isActive: boolean;
+}
+
+// New types matching backend API
+export interface ApiResource {
+  _id: string;
+  title: string;
+  description: string;
+  type: ResourceType;
+  category: UserType;
+  content: {
+    url: string;
+    fileName?: string;
+    fileSize?: number;
+    mimeType?: string;
+    isExternal: boolean;
+  };
+  subject?: {
+    _id: string;
+    name: string;
+  };
+  grade?: string;
+  school?: {
+    _id: string;
+    name: string;
+    city: string;
+    state: string;
+  };
+  tags: string[];
+  isPublic: boolean;
+  isActive: boolean;
+  uploadedBy: {
+    _id: string;
+    name: string;
+    email: string;
+  };
+  viewCount: number;
+  thumbnail?: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export type ResourceType = 'document' | 'video';

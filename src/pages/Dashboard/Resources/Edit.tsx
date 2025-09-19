@@ -16,36 +16,32 @@ import {
   Video,
   X,
   Plus,
-  Trash2
+  Trash2,
+  Loader2
 } from 'lucide-react';
-import type { UpdateResourceData, Resource, ResourceType, UserType } from '@/types/resources';
+import type { UserType } from '@/types/resources';
+import type { Resource as ApiResource, UpdateResourceData } from '@/api/resourceService';
+import { resourceService } from '@/api/resourceService';
+import { subjectService } from '@/api/subjectService';
+import { schoolService } from '@/api/schoolService';
+import type { Subject } from '@/api/subjectService';
+import type { School } from '@/api/schoolService';
+import { toast } from 'sonner';
 
-// Mock resource data - in real app, this would come from API
-const mockResource: Resource = {
-  id: '1',
-  title: 'Mathematics Fundamentals',
-  description: 'Basic mathematics concepts for students',
-  type: 'document',
-  userType: 'student',
-  bucket: 'documents',
-  url: 'https://example.com/math-fundamentals.pdf',
-  uploadedAt: new Date('2024-01-15'),
-  updatedAt: new Date('2024-01-15'),
-  uploadedBy: 'Lead Mentor',
-  tags: ['mathematics', 'fundamentals'],
-  isActive: true
-};
+const GRADES = [
+  'Grade 1', 'Grade 2', 'Grade 3', 'Grade 4', 'Grade 5',
+  'Grade 6', 'Grade 7', 'Grade 8', 'Grade 9', 'Grade 10'
+];
 
 export default function EditResourcePage() {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
   
   const [formData, setFormData] = useState<UpdateResourceData>({
-    id: id || '',
     title: '',
     description: '',
     type: 'document',
-    userType: 'student',
+    category: 'student',
     url: '',
     tags: []
   });
@@ -53,35 +49,56 @@ export default function EditResourcePage() {
   const [newTag, setNewTag] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [isUpdating, setIsUpdating] = useState(false);
+  const [subjects, setSubjects] = useState<Subject[]>([]);
+  const [schools, setSchools] = useState<School[]>([]);
+  const [activeTab, setActiveTab] = useState<'file' | 'url'>('file');
+  const [resource, setResource] = useState<ApiResource | null>(null);
 
   useEffect(() => {
-    // Simulate loading resource data
-    const loadResource = async () => {
+    const loadData = async () => {
+      if (!id) return;
+      
       setIsLoading(true);
       try {
-        // TODO: Replace with actual API call
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        
+        // Load resource data and form data in parallel
+        const [resourceResponse, subjectsData, schoolsResponse] = await Promise.all([
+          resourceService.getById(id),
+          subjectService.getAllSubjects(),
+          schoolService.getAll(),
+        ]);
+
+        const resourceData = resourceResponse.data;
+        setResource(resourceData);
+        setSubjects(subjectsData);
+        setSchools(schoolsResponse.data);
+
+        // Set form data from the resource
         setFormData({
-          id: mockResource.id,
-          title: mockResource.title,
-          description: mockResource.description,
-          type: mockResource.type,
-          userType: mockResource.userType,
-          url: mockResource.url,
-          tags: mockResource.tags
+          title: resourceData.title,
+          description: resourceData.description,
+          type: resourceData.type,
+          category: resourceData.category,
+          subject: resourceData.subject?._id,
+          grade: resourceData.grade,
+          school: resourceData.school?._id,
+          url: resourceData.content.url,
+          tags: resourceData.tags,
+          isPublic: resourceData.isPublic,
         });
+
+        // Set active tab based on whether the resource is external
+        setActiveTab(resourceData.content.isExternal ? 'url' : 'file');
       } catch (error) {
-        console.error('Error loading resource:', error);
+        console.error('Error loading data:', error);
+        toast.error('Failed to load resource data');
+        navigate('/leadmentor/resources');
       } finally {
         setIsLoading(false);
       }
     };
 
-    if (id) {
-      loadResource();
-    }
-  }, [id]);
+    loadData();
+  }, [id, navigate]);
 
   const handleInputChange = (field: keyof UpdateResourceData, value: any) => {
     setFormData(prev => ({
@@ -119,38 +136,61 @@ export default function EditResourcePage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!id) return;
+    
     setIsUpdating(true);
 
     try {
-      // TODO: Implement actual API call
-      console.log('Updating resource:', formData);
+      // Validate required fields
+      if (!formData.title || !formData.type || !formData.category) {
+        toast.error('Please fill in all required fields');
+        return;
+      }
+
+      if (activeTab === 'file' && !formData.file && !resource?.content.isExternal) {
+        toast.error('Please select a file to upload');
+        return;
+      }
+
+      if (activeTab === 'url' && !formData.url) {
+        toast.error('Please provide an external URL');
+        return;
+      }
+
+      // Update the resource
+      await resourceService.update(id, formData);
       
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
-      // Navigate back to resources page
+      toast.success('Resource updated successfully!');
       navigate('/leadmentor/resources');
     } catch (error) {
       console.error('Error updating resource:', error);
+      toast.error('Failed to update resource. Please try again.');
     } finally {
       setIsUpdating(false);
     }
   };
 
   const handleDelete = async () => {
+    if (!id) return;
+    
     if (window.confirm('Are you sure you want to delete this resource? This action cannot be undone.')) {
       try {
-        // TODO: Implement actual API call
-        console.log('Deleting resource:', id);
-        
-        // Simulate API call
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        
-        // Navigate back to resources page
+        await resourceService.delete(id);
+        toast.success('Resource deleted successfully!');
         navigate('/leadmentor/resources');
       } catch (error) {
         console.error('Error deleting resource:', error);
+        toast.error('Failed to delete resource. Please try again.');
       }
+    }
+  };
+
+  const handleTabChange = (tab: 'file' | 'url') => {
+    setActiveTab(tab);
+    if (tab === 'file') {
+      setFormData(prev => ({ ...prev, url: '' }));
+    } else {
+      setFormData(prev => ({ ...prev, file: undefined }));
     }
   };
 
@@ -159,9 +199,23 @@ export default function EditResourcePage() {
       <div className="container mx-auto p-6 max-w-4xl">
         <div className="flex items-center justify-center h-64">
           <div className="text-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+            <Loader2 className="h-12 w-12 animate-spin mx-auto mb-4" />
             <p className="text-muted-foreground">Loading resource...</p>
           </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!resource) {
+    return (
+      <div className="container mx-auto p-6 max-w-4xl">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold mb-4">Resource Not Found</h1>
+          <p className="text-muted-foreground mb-4">The resource you're looking for doesn't exist.</p>
+          <Button onClick={() => navigate('/leadmentor/resources')}>
+            Back to Resources
+          </Button>
         </div>
       </div>
     );
@@ -217,10 +271,10 @@ export default function EditResourcePage() {
               </div>
               
               <div className="space-y-2">
-                <Label htmlFor="userType">Target Audience *</Label>
+                <Label htmlFor="category">Target Audience *</Label>
                 <Select
-                  value={formData.userType}
-                  onValueChange={(value: UserType) => handleInputChange('userType', value)}
+                  value={formData.category}
+                  onValueChange={(value: UserType) => handleInputChange('category', value)}
                 >
                   <SelectTrigger>
                     <SelectValue />
@@ -244,9 +298,68 @@ export default function EditResourcePage() {
               />
             </div>
 
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="subject">Subject</Label>
+                <Select
+                  value={formData.subject || ''}
+                  onValueChange={(value) => handleInputChange('subject', value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select subject" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {subjects.map((subject) => (
+                      <SelectItem key={subject._id} value={subject._id}>
+                        {subject.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="grade">Grade</Label>
+                <Select
+                  value={formData.grade || ''}
+                  onValueChange={(value) => handleInputChange('grade', value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select grade" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {GRADES.map((grade) => (
+                      <SelectItem key={grade} value={grade}>
+                        {grade}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="school">School</Label>
+              <Select
+                value={formData.school || ''}
+                onValueChange={(value) => handleInputChange('school', value)}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select school" />
+                </SelectTrigger>
+                <SelectContent>
+                  {schools.map((school) => (
+                    <SelectItem key={school._id} value={school._id}>
+                      {school.name} - {school.city}, {school.state}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
             <div className="space-y-2">
               <Label>Resource Type *</Label>
-              <Tabs value={formData.type} onValueChange={(value: string) => handleInputChange('type', value as ResourceType)}>
+              <Tabs value={formData.type} onValueChange={(value: string) => handleInputChange('type', value)}>
                 <TabsList className="grid w-full grid-cols-2">
                   <TabsTrigger value="document" className="flex items-center gap-2">
                     <FileText className="h-4 w-4" />
@@ -270,7 +383,7 @@ export default function EditResourcePage() {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <Tabs value={formData.url ? 'url' : 'file'} className="w-full">
+            <Tabs value={activeTab} onValueChange={(value) => handleTabChange(value as 'file' | 'url')} className="w-full">
               <TabsList className="grid w-full grid-cols-2">
                 <TabsTrigger value="file" className="flex items-center gap-2">
                   <Upload className="h-4 w-4" />
@@ -291,22 +404,27 @@ export default function EditResourcePage() {
                     onChange={handleFileUpload}
                     accept={
                       formData.type === 'video' 
-                        ? 'video/mp4,video/avi,video/mov' 
-                        : '.pdf,.pptx,.xlsx,.docx'
+                        ? 'video/mp4,video/avi,video/mov,video/wmv,video/webm' 
+                        : '.pdf,.pptx,.xlsx,.docx,.doc,.xls,.ppt'
                     }
                   />
                   <p className="text-sm text-muted-foreground">
                     {formData.type === 'video' 
-                      ? 'Supported formats: MP4, AVI, MOV' 
-                      : 'Supported formats: PDF, PPTX, XLSX, DOCX'
+                      ? 'Supported formats: MP4, AVI, MOV, WMV, WEBM' 
+                      : 'Supported formats: PDF, PPTX, XLSX, DOCX, DOC, XLS, PPT'
                     }
                   </p>
+                  {resource?.content.fileName && (
+                    <p className="text-sm text-blue-600">
+                      Current file: {resource.content.fileName}
+                    </p>
+                  )}
                 </div>
               </TabsContent>
 
               <TabsContent value="url" className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="url">Resource URL</Label>
+                  <Label htmlFor="url">External URL</Label>
                   <Input
                     id="url"
                     type="url"
@@ -369,17 +487,49 @@ export default function EditResourcePage() {
           </CardContent>
         </Card>
 
-        <div className="flex justify-end gap-4">
+        <Card>
+          <CardHeader>
+            <CardTitle>Access Settings</CardTitle>
+            <CardDescription>
+              Configure who can access this resource
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="flex items-center space-x-2">
+              <input
+                type="checkbox"
+                id="isPublic"
+                checked={formData.isPublic || false}
+                onChange={(e) => handleInputChange('isPublic', e.target.checked)}
+                className="rounded"
+              />
+              <Label htmlFor="isPublic">Make this resource public</Label>
+            </div>
+          </CardContent>
+        </Card>
+
+        <div className="flex justify-between gap-4">
           <Button
             type="button"
-            variant="outline"
-            onClick={() => navigate('/leadmentor/resources')}
+            variant="destructive"
+            onClick={handleDelete}
+            className="flex items-center gap-2"
           >
-            Cancel
+            <Trash2 className="h-4 w-4" />
+            Delete Resource
           </Button>
-          <Button type="submit" disabled={isUpdating}>
-            {isUpdating ? 'Updating...' : 'Update Resource'}
-          </Button>
+          <div className="flex gap-4">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => navigate('/leadmentor/resources')}
+            >
+              Cancel
+            </Button>
+            <Button type="submit" disabled={isUpdating}>
+              {isUpdating ? 'Updating...' : 'Update Resource'}
+            </Button>
+          </div>
         </div>
       </form>
     </div>
