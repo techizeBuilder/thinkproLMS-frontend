@@ -4,6 +4,8 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 
 import Login from "../pages/Auth/Login";
 import Setup from "../pages/Auth/Setup";
+import GuestLogin from "../pages/Auth/GuestLogin";
+import GuestRegister from "../pages/Auth/GuestRegister";
 import NotFound from "../pages/NotFound";
 import SuperAdmin from "../pages/Dashboard/SuperAdmin";
 import Admin from "../pages/Dashboard/Admin";
@@ -57,6 +59,14 @@ import LeadMentorDashboard from "../pages/Dashboard/LeadMentor/Dashboard";
 import Student from "../pages/Dashboard/Student";
 import Mentor from "../pages/Dashboard/Mentor";
 
+// Guest Components
+import GuestLayout from "../components/Guest/GuestLayout";
+import GuestHome from "../pages/Guest/GuestHome";
+import GuestResources from "../pages/Guest/GuestResources";
+import GuestQuizzes from "../pages/Guest/GuestQuizzes";
+import GuestClasses from "../pages/Guest/GuestClasses";
+import GuestPremium from "../pages/Guest/GuestPremium";
+
 function ProtectedRoute({
   children,
   role,
@@ -82,7 +92,8 @@ function ProtectedRoute({
       schooladmin: "/admin",
       admin: "/admin",
       mentor: "/mentor",
-      student: "/student"
+      student: "/student",
+      guest: "/guest"
     };
     
     const route = roleRouteMap[user.role] || "/login";
@@ -109,7 +120,8 @@ function RootRoute() {
     schooladmin: "/admin",
     admin: "/admin",
     mentor: "/mentor",
-    student: "/student"
+    student: "/student",
+    guest: "/guest"
   };
 
   const route = roleRouteMap[user.role] || "/login";
@@ -126,6 +138,8 @@ export default function AppRouter() {
         {/* Public */}
         <Route path="/login" element={<Login />} />
         <Route path="/setup/:token" element={<Setup />} />
+        <Route path="/guest/login" element={<GuestLogin />} />
+        <Route path="/guest/register" element={<GuestRegister />} />
 
         {/* SuperAdmin */}
         <Route
@@ -359,6 +373,22 @@ export default function AppRouter() {
         >
           <Route path="resources" element={<StudentResourcesPage />} />
           <Route path="resources/:id/view" element={<StudentResourceViewPage />} />
+        </Route>
+
+        {/* Guest */}
+        <Route
+          path="/guest"
+          element={
+            <ProtectedRoute role="guest">
+              <GuestLayout />
+            </ProtectedRoute>
+          }
+        >
+          <Route index element={<GuestHome />} />
+          <Route path="resources" element={<GuestResources />} />
+          <Route path="quizzes" element={<GuestQuizzes />} />
+          <Route path="classes" element={<GuestClasses />} />
+          <Route path="premium" element={<GuestPremium />} />
         </Route>
 
         {/* Fallback */}
