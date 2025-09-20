@@ -11,7 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Badge } from '@/components/ui/badge';
 import { X, Upload, FileText, Video, Link } from 'lucide-react';
 import { toast } from 'sonner';
-import { resourceService } from '@/api/resourceService';
+import { resourceService, type CreateResourceData } from '@/api/resourceService';
 import { subjectService } from '@/api/subjectService';
 import { schoolService } from '@/api/schoolService';
 import type { Subject } from '@/api/subjectService';
@@ -30,7 +30,6 @@ const resourceSchema = z.object({
   url: z.string().optional(),
 });
 
-type ResourceFormData = z.infer<typeof resourceSchema>;
 
 interface ResourceFormProps {
   resource?: any; // ApiResource type
@@ -57,8 +56,7 @@ export default function ResourceForm({ resource, onSuccess, onCancel }: Resource
     formState: { errors },
     setValue,
     watch,
-    reset,
-  } = useForm<ResourceFormData>({
+  } = useForm({
     resolver: zodResolver(resourceSchema),
     defaultValues: {
       title: resource?.title || '',
@@ -128,15 +126,15 @@ export default function ResourceForm({ resource, onSuccess, onCancel }: Resource
 
   const removeTag = (tagToRemove: string) => {
     const currentTags = watch('tags') || [];
-    setValue('tags', currentTags.filter(tag => tag !== tagToRemove));
+    setValue('tags', currentTags.filter((tag: string) => tag !== tagToRemove));
   };
 
-  const onSubmit = async (data: ResourceFormData) => {
+  const onSubmit = async (data: any): Promise<void> => {
     setIsSubmitting(true);
     try {
-      const formData = {
+      const formData: CreateResourceData = {
         ...data,
-        file: selectedFile,
+        file: selectedFile || undefined,
         tags: data.tags || [],
       };
 
@@ -381,7 +379,7 @@ export default function ResourceForm({ resource, onSuccess, onCancel }: Resource
               </Button>
             </div>
             <div className="flex flex-wrap gap-2">
-              {(watch('tags') || []).map((tag, index) => (
+              {(watch('tags') || []).map((tag: string, index: number) => (
                 <Badge key={index} variant="secondary" className="flex items-center gap-1">
                   {tag}
                   <X

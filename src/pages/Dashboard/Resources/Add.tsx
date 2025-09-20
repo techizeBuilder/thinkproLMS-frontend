@@ -17,19 +17,13 @@ import {
   X,
   Plus
 } from 'lucide-react';
-import type { UserType, BucketType, ResourceType } from '@/types/resources';
+import type { UserType, ResourceType } from '@/types/resources';
 import type { CreateResourceData } from '@/api/resourceService';
 import { resourceService } from '@/api/resourceService';
 import { subjectService } from '@/api/subjectService';
 import { schoolService } from '@/api/schoolService';
-import type { Subject } from '@/api/subjectService';
-import type { School } from '@/api/schoolService';
 import { toast } from 'sonner';
 
-const GRADES = [
-  'Grade 1', 'Grade 2', 'Grade 3', 'Grade 4', 'Grade 5',
-  'Grade 6', 'Grade 7', 'Grade 8', 'Grade 9', 'Grade 10'
-];
 
 export default function AddResourcePage() {
   const navigate = useNavigate();
@@ -46,20 +40,16 @@ export default function AddResourcePage() {
 
   const [newTag, setNewTag] = useState('');
   const [isUploading, setIsUploading] = useState(false);
-  const [subjects, setSubjects] = useState<Subject[]>([]);
-  const [schools, setSchools] = useState<School[]>([]);
   const [activeTab, setActiveTab] = useState<'file' | 'url'>('file');
 
   // Load subjects and schools
   useEffect(() => {
     const loadData = async () => {
       try {
-        const [subjectsData, schoolsData] = await Promise.all([
+        await Promise.all([
           subjectService.getAllSubjects(),
           schoolService.getAllSchools(),
         ]);
-        setSubjects(subjectsData);
-        setSchools(schoolsData);
       } catch (error) {
         console.error('Error loading data:', error);
         toast.error('Failed to load form data');

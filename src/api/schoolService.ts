@@ -5,7 +5,7 @@ export interface SchoolHead {
   designation: string;
   email: string;
   phoneNumber: string;
-  profilePic?: string;
+  profilePic?: string | File;
 }
 
 export interface GradeWithSections {
@@ -77,6 +77,12 @@ export const schoolService = {
     return response.data;
   },
 
+  // Get all schools (alias for getAll)
+  getAllSchools: async (): Promise<School[]> => {
+    const response = await schoolService.getAll();
+    return response.data;
+  },
+
   // Get school by ID
   getById: async (id: string): Promise<{ success: boolean; data: School }> => {
     const response = await axiosInstance.get(`/schools/${id}`);
@@ -107,7 +113,7 @@ export const schoolService = {
     // Add school head profile pictures
     if (data.schoolHeads) {
       data.schoolHeads.forEach((head, index) => {
-        if (head.profilePic && head.profilePic instanceof File) {
+        if (head.profilePic && typeof head.profilePic === 'object' && head.profilePic instanceof File) {
           formData.append(`schoolHeadProfilePic${index}`, head.profilePic);
         }
       });
@@ -146,7 +152,7 @@ export const schoolService = {
     // Add school head profile pictures
     if (data.schoolHeads !== undefined) {
       data.schoolHeads.forEach((head, index) => {
-        if (head.profilePic && head.profilePic instanceof File) {
+        if (head.profilePic && typeof head.profilePic === 'object' && head.profilePic instanceof File) {
           formData.append(`schoolHeadProfilePic${index}`, head.profilePic);
         }
       });
