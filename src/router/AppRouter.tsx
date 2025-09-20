@@ -59,6 +59,17 @@ import MentorResourcesPage from "../pages/Dashboard/Mentor/Resources";
 import MentorResourceViewPage from "../pages/Dashboard/Mentor/ResourceView";
 import MentorStudentsPage from "../pages/Dashboard/Mentor/Students";
 
+// Assessment Components
+import MentorAssessmentsPage from "../pages/Dashboard/Mentor/Assessments";
+import CreateAssessmentPage from "../pages/Dashboard/Mentor/Assessments/Create";
+import ViewAssessmentPage from "../pages/Dashboard/Mentor/Assessments/View";
+import EditAssessmentPage from "../pages/Dashboard/Mentor/Assessments/Edit";
+import AssessmentAnalyticsPage from "../pages/Dashboard/Mentor/Assessments/Analytics";
+import StudentAssessmentsPage from "../pages/Dashboard/Student/Assessments";
+import TakeAssessmentPage from "../pages/Dashboard/Student/Assessments/TakeAssessment";
+import StudentAssessmentResultsPage from "../pages/Dashboard/Student/Assessments/Results";
+import StudentDashboard from "../pages/Dashboard/Student/Dashboard";
+
 // Dashboard Components
 import SuperAdminDashboard from "../pages/Dashboard/SuperAdmin/Dashboard";
 import LeadMentorDashboard from "../pages/Dashboard/LeadMentor/Dashboard";
@@ -187,6 +198,13 @@ export default function AppRouter() {
           {/* Question Bank */}
           <Route path="question-bank" element={<QuestionBankPage />} />
           
+          {/* Assessment Management */}
+          <Route path="assessments" element={<MentorAssessmentsPage />} />
+          <Route path="assessments/create" element={<CreateAssessmentPage />} />
+          <Route path="assessments/:id" element={<ViewAssessmentPage />} />
+          <Route path="assessments/:id/edit" element={<EditAssessmentPage />} />
+          <Route path="assessments/:id/analytics" element={<AssessmentAnalyticsPage />} />
+          
           {/* Resources Management */}
           <Route 
             path="resources" 
@@ -297,6 +315,13 @@ export default function AppRouter() {
           {/* Question Bank */}
           <Route path="question-bank" element={<QuestionBankPage />} />
           
+          {/* Assessment Management */}
+          <Route path="assessments" element={<MentorAssessmentsPage />} />
+          <Route path="assessments/create" element={<CreateAssessmentPage />} />
+          <Route path="assessments/:id" element={<ViewAssessmentPage />} />
+          <Route path="assessments/:id/edit" element={<EditAssessmentPage />} />
+          <Route path="assessments/:id/analytics" element={<AssessmentAnalyticsPage />} />
+          
           {/* Resources Management */}
           <Route 
             path="resources" 
@@ -379,6 +404,13 @@ export default function AppRouter() {
           <Route path="students" element={<MentorStudentsPage />} />
           <Route path="resources" element={<MentorResourcesPage />} />
           <Route path="resources/:id/view" element={<MentorResourceViewPage />} />
+          
+          {/* Assessment Management */}
+          <Route path="assessments" element={<MentorAssessmentsPage />} />
+          <Route path="assessments/create" element={<CreateAssessmentPage />} />
+          <Route path="assessments/:id" element={<ViewAssessmentPage />} />
+          <Route path="assessments/:id/edit" element={<EditAssessmentPage />} />
+          <Route path="assessments/:id/analytics" element={<AssessmentAnalyticsPage />} />
         </Route>
 
         {/* Student */}
@@ -390,8 +422,14 @@ export default function AppRouter() {
             </ProtectedRoute>
           }
         >
+          <Route index element={<StudentDashboard />} />
           <Route path="resources" element={<StudentResourcesPage />} />
           <Route path="resources/:id/view" element={<StudentResourceViewPage />} />
+          
+          {/* Assessment Routes */}
+          <Route path="assessments" element={<StudentAssessmentsPage />} />
+          <Route path="assessments/:id/take" element={<TakeAssessmentPage />} />
+          <Route path="assessments/results" element={<StudentAssessmentResultsPage />} />
         </Route>
 
         {/* Guest */}
