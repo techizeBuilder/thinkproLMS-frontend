@@ -48,6 +48,9 @@ export function SuperAdminSidebar({ className }: SuperAdminSidebarProps) {
             <SidebarNavItem to="/superadmin/lead-mentors" icon={Crown}>
               Lead Mentors
             </SidebarNavItem>
+            <SidebarNavItem to="/superadmin/mentors" icon={Users}>
+              School Mentors
+            </SidebarNavItem>
             <SidebarNavItem to="/superadmin/students" icon={Users}>
               Students
             </SidebarNavItem>

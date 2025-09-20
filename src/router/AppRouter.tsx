@@ -23,6 +23,9 @@ import EditSchoolAdminPage from "../pages/Dashboard/SuperAdmin/SchoolAdmins/Edit
 import LeadMentorsPage from "../pages/Dashboard/SuperAdmin/LeadMentors";
 import CreateLeadMentorPage from "../pages/Dashboard/SuperAdmin/LeadMentors/Create";
 import EditLeadMentorPage from "../pages/Dashboard/SuperAdmin/LeadMentors/Edit";
+import SuperAdminMentorsPage from "../pages/Dashboard/SuperAdmin/Mentors";
+import CreateSuperAdminMentorPage from "../pages/Dashboard/SuperAdmin/Mentors/Create";
+import EditSuperAdminMentorPage from "../pages/Dashboard/SuperAdmin/Mentors/Edit";
 
 // LeadMentor Edit Components (re-exported from SuperAdmin)
 import LeadMentorEditSchoolAdminPage from "../pages/Dashboard/LeadMentor/SchoolAdmins/Edit";
@@ -166,6 +169,11 @@ export default function AppRouter() {
           <Route path="lead-mentors" element={<LeadMentorsPage />} />
           <Route path="lead-mentors/create" element={<CreateLeadMentorPage />} />
           <Route path="lead-mentors/:id/edit" element={<EditLeadMentorPage />} />
+          
+          {/* Mentor Management */}
+          <Route path="mentors" element={<SuperAdminMentorsPage />} />
+          <Route path="mentors/create" element={<CreateSuperAdminMentorPage />} />
+          <Route path="mentors/:id/edit" element={<EditSuperAdminMentorPage />} />
           
           {/* Student Management */}
           <Route path="students" element={<StudentsPage />} />

@@ -9,6 +9,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Plus, Trash2, Check } from 'lucide-react';
 import { questionBankService, type CreateQuestionData } from '@/api/questionBankService';
+import { subjectService, type Subject } from '@/api/subjectService';
+import { moduleService, type ModuleItem } from '@/api/moduleService';
 import { toast } from 'sonner';
 
 interface CreateQuestionFormProps {
@@ -35,8 +37,8 @@ const CreateQuestionForm: React.FC<CreateQuestionFormProps> = ({
     correctAnswers: [],
     difficulty: 'Medium',
   });
-  const [subjects, setSubjects] = useState<string[]>([]);
-  const [modules, setModules] = useState<string[]>([]);
+  const [subjects, setSubjects] = useState<Subject[]>([]);
+  const [modules, setModules] = useState<ModuleItem[]>([]);
   const [loading, setLoading] = useState(false);
 
   const grades = [
@@ -53,20 +55,41 @@ const CreateQuestionForm: React.FC<CreateQuestionFormProps> = ({
   ];
 
   useEffect(() => {
-    if (open && formData.grade) {
-      fetchSubjectsAndModules();
+    if (open) {
+      fetchSubjects();
     }
-  }, [open, formData.grade]);
+  }, [open]);
 
-  const fetchSubjectsAndModules = async () => {
+  useEffect(() => {
+    if (formData.grade && formData.subject) {
+      fetchModules();
+    } else {
+      setModules([]);
+    }
+  }, [formData.grade, formData.subject]);
+
+  const fetchSubjects = async () => {
     try {
-      const response = await questionBankService.getSubjectsAndModules(formData.grade);
-      if (response.success) {
-        setSubjects(response.data.subjects);
-        setModules(response.data.modules);
+      const subjectsData = await subjectService.getAllSubjects();
+      setSubjects(subjectsData);
+    } catch (error) {
+      console.error('Error fetching subjects:', error);
+      toast.error('Failed to fetch subjects');
+    }
+  };
+
+  const fetchModules = async () => {
+    try {
+      const gradeNumber = parseInt(formData.grade.replace('Grade ', ''));
+      const selectedSubject = subjects.find(s => s.name === formData.subject);
+      
+      if (selectedSubject) {
+        const moduleData = await moduleService.getModulesByGradeAndSubject(gradeNumber, selectedSubject._id);
+        setModules(moduleData.modules);
       }
     } catch (error) {
-      console.error('Error fetching subjects and modules:', error);
+      console.error('Error fetching modules:', error);
+      toast.error('Failed to fetch modules');
     }
   };
 
@@ -82,6 +105,15 @@ const CreateQuestionForm: React.FC<CreateQuestionFormProps> = ({
         ...prev,
         grade: value,
         subject: '',
+        module: '',
+      }));
+    }
+
+    // If subject changes, reset module
+    if (field === 'subject') {
+      setFormData(prev => ({
+        ...prev,
+        subject: value,
         module: '',
       }));
     }
@@ -243,7 +275,7 @@ const CreateQuestionForm: React.FC<CreateQuestionFormProps> = ({
                     </SelectTrigger>
                     <SelectContent>
                       {subjects.map(subject => (
-                        <SelectItem key={subject} value={subject}>{subject}</SelectItem>
+                        <SelectItem key={subject._id} value={subject.name}>{subject.name}</SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
@@ -257,7 +289,7 @@ const CreateQuestionForm: React.FC<CreateQuestionFormProps> = ({
                     </SelectTrigger>
                     <SelectContent>
                       {modules.map(module => (
-                        <SelectItem key={module} value={module}>{module}</SelectItem>
+                        <SelectItem key={module._id || module.name} value={module.name}>{module.name}</SelectItem>
                       ))}
                     </SelectContent>
                   </Select>

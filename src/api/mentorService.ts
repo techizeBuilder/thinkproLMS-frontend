@@ -20,11 +20,9 @@ export interface Mentor {
   }>;
   addedBy: {
     _id: string;
-    user: {
-      _id: string;
-      name: string;
-      email: string;
-    };
+    name: string;
+    email: string;
+    role: string;
   };
   isActive: boolean;
   createdAt: string;
