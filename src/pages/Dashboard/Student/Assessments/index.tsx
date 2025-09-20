@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -12,7 +12,7 @@ import {
   AlertCircle,
   Eye
 } from "lucide-react";
-import { studentAssessmentService, AvailableAssessment } from "@/api/assessmentService";
+import { studentAssessmentService, type AvailableAssessment } from "@/api/assessmentService";
 import { toast } from "sonner";
 
 export default function StudentAssessmentsPage() {

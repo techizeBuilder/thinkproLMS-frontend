@@ -1,19 +1,17 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { 
   ArrowLeft, 
   Users, 
   TrendingUp, 
-  Clock, 
   CheckCircle,
   BarChart3,
   Download
 } from "lucide-react";
-import { assessmentService, Assessment, AssessmentAnalytics } from "@/api/assessmentService";
+import { assessmentService, type Assessment, type AssessmentAnalytics } from "@/api/assessmentService";
 import { toast } from "sonner";
 
 export default function AssessmentAnalyticsPage() {

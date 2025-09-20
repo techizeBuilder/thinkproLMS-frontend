@@ -12,7 +12,7 @@ import {
   SidebarFooter,
   useSidebar
 } from "@/components/ui/collapsible-sidebar"
-import { BookOpen, HomeIcon, Settings, User, Award, Clock, FileText, FolderOpen, ClipboardList } from "lucide-react"
+import { BookOpen, HomeIcon, Settings, User, Award, Clock, FolderOpen, ClipboardList } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { LogoutButton } from "@/components/ui/logout-button"
 

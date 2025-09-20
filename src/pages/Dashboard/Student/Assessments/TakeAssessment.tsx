@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -11,10 +11,9 @@ import {
   Circle, 
   ArrowLeft, 
   ArrowRight,
-  Flag,
   AlertTriangle
 } from "lucide-react";
-import { studentAssessmentService, Assessment, AssessmentResponse, Question } from "@/api/assessmentService";
+import { studentAssessmentService, type Assessment, type AssessmentResponse } from "@/api/assessmentService";
 import { toast } from "sonner";
 
 export default function TakeAssessmentPage() {
@@ -88,7 +87,7 @@ export default function TakeAssessmentPage() {
     const currentQuestion = assessment?.questions[currentQuestionIndex];
     if (!currentQuestion) return;
 
-    const question = (currentQuestion as any).questionId as Question;
+    const question = (currentQuestion as any).questionId;
     
     if (question.answerType === "radio" || question.answerType === "multichoice") {
       setSelectedAnswers([answerIndex]);
@@ -212,7 +211,7 @@ export default function TakeAssessmentPage() {
   }
 
   const currentQuestion = assessment.questions[currentQuestionIndex];
-  const question = (currentQuestion as any).questionId as Question;
+  const question = (currentQuestion as any).questionId;
   const isLastQuestion = currentQuestionIndex === assessment.questions.length - 1;
   const isFirstQuestion = currentQuestionIndex === 0;
 
@@ -293,7 +292,7 @@ export default function TakeAssessmentPage() {
           </div>
 
           <div className="space-y-3">
-            {question.answerChoices.map((choice, index) => (
+            {question.answerChoices.map((choice: any, index: number) => (
               <div
                 key={index}
                 className={`flex items-center space-x-3 p-3 border rounded-lg cursor-pointer transition-colors ${

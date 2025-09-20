@@ -31,7 +31,7 @@ export default function ViewAssessmentPage() {
         const response = await assessmentService.getAssessmentById(id);
         console.log("Assessment response:", response);
         setAssessment(response.data);
-      } catch (error) {
+      } catch (error: any) {
         console.error("Error loading assessment:", error);
         console.error("Error details:", error.response?.data || error.message);
         toast.error(`Failed to load assessment: ${error.response?.data?.message || error.message}`);
