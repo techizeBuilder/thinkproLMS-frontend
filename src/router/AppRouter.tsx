@@ -53,14 +53,16 @@ import EditResourcePage from "../pages/Dashboard/Resources/Edit";
 import ViewResourcePage from "../pages/Dashboard/Resources/View";
 import StudentResourcesPage from "../pages/Dashboard/Student/Resources";
 import StudentResourceViewPage from "../pages/Dashboard/Student/ResourceView";
+import MentorLayout from "../pages/Dashboard/Mentor/Layout";
+import MentorDashboard from "../pages/Dashboard/Mentor/Dashboard";
 import MentorResourcesPage from "../pages/Dashboard/Mentor/Resources";
 import MentorResourceViewPage from "../pages/Dashboard/Mentor/ResourceView";
+import MentorStudentsPage from "../pages/Dashboard/Mentor/Students";
 
 // Dashboard Components
 import SuperAdminDashboard from "../pages/Dashboard/SuperAdmin/Dashboard";
 import LeadMentorDashboard from "../pages/Dashboard/LeadMentor/Dashboard";
 import Student from "../pages/Dashboard/Student";
-import Mentor from "../pages/Dashboard/Mentor";
 
 // Guest Components
 import GuestLayout from "../components/Guest/GuestLayout";
@@ -369,10 +371,12 @@ export default function AppRouter() {
           path="/mentor"
           element={
             <ProtectedRoute role="mentor">
-              <Mentor />
+              <MentorLayout />
             </ProtectedRoute>
           }
         >
+          <Route index element={<MentorDashboard />} />
+          <Route path="students" element={<MentorStudentsPage />} />
           <Route path="resources" element={<MentorResourcesPage />} />
           <Route path="resources/:id/view" element={<MentorResourceViewPage />} />
         </Route>

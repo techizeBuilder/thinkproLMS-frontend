@@ -63,6 +63,12 @@ export const mentorService = {
     return response.data;
   },
 
+  // Get my profile (for mentors)
+  getMyProfile: async (): Promise<{ success: boolean; data: Mentor }> => {
+    const response = await axiosInstance.get("/mentors/my-profile");
+    return response.data;
+  },
+
   // Create new mentor
   create: async (
     data: CreateMentorData
