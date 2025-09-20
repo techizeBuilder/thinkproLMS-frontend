@@ -10,8 +10,22 @@ export interface Question {
   _id: string;
   questionText: string;
   grade: string;
-  subject: string;
-  module: string;
+  subject: {
+    _id: string;
+    name: string;
+  };
+  module: {
+    _id: string;
+    grade: number;
+    subject: {
+      _id: string;
+      name: string;
+    };
+    modules: Array<{
+      name: string;
+      description?: string;
+    }>;
+  };
   answerType: 'radio' | 'checkbox' | 'dropdown' | 'multichoice';
   answerChoices: AnswerChoice[];
   correctAnswers: number[];
@@ -37,8 +51,22 @@ export interface QuestionRecommendation {
   _id: string;
   questionText: string;
   grade: string;
-  subject: string;
-  module: string;
+  subject: {
+    _id: string;
+    name: string;
+  };
+  module: {
+    _id: string;
+    grade: number;
+    subject: {
+      _id: string;
+      name: string;
+    };
+    modules: Array<{
+      name: string;
+      description?: string;
+    }>;
+  };
   answerType: 'radio' | 'checkbox' | 'dropdown' | 'multichoice';
   answerChoices: AnswerChoice[];
   correctAnswers: number[];
@@ -63,8 +91,8 @@ export interface QuestionRecommendation {
 export interface CreateQuestionData {
   questionText: string;
   grade: string;
-  subject: string;
-  module: string;
+  subject: string; // ObjectId as string
+  module: string; // ObjectId as string
   answerType: 'radio' | 'checkbox' | 'dropdown' | 'multichoice';
   answerChoices: { text: string; isCorrect: boolean }[];
   correctAnswers: number[];

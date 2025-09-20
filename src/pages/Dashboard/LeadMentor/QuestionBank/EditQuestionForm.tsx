@@ -10,7 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { Plus, Trash2, Check } from 'lucide-react';
 import { questionBankService, type CreateQuestionData, type Question } from '@/api/questionBankService';
 import { subjectService, type Subject } from '@/api/subjectService';
-import { moduleService, type ModuleItem } from '@/api/moduleService';
+import { moduleService, type Module } from '@/api/moduleService';
 import { toast } from 'sonner';
 
 interface EditQuestionFormProps {
@@ -40,7 +40,7 @@ const EditQuestionForm: React.FC<EditQuestionFormProps> = ({
     difficulty: 'Medium',
   });
   const [subjects, setSubjects] = useState<Subject[]>([]);
-  const [modules, setModules] = useState<ModuleItem[]>([]);
+  const [modules, setModules] = useState<Module[]>([]);
   const [loading, setLoading] = useState(false);
 
   const grades = [
@@ -62,8 +62,8 @@ const EditQuestionForm: React.FC<EditQuestionFormProps> = ({
       setFormData({
         questionText: question.questionText,
         grade: question.grade,
-        subject: question.subject,
-        module: question.module,
+        subject: question.subject._id,
+        module: question.module._id,
         answerType: question.answerType,
         answerChoices: question.answerChoices.map(choice => ({
           text: choice.text,
@@ -98,11 +98,10 @@ const EditQuestionForm: React.FC<EditQuestionFormProps> = ({
   const fetchModules = async () => {
     try {
       const gradeNumber = parseInt(formData.grade.replace('Grade ', ''));
-      const selectedSubject = subjects.find(s => s.name === formData.subject);
       
-      if (selectedSubject) {
-        const moduleData = await moduleService.getModulesByGradeAndSubject(gradeNumber, selectedSubject._id);
-        setModules(moduleData.modules);
+      if (formData.subject) {
+        const moduleData = await moduleService.getModulesByGradeAndSubject(gradeNumber, formData.subject);
+        setModules([moduleData]); // Module document for this grade-subject combination
       }
     } catch (error) {
       console.error('Error fetching modules:', error);
@@ -282,7 +281,7 @@ const EditQuestionForm: React.FC<EditQuestionFormProps> = ({
                     </SelectTrigger>
                     <SelectContent>
                       {subjects.map(subject => (
-                        <SelectItem key={subject._id} value={subject.name}>{subject.name}</SelectItem>
+                        <SelectItem key={subject._id} value={subject._id}>{subject.name}</SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
@@ -296,7 +295,9 @@ const EditQuestionForm: React.FC<EditQuestionFormProps> = ({
                     </SelectTrigger>
                     <SelectContent>
                       {modules.map(module => (
-                        <SelectItem key={module._id || module.name} value={module.name}>{module.name}</SelectItem>
+                        <SelectItem key={module._id} value={module._id}>
+                          {module.subject.name} - Grade {module.grade}
+                        </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>

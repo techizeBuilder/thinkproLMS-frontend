@@ -240,8 +240,8 @@ const QuestionRecommendations: React.FC<QuestionRecommendationsProps> = ({
                             </div>
                           </TableCell>
                           <TableCell>{recommendation.grade}</TableCell>
-                          <TableCell>{recommendation.subject}</TableCell>
-                          <TableCell>{recommendation.module}</TableCell>
+                          <TableCell>{recommendation.subject.name}</TableCell>
+                          <TableCell>{recommendation.module.subject.name} - Grade {recommendation.module.grade}</TableCell>
                           <TableCell>
                             <Badge className={getDifficultyColor(recommendation.difficulty)}>
                               {recommendation.difficulty}
@@ -339,11 +339,11 @@ const QuestionRecommendations: React.FC<QuestionRecommendationsProps> = ({
                       </div>
                       <div>
                         <Label className="font-medium">Subject:</Label>
-                        <p>{selectedRecommendation.subject}</p>
+                        <p>{selectedRecommendation.subject.name}</p>
                       </div>
                       <div>
                         <Label className="font-medium">Module:</Label>
-                        <p>{selectedRecommendation.module}</p>
+                        <p>{selectedRecommendation.module.subject.name} - Grade {selectedRecommendation.module.grade}</p>
                       </div>
                       <div>
                         <Label className="font-medium">Difficulty:</Label>

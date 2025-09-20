@@ -499,8 +499,8 @@ const QuestionBankPage: React.FC = () => {
                         </div>
                       </TableCell>
                       <TableCell>{question.grade}</TableCell>
-                      <TableCell>{question.subject}</TableCell>
-                      <TableCell>{question.module}</TableCell>
+                      <TableCell>{question.subject?.name || 'N/A'}</TableCell>
+                      <TableCell>{question.module?.subject?.name || 'N/A'} - Grade {question.module?.grade || 'N/A'}</TableCell>
                       <TableCell>
                         {getAnswerTypeLabel(question.answerType)}
                       </TableCell>

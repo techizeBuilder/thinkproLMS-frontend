@@ -10,7 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { Plus, Trash2, Check } from 'lucide-react';
 import { questionBankService, type CreateQuestionData } from '@/api/questionBankService';
 import { subjectService, type Subject } from '@/api/subjectService';
-import { moduleService, type ModuleItem } from '@/api/moduleService';
+import { moduleService, type Module } from '@/api/moduleService';
 import { toast } from 'sonner';
 
 interface CreateQuestionFormProps {
@@ -38,7 +38,7 @@ const CreateQuestionForm: React.FC<CreateQuestionFormProps> = ({
     difficulty: 'Medium',
   });
   const [subjects, setSubjects] = useState<Subject[]>([]);
-  const [modules, setModules] = useState<ModuleItem[]>([]);
+  const [modules, setModules] = useState<Module[]>([]);
   const [loading, setLoading] = useState(false);
 
   const grades = [
@@ -81,11 +81,10 @@ const CreateQuestionForm: React.FC<CreateQuestionFormProps> = ({
   const fetchModules = async () => {
     try {
       const gradeNumber = parseInt(formData.grade.replace('Grade ', ''));
-      const selectedSubject = subjects.find(s => s.name === formData.subject);
       
-      if (selectedSubject) {
-        const moduleData = await moduleService.getModulesByGradeAndSubject(gradeNumber, selectedSubject._id);
-        setModules(moduleData.modules);
+      if (formData.subject) {
+        const moduleData = await moduleService.getModulesByGradeAndSubject(gradeNumber, formData.subject);
+        setModules([moduleData]); // Module document for this grade-subject combination
       }
     } catch (error) {
       console.error('Error fetching modules:', error);
@@ -275,7 +274,7 @@ const CreateQuestionForm: React.FC<CreateQuestionFormProps> = ({
                     </SelectTrigger>
                     <SelectContent>
                       {subjects.map(subject => (
-                        <SelectItem key={subject._id} value={subject.name}>{subject.name}</SelectItem>
+                        <SelectItem key={subject._id} value={subject._id}>{subject.name}</SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
@@ -289,7 +288,9 @@ const CreateQuestionForm: React.FC<CreateQuestionFormProps> = ({
                     </SelectTrigger>
                     <SelectContent>
                       {modules.map(module => (
-                        <SelectItem key={module._id || module.name} value={module.name}>{module.name}</SelectItem>
+                        <SelectItem key={module._id} value={module._id}>
+                          {module.subject.name} - Grade {module.grade}
+                        </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
