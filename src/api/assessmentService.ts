@@ -122,6 +122,8 @@ export interface AvailableAssessment extends Assessment {
   attemptStatus: string;
   hasAttempted: boolean;
   canRetake: boolean;
+  assessmentStatus: "upcoming" | "available" | "expired" | "completed" | "in_progress" | "not_available";
+  isCurrentlyAvailable: boolean;
 }
 
 // Assessment API

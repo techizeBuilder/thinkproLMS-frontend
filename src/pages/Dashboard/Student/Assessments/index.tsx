@@ -47,43 +47,50 @@ export default function StudentAssessmentsPage() {
   };
 
   const getStatusBadge = (assessment: AvailableAssessment) => {
-    const now = new Date();
-    const startDate = new Date(assessment.startDate);
-    const endDate = new Date(assessment.endDate);
-
-    if (assessment.hasAttempted) {
-      return (
-        <Badge variant="outline" className="border-green-300 text-green-700">
-          <CheckCircle className="h-3 w-3 mr-1" />
-          Completed
-        </Badge>
-      );
+    switch (assessment.assessmentStatus) {
+      case "completed":
+        return (
+          <Badge variant="outline" className="border-green-300 text-green-700">
+            <CheckCircle className="h-3 w-3 mr-1" />
+            Completed
+          </Badge>
+        );
+      case "upcoming":
+        return (
+          <Badge variant="outline" className="border-blue-300 text-blue-700">
+            <Clock className="h-3 w-3 mr-1" />
+            Upcoming
+          </Badge>
+        );
+      case "expired":
+        return (
+          <Badge variant="outline" className="border-red-300 text-red-700">
+            <AlertCircle className="h-3 w-3 mr-1" />
+            Expired
+          </Badge>
+        );
+      case "in_progress":
+        return (
+          <Badge variant="outline" className="border-yellow-300 text-yellow-700">
+            <Clock className="h-3 w-3 mr-1" />
+            In Progress
+          </Badge>
+        );
+      case "available":
+        return (
+          <Badge variant="default" className="bg-green-100 text-green-800">
+            <Play className="h-3 w-3 mr-1" />
+            Available
+          </Badge>
+        );
+      default:
+        return (
+          <Badge variant="outline" className="border-gray-300 text-gray-700">
+            <AlertCircle className="h-3 w-3 mr-1" />
+            Not Available
+          </Badge>
+        );
     }
-
-    if (now < startDate) {
-      return (
-        <Badge variant="outline" className="border-blue-300 text-blue-700">
-          <Clock className="h-3 w-3 mr-1" />
-          Upcoming
-        </Badge>
-      );
-    }
-
-    if (now > endDate) {
-      return (
-        <Badge variant="outline" className="border-red-300 text-red-700">
-          <AlertCircle className="h-3 w-3 mr-1" />
-          Expired
-        </Badge>
-      );
-    }
-
-    return (
-      <Badge variant="default" className="bg-green-100 text-green-800">
-        <Play className="h-3 w-3 mr-1" />
-        Available
-      </Badge>
-    );
   };
 
   const formatDate = (dateString: string) => {
@@ -96,13 +103,6 @@ export default function StudentAssessmentsPage() {
     });
   };
 
-  const isAssessmentAvailable = (assessment: AvailableAssessment) => {
-    const now = new Date();
-    const startDate = new Date(assessment.startDate);
-    const endDate = new Date(assessment.endDate);
-    
-    return !assessment.hasAttempted && now >= startDate && now <= endDate;
-  };
 
   if (loading) {
     return (
@@ -187,7 +187,7 @@ export default function StudentAssessmentsPage() {
 
                 {/* Action Button */}
                 <div className="pt-2">
-                  {isAssessmentAvailable(assessment) ? (
+                  {assessment.assessmentStatus === "available" ? (
                     <Button 
                       className="w-full" 
                       onClick={() => handleStartAssessment(assessment)}
@@ -195,7 +195,7 @@ export default function StudentAssessmentsPage() {
                       <Play className="h-4 w-4 mr-2" />
                       Start Assessment
                     </Button>
-                  ) : assessment.hasAttempted ? (
+                  ) : assessment.assessmentStatus === "completed" ? (
                     <Button 
                       variant="outline" 
                       className="w-full" 
@@ -204,7 +204,15 @@ export default function StudentAssessmentsPage() {
                       <CheckCircle className="h-4 w-4 mr-2" />
                       Completed
                     </Button>
-                  ) : (
+                  ) : assessment.assessmentStatus === "in_progress" ? (
+                    <Button 
+                      className="w-full" 
+                      onClick={() => handleStartAssessment(assessment)}
+                    >
+                      <Play className="h-4 w-4 mr-2" />
+                      Continue Assessment
+                    </Button>
+                  ) : assessment.assessmentStatus === "upcoming" ? (
                     <Button 
                       variant="outline" 
                       className="w-full" 
@@ -212,6 +220,24 @@ export default function StudentAssessmentsPage() {
                     >
                       <Clock className="h-4 w-4 mr-2" />
                       Not Available Yet
+                    </Button>
+                  ) : assessment.assessmentStatus === "expired" ? (
+                    <Button 
+                      variant="outline" 
+                      className="w-full" 
+                      disabled
+                    >
+                      <AlertCircle className="h-4 w-4 mr-2" />
+                      Expired
+                    </Button>
+                  ) : (
+                    <Button 
+                      variant="outline" 
+                      className="w-full" 
+                      disabled
+                    >
+                      <AlertCircle className="h-4 w-4 mr-2" />
+                      Not Available
                     </Button>
                   )}
                 </div>

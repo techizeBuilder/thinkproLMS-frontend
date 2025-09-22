@@ -124,10 +124,9 @@ export default function EditAssessmentPage() {
     setQuestions(updatedQuestions);
   };
 
-  // Check if assessment can be edited (not published and started)
-  const canEditQuestions = assessment && 
-    (assessment.status === "draft" || 
-     (assessment.status === "published" && new Date() < new Date(assessment.startDate)));
+  // Check if assessment can be edited (only draft assessments)
+  const canEdit = assessment && assessment.status === "draft";
+  const canEditQuestions = canEdit;
 
   if (loading) {
     return (
@@ -181,15 +180,41 @@ export default function EditAssessmentPage() {
           >
             Cancel
           </Button>
-          <Button 
-            onClick={handleSave}
-            disabled={saving}
-          >
-            <Save className="h-4 w-4 mr-2" />
-            {saving ? "Saving..." : "Save Changes"}
-          </Button>
+          {canEdit ? (
+            <Button 
+              onClick={handleSave}
+              disabled={saving}
+            >
+              <Save className="h-4 w-4 mr-2" />
+              {saving ? "Saving..." : "Save Changes"}
+            </Button>
+          ) : (
+            <Button 
+              disabled
+              variant="outline"
+            >
+              <Save className="h-4 w-4 mr-2" />
+              Cannot Edit Published Assessment
+            </Button>
+          )}
         </div>
       </div>
+
+      {/* Warning message for published assessments */}
+      {!canEdit && (
+        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+          <div className="flex items-center">
+            <div className="text-red-800">
+              <p className="font-medium">Assessment Cannot Be Edited</p>
+              <p className="text-sm">
+                This assessment has been published and cannot be modified. Once an assessment is published, 
+                it becomes read-only to maintain data integrity and prevent changes that could affect students 
+                who have already started or completed the assessment.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
 
       <Tabs defaultValue="settings" className="space-y-6">
         <TabsList className="grid w-full grid-cols-2">
@@ -223,6 +248,7 @@ export default function EditAssessmentPage() {
                       value={formData.title}
                       onChange={(e) => handleInputChange("title", e.target.value)}
                       placeholder="Enter assessment title"
+                      disabled={!canEdit}
                     />
                   </div>
 
@@ -234,6 +260,7 @@ export default function EditAssessmentPage() {
                       onChange={(e) => handleInputChange("instructions", e.target.value)}
                       placeholder="Enter instructions for students"
                       rows={4}
+                      disabled={!canEdit}
                     />
                   </div>
 
@@ -245,6 +272,7 @@ export default function EditAssessmentPage() {
                         type="datetime-local"
                         value={formData.startDate}
                         onChange={(e) => handleInputChange("startDate", e.target.value)}
+                        disabled={!canEdit}
                       />
                     </div>
                     <div className="space-y-2">
@@ -254,6 +282,7 @@ export default function EditAssessmentPage() {
                         type="datetime-local"
                         value={formData.endDate}
                         onChange={(e) => handleInputChange("endDate", e.target.value)}
+                        disabled={!canEdit}
                       />
                     </div>
                     <div className="space-y-2">
@@ -264,6 +293,7 @@ export default function EditAssessmentPage() {
                         min="1"
                         value={formData.duration}
                         onChange={(e) => handleInputChange("duration", parseInt(e.target.value))}
+                        disabled={!canEdit}
                       />
                     </div>
                   </div>
@@ -271,63 +301,66 @@ export default function EditAssessmentPage() {
               </Card>
 
               {/* Target Students */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center">
-                    <Users className="h-5 w-5 mr-2" />
-                    Target Students
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  {formData.targetStudents.map((target, index) => (
-                    <div key={index} className="border rounded-lg p-4">
-                      <div className="flex items-center justify-between mb-3">
-                        <h4 className="font-medium">Target Group {index + 1}</h4>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => removeTargetStudent(index)}
-                        >
-                          Remove
-                        </Button>
-                      </div>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                          <Label>Grade</Label>
-                          <Select 
-                            value={target.grade} 
-                            onValueChange={(value) => handleTargetStudentChange(index, "grade", value)}
+                {/* <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center">
+                      <Users className="h-5 w-5 mr-2" />
+                      Target Students
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    {formData.targetStudents.map((target, index) => (
+                      <div key={index} className="border rounded-lg p-4">
+                        <div className="flex items-center justify-between mb-3">
+                          <h4 className="font-medium">Target Group {index + 1}</h4>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => removeTargetStudent(index)}
+                            disabled={!canEdit}
                           >
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select grade" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {["Grade 1", "Grade 2", "Grade 3", "Grade 4", "Grade 5", 
-                                "Grade 6", "Grade 7", "Grade 8", "Grade 9", "Grade 10"].map(grade => (
-                                <SelectItem key={grade} value={grade}>{grade}</SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
+                            Remove
+                          </Button>
                         </div>
-                        <div className="space-y-2">
-                          <Label>Sections (optional)</Label>
-                          <Input
-                            placeholder="e.g., A, B, C (comma separated)"
-                            value={target.sections.join(", ")}
-                            onChange={(e) => {
-                              const sections = e.target.value.split(",").map(s => s.trim()).filter(s => s);
-                              handleTargetStudentChange(index, "sections", sections);
-                            }}
-                          />
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div className="space-y-2">
+                            <Label>Grade</Label>
+                            <Select 
+                              value={target.grade} 
+                              onValueChange={(value) => handleTargetStudentChange(index, "grade", value)}
+                              disabled={!canEdit}
+                            >
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select grade" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {["Grade 1", "Grade 2", "Grade 3", "Grade 4", "Grade 5", 
+                                  "Grade 6", "Grade 7", "Grade 8", "Grade 9", "Grade 10"].map(grade => (
+                                  <SelectItem key={grade} value={grade}>{grade}</SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Sections (optional)</Label>
+                            <Input
+                              placeholder="e.g., A, B, C (comma separated)"
+                              value={target.sections.join(", ")}
+                              onChange={(e) => {
+                                const sections = e.target.value.split(",").map(s => s.trim()).filter(s => s);
+                                handleTargetStudentChange(index, "sections", sections);
+                              }}
+                              disabled={!canEdit}
+                            />
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  ))}
-                  <Button variant="outline" onClick={addTargetStudent}>
-                    Add Target Group
-                  </Button>
-                </CardContent>
-              </Card>
+                    ))}
+                    <Button variant="outline" onClick={addTargetStudent} disabled={!canEdit}>
+                      Add Target Group
+                    </Button>
+                  </CardContent>
+                </Card> */}
             </div>
 
             {/* Sidebar */}
@@ -382,12 +415,14 @@ export default function EditAssessmentPage() {
 
         <TabsContent value="questions" className="space-y-6">
           {!canEditQuestions && (
-            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+            <div className="bg-red-50 border border-red-200 rounded-lg p-4">
               <div className="flex items-center">
-                <div className="text-yellow-800">
+                <div className="text-red-800">
                   <p className="font-medium">Questions cannot be edited</p>
                   <p className="text-sm">
-                    This assessment has been published and started. Questions can only be edited for draft assessments or published assessments that haven't started yet.
+                    This assessment has been published and cannot be modified. Once an assessment is published, 
+                    it becomes read-only to maintain data integrity and prevent changes that could affect students 
+                    who have already started or completed the assessment.
                   </p>
                 </div>
               </div>
