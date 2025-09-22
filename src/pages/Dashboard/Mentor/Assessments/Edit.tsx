@@ -7,13 +7,17 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
   BookOpen, 
   Users, 
   Save,
-  ArrowLeft
+  ArrowLeft,
+  FileText,
+  Settings
 } from "lucide-react";
-import { assessmentService, type Assessment } from "@/api/assessmentService";
+import { assessmentService, type Assessment, type AssessmentQuestion } from "@/api/assessmentService";
+import AssessmentQuestionManager from "@/components/AssessmentQuestionManager";
 import { toast } from "sonner";
 
 export default function EditAssessmentPage() {
@@ -32,6 +36,9 @@ export default function EditAssessmentPage() {
     duration: 60,
     targetStudents: [] as Array<{ grade: string; sections: string[] }>,
   });
+
+  // Questions state
+  const [questions, setQuestions] = useState<AssessmentQuestion[]>([]);
 
   useEffect(() => {
     const loadAssessment = async () => {
@@ -52,6 +59,9 @@ export default function EditAssessmentPage() {
           duration: assessmentData.duration,
           targetStudents: assessmentData.targetStudents,
         });
+
+        // Set questions
+        setQuestions(assessmentData.questions);
       } catch (error) {
         console.error("Error loading assessment:", error);
         toast.error("Failed to load assessment");
@@ -109,6 +119,15 @@ export default function EditAssessmentPage() {
       setSaving(false);
     }
   };
+
+  const handleQuestionsUpdate = (updatedQuestions: AssessmentQuestion[]) => {
+    setQuestions(updatedQuestions);
+  };
+
+  // Check if assessment can be edited (not published and started)
+  const canEditQuestions = assessment && 
+    (assessment.status === "draft" || 
+     (assessment.status === "published" && new Date() < new Date(assessment.startDate)));
 
   if (loading) {
     return (
@@ -172,180 +191,220 @@ export default function EditAssessmentPage() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Main Content */}
-        <div className="lg:col-span-2 space-y-6">
-          {/* Basic Information */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center">
-                <BookOpen className="h-5 w-5 mr-2" />
-                Assessment Information
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="title">Assessment Title *</Label>
-                <Input
-                  id="title"
-                  value={formData.title}
-                  onChange={(e) => handleInputChange("title", e.target.value)}
-                  placeholder="Enter assessment title"
-                />
-              </div>
+      <Tabs defaultValue="settings" className="space-y-6">
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="settings" className="flex items-center gap-2">
+            <Settings className="h-4 w-4" />
+            Assessment Settings
+          </TabsTrigger>
+          <TabsTrigger value="questions" className="flex items-center gap-2">
+            <FileText className="h-4 w-4" />
+            Questions ({questions.length})
+          </TabsTrigger>
+        </TabsList>
 
-              <div className="space-y-2">
-                <Label htmlFor="instructions">Instructions *</Label>
-                <Textarea
-                  id="instructions"
-                  value={formData.instructions}
-                  onChange={(e) => handleInputChange("instructions", e.target.value)}
-                  placeholder="Enter instructions for students"
-                  rows={4}
-                />
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="startDate">Start Date *</Label>
-                  <Input
-                    id="startDate"
-                    type="datetime-local"
-                    value={formData.startDate}
-                    onChange={(e) => handleInputChange("startDate", e.target.value)}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="endDate">End Date *</Label>
-                  <Input
-                    id="endDate"
-                    type="datetime-local"
-                    value={formData.endDate}
-                    onChange={(e) => handleInputChange("endDate", e.target.value)}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="duration">Duration (minutes) *</Label>
-                  <Input
-                    id="duration"
-                    type="number"
-                    min="1"
-                    value={formData.duration}
-                    onChange={(e) => handleInputChange("duration", parseInt(e.target.value))}
-                  />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Target Students */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center">
-                <Users className="h-5 w-5 mr-2" />
-                Target Students
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {formData.targetStudents.map((target, index) => (
-                <div key={index} className="border rounded-lg p-4">
-                  <div className="flex items-center justify-between mb-3">
-                    <h4 className="font-medium">Target Group {index + 1}</h4>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => removeTargetStudent(index)}
-                    >
-                      Remove
-                    </Button>
+        <TabsContent value="settings" className="space-y-6">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Main Content */}
+            <div className="lg:col-span-2 space-y-6">
+              {/* Basic Information */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center">
+                    <BookOpen className="h-5 w-5 mr-2" />
+                    Assessment Information
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="title">Assessment Title *</Label>
+                    <Input
+                      id="title"
+                      value={formData.title}
+                      onChange={(e) => handleInputChange("title", e.target.value)}
+                      placeholder="Enter assessment title"
+                    />
                   </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="instructions">Instructions *</Label>
+                    <Textarea
+                      id="instructions"
+                      value={formData.instructions}
+                      onChange={(e) => handleInputChange("instructions", e.target.value)}
+                      placeholder="Enter instructions for students"
+                      rows={4}
+                    />
+                  </div>
+
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <Label>Grade</Label>
-                      <Select 
-                        value={target.grade} 
-                        onValueChange={(value) => handleTargetStudentChange(index, "grade", value)}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select grade" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {["Grade 1", "Grade 2", "Grade 3", "Grade 4", "Grade 5", 
-                            "Grade 6", "Grade 7", "Grade 8", "Grade 9", "Grade 10"].map(grade => (
-                            <SelectItem key={grade} value={grade}>{grade}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                      <Label htmlFor="startDate">Start Date *</Label>
+                      <Input
+                        id="startDate"
+                        type="datetime-local"
+                        value={formData.startDate}
+                        onChange={(e) => handleInputChange("startDate", e.target.value)}
+                      />
                     </div>
                     <div className="space-y-2">
-                      <Label>Sections (optional)</Label>
+                      <Label htmlFor="endDate">End Date *</Label>
                       <Input
-                        placeholder="e.g., A, B, C (comma separated)"
-                        value={target.sections.join(", ")}
-                        onChange={(e) => {
-                          const sections = e.target.value.split(",").map(s => s.trim()).filter(s => s);
-                          handleTargetStudentChange(index, "sections", sections);
-                        }}
+                        id="endDate"
+                        type="datetime-local"
+                        value={formData.endDate}
+                        onChange={(e) => handleInputChange("endDate", e.target.value)}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="duration">Duration (minutes) *</Label>
+                      <Input
+                        id="duration"
+                        type="number"
+                        min="1"
+                        value={formData.duration}
+                        onChange={(e) => handleInputChange("duration", parseInt(e.target.value))}
                       />
                     </div>
                   </div>
+                </CardContent>
+              </Card>
+
+              {/* Target Students */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center">
+                    <Users className="h-5 w-5 mr-2" />
+                    Target Students
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {formData.targetStudents.map((target, index) => (
+                    <div key={index} className="border rounded-lg p-4">
+                      <div className="flex items-center justify-between mb-3">
+                        <h4 className="font-medium">Target Group {index + 1}</h4>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => removeTargetStudent(index)}
+                        >
+                          Remove
+                        </Button>
+                      </div>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <Label>Grade</Label>
+                          <Select 
+                            value={target.grade} 
+                            onValueChange={(value) => handleTargetStudentChange(index, "grade", value)}
+                          >
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select grade" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {["Grade 1", "Grade 2", "Grade 3", "Grade 4", "Grade 5", 
+                                "Grade 6", "Grade 7", "Grade 8", "Grade 9", "Grade 10"].map(grade => (
+                                <SelectItem key={grade} value={grade}>{grade}</SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="space-y-2">
+                          <Label>Sections (optional)</Label>
+                          <Input
+                            placeholder="e.g., A, B, C (comma separated)"
+                            value={target.sections.join(", ")}
+                            onChange={(e) => {
+                              const sections = e.target.value.split(",").map(s => s.trim()).filter(s => s);
+                              handleTargetStudentChange(index, "sections", sections);
+                            }}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                  <Button variant="outline" onClick={addTargetStudent}>
+                    Add Target Group
+                  </Button>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Sidebar */}
+            <div className="space-y-6">
+              {/* Assessment Info */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Assessment Details</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-2">
+                  <div className="flex justify-between text-sm">
+                    <span>Grade:</span>
+                    <span className="font-medium">{assessment.grade}</span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span>Subject:</span>
+                    <span className="font-medium">{assessment.subject}</span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span>Questions:</span>
+                    <span className="font-medium">{questions.length}</span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span>Total Marks:</span>
+                    <span className="font-medium">
+                      {questions.reduce((sum, q) => sum + q.marks, 0)}
+                    </span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span>Status:</span>
+                    <Badge variant="outline">{assessment.status}</Badge>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Modules */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Modules</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex flex-wrap gap-1">
+                    {assessment.modules.map((module, index) => (
+                      <Badge key={index} variant="outline">{module}</Badge>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+        </TabsContent>
+
+        <TabsContent value="questions" className="space-y-6">
+          {!canEditQuestions && (
+            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+              <div className="flex items-center">
+                <div className="text-yellow-800">
+                  <p className="font-medium">Questions cannot be edited</p>
+                  <p className="text-sm">
+                    This assessment has been published and started. Questions can only be edited for draft assessments or published assessments that haven't started yet.
+                  </p>
                 </div>
-              ))}
-              <Button variant="outline" onClick={addTargetStudent}>
-                Add Target Group
-              </Button>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Sidebar */}
-        <div className="space-y-6">
-          {/* Assessment Info */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Assessment Details</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-2">
-              <div className="flex justify-between text-sm">
-                <span>Grade:</span>
-                <span className="font-medium">{assessment.grade}</span>
               </div>
-              <div className="flex justify-between text-sm">
-                <span>Subject:</span>
-                <span className="font-medium">{assessment.subject}</span>
-              </div>
-              <div className="flex justify-between text-sm">
-                <span>Questions:</span>
-                <span className="font-medium">{assessment.questions.length}</span>
-              </div>
-              <div className="flex justify-between text-sm">
-                <span>Total Marks:</span>
-                <span className="font-medium">
-                  {assessment.questions.reduce((sum, q) => sum + q.marks, 0)}
-                </span>
-              </div>
-              <div className="flex justify-between text-sm">
-                <span>Status:</span>
-                <Badge variant="outline">{assessment.status}</Badge>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Modules */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Modules</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="flex flex-wrap gap-1">
-                {assessment.modules.map((module, index) => (
-                  <Badge key={index} variant="outline">{module}</Badge>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
+            </div>
+          )}
+          
+          <AssessmentQuestionManager
+            assessmentId={id!}
+            currentQuestions={questions}
+            onQuestionsUpdate={handleQuestionsUpdate}
+            grade={assessment.grade}
+            subject={assessment.subject}
+            modules={assessment.modules}
+            disabled={!canEditQuestions}
+          />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }

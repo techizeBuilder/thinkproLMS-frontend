@@ -157,6 +157,12 @@ export const assessmentService = {
     return response.data;
   },
 
+  // Update assessment questions
+  updateAssessmentQuestions: async (id: string, questions: AssessmentQuestion[]) => {
+    const response = await axiosInstance.put(`/assessments/${id}/questions`, { questions });
+    return response.data;
+  },
+
   // Publish assessment
   publishAssessment: async (id: string, notificationMessage?: string) => {
     const response = await axiosInstance.post(`/assessments/${id}/publish`, {
