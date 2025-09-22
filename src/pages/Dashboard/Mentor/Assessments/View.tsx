@@ -114,13 +114,15 @@ export default function ViewAssessmentPage() {
         </div>
         <div className="flex items-center gap-2">
           {getStatusBadge(assessment.status)}
-          <Button 
-            variant="outline"
-            onClick={() => navigate(`/mentor/assessments/${assessment._id}/edit`)}
-          >
-            <Edit className="h-4 w-4 mr-2" />
-            Edit
-          </Button>
+          {assessment.status === "draft" && (
+            <Button 
+              variant="outline"
+              onClick={() => navigate(`/mentor/assessments/${assessment._id}/edit`)}
+            >
+              <Edit className="h-4 w-4 mr-2" />
+              Edit
+            </Button>
+          )}
           <Button 
             onClick={() => navigate(`/mentor/assessments/${assessment._id}/analytics`)}
           >
@@ -245,15 +247,9 @@ export default function ViewAssessmentPage() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="space-y-2">
-                {assessment.targetStudents.map((target, index) => (
-                  <div key={index} className="text-sm">
-                    <span className="font-medium">{target.grade}</span>
-                    {target.sections.length > 0 && (
-                      <span className="text-gray-500"> - Sections: {target.sections.join(", ")}</span>
-                    )}
-                  </div>
-                ))}
+              <div className="text-sm">
+                <span className="font-medium">{assessment.grade}</span>
+                <span className="text-gray-500"> - All sections</span>
               </div>
             </CardContent>
           </Card>

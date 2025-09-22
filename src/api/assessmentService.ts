@@ -18,10 +18,6 @@ export interface AssessmentQuestion {
   marks: number;
 }
 
-export interface TargetStudent {
-  grade: string;
-  sections: string[];
-}
 
 export interface Assessment {
   _id: string;
@@ -35,7 +31,6 @@ export interface Assessment {
   duration: number; // in minutes
   questions: AssessmentQuestion[];
   totalMarks: number;
-  targetStudents: TargetStudent[];
   school: {
     _id: string;
     name: string;
@@ -64,7 +59,6 @@ export interface CreateAssessmentData {
   endDate: string;
   duration: number;
   questions: AssessmentQuestion[];
-  targetStudents: TargetStudent[];
   school?: string;
 }
 
@@ -176,6 +170,12 @@ export const assessmentService = {
   // Get assessment analytics
   getAssessmentAnalytics: async (id: string) => {
     const response = await axiosInstance.get(`/assessments/${id}/analytics`);
+    return response.data;
+  },
+
+  // Recalculate assessment statistics
+  recalculateAssessmentStatistics: async (id: string) => {
+    const response = await axiosInstance.post(`/assessments/${id}/recalculate-statistics`);
     return response.data;
   },
 

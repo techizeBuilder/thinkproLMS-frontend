@@ -5,12 +5,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
   BookOpen, 
-  Users, 
   Save,
   ArrowLeft,
   FileText,
@@ -34,7 +32,6 @@ export default function EditAssessmentPage() {
     startDate: "",
     endDate: "",
     duration: 60,
-    targetStudents: [] as Array<{ grade: string; sections: string[] }>,
   });
 
   // Questions state
@@ -57,7 +54,6 @@ export default function EditAssessmentPage() {
           startDate: new Date(assessmentData.startDate).toISOString().slice(0, 16),
           endDate: new Date(assessmentData.endDate).toISOString().slice(0, 16),
           duration: assessmentData.duration,
-          targetStudents: assessmentData.targetStudents,
         });
 
         // Set questions
@@ -81,28 +77,6 @@ export default function EditAssessmentPage() {
     }));
   };
 
-  const handleTargetStudentChange = (index: number, field: string, value: any) => {
-    setFormData(prev => ({
-      ...prev,
-      targetStudents: prev.targetStudents.map((target, i) => 
-        i === index ? { ...target, [field]: value } : target
-      ),
-    }));
-  };
-
-  const addTargetStudent = () => {
-    setFormData(prev => ({
-      ...prev,
-      targetStudents: [...prev.targetStudents, { grade: "", sections: [] }],
-    }));
-  };
-
-  const removeTargetStudent = (index: number) => {
-    setFormData(prev => ({
-      ...prev,
-      targetStudents: prev.targetStudents.filter((_, i) => i !== index),
-    }));
-  };
 
   const handleSave = async () => {
     if (!id) return;
@@ -300,67 +274,6 @@ export default function EditAssessmentPage() {
                 </CardContent>
               </Card>
 
-              {/* Target Students */}
-                {/* <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center">
-                      <Users className="h-5 w-5 mr-2" />
-                      Target Students
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    {formData.targetStudents.map((target, index) => (
-                      <div key={index} className="border rounded-lg p-4">
-                        <div className="flex items-center justify-between mb-3">
-                          <h4 className="font-medium">Target Group {index + 1}</h4>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => removeTargetStudent(index)}
-                            disabled={!canEdit}
-                          >
-                            Remove
-                          </Button>
-                        </div>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                          <div className="space-y-2">
-                            <Label>Grade</Label>
-                            <Select 
-                              value={target.grade} 
-                              onValueChange={(value) => handleTargetStudentChange(index, "grade", value)}
-                              disabled={!canEdit}
-                            >
-                              <SelectTrigger>
-                                <SelectValue placeholder="Select grade" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                {["Grade 1", "Grade 2", "Grade 3", "Grade 4", "Grade 5", 
-                                  "Grade 6", "Grade 7", "Grade 8", "Grade 9", "Grade 10"].map(grade => (
-                                  <SelectItem key={grade} value={grade}>{grade}</SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-                          </div>
-                          <div className="space-y-2">
-                            <Label>Sections (optional)</Label>
-                            <Input
-                              placeholder="e.g., A, B, C (comma separated)"
-                              value={target.sections.join(", ")}
-                              onChange={(e) => {
-                                const sections = e.target.value.split(",").map(s => s.trim()).filter(s => s);
-                                handleTargetStudentChange(index, "sections", sections);
-                              }}
-                              disabled={!canEdit}
-                            />
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                    <Button variant="outline" onClick={addTargetStudent} disabled={!canEdit}>
-                      Add Target Group
-                    </Button>
-                  </CardContent>
-                </Card> */}
             </div>
 
             {/* Sidebar */}

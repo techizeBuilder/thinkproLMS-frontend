@@ -55,7 +55,6 @@ export default function CreateAssessmentPage() {
     startDate: "",
     endDate: "",
     duration: 60,
-    targetStudents: [] as Array<{ grade: string; sections: string[] }>,
   });
 
   // Question selection state
@@ -183,9 +182,6 @@ export default function CreateAssessmentPage() {
           order: q.order,
           marks: q.marks,
         })),
-        targetStudents: formData.targetStudents.length > 0 
-          ? formData.targetStudents 
-          : [{ grade: formData.grade, sections: [] }],
       };
 
       await assessmentService.createAssessment(assessmentData);
@@ -213,9 +209,6 @@ export default function CreateAssessmentPage() {
           order: q.order,
           marks: q.marks,
         })),
-        targetStudents: formData.targetStudents.length > 0 
-          ? formData.targetStudents 
-          : [{ grade: formData.grade, sections: [] }],
       };
 
       const response = await assessmentService.createAssessment(assessmentData);
