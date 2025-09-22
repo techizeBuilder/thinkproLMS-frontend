@@ -9,83 +9,42 @@ import {
   Play, 
   Eye,
   Calendar,
-  User
+  User,
+  Loader2
 } from 'lucide-react';
-import type { Resource } from '@/types/resources';
-
-// Mock resource data - in real app, this would come from API
-const mockResource: Resource = {
-  id: '3',
-  title: 'Science Experiments Demo',
-  description: 'Video demonstration of science experiments for students',
-  type: 'video',
-  userType: 'student',
-  bucket: 'videos',
-  url: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
-  uploadedAt: new Date('2024-01-12'),
-  updatedAt: new Date('2024-01-12'),
-  uploadedBy: 'Lead Mentor',
-  tags: ['science', 'experiments', 'demo'],
-  isActive: true
-};
+import type { ApiResource } from '@/types/resources';
+import { resourceService } from '@/api/resourceService';
+import { toast } from 'sonner';
 
 export default function StudentResourceViewPage() {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
   
-  const [resource, setResource] = useState<Resource | null>(null);
+  const [resource, setResource] = useState<ApiResource | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [viewCount, setViewCount] = useState(0);
 
   useEffect(() => {
     const loadResource = async () => {
+      if (!id) return;
+      
       setIsLoading(true);
       try {
-        // TODO: Replace with actual API call
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        
-        setResource(mockResource);
-        setViewCount(42); // Mock view count
+        const response = await resourceService.getById(id);
+        setResource(response.data);
       } catch (error) {
         console.error('Error loading resource:', error);
+        toast.error('Failed to load resource');
       } finally {
         setIsLoading(false);
       }
     };
 
-    if (id) {
-      loadResource();
-    }
+    loadResource();
   }, [id]);
 
-  const getEmbedUrl = (url: string): string => {
-    // Handle YouTube URLs
-    if (url.includes('youtube.com/watch') || url.includes('youtu.be/')) {
-      const videoId = url.includes('youtu.be/') 
-        ? url.split('youtu.be/')[1].split('?')[0]
-        : url.split('v=')[1].split('&')[0];
-      return `https://www.youtube.com/embed/${videoId}`;
-    }
-    
-    // Handle Vimeo URLs
-    if (url.includes('vimeo.com/')) {
-      const videoId = url.split('vimeo.com/')[1].split('?')[0];
-      return `https://player.vimeo.com/video/${videoId}`;
-    }
-    
-    // For direct video files, return as is
-    return url;
-  };
-
-  const getVideoSource = (url: string): 'youtube' | 'vimeo' | 'direct' => {
-    if (url.includes('youtube.com') || url.includes('youtu.be')) return 'youtube';
-    if (url.includes('vimeo.com')) return 'vimeo';
-    return 'direct';
-  };
-
   const handleExternalOpen = () => {
-    if (resource?.url) {
-      window.open(resource.url, '_blank');
+    if (resource?.content.url) {
+      window.open(resource.content.url, '_blank');
     }
   };
 
@@ -94,8 +53,8 @@ export default function StudentResourceViewPage() {
       <div className="container mx-auto p-6 max-w-6xl">
         <div className="flex items-center justify-center h-64">
           <div className="text-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
-            <p className="text-muted-foreground">Loading video...</p>
+            <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
+            <p className="text-muted-foreground">Loading resource...</p>
           </div>
         </div>
       </div>
@@ -118,8 +77,7 @@ export default function StudentResourceViewPage() {
     );
   }
 
-  const videoSource = getVideoSource(resource.url || '');
-  const embedUrl = getEmbedUrl(resource.url || '');
+  const embedUrl = resourceService.getIframeUrl(resource);
 
   return (
     <div className="container mx-auto p-6 max-w-6xl">
@@ -153,15 +111,7 @@ export default function StudentResourceViewPage() {
           <Card>
             <CardContent className="p-0">
               <div className="aspect-video bg-black rounded-lg overflow-hidden">
-                {videoSource === 'direct' ? (
-                  <video
-                    controls
-                    className="w-full h-full"
-                    src={resource.url}
-                  >
-                    Your browser does not support the video tag.
-                  </video>
-                ) : (
+                {resource.content.isExternal ? (
                   <iframe
                     src={embedUrl}
                     className="w-full h-full"
@@ -170,6 +120,14 @@ export default function StudentResourceViewPage() {
                     allowFullScreen
                     title={resource.title}
                   />
+                ) : (
+                  <video
+                    controls
+                    className="w-full h-full"
+                    src={resourceService.getResourceUrl(resource)}
+                  >
+                    Your browser does not support the video tag.
+                  </video>
                 )}
               </div>
             </CardContent>
@@ -188,17 +146,17 @@ export default function StudentResourceViewPage() {
             <CardContent className="space-y-4">
               <div className="flex items-center gap-2 text-sm">
                 <Eye className="h-4 w-4" />
-                <span>{viewCount} views</span>
+                <span>{resource.viewCount} views</span>
               </div>
               
               <div className="flex items-center gap-2 text-sm">
                 <Calendar className="h-4 w-4" />
-                <span>Uploaded {resource.uploadedAt.toLocaleDateString()}</span>
+                <span>Uploaded {new Date(resource.createdAt).toLocaleDateString()}</span>
               </div>
               
               <div className="flex items-center gap-2 text-sm">
                 <User className="h-4 w-4" />
-                <span>By {resource.uploadedBy}</span>
+                <span>By {resource.uploadedBy.name}</span>
               </div>
 
               <div className="pt-2">

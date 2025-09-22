@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -9,121 +9,77 @@ import {
   FolderOpen,
   Eye,
   ExternalLink,
-  Download
+  Download,
+  Loader2
 } from 'lucide-react';
-import type { Resource } from '@/types/resources';
+import type { ApiResource } from '@/types/resources';
 import { useNavigate } from 'react-router-dom';
-
-// Mock data for student resources only
-const mockStudentResources: Resource[] = [
-  {
-    id: '1',
-    title: 'Mathematics Fundamentals',
-    description: 'Basic mathematics concepts for students',
-    type: 'document',
-    userType: 'student',
-    bucket: 'documents',
-    url: 'https://example.com/math-fundamentals.pdf',
-    uploadedAt: new Date('2024-01-15'),
-    updatedAt: new Date('2024-01-15'),
-    uploadedBy: 'Lead Mentor',
-    tags: ['mathematics', 'fundamentals'],
-    isActive: true
-  },
-  {
-    id: '2',
-    title: 'Science Study Guide',
-    description: 'Comprehensive science study materials',
-    type: 'document',
-    userType: 'student',
-    bucket: 'documents',
-    url: 'https://example.com/science-guide.pdf',
-    uploadedAt: new Date('2024-01-14'),
-    updatedAt: new Date('2024-01-14'),
-    uploadedBy: 'Lead Mentor',
-    tags: ['science', 'study guide'],
-    isActive: true
-  },
-  {
-    id: '3',
-    title: 'Science Experiments Demo',
-    description: 'Video demonstration of science experiments',
-    type: 'video',
-    userType: 'student',
-    bucket: 'videos',
-    url: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
-    uploadedAt: new Date('2024-01-12'),
-    updatedAt: new Date('2024-01-12'),
-    uploadedBy: 'Lead Mentor',
-    tags: ['science', 'experiments'],
-    isActive: true
-  },
-  {
-    id: '4',
-    title: 'Mathematics Problem Solving',
-    description: 'Step-by-step math problem solving techniques',
-    type: 'video',
-    userType: 'student',
-    bucket: 'videos',
-    url: 'https://vimeo.com/123456789',
-    uploadedAt: new Date('2024-01-10'),
-    updatedAt: new Date('2024-01-10'),
-    uploadedBy: 'Lead Mentor',
-    tags: ['mathematics', 'problem solving'],
-    isActive: true
-  }
-];
+import { resourceService } from '@/api/resourceService';
+import { toast } from 'sonner';
 
 export default function StudentResourcesPage() {
   const navigate = useNavigate();
   const [selectedBucket, setSelectedBucket] = useState<'documents' | 'videos'>('documents');
+  const [resources, setResources] = useState<ApiResource[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  // Filter resources for students only
-  const studentResources = mockStudentResources.filter(
-    resource => resource.userType === 'student'
-  );
+  useEffect(() => {
+    loadStudentResources();
+  }, []);
 
-  const documentResources = studentResources.filter(
-    resource => resource.bucket === 'documents'
-  );
-
-  const videoResources = studentResources.filter(
-    resource => resource.bucket === 'videos'
-  );
-
-  const handleViewResource = (resource: Resource) => {
-    if (resource.type === 'video') {
-      navigate(`/student/resources/${resource.id}/view`);
-    } else {
-      // For documents, open in new tab
-      window.open(resource.url, '_blank');
+  const loadStudentResources = async () => {
+    try {
+      setLoading(true);
+      const response = await resourceService.getByCategory('student');
+      setResources(response.data || []);
+    } catch (error) {
+      console.error('Error loading student resources:', error);
+      toast.error('Failed to load resources');
+    } finally {
+      setLoading(false);
     }
   };
 
-  const handleDownloadResource = (resource: Resource) => {
-    if (resource.url) {
-      // Create a temporary link to download the file
-      const link = document.createElement('a');
-      link.href = resource.url;
-      link.download = resource.title;
-      link.target = '_blank';
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+  // Filter resources by type
+  const documentResources = resources.filter(
+    resource => resource.type === 'document'
+  );
+
+  const videoResources = resources.filter(
+    resource => resource.type === 'video'
+  );
+
+  const handleViewResource = (resource: ApiResource) => {
+    if (resource.type === 'video') {
+      navigate(`/student/resources/${resource._id}/view`);
+    } else {
+      // For documents, open in new tab
+      const url = resourceService.getResourceUrl(resource);
+      window.open(url, '_blank');
     }
+  };
+
+  const handleDownloadResource = (resource: ApiResource) => {
+    const url = resourceService.getDownloadUrl(resource);
+    // Create a temporary link to download the file
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = resource.title;
+    link.target = '_blank';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   const getResourceIcon = (type: string) => {
     return type === 'video' ? <Video className="h-5 w-5" /> : <FileText className="h-5 w-5" />;
   };
 
-  const getFileTypeBadge = (url?: string) => {
-    if (!url) return null;
+  const getFileTypeBadge = (resource: ApiResource) => {
+    const url = resource.content.url;
+    const isExternal = resource.content.isExternal;
     
-    const extension = url.split('.').pop()?.toLowerCase();
-    const isLink = url.startsWith('http');
-    
-    if (isLink) {
+    if (isExternal) {
       if (url.includes('youtube.com') || url.includes('youtu.be')) {
         return <Badge variant="secondary">YouTube</Badge>;
       } else if (url.includes('vimeo.com')) {
@@ -133,8 +89,22 @@ export default function StudentResourcesPage() {
       }
     }
     
+    const extension = resource.content.fileName?.split('.').pop()?.toLowerCase();
     return <Badge variant="outline">{extension?.toUpperCase()}</Badge>;
   };
+
+  if (loading) {
+    return (
+      <div className="container mx-auto p-6 space-y-6">
+        <div className="flex items-center justify-center h-64">
+          <div className="text-center">
+            <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
+            <p className="text-muted-foreground">Loading resources...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto p-6 space-y-6">
@@ -167,52 +137,58 @@ export default function StudentResourcesPage() {
           </div>
           
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {documentResources.map((resource) => (
-              <Card key={resource.id} className="hover:shadow-md transition-shadow">
-                <CardHeader className="pb-3">
-                  <div className="flex items-start justify-between">
-                    <div className="flex items-center gap-2">
-                      {getResourceIcon(resource.type)}
-                      <CardTitle className="text-lg">{resource.title}</CardTitle>
+            {documentResources.length === 0 ? (
+              <div className="col-span-full text-center py-8 text-muted-foreground">
+                No document resources available
+              </div>
+            ) : (
+              documentResources.map((resource) => (
+                <Card key={resource._id} className="hover:shadow-md transition-shadow">
+                  <CardHeader className="pb-3">
+                    <div className="flex items-start justify-between">
+                      <div className="flex items-center gap-2">
+                        {getResourceIcon(resource.type)}
+                        <CardTitle className="text-lg">{resource.title}</CardTitle>
+                      </div>
+                      {getFileTypeBadge(resource)}
                     </div>
-                    {getFileTypeBadge(resource.url)}
-                  </div>
-                  {resource.description && (
-                    <CardDescription>{resource.description}</CardDescription>
-                  )}
-                </CardHeader>
-                <CardContent className="pt-0">
-                  <div className="flex items-center justify-between">
-                    <div className="flex flex-wrap gap-1">
-                      {resource.tags?.map((tag) => (
-                        <Badge key={tag} variant="secondary" className="text-xs">
-                          {tag}
-                        </Badge>
-                      ))}
+                    {resource.description && (
+                      <CardDescription>{resource.description}</CardDescription>
+                    )}
+                  </CardHeader>
+                  <CardContent className="pt-0">
+                    <div className="flex items-center justify-between">
+                      <div className="flex flex-wrap gap-1">
+                        {resource.tags?.map((tag) => (
+                          <Badge key={tag} variant="secondary" className="text-xs">
+                            {tag}
+                          </Badge>
+                        ))}
+                      </div>
+                      <div className="flex gap-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleViewResource(resource)}
+                        >
+                          <Eye className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleDownloadResource(resource)}
+                        >
+                          <Download className="h-4 w-4" />
+                        </Button>
+                      </div>
                     </div>
-                    <div className="flex gap-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleViewResource(resource)}
-                      >
-                        <Eye className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleDownloadResource(resource)}
-                      >
-                        <Download className="h-4 w-4" />
-                      </Button>
+                    <div className="text-xs text-muted-foreground mt-2">
+                      Uploaded by {resource.uploadedBy.name} • {new Date(resource.createdAt).toLocaleDateString()}
                     </div>
-                  </div>
-                  <div className="text-xs text-muted-foreground mt-2">
-                    Uploaded by {resource.uploadedBy} • {resource.uploadedAt.toLocaleDateString()}
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+                  </CardContent>
+                </Card>
+              ))
+            )}
           </div>
         </TabsContent>
 
@@ -224,52 +200,58 @@ export default function StudentResourcesPage() {
           </div>
           
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {videoResources.map((resource) => (
-              <Card key={resource.id} className="hover:shadow-md transition-shadow">
-                <CardHeader className="pb-3">
-                  <div className="flex items-start justify-between">
-                    <div className="flex items-center gap-2">
-                      {getResourceIcon(resource.type)}
-                      <CardTitle className="text-lg">{resource.title}</CardTitle>
+            {videoResources.length === 0 ? (
+              <div className="col-span-full text-center py-8 text-muted-foreground">
+                No video resources available
+              </div>
+            ) : (
+              videoResources.map((resource) => (
+                <Card key={resource._id} className="hover:shadow-md transition-shadow">
+                  <CardHeader className="pb-3">
+                    <div className="flex items-start justify-between">
+                      <div className="flex items-center gap-2">
+                        {getResourceIcon(resource.type)}
+                        <CardTitle className="text-lg">{resource.title}</CardTitle>
+                      </div>
+                      {getFileTypeBadge(resource)}
                     </div>
-                    {getFileTypeBadge(resource.url)}
-                  </div>
-                  {resource.description && (
-                    <CardDescription>{resource.description}</CardDescription>
-                  )}
-                </CardHeader>
-                <CardContent className="pt-0">
-                  <div className="flex items-center justify-between">
-                    <div className="flex flex-wrap gap-1">
-                      {resource.tags?.map((tag) => (
-                        <Badge key={tag} variant="secondary" className="text-xs">
-                          {tag}
-                        </Badge>
-                      ))}
+                    {resource.description && (
+                      <CardDescription>{resource.description}</CardDescription>
+                    )}
+                  </CardHeader>
+                  <CardContent className="pt-0">
+                    <div className="flex items-center justify-between">
+                      <div className="flex flex-wrap gap-1">
+                        {resource.tags?.map((tag) => (
+                          <Badge key={tag} variant="secondary" className="text-xs">
+                            {tag}
+                          </Badge>
+                        ))}
+                      </div>
+                      <div className="flex gap-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleViewResource(resource)}
+                        >
+                          <Eye className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => window.open(resourceService.getResourceUrl(resource), '_blank')}
+                        >
+                          <ExternalLink className="h-4 w-4" />
+                        </Button>
+                      </div>
                     </div>
-                    <div className="flex gap-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleViewResource(resource)}
-                      >
-                        <Eye className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => window.open(resource.url, '_blank')}
-                      >
-                        <ExternalLink className="h-4 w-4" />
-                      </Button>
+                    <div className="text-xs text-muted-foreground mt-2">
+                      Uploaded by {resource.uploadedBy.name} • {new Date(resource.createdAt).toLocaleDateString()}
                     </div>
-                  </div>
-                  <div className="text-xs text-muted-foreground mt-2">
-                    Uploaded by {resource.uploadedBy} • {resource.uploadedAt.toLocaleDateString()}
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+                  </CardContent>
+                </Card>
+              ))
+            )}
           </div>
         </TabsContent>
       </Tabs>
