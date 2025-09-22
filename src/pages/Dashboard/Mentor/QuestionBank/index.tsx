@@ -18,10 +18,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
-  Plus,
-  Eye,
-} from "lucide-react";
+import { Plus, Eye } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -33,14 +30,14 @@ import {
   type Question,
   type QuestionFilters,
 } from "@/api/questionBankService";
-import { subjectService, type Subject } from '@/api/subjectService';
-import { moduleService, type ModuleItem } from '@/api/moduleService';
+import { type Subject } from "@/api/subjectService";
+import { moduleService, type ModuleItem } from "@/api/moduleService";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import RecommendQuestionForm from "./RecommendQuestionForm";
 
 const MentorQuestionBankPage: React.FC = () => {
-  const { } = useAuth();
+  const {} = useAuth();
   const [questions, setQuestions] = useState<Question[]>([]);
   const [loading, setLoading] = useState(true);
   const [filters, setFilters] = useState<QuestionFilters>({
@@ -55,7 +52,9 @@ const MentorQuestionBankPage: React.FC = () => {
   const [subjects, setSubjects] = useState<Subject[]>([]);
   const [modules, setModules] = useState<ModuleItem[]>([]);
   const [showRecommendForm, setShowRecommendForm] = useState(false);
-  const [selectedQuestion, setSelectedQuestion] = useState<Question | null>(null);
+  const [selectedQuestion, setSelectedQuestion] = useState<Question | null>(
+    null
+  );
   const [showViewDialog, setShowViewDialog] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -90,13 +89,16 @@ const MentorQuestionBankPage: React.FC = () => {
 
   const fetchModulesForSubject = async () => {
     if (!filters.grade || !filters.subject) return;
-    
+
     try {
-      const gradeNumber = parseInt(filters.grade.replace('Grade ', ''));
-      const selectedSubject = subjects.find(s => s.name === filters.subject);
-      
+      const gradeNumber = parseInt(filters.grade.replace("Grade ", ""));
+      const selectedSubject = subjects.find((s) => s.name === filters.subject);
+
       if (selectedSubject) {
-        const moduleData = await moduleService.getModulesByGradeAndSubject(gradeNumber, selectedSubject._id);
+        const moduleData = await moduleService.getModulesByGradeAndSubject(
+          gradeNumber,
+          selectedSubject._id
+        );
         setModules(moduleData.modules);
       }
     } catch (error) {
@@ -125,7 +127,9 @@ const MentorQuestionBankPage: React.FC = () => {
 
   const fetchSubjectsAndModules = async () => {
     try {
-      const response = await questionBankService.getSubjectsAndModules(filters.grade);
+      const response = await questionBankService.getSubjectsAndModules(
+        filters.grade
+      );
       if (response.success) {
         setSubjects(response.data.subjects);
         setModules(response.data.modules);
@@ -136,7 +140,7 @@ const MentorQuestionBankPage: React.FC = () => {
   };
 
   const handleFilterChange = (key: string, value: string) => {
-    setFilters(prev => ({
+    setFilters((prev) => ({
       ...prev,
       [key]: value === "all" ? undefined : value,
       page: 1, // Reset to first page when filtering
@@ -144,7 +148,7 @@ const MentorQuestionBankPage: React.FC = () => {
   };
 
   const handlePageChange = (page: number) => {
-    setFilters(prev => ({ ...prev, page }));
+    setFilters((prev) => ({ ...prev, page }));
   };
 
   const handleRecommendSuccess = () => {
@@ -262,10 +266,14 @@ const MentorQuestionBankPage: React.FC = () => {
             </div>
 
             <div>
-              <label className="text-sm font-medium mb-2 block">Difficulty</label>
+              <label className="text-sm font-medium mb-2 block">
+                Difficulty
+              </label>
               <Select
                 value={filters.difficulty || "all"}
-                onValueChange={(value) => handleFilterChange("difficulty", value)}
+                onValueChange={(value) =>
+                  handleFilterChange("difficulty", value)
+                }
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Select Difficulty" />
@@ -282,10 +290,14 @@ const MentorQuestionBankPage: React.FC = () => {
             </div>
 
             <div>
-              <label className="text-sm font-medium mb-2 block">Answer Type</label>
+              <label className="text-sm font-medium mb-2 block">
+                Answer Type
+              </label>
               <Select
                 value={filters.answerType || "all"}
-                onValueChange={(value) => handleFilterChange("answerType", value)}
+                onValueChange={(value) =>
+                  handleFilterChange("answerType", value)
+                }
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Select Type" />
@@ -442,30 +454,38 @@ const MentorQuestionBankPage: React.FC = () => {
           <DialogHeader>
             <DialogTitle>Question Details</DialogTitle>
           </DialogHeader>
-          
+
           {selectedQuestion && (
             <div className="space-y-6">
               {/* Question Info */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
-                  <label className="text-sm font-medium text-gray-500">Grade</label>
+                  <label className="text-sm font-medium text-gray-500">
+                    Grade
+                  </label>
                   <div className="mt-1">
                     <Badge variant="outline">{selectedQuestion.grade}</Badge>
                   </div>
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-gray-500">Subject</label>
+                  <label className="text-sm font-medium text-gray-500">
+                    Subject
+                  </label>
                   <div className="mt-1 text-sm">{selectedQuestion.subject}</div>
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-gray-500">Module</label>
+                  <label className="text-sm font-medium text-gray-500">
+                    Module
+                  </label>
                   <div className="mt-1 text-sm">{selectedQuestion.module}</div>
                 </div>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="text-sm font-medium text-gray-500">Difficulty</label>
+                  <label className="text-sm font-medium text-gray-500">
+                    Difficulty
+                  </label>
                   <div className="mt-1">
                     <Badge
                       variant={
@@ -481,7 +501,9 @@ const MentorQuestionBankPage: React.FC = () => {
                   </div>
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-gray-500">Answer Type</label>
+                  <label className="text-sm font-medium text-gray-500">
+                    Answer Type
+                  </label>
                   <div className="mt-1">
                     <Badge variant="outline">
                       {getAnswerTypeLabel(selectedQuestion.answerType)}
@@ -492,7 +514,9 @@ const MentorQuestionBankPage: React.FC = () => {
 
               {/* Question Text */}
               <div>
-                <label className="text-sm font-medium text-gray-500">Question</label>
+                <label className="text-sm font-medium text-gray-500">
+                  Question
+                </label>
                 <div className="mt-1 p-4 bg-gray-50 rounded-lg">
                   <p className="text-sm">{selectedQuestion.questionText}</p>
                 </div>
@@ -500,7 +524,9 @@ const MentorQuestionBankPage: React.FC = () => {
 
               {/* Answer Choices */}
               <div>
-                <label className="text-sm font-medium text-gray-500">Answer Choices</label>
+                <label className="text-sm font-medium text-gray-500">
+                  Answer Choices
+                </label>
                 <div className="mt-1 space-y-2">
                   {selectedQuestion.answerChoices.map((choice, index) => (
                     <div
@@ -530,11 +556,17 @@ const MentorQuestionBankPage: React.FC = () => {
               {/* Metadata */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t">
                 <div>
-                  <label className="text-sm font-medium text-gray-500">Created By</label>
-                  <div className="mt-1 text-sm">{selectedQuestion.createdBy?.name || "Unknown"}</div>
+                  <label className="text-sm font-medium text-gray-500">
+                    Created By
+                  </label>
+                  <div className="mt-1 text-sm">
+                    {selectedQuestion.createdBy?.name || "Unknown"}
+                  </div>
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-gray-500">Created At</label>
+                  <label className="text-sm font-medium text-gray-500">
+                    Created At
+                  </label>
                   <div className="mt-1 text-sm">
                     {new Date(selectedQuestion.createdAt).toLocaleDateString()}
                   </div>
