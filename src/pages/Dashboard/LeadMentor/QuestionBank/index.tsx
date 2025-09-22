@@ -53,7 +53,6 @@ import CreateQuestionForm from "./CreateQuestionForm";
 import EditQuestionForm from "./EditQuestionForm";
 import BulkUploadForm from "./BulkUploadForm";
 import QuestionRecommendations from "./QuestionRecommendations";
-import RecommendQuestionForm from "./RecommendQuestionForm";
 
 const QuestionBankPage: React.FC = () => {
   const { } = useAuth();
@@ -77,7 +76,6 @@ const QuestionBankPage: React.FC = () => {
   const [showEditForm, setShowEditForm] = useState(false);
   const [showBulkUpload, setShowBulkUpload] = useState(false);
   const [showRecommendations, setShowRecommendations] = useState(false);
-  const [showRecommendForm, setShowRecommendForm] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const grades = [
@@ -277,14 +275,6 @@ const QuestionBankPage: React.FC = () => {
           </p>
         </div>
         <div className="flex gap-2">
-          <Button
-            variant="outline"
-            onClick={() => setShowRecommendForm(true)}
-            className="flex items-center gap-2"
-          >
-            <Plus className="h-4 w-4" />
-            Recommend Question
-          </Button>
           <Button
             variant="outline"
             onClick={() => setShowRecommendations(true)}
@@ -643,14 +633,6 @@ const QuestionBankPage: React.FC = () => {
         }}
       />
 
-      <RecommendQuestionForm
-        open={showRecommendForm}
-        onOpenChange={setShowRecommendForm}
-        onSuccess={() => {
-          setShowRecommendForm(false);
-          fetchQuestions();
-        }}
-      />
     </div>
   );
 };
