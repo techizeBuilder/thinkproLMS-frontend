@@ -71,6 +71,9 @@ import TakeAssessmentPage from "../pages/Dashboard/Student/Assessments/TakeAsses
 import StudentAssessmentResultsPage from "../pages/Dashboard/Student/Assessments/Results";
 import StudentDashboard from "../pages/Dashboard/Student/Dashboard";
 
+// Certificate Routes
+import { certificateRoutes, studentCertificateRoutes } from "./certificateRoutes";
+
 // Dashboard Components
 import SuperAdminDashboard from "../pages/Dashboard/SuperAdmin/Dashboard";
 import LeadMentorDashboard from "../pages/Dashboard/LeadMentor/Dashboard";
@@ -206,6 +209,9 @@ export default function AppRouter() {
           <Route path="assessments/:id/edit" element={<EditAssessmentPage />} />
           <Route path="assessments/:id/analytics" element={<AssessmentAnalyticsPage />} />
           
+          {/* Certificate Management */}
+          {certificateRoutes}
+          
           {/* Resources Management */}
           <Route 
             path="resources" 
@@ -323,6 +329,9 @@ export default function AppRouter() {
           <Route path="assessments/:id/edit" element={<EditAssessmentPage />} />
           <Route path="assessments/:id/analytics" element={<AssessmentAnalyticsPage />} />
           
+          {/* Certificate Management */}
+          {certificateRoutes}
+          
           {/* Resources Management */}
           <Route 
             path="resources" 
@@ -434,6 +443,9 @@ export default function AppRouter() {
           <Route path="assessments" element={<StudentAssessmentsPage />} />
           <Route path="assessments/:id/take" element={<TakeAssessmentPage />} />
           <Route path="assessments/results" element={<StudentAssessmentResultsPage />} />
+          
+          {/* Certificate Routes */}
+          {studentCertificateRoutes}
         </Route>
 
         {/* Guest */}

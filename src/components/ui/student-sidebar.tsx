@@ -59,6 +59,9 @@ export function StudentSidebar({ className }: StudentSidebarProps) {
             <SidebarNavItem to="/student/achievements" icon={Award}>
               Achievements
             </SidebarNavItem>
+            <SidebarNavItem to="/student/certificates" icon={Award}>
+              Certificates
+            </SidebarNavItem>
           </SidebarNav>
         </SidebarGroup>
 

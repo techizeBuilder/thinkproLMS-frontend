@@ -24,6 +24,7 @@ import {
   FolderOpen,
   Layers,
   FileText,
+  Award,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { LogoutButton } from "@/components/ui/logout-button";
@@ -78,6 +79,9 @@ export function LeadMentorSidebar({ className }: LeadMentorSidebarProps) {
           <SidebarNav>
             <SidebarNavItem to="/leadmentor/question-bank" icon={BookOpen}>
               Question Bank
+            </SidebarNavItem>
+            <SidebarNavItem to="/leadmentor/certificates" icon={Award}>
+              Certificates
             </SidebarNavItem>
           </SidebarNav>
         </SidebarGroup>

@@ -122,4 +122,12 @@ export const studentService = {
     const response = await axiosInstance.post(`/students/${id}/reset-password`);
     return response.data;
   },
+
+  // Get students for certificate creation
+  getForCertificate: async (
+    queryParams: string
+  ): Promise<{ success: boolean; data: any[] }> => {
+    const response = await axiosInstance.get(`/certificates/students?${queryParams}`);
+    return response.data;
+  },
 };

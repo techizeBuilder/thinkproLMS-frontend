@@ -41,8 +41,8 @@ export default function AssessmentQuestionManager({
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
-  const [difficultyFilter, setDifficultyFilter] = useState<string>("");
-  const [answerTypeFilter, setAnswerTypeFilter] = useState<string>("");
+  const [difficultyFilter, setDifficultyFilter] = useState<string>("all");
+  const [answerTypeFilter, setAnswerTypeFilter] = useState<string>("all");
   const [selectedQuestions, setSelectedQuestions] = useState<Set<string>>(new Set());
   const [showAddQuestions, setShowAddQuestions] = useState(false);
 
@@ -63,12 +63,12 @@ export default function AssessmentQuestionManager({
     }
 
     // Filter by difficulty
-    if (difficultyFilter) {
+    if (difficultyFilter && difficultyFilter !== 'all') {
       filtered = filtered.filter(q => q.difficulty === difficultyFilter);
     }
 
     // Filter by answer type
-    if (answerTypeFilter) {
+    if (answerTypeFilter && answerTypeFilter !== 'all') {
       filtered = filtered.filter(q => q.answerType === answerTypeFilter);
     }
 
@@ -300,7 +300,7 @@ export default function AssessmentQuestionManager({
                     <SelectValue placeholder="All" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">All</SelectItem>
+                    <SelectItem value="all">All</SelectItem>
                     <SelectItem value="Easy">Easy</SelectItem>
                     <SelectItem value="Medium">Medium</SelectItem>
                     <SelectItem value="Tough">Tough</SelectItem>
@@ -314,7 +314,7 @@ export default function AssessmentQuestionManager({
                     <SelectValue placeholder="All" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">All</SelectItem>
+                    <SelectItem value="all">All</SelectItem>
                     <SelectItem value="radio">Single Choice</SelectItem>
                     <SelectItem value="checkbox">Multiple Choice</SelectItem>
                     <SelectItem value="dropdown">Dropdown</SelectItem>

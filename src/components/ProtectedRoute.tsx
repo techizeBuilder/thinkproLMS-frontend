@@ -25,6 +25,12 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
     return <>{children}</>;
   }
 
+  // Lead mentors automatically have certificate permissions
+  if (user?.role === 'leadmentor' && 
+      (requiredPermission === 'certificate_manage' || requiredPermission === 'certificate_view')) {
+    return <>{children}</>;
+  }
+
   // If user doesn't have the required permission, redirect
   if (!user?.permissions?.includes(requiredPermission)) {
     return <Navigate to={fallbackPath} replace />;
