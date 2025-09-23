@@ -32,25 +32,26 @@ export default function MentorSchedulesPage() {
   const [schedules, setSchedules] = useState<Schedule[]>([]);
   const [loading, setLoading] = useState(true);
   const [filters, setFilters] = useState({
-    academicYear: "",
-    grade: "",
-    subject: "",
+    academicYear: "all",
+    grade: "all",
+    subject: "all",
     status: "all",
     search: "",
   });
 
-  const grades = [
-    "Grade 1", "Grade 2", "Grade 3", "Grade 4", "Grade 5",
-    "Grade 6", "Grade 7", "Grade 8", "Grade 9", "Grade 10"
-  ];
+  // Get unique grades from the schedules data
+  const grades = Array.from(new Set(schedules.map(schedule => schedule.grade))).sort();
 
-  const academicYears = [
-    "2024-25", "2023-24", "2022-23"
-  ];
+  // Get unique academic years from the schedules data
+  const academicYears = Array.from(new Set(schedules.map(schedule => schedule.academicYear))).sort();
 
-  const subjects = [
-    "Mathematics", "Science", "English", "Social Studies", "Hindi"
-  ];
+  // Get unique subjects from the schedules data
+  const subjects = Array.from(new Set(schedules.map(schedule => schedule.subject._id)))
+    .map(subjectId => {
+      const schedule = schedules.find(s => s.subject._id === subjectId);
+      return schedule ? schedule.subject : null;
+    })
+    .filter(Boolean);
 
   useEffect(() => {
     loadSchedules();
@@ -59,12 +60,10 @@ export default function MentorSchedulesPage() {
   const loadSchedules = async () => {
     try {
       setLoading(true);
-      // Assuming we have mentorId from user context
-      const mentorId = user?.mentorId || "current-mentor-id";
-      const response = await scheduleService.getMentorSchedules(mentorId, {
-        academicYear: filters.academicYear || undefined,
-        grade: filters.grade || undefined,
-        subject: filters.subject || undefined,
+      const response = await scheduleService.getMentorSchedules("my-schedules", {
+        academicYear: filters.academicYear !== "all" ? filters.academicYear : undefined,
+        grade: filters.grade !== "all" ? filters.grade : undefined,
+        subject: filters.subject !== "all" ? filters.subject : undefined,
         status: filters.status !== "all" ? filters.status : undefined,
       });
       setSchedules(response.data || []);
@@ -110,15 +109,40 @@ export default function MentorSchedulesPage() {
   };
 
   const filteredSchedules = schedules.filter(schedule => {
+    // Search filter
     if (filters.search) {
       const searchTerm = filters.search.toLowerCase();
-      return (
+      const matchesSearch = (
         schedule.grade.toLowerCase().includes(searchTerm) ||
         schedule.section.toLowerCase().includes(searchTerm) ||
         schedule.subject.name.toLowerCase().includes(searchTerm) ||
         schedule.school.name.toLowerCase().includes(searchTerm)
       );
+      if (!matchesSearch) return false;
     }
+
+    // Academic year filter
+    if (filters.academicYear && filters.academicYear !== "all") {
+      if (schedule.academicYear !== filters.academicYear) return false;
+    }
+
+    // Grade filter
+    if (filters.grade && filters.grade !== "all") {
+      if (schedule.grade !== filters.grade) return false;
+    }
+
+    // Subject filter
+    if (filters.subject && filters.subject !== "all") {
+      if (schedule.subject._id !== filters.subject) return false;
+    }
+
+    // Status filter
+    if (filters.status && filters.status !== "all") {
+      // Check if any session has the specified status
+      const hasStatus = schedule.sessions.some(session => session.status === filters.status);
+      if (!hasStatus) return false;
+    }
+
     return true;
   });
 
@@ -185,7 +209,7 @@ export default function MentorSchedulesPage() {
                   <SelectValue placeholder="All Years" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All Years</SelectItem>
+                  <SelectItem value="all">All Years</SelectItem>
                   {academicYears.map((year) => (
                     <SelectItem key={year} value={year}>
                       {year}
@@ -205,7 +229,7 @@ export default function MentorSchedulesPage() {
                   <SelectValue placeholder="All Grades" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All Grades</SelectItem>
+                  <SelectItem value="all">All Grades</SelectItem>
                   {grades.map((grade) => (
                     <SelectItem key={grade} value={grade}>
                       {grade}
@@ -225,10 +249,10 @@ export default function MentorSchedulesPage() {
                   <SelectValue placeholder="All Subjects" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All Subjects</SelectItem>
+                  <SelectItem value="all">All Subjects</SelectItem>
                   {subjects.map((subject) => (
-                    <SelectItem key={subject} value={subject}>
-                      {subject}
+                    <SelectItem key={subject._id} value={subject._id}>
+                      {subject.name}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -277,11 +301,11 @@ export default function MentorSchedulesPage() {
             <Calendar className="h-12 w-12 text-gray-400 mx-auto mb-4" />
             <h3 className="text-lg font-semibold mb-2">No schedules found</h3>
             <p className="text-gray-600 mb-4">
-              {filters.search || filters.academicYear || filters.grade || filters.subject || filters.status !== "all"
+              {filters.search || filters.academicYear !== "all" || filters.grade !== "all" || filters.subject !== "all" || filters.status !== "all"
                 ? "Try adjusting your filters to see more results."
                 : "Create your first schedule to get started."}
             </p>
-            {!filters.search && !filters.academicYear && !filters.grade && !filters.subject && filters.status === "all" && (
+            {!filters.search && filters.academicYear === "all" && filters.grade === "all" && filters.subject === "all" && filters.status === "all" && (
               <Button onClick={() => navigate("/mentor/schedules/create")}>
                 <Plus className="h-4 w-4 mr-2" />
                 Create Schedule

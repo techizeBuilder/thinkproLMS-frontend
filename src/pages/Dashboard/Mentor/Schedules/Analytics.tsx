@@ -37,9 +37,7 @@ export default function ScheduleAnalyticsPage() {
   const loadAnalytics = async () => {
     try {
       setLoading(true);
-      const mentorId = user?.mentorId || "current-mentor-id";
       const response = await scheduleService.getScheduleAnalytics({
-        mentorId,
         academicYear: selectedAcademicYear,
       });
       setAnalytics(response.data);

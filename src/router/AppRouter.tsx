@@ -70,6 +70,8 @@ import AssessmentAnalyticsPage from "../pages/Dashboard/Mentor/Assessments/Analy
 // Schedule Components
 import MentorSchedulesPage from "../pages/Dashboard/Mentor/Schedules";
 import CreateSchedulePage from "../pages/Dashboard/Mentor/Schedules/Create";
+import ViewSchedulePage from "../pages/Dashboard/Mentor/Schedules/View";
+import EditSchedulePage from "../pages/Dashboard/Mentor/Schedules/Edit";
 import ScheduleCalendarPage from "../pages/Dashboard/Mentor/Schedules/Calendar";
 import ScheduleAnalyticsPage from "../pages/Dashboard/Mentor/Schedules/Analytics";
 import CreateClassReportPage from "../pages/Dashboard/Mentor/ClassReports/Create";
@@ -426,6 +428,8 @@ export default function AppRouter() {
           {/* Schedule Management */}
           <Route path="schedules" element={<MentorSchedulesPage />} />
           <Route path="schedules/create" element={<CreateSchedulePage />} />
+          <Route path="schedules/:id" element={<ViewSchedulePage />} />
+          <Route path="schedules/:id/edit" element={<EditSchedulePage />} />
           <Route path="schedules/calendar" element={<ScheduleCalendarPage />} />
           <Route path="schedules/analytics" element={<ScheduleAnalyticsPage />} />
           <Route path="class-reports/create" element={<CreateClassReportPage />} />

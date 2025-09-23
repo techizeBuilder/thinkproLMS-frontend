@@ -59,7 +59,7 @@ export interface Schedule {
 
 export interface CreateScheduleData {
   school: string;
-  mentor: string;
+  mentor?: string; // Optional - backend will get from authenticated user for mentors
   grade: string;
   section: string;
   subject: string;

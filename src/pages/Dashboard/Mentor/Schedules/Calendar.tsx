@@ -46,9 +46,7 @@ export default function ScheduleCalendarPage() {
   const loadCalendarData = async () => {
     try {
       setLoading(true);
-      const mentorId = user?.mentorId || "current-mentor-id";
       const response = await scheduleService.getCalendarView({
-        mentorId,
         month: currentDate.getMonth() + 1,
         year: currentDate.getFullYear(),
       });
