@@ -66,6 +66,13 @@ import CreateAssessmentPage from "../pages/Dashboard/Mentor/Assessments/Create";
 import ViewAssessmentPage from "../pages/Dashboard/Mentor/Assessments/View";
 import EditAssessmentPage from "../pages/Dashboard/Mentor/Assessments/Edit";
 import AssessmentAnalyticsPage from "../pages/Dashboard/Mentor/Assessments/Analytics";
+
+// Schedule Components
+import MentorSchedulesPage from "../pages/Dashboard/Mentor/Schedules";
+import CreateSchedulePage from "../pages/Dashboard/Mentor/Schedules/Create";
+import ScheduleCalendarPage from "../pages/Dashboard/Mentor/Schedules/Calendar";
+import ScheduleAnalyticsPage from "../pages/Dashboard/Mentor/Schedules/Analytics";
+import CreateClassReportPage from "../pages/Dashboard/Mentor/ClassReports/Create";
 import StudentAssessmentsPage from "../pages/Dashboard/Student/Assessments";
 import TakeAssessmentPage from "../pages/Dashboard/Student/Assessments/TakeAssessment";
 import StudentAssessmentResultsPage from "../pages/Dashboard/Student/Assessments/Results";
@@ -415,6 +422,13 @@ export default function AppRouter() {
           <Route path="assessments/:id" element={<ViewAssessmentPage />} />
           <Route path="assessments/:id/edit" element={<EditAssessmentPage />} />
           <Route path="assessments/:id/analytics" element={<AssessmentAnalyticsPage />} />
+          
+          {/* Schedule Management */}
+          <Route path="schedules" element={<MentorSchedulesPage />} />
+          <Route path="schedules/create" element={<CreateSchedulePage />} />
+          <Route path="schedules/calendar" element={<ScheduleCalendarPage />} />
+          <Route path="schedules/analytics" element={<ScheduleAnalyticsPage />} />
+          <Route path="class-reports/create" element={<CreateClassReportPage />} />
         </Route>
 
         {/* Student */}
