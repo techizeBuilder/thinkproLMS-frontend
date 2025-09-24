@@ -296,4 +296,10 @@ export const studentAssessmentService = {
     const response = await axiosInstance.get(`/student-assessments/results/${resultId}`);
     return response.data;
   },
+
+  // Get assessment status (for connection recovery)
+  getAssessmentStatus: async (responseId: string) => {
+    const response = await axiosInstance.get(`/student-assessments/${responseId}/status`);
+    return response.data;
+  },
 };

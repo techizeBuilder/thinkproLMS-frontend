@@ -11,7 +11,9 @@ import {
   Circle, 
   ArrowLeft, 
   ArrowRight,
-  AlertTriangle
+  AlertTriangle,
+  Wifi,
+  WifiOff
 } from "lucide-react";
 import { studentAssessmentService, type Assessment, type AssessmentResponse } from "@/api/assessmentService";
 import { toast } from "sonner";
@@ -29,9 +31,14 @@ export default function TakeAssessmentPage() {
   const [submitting, setSubmitting] = useState(false);
   const [questionStartTime, setQuestionStartTime] = useState(Date.now());
   const [answeredQuestions, setAnsweredQuestions] = useState<Set<number>>(new Set());
+  const [isOnline, setIsOnline] = useState(navigator.onLine);
+  const [pendingSave, setPendingSave] = useState(false);
+  const [lastSaved, setLastSaved] = useState<Date | null>(null);
   
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const questionTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const autoSaveRef = useRef<NodeJS.Timeout | null>(null);
+  const retryTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     if (id) {
@@ -41,6 +48,8 @@ export default function TakeAssessmentPage() {
     return () => {
       if (timerRef.current) clearInterval(timerRef.current);
       if (questionTimerRef.current) clearInterval(questionTimerRef.current);
+      if (autoSaveRef.current) clearInterval(autoSaveRef.current);
+      if (retryTimeoutRef.current) clearTimeout(retryTimeoutRef.current);
     };
   }, [id]);
 
@@ -61,6 +70,89 @@ export default function TakeAssessmentPage() {
       if (timerRef.current) clearInterval(timerRef.current);
     };
   }, [timeRemaining]);
+
+  // Network status monitoring
+  useEffect(() => {
+    const handleOnline = async () => {
+      setIsOnline(true);
+      if (pendingSave) {
+        toast.success("Connection restored. Saving your progress...");
+        await saveAnswer();
+      }
+      
+      // Check assessment status when connection is restored
+      if (response) {
+        try {
+          const statusResponse = await studentAssessmentService.getAssessmentStatus(response._id);
+          if (statusResponse.data.canContinue) {
+            setTimeRemaining(statusResponse.data.timeRemaining);
+            if (statusResponse.data.lastSavedAt) {
+              setLastSaved(new Date(statusResponse.data.lastSavedAt));
+            }
+          } else {
+            toast.error("Assessment time has expired. Redirecting to results...");
+            navigate("/student/assessments/results");
+          }
+        } catch (error) {
+          console.error("Error checking assessment status:", error);
+        }
+      }
+    };
+
+    const handleOffline = () => {
+      setIsOnline(false);
+      toast.error("Connection lost. Your answers will be saved when connection is restored.");
+    };
+
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, [pendingSave, response, navigate]);
+
+  // Tab close prevention
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (selectedAnswers.length > 0 && !submitting) {
+        e.preventDefault();
+        e.returnValue = 'You have unsaved answers. Are you sure you want to leave?';
+        return e.returnValue;
+      }
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, [selectedAnswers, submitting]);
+
+  // Auto-save on visibility change
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.hidden && selectedAnswers.length > 0 && isOnline) {
+        saveAnswer();
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
+  }, [selectedAnswers, isOnline]);
+
+  // Periodic auto-save
+  useEffect(() => {
+    if (response && isOnline) {
+      autoSaveRef.current = setInterval(() => {
+        if (selectedAnswers.length > 0) {
+          saveAnswer();
+        }
+      }, 30000); // Auto-save every 30 seconds
+    }
+
+    return () => {
+      if (autoSaveRef.current) clearInterval(autoSaveRef.current);
+    };
+  }, [response, selectedAnswers, isOnline]);
 
   const startAssessment = async () => {
     try {
@@ -101,38 +193,61 @@ export default function TakeAssessmentPage() {
     }
   };
 
-  const saveAnswer = async () => {
-    if (!response || !assessment) return;
+  const saveAnswer = async (retries = 3): Promise<boolean> => {
+    if (!response || !assessment || selectedAnswers.length === 0) return true;
 
     const currentQuestion = assessment.questions[currentQuestionIndex];
     const timeSpent = Math.floor((Date.now() - questionStartTime) / 1000);
 
-    try {
-      await studentAssessmentService.submitAnswer(
-        response._id,
-        (currentQuestion as any).questionId._id,
-        selectedAnswers,
-        timeSpent
-      );
-      
-      // Mark this question as answered
-      setAnsweredQuestions(prev => new Set([...prev, currentQuestionIndex]));
-    } catch (error) {
-      console.error("Error saving answer:", error);
-      toast.error("Failed to save answer");
+    for (let attempt = 1; attempt <= retries; attempt++) {
+      try {
+        await studentAssessmentService.submitAnswer(
+          response._id,
+          (currentQuestion as any).questionId._id,
+          selectedAnswers,
+          timeSpent
+        );
+        
+        // Mark this question as answered
+        setAnsweredQuestions(prev => new Set([...prev, currentQuestionIndex]));
+        setLastSaved(new Date());
+        setPendingSave(false);
+        
+        if (attempt > 1) {
+          toast.success("Answer saved successfully");
+        }
+        return true;
+      } catch (error) {
+        console.error(`Error saving answer (attempt ${attempt}):`, error);
+        
+        if (attempt === retries) {
+          // Final attempt failed
+          setPendingSave(true);
+          toast.error("Failed to save answer. Will retry when connection is restored.");
+          return false;
+        } else {
+          // Wait before retry (exponential backoff)
+          await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
+        }
+      }
     }
+    return false;
   };
 
-  const saveAllAnswers = async () => {
-    if (!response || !assessment) return;
+  const saveAllAnswers = async (): Promise<boolean> => {
+    if (!response || !assessment) return true;
 
     // Save current answer if it has been answered
     if (selectedAnswers.length > 0) {
-      await saveAnswer();
+      const saved = await saveAnswer();
+      if (!saved) {
+        return false;
+      }
     }
 
     // Note: Other answers should already be saved when navigating between questions
     // This function ensures the current answer is saved before submission
+    return true;
   };
 
   const handleNextQuestion = async () => {
@@ -165,7 +280,11 @@ export default function TakeAssessmentPage() {
       setSubmitting(true);
       
       // Always save all answers before submitting
-      await saveAllAnswers();
+      const saved = await saveAllAnswers();
+      if (!saved) {
+        toast.error("Cannot submit assessment. Please check your connection and try again.");
+        return;
+      }
       
       const result = await studentAssessmentService.submitAssessment(response!._id, autoSubmit);
       
@@ -180,7 +299,7 @@ export default function TakeAssessmentPage() {
       });
     } catch (error) {
       console.error("Error submitting assessment:", error);
-      toast.error("Failed to submit assessment");
+      toast.error("Failed to submit assessment. Please try again.");
     } finally {
       setSubmitting(false);
     }
@@ -243,6 +362,32 @@ export default function TakeAssessmentPage() {
           <p className="text-gray-600">{assessment.grade} - {assessment.subject}</p>
         </div>
         <div className="flex items-center gap-4">
+          {/* Network Status */}
+          <div className="flex items-center gap-2">
+            {isOnline ? (
+              <div className="flex items-center gap-1 text-green-600">
+                <Wifi className="h-4 w-4" />
+                <span className="text-sm">Online</span>
+              </div>
+            ) : (
+              <div className="flex items-center gap-1 text-red-600">
+                <WifiOff className="h-4 w-4" />
+                <span className="text-sm">Offline</span>
+              </div>
+            )}
+            {pendingSave && (
+              <div className="flex items-center gap-1 text-orange-600">
+                <AlertTriangle className="h-4 w-4" />
+                <span className="text-sm">Saving...</span>
+              </div>
+            )}
+            {lastSaved && (
+              <div className="text-xs text-gray-500">
+                Last saved: {lastSaved.toLocaleTimeString()}
+              </div>
+            )}
+          </div>
+          
           <div className="text-right">
             <div className="flex items-center gap-2 text-lg font-mono">
               <Clock className="h-5 w-5" />
@@ -263,6 +408,16 @@ export default function TakeAssessmentPage() {
         </div>
         <Progress value={getProgressPercentage()} className="h-2" />
       </div>
+
+      {/* Network Status Alert */}
+      {!isOnline && (
+        <Alert className="border-red-200 bg-red-50">
+          <WifiOff className="h-4 w-4 text-red-600" />
+          <AlertDescription className="text-red-800">
+            <strong>Connection Lost:</strong> You are currently offline. Your answers will be saved automatically when connection is restored.
+          </AlertDescription>
+        </Alert>
+      )}
 
       {/* Instructions */}
       {currentQuestionIndex === 0 && (
@@ -288,7 +443,9 @@ export default function TakeAssessmentPage() {
                 setQuestionStartTime(Date.now());
               }
             }}
-            className="w-10 h-10"
+            className={`w-10 h-10 ${
+              answeredQuestions.has(index) ? "bg-green-100 border-green-500" : ""
+            }`}
           >
             {index + 1}
           </Button>
@@ -360,8 +517,14 @@ export default function TakeAssessmentPage() {
               <ArrowRight className="h-4 w-4 ml-2" />
             </Button>
           ) : (
-            <Button onClick={handleSubmitAssessment} disabled={submitting}>
-              {submitting ? "Submitting..." : "Submit Assessment"}
+            <Button 
+              onClick={handleSubmitAssessment} 
+              disabled={submitting || !isOnline || pendingSave}
+            >
+              {submitting ? "Submitting..." : 
+               !isOnline ? "Offline - Cannot Submit" :
+               pendingSave ? "Saving..." : 
+               "Submit Assessment"}
             </Button>
           )}
         </div>
