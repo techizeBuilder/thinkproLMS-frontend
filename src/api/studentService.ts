@@ -11,6 +11,7 @@ export interface Student {
   };
   rollNumber: string;
   grade: string;
+  section: string;
   school: {
     _id: string;
     name: string;
@@ -35,6 +36,7 @@ export interface CreateStudentData {
   email: string;
   rollNumber: string;
   grade: string;
+  section: string;
   school: string;
 }
 
@@ -43,6 +45,7 @@ export interface UpdateStudentData {
   email?: string;
   rollNumber?: string;
   grade?: string;
+  section?: string;
   school?: string;
   isActive?: boolean;
 }

@@ -13,6 +13,11 @@ export interface GradeWithSections {
   sections: string[];
 }
 
+export interface AvailableGrade {
+  grade: string;
+  sections: string[];
+}
+
 export interface ServiceDetails {
   serviceType?: string;
   mentors: ("School Mentor" | "Thinker Mentor")[];
@@ -165,6 +170,12 @@ export const schoolService = {
   // Toggle school activation status
   toggleStatus: async (id: string, isActive: boolean): Promise<{ success: boolean; data: School; message: string }> => {
     const response = await axiosInstance.patch(`/schools/${id}/toggle-status`, { isActive });
+    return response.data;
+  },
+
+  // Get school service details for grade/section filtering
+  getServiceDetails: async (id: string): Promise<{ success: boolean; data: { grades: AvailableGrade[]; hasServiceDetails: boolean } }> => {
+    const response = await axiosInstance.get(`/schools/${id}/service-details`);
     return response.data;
   },
 };

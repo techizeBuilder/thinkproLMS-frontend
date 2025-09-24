@@ -9,6 +9,7 @@ import { ArrowLeft, Upload, Download, FileSpreadsheet, CheckCircle, XCircle } fr
 import axiosInstance from "@/api/axiosInstance";
 import { schoolService, type School } from "@/api/schoolService";
 import { useStudentsPath } from "@/utils/navigation";
+import * as XLSX from "xlsx";
 
 interface BulkUploadResult {
   successful: Array<{
@@ -17,6 +18,7 @@ interface BulkUploadResult {
     email: string;
     school: string;
     grade: string;
+    section: string;
     hasCustomCredentials: boolean;
     generatedPassword?: string;
   }>;
@@ -85,11 +87,12 @@ export default function BulkUploadPage() {
   };
 
   const downloadTemplate = () => {
-    // Create a sample Excel template
+    // Create a sample Excel template with proper formatting
     const templateData = [
       {
         name: "John Doe",
         grade: "Grade 10",
+        section: "A",
         loginId: "john@example.com", // Optional
         parentEmail: "parent@example.com", // Optional
         parentPhoneNumber: "1234567890" // Optional
@@ -97,26 +100,43 @@ export default function BulkUploadPage() {
       {
         name: "Jane Smith",
         grade: "Grade 5",
+        section: "B",
         loginId: "", // Leave empty for system-generated
         parentEmail: "",
         parentPhoneNumber: ""
       }
     ];
 
-    // Convert to CSV for simplicity (in a real app, you'd use a library like xlsx)
-    const csvContent = [
-      "name,grade,loginId,parentEmail,parentPhoneNumber",
-      ...templateData.map(row => 
-        `${row.name},${row.grade},${row.loginId},${row.parentEmail},${row.parentPhoneNumber}`
-      )
-    ].join("\n");
-
-    const blob = new Blob([csvContent], { type: "text/csv" });
+    // Create a new workbook
+    const workbook = XLSX.utils.book_new();
+    
+    // Create worksheet from data
+    const worksheet = XLSX.utils.json_to_sheet(templateData);
+    
+    // Set column widths for better readability
+    const columnWidths = [
+      { wch: 15 }, // name
+      { wch: 10 }, // grade
+      { wch: 8 },  // section
+      { wch: 25 }, // loginId
+      { wch: 25 }, // parentEmail
+      { wch: 15 }  // parentPhoneNumber
+    ];
+    worksheet['!cols'] = columnWidths;
+    
+    // Add the worksheet to workbook
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Students");
+    
+    // Generate Excel file buffer
+    const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+    
+    // Create blob and download
+    const blob = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.style.display = "none";
     a.href = url;
-    a.download = "student_template.csv";
+    a.download = "student_template.xlsx";
     document.body.appendChild(a);
     a.click();
     window.URL.revokeObjectURL(url);
@@ -125,19 +145,50 @@ export default function BulkUploadPage() {
   const downloadResults = () => {
     if (!uploadResult) return;
 
-    const csvContent = [
-      "Name,Student ID,Login ID,School,Grade,Generated Password,Status",
-      ...uploadResult.successful.map(student => 
-        `${student.name},${student.studentId},${student.email},${student.school},${student.grade},${student.generatedPassword || "N/A"},Success`
-      )
-    ].join("\n");
+    // Prepare data for Excel export
+    const resultsData = uploadResult.successful.map(student => ({
+      "Student Name": student.name,
+      "Student ID": student.studentId,
+      "Login ID": student.email,
+      "School": student.school,
+      "Grade": student.grade,
+      "Section": student.section,
+      "Generated Password": student.generatedPassword || "N/A",
+      "Status": "Success"
+    }));
 
-    const blob = new Blob([csvContent], { type: "text/csv" });
+    // Create a new workbook
+    const workbook = XLSX.utils.book_new();
+    
+    // Create worksheet from data
+    const worksheet = XLSX.utils.json_to_sheet(resultsData);
+    
+    // Set column widths for better readability
+    const columnWidths = [
+      { wch: 20 }, // Student Name
+      { wch: 15 }, // Student ID
+      { wch: 25 }, // Login ID
+      { wch: 25 }, // School
+      { wch: 10 }, // Grade
+      { wch: 8 },  // Section
+      { wch: 20 }, // Generated Password
+      { wch: 10 }  // Status
+    ];
+    worksheet['!cols'] = columnWidths;
+    
+    // Add the worksheet to workbook
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Upload Results");
+    
+    // Generate Excel file buffer
+    const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+    
+    // Create blob and download
+    const blob = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.style.display = "none";
     a.href = url;
-    a.download = "upload_results.csv";
+    a.download = "upload_results.xlsx";
     document.body.appendChild(a);
     a.click();
     window.URL.revokeObjectURL(url);
@@ -193,9 +244,9 @@ export default function BulkUploadPage() {
           <div className="bg-blue-50 p-4 rounded-lg">
             <h4 className="font-medium text-blue-900 mb-2">Required Excel Columns:</h4>
             <div className="text-sm text-blue-800">
-              <strong>Required:</strong> name, grade<br />
+              <strong>Required:</strong> name, grade, section<br />
               <strong>Optional:</strong> loginId, parentEmail, parentPhoneNumber<br />
-              <strong>Note:</strong> School will be selected from the dropdown below
+              <strong>Note:</strong> School will be selected from the dropdown below. If section is not provided, "A" will be used as default.
             </div>
           </div>
 

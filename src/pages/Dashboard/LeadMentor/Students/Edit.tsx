@@ -20,6 +20,7 @@ interface Student {
   };
   studentId: string;
   grade: string;
+  section: string;
   parentEmail?: string;
   parentPhoneNumber?: string;
   hasCustomCredentials: boolean;
@@ -35,6 +36,7 @@ export default function EditStudentPage() {
   const [formData, setFormData] = useState({
     name: "",
     grade: "",
+    section: "",
     parentEmail: "",
     parentPhoneNumber: "",
   });
@@ -56,6 +58,7 @@ export default function EditStudentPage() {
       setFormData({
         name: studentData.user.name,
         grade: studentData.grade,
+        section: studentData.section || "",
         parentEmail: studentData.parentEmail || "",
         parentPhoneNumber: studentData.parentPhoneNumber || "",
       });
@@ -148,6 +151,19 @@ export default function EditStudentPage() {
                   ))}
                 </select>
               </div>
+            </div>
+
+            {/* Section Selection */}
+            <div className="space-y-2">
+              <Label htmlFor="section">Section *</Label>
+              <Input
+                id="section"
+                name="section"
+                value={formData.section}
+                onChange={handleInputChange}
+                required
+                placeholder="Enter section (e.g., A, B, C)"
+              />
             </div>
 
             {/* Read-only fields */}
