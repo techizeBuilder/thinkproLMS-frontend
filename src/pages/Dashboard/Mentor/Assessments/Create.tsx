@@ -13,7 +13,8 @@ import {
   Trash2, 
   Eye,
   Save,
-  Send
+  Send,
+  Search
 } from "lucide-react";
 import { assessmentService } from "@/api/assessmentService";
 import { questionBankService } from "@/api/questionBankService";
@@ -72,6 +73,8 @@ export default function CreateAssessmentPage() {
     modules: [] as string[],
     difficulty: "all",
   });
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filteredQuestions, setFilteredQuestions] = useState<Question[]>([]);
 
   // UI state
   const [loading, setLoading] = useState(false);
@@ -194,6 +197,25 @@ export default function CreateAssessmentPage() {
 
     loadQuestions();
   }, [questionFilters]);
+
+  // Filter questions based on search term and difficulty
+  useEffect(() => {
+    let filtered = availableQuestions;
+
+    // Filter by search term
+    if (searchTerm) {
+      filtered = filtered.filter(q => 
+        q.questionText.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+
+    // Filter by difficulty (if not already filtered by API)
+    if (questionFilters.difficulty && questionFilters.difficulty !== "all") {
+      filtered = filtered.filter(q => q.difficulty === questionFilters.difficulty);
+    }
+
+    setFilteredQuestions(filtered);
+  }, [availableQuestions, searchTerm, questionFilters.difficulty]);
 
   const handleInputChange = (field: string, value: any) => {
     if (field === "school") {
@@ -593,6 +615,17 @@ export default function CreateAssessmentPage() {
             <CardHeader>
               <CardTitle>Available Questions</CardTitle>
               <div className="flex gap-2">
+                <div className="flex-1">
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                    <Input
+                      placeholder="Search questions..."
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      className="pl-10"
+                    />
+                  </div>
+                </div>
                 <Select value={questionFilters.difficulty} onValueChange={(value) => 
                   setQuestionFilters(prev => ({ ...prev, difficulty: value }))
                 }>
@@ -610,7 +643,7 @@ export default function CreateAssessmentPage() {
             </CardHeader>
             <CardContent>
               <div className="space-y-3 max-h-96 overflow-y-auto">
-                {availableQuestions.map(question => (
+                {filteredQuestions.map(question => (
                   <div key={question._id} className="border rounded-lg p-3">
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
@@ -627,6 +660,9 @@ export default function CreateAssessmentPage() {
                     </div>
                   </div>
                 ))}
+                {filteredQuestions.length === 0 && availableQuestions.length > 0 && (
+                  <p className="text-center text-gray-500 py-4">No questions match your search criteria</p>
+                )}
                 {availableQuestions.length === 0 && (
                   <p className="text-center text-gray-500 py-4">No questions available</p>
                 )}
