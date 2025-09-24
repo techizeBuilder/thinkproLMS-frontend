@@ -17,6 +17,9 @@ import {
 } from "lucide-react";
 import { assessmentService } from "@/api/assessmentService";
 import { questionBankService } from "@/api/questionBankService";
+import { schoolService, type School, type AvailableGrade } from "@/api/schoolService";
+import { mentorService } from "@/api/mentorService";
+import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 
 interface Question {
@@ -44,12 +47,15 @@ interface SelectedQuestion extends Question {
 
 export default function CreateAssessmentPage() {
   const navigate = useNavigate();
+  const { user } = useAuth();
   
   // Form state
   const [formData, setFormData] = useState({
     title: "",
     instructions: "",
+    school: "",
     grade: "",
+    section: "",
     subject: "",
     modules: [] as string[],
     startDate: "",
@@ -72,6 +78,79 @@ export default function CreateAssessmentPage() {
   const [step, setStep] = useState(1); // 1: Basic Info, 2: Questions, 3: Preview
   const [subjects, setSubjects] = useState<string[]>([]);
   const [modules, setModules] = useState<string[]>([]);
+  
+  // School and section state
+  const [schools, setSchools] = useState<School[]>([]);
+  const [availableGrades, setAvailableGrades] = useState<AvailableGrade[]>([]);
+  const [availableSections, setAvailableSections] = useState<string[]>([]);
+  const [hasServiceDetails, setHasServiceDetails] = useState(false);
+
+  // Load schools for SuperAdmin/LeadMentor and mentor profile for mentors
+  useEffect(() => {
+    const loadSchools = async () => {
+      if (user?.role === "superadmin" || user?.role === "leadmentor") {
+        try {
+          const response = await schoolService.getAll();
+          if (response.success) {
+            setSchools(response.data);
+          }
+        } catch (error) {
+          console.error("Error loading schools:", error);
+          toast.error("Failed to load schools");
+        }
+      } else if (user?.role === "mentor") {
+        try {
+          const response = await mentorService.getMyProfile();
+          if (response.success) {
+            // Convert assigned schools to the format expected by the form
+            const assignedSchools: School[] = response.data.assignedSchools.map(school => ({
+              _id: school._id,
+              name: school.name,
+              address: "", // Not available in mentor profile
+              city: school.city,
+              state: school.state,
+              board: school.board as "ICSE" | "CBSE" | "State" | "Other",
+              branchName: school.branchName || "",
+              isActive: true, // Assume active since they're assigned
+              createdAt: new Date().toISOString(),
+              updatedAt: new Date().toISOString()
+            }));
+            setSchools(assignedSchools);
+          }
+        } catch (error) {
+          console.error("Error loading mentor profile:", error);
+          toast.error("Failed to load mentor profile");
+        }
+      }
+    };
+
+    loadSchools();
+  }, [user?.role]);
+
+  // Load school service details when school changes
+  useEffect(() => {
+    const fetchSchoolServiceDetails = async (schoolId: string) => {
+      try {
+        const response = await schoolService.getServiceDetails(schoolId);
+        if (response.success) {
+          setAvailableGrades(response.data.grades);
+          setHasServiceDetails(response.data.hasServiceDetails);
+        }
+      } catch (error) {
+        console.error("Error fetching school service details:", error);
+        setAvailableGrades([]);
+        setHasServiceDetails(false);
+      }
+    };
+
+    if (formData.school) {
+      fetchSchoolServiceDetails(formData.school);
+    } else {
+      setAvailableGrades([]);
+      setHasServiceDetails(false);
+      setAvailableSections([]);
+    }
+  }, [formData.school]);
 
   // Load subjects and modules
   useEffect(() => {
@@ -117,10 +196,24 @@ export default function CreateAssessmentPage() {
   }, [questionFilters]);
 
   const handleInputChange = (field: string, value: any) => {
-    setFormData(prev => ({
-      ...prev,
-      [field]: value,
-    }));
+    if (field === "school") {
+      // Reset grade and section when school changes
+      setFormData(prev => ({ ...prev, [field]: value, grade: "", section: "" }));
+      setAvailableSections([]);
+    } else if (field === "grade") {
+      // Reset section when grade changes and update available sections
+      setFormData(prev => ({ ...prev, [field]: value, section: "" }));
+      
+      if (value && hasServiceDetails) {
+        // Find the selected grade in available grades and get its sections
+        const selectedGradeData = availableGrades.find(gradeData => gradeData.grade === value);
+        setAvailableSections(selectedGradeData?.sections || []);
+      } else {
+        setAvailableSections([]);
+      }
+    } else {
+      setFormData(prev => ({ ...prev, [field]: value }));
+    }
 
     // Update question filters when grade/subject changes
     if (field === "grade" || field === "subject") {
@@ -230,8 +323,14 @@ export default function CreateAssessmentPage() {
   };
 
   const validateForm = () => {
-    if (!formData.title || !formData.instructions || !formData.grade || !formData.subject) {
+    if (!formData.title || !formData.instructions || !formData.grade || !formData.section || !formData.subject) {
       toast.error("Please fill in all required fields");
+      return false;
+    }
+
+    // For SuperAdmin/LeadMentor/Mentor, school is required
+    if ((user?.role === "superadmin" || user?.role === "leadmentor" || user?.role === "mentor") && !formData.school) {
+      toast.error("Please select a school");
       return false;
     }
 
@@ -324,6 +423,26 @@ export default function CreateAssessmentPage() {
                 />
               </div>
 
+              {/* School selection for SuperAdmin/LeadMentor/Mentor */}
+              {(user?.role === "superadmin" || user?.role === "leadmentor" || user?.role === "mentor") && (
+                <div className="space-y-2">
+                  <Label htmlFor="school">School *</Label>
+                  <Select value={formData.school} onValueChange={(value) => handleInputChange("school", value)}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select school" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {schools.map(school => (
+                        <SelectItem key={school._id} value={school._id}>{school.name}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  {user?.role === "mentor" && schools.length === 0 && (
+                    <p className="text-sm text-gray-500">No schools assigned to you. Please contact your administrator.</p>
+                  )}
+                </div>
+              )}
+
               <div className="space-y-2">
                 <Label htmlFor="grade">Grade *</Label>
                 <Select value={formData.grade} onValueChange={(value) => handleInputChange("grade", value)}>
@@ -331,12 +450,41 @@ export default function CreateAssessmentPage() {
                     <SelectValue placeholder="Select grade" />
                   </SelectTrigger>
                   <SelectContent>
-                    {["Grade 1", "Grade 2", "Grade 3", "Grade 4", "Grade 5", 
-                      "Grade 6", "Grade 7", "Grade 8", "Grade 9", "Grade 10"].map(grade => (
-                      <SelectItem key={grade} value={grade}>{grade}</SelectItem>
+                    {hasServiceDetails ? (
+                      availableGrades.map(gradeData => (
+                        <SelectItem key={gradeData.grade} value={gradeData.grade}>{gradeData.grade}</SelectItem>
+                      ))
+                    ) : (
+                      ["Grade 1", "Grade 2", "Grade 3", "Grade 4", "Grade 5", 
+                       "Grade 6", "Grade 7", "Grade 8", "Grade 9", "Grade 10"].map(grade => (
+                        <SelectItem key={grade} value={grade}>{grade}</SelectItem>
+                      ))
+                    )}
+                  </SelectContent>
+                </Select>
+                {hasServiceDetails && availableGrades.length === 0 && formData.school && (
+                  <p className="text-sm text-gray-500">No grades available for this school. Please configure service details first.</p>
+                )}
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="section">Section *</Label>
+                <Select value={formData.section} onValueChange={(value) => handleInputChange("section", value)}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select section" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {availableSections.map(section => (
+                      <SelectItem key={section} value={section}>{section}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
+                {hasServiceDetails && availableSections.length === 0 && formData.grade && (
+                  <p className="text-sm text-gray-500">No sections available for {formData.grade}. Please configure service details first.</p>
+                )}
+                {!hasServiceDetails && formData.school && (
+                  <p className="text-sm text-gray-500">Service details not configured for this school. Please contact administrator.</p>
+                )}
               </div>
 
               <div className="space-y-2">
@@ -429,7 +577,7 @@ export default function CreateAssessmentPage() {
             </div>
 
             <div className="flex justify-end">
-              <Button onClick={() => setStep(2)} disabled={!formData.grade || !formData.subject}>
+              <Button onClick={() => setStep(2)} disabled={!formData.grade || !formData.section || !formData.subject || ((user?.role === "superadmin" || user?.role === "leadmentor" || user?.role === "mentor") && !formData.school)}>
                 Next: Select Questions
               </Button>
             </div>
@@ -551,7 +699,11 @@ export default function CreateAssessmentPage() {
                 <h3 className="font-semibold mb-2">Basic Information</h3>
                 <div className="space-y-2 text-sm">
                   <p><strong>Title:</strong> {formData.title}</p>
+                  {(user?.role === "superadmin" || user?.role === "leadmentor" || user?.role === "mentor") && (
+                    <p><strong>School:</strong> {schools.find(s => s._id === formData.school)?.name || "Not selected"}</p>
+                  )}
                   <p><strong>Grade:</strong> {formData.grade}</p>
+                  <p><strong>Section:</strong> {formData.section}</p>
                   <p><strong>Subject:</strong> {formData.subject}</p>
                   <p><strong>Modules:</strong> {formData.modules.join(", ") || "All"}</p>
                   <p><strong>Duration:</strong> {formData.duration} minutes</p>
