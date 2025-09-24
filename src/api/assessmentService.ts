@@ -77,13 +77,33 @@ export interface QuestionFilters {
   difficulty?: string;
 }
 
+export interface StudentReport {
+  studentId: string;
+  studentName: string;
+  studentEmail: string;
+  studentGrade: string;
+  section: string;
+  marksObtained: number;
+  percentage: number;
+  grade: string;
+  timeSpent: number;
+  timeSpentFormatted: string;
+  status: string;
+  submittedAt: string | null;
+  startTime: string;
+  endTime: string | null;
+}
+
 export interface AssessmentAnalytics {
   totalAttempts: number;
   completedAttempts: number;
+  totalEligibleStudents: number;
+  pendingStudents: number;
   averageScore: number;
   averagePercentage: number;
   completionRate: number;
   gradeDistribution: Record<string, number>;
+  studentReports: StudentReport[];
 }
 
 // Student Assessment Types
