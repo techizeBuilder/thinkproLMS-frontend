@@ -1,4 +1,3 @@
-import type { JSX } from "react";
 import { Route } from "react-router-dom";
 import { ProtectedRoute as PermissionProtectedRoute } from "../components/ProtectedRoute";
 

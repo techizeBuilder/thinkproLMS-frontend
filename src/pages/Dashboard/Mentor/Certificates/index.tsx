@@ -395,7 +395,7 @@ export default function CertificatesPage() {
                     <span className="text-sm text-muted-foreground">Status breakdown:</span>
                     {Object.entries(statusCounts).map(([status, count]) => (
                       <Badge key={status} variant="outline" className="text-xs">
-                        {status}: {count}
+                        {status}: {String(count)}
                       </Badge>
                     ))}
                   </div>

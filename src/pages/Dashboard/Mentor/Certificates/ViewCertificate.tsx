@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { 
@@ -357,7 +357,7 @@ export default function ViewCertificate() {
                 {Object.entries(statusCounts).map(([status, count]) => (
                   <div key={status} className="flex items-center justify-between">
                     <span className="text-sm text-muted-foreground capitalize">{status}:</span>
-                    <Badge variant="outline">{count}</Badge>
+                    <Badge variant="outline">{String(count)}</Badge>
                   </div>
                 ))}
               </div>

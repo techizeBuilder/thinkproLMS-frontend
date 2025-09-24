@@ -3,20 +3,16 @@ import { useParams, useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
-import { Separator } from "@/components/ui/separator";
 import { 
   ArrowLeft, 
   Trophy, 
-  Clock, 
   CheckCircle, 
   XCircle,
   BookOpen,
-  Calendar,
   AlertCircle,
   Lightbulb
 } from "lucide-react";
-import { studentAssessmentService, type DetailedAssessmentResult, type DetailedQuestion } from "@/api/assessmentService";
+import { studentAssessmentService, type DetailedAssessmentResult } from "@/api/assessmentService";
 import { toast } from "sonner";
 
 export default function DetailedAssessmentResultsPage() {
@@ -103,14 +99,14 @@ export default function DetailedAssessmentResultsPage() {
 
   const getWrongAnswers = () => {
     if (!result) return [];
-    return result.assessment.questions.filter(question => 
+    return result.assessment.questions.filter((question: any) => 
       question.studentAnswer && !question.studentAnswer.isCorrect
     );
   };
 
   const getCorrectAnswers = () => {
     if (!result) return [];
-    return result.assessment.questions.filter(question => 
+    return result.assessment.questions.filter((question: any) => 
       question.studentAnswer && question.studentAnswer.isCorrect
     );
   };
@@ -235,8 +231,8 @@ export default function DetailedAssessmentResultsPage() {
             </p>
           </CardHeader>
           <CardContent className="space-y-6">
-            {wrongAnswers.map((question, index) => (
-              <div key={question.questionId} className="border border-red-200 rounded-lg p-4 bg-red-50">
+            {wrongAnswers.map((question: any, index) => (
+              <div key={String(question.questionId) || index} className="border border-red-200 rounded-lg p-4 bg-red-50">
                 <div className="flex items-start justify-between mb-3">
                   <div className="flex items-center gap-2">
                     <Badge variant="outline" className="text-red-600 border-red-300">
@@ -258,7 +254,7 @@ export default function DetailedAssessmentResultsPage() {
                   <h4 className="font-semibold text-gray-800 mb-2">{question.questionText}</h4>
                   
                   <div className="space-y-2">
-                    {question.answerChoices.map((choice, choiceIndex) => {
+                    {question.answerChoices.map((choice: any, choiceIndex: number) => {
                       const isSelected = question.studentAnswer?.selectedAnswers.includes(choiceIndex);
                       const isCorrect = question.correctAnswers.includes(choiceIndex);
                       
@@ -338,10 +334,10 @@ export default function DetailedAssessmentResultsPage() {
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-              {correctAnswers.map((question) => {
+              {correctAnswers.map((question: any, index) => {
                 const questionNumber = result.assessment.questions.findIndex(q => q.questionId === question.questionId) + 1;
                 return (
-                  <div key={question.questionId} className="p-3 bg-green-50 border border-green-200 rounded-lg">
+                  <div key={String(question.questionId) || index} className="p-3 bg-green-50 border border-green-200 rounded-lg">
                     <div className="flex items-center justify-between mb-2">
                       <Badge className="bg-green-100 text-green-800">
                         Question {questionNumber}

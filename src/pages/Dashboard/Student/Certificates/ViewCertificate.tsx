@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { 
@@ -15,7 +15,6 @@ import {
   Loader2
 } from 'lucide-react';
 import { certificateService } from '@/api/certificateService';
-import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 
 interface StudentCertificate {
@@ -54,7 +53,6 @@ interface StudentCertificate {
 export default function StudentCertificateViewPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { user } = useAuth();
   const [certificate, setCertificate] = useState<StudentCertificate | null>(null);
   const [loading, setLoading] = useState(true);
   const [downloading, setDownloading] = useState(false);

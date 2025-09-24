@@ -15,7 +15,6 @@ import {
   User
 } from 'lucide-react';
 import { certificateService } from '@/api/certificateService';
-import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 
 interface StudentCertificate {
@@ -52,7 +51,6 @@ interface StudentCertificate {
 }
 
 export default function StudentCertificatesPage() {
-  const { user } = useAuth();
   const navigate = useNavigate();
   const [certificates, setCertificates] = useState<StudentCertificate[]>([]);
   const [loading, setLoading] = useState(true);
