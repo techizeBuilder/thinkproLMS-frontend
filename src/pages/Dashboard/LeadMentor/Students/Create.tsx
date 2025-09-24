@@ -147,7 +147,7 @@ export default function CreateStudentPage() {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="email">Student ID (Optional)</Label>
+                <Label htmlFor="email">Student Email/Login ID (Optional)</Label>
                 <Input
                   id="email"
                   name="email"
@@ -157,7 +157,7 @@ export default function CreateStudentPage() {
                   placeholder="student@example.com"
                 />
                 <p className="text-xs text-gray-500">
-                  If not provided, system will generate student ID and password
+                  If not provided, system will generate student ID and password. If provided, this will be used as login ID with generated password.
                 </p>
               </div>
             </div>
@@ -273,7 +273,7 @@ export default function CreateStudentPage() {
           <CardContent className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="parentEmail">Parent Email</Label>
+                <Label htmlFor="parentEmail">Parent Email (Optional)</Label>
                 <Input
                   id="parentEmail"
                   name="parentEmail"
@@ -282,6 +282,9 @@ export default function CreateStudentPage() {
                   onChange={handleInputChange}
                   placeholder="parent@example.com"
                 />
+                <p className="text-xs text-gray-500">
+                  If provided, parent will receive setup email to create password for student
+                </p>
               </div>
               <div className="space-y-2">
                 <Label htmlFor="parentPhoneNumber">Parent Phone Number</Label>
