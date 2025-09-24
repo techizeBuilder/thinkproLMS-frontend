@@ -12,9 +12,10 @@ export interface Question {
   grade: string;
   subject: string;
   module: string;
-  answerType: 'radio' | 'checkbox' | 'dropdown' | 'multichoice';
+  answerType: 'radio' | 'checkbox';
   answerChoices: AnswerChoice[];
   correctAnswers: number[];
+  explanation: string;
   difficulty: 'Easy' | 'Medium' | 'Tough';
   order: number;
   isActive: boolean;
@@ -39,9 +40,10 @@ export interface QuestionRecommendation {
   grade: string;
   subject: string;
   module: string;
-  answerType: 'radio' | 'checkbox' | 'dropdown' | 'multichoice';
+  answerType: 'radio' | 'checkbox';
   answerChoices: AnswerChoice[];
   correctAnswers: number[];
+  explanation: string;
   difficulty: 'Easy' | 'Medium' | 'Tough';
   status: 'pending' | 'approved' | 'rejected';
   recommendedBy: {
@@ -65,9 +67,10 @@ export interface CreateQuestionData {
   grade: string;
   subject: string;
   module: string;
-  answerType: 'radio' | 'checkbox' | 'dropdown' | 'multichoice';
+  answerType: 'radio' | 'checkbox';
   answerChoices: { text: string; isCorrect: boolean }[];
   correctAnswers: number[];
+  explanation: string;
   difficulty: 'Easy' | 'Medium' | 'Tough';
 }
 
@@ -80,6 +83,7 @@ export interface BulkQuestionData {
   answerChoices: string[];
   correctAnswers: number[];
   difficulty: string;
+  explanation: string;
   row: number;
 }
 

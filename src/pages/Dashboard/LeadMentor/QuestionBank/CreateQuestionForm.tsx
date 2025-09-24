@@ -35,6 +35,7 @@ const CreateQuestionForm: React.FC<CreateQuestionFormProps> = ({
       { text: '', isCorrect: false },
     ],
     correctAnswers: [],
+    explanation: '',
     difficulty: 'Medium',
   });
   const [subjects, setSubjects] = useState<Subject[]>([]);
@@ -50,8 +51,6 @@ const CreateQuestionForm: React.FC<CreateQuestionFormProps> = ({
   const answerTypes = [
     { value: 'radio', label: 'Single Choice (Radio)' },
     { value: 'checkbox', label: 'Multiple Choice (Checkbox)' },
-    { value: 'dropdown', label: 'Dropdown' },
-    { value: 'multichoice', label: 'Multi Choice' },
   ];
 
   useEffect(() => {
@@ -215,6 +214,7 @@ const CreateQuestionForm: React.FC<CreateQuestionFormProps> = ({
             { text: '', isCorrect: false },
           ],
           correctAnswers: [],
+          explanation: '',
           difficulty: 'Medium',
         });
       }
@@ -394,6 +394,29 @@ const CreateQuestionForm: React.FC<CreateQuestionFormProps> = ({
                   </div>
                 </div>
               )}
+            </CardContent>
+          </Card>
+
+          {/* Explanation */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Explanation</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div>
+                <Label htmlFor="explanation">Explanation for Correct Answer</Label>
+                <Textarea
+                  id="explanation"
+                  value={formData.explanation}
+                  onChange={(e) => handleInputChange('explanation', e.target.value)}
+                  placeholder="Provide an explanation for why the correct answer(s) is/are correct..."
+                  className="mt-1"
+                  rows={4}
+                />
+                <p className="text-sm text-gray-500 mt-1">
+                  This explanation will help students understand why the correct answer is right.
+                </p>
+              </div>
             </CardContent>
           </Card>
 

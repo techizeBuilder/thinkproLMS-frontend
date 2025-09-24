@@ -10,7 +10,8 @@ import {
   Clock, 
   CheckCircle, 
   BookOpen,
-  Calendar
+  Calendar,
+  Eye
 } from "lucide-react";
 import { studentAssessmentService, type AssessmentResponse } from "@/api/assessmentService";
 import { toast } from "sonner";
@@ -149,6 +150,15 @@ export default function AssessmentResultsPage() {
                 {getPerformanceMessage(recentResult.percentage)}
               </p>
             </div>
+            <div className="text-center mt-4">
+              <Button 
+                variant="outline"
+                onClick={() => navigate(`/student/assessments/results/${recentResult._id}`)}
+              >
+                <Eye className="h-4 w-4 mr-2" />
+                View Detailed Results
+              </Button>
+            </div>
           </CardContent>
         </Card>
       )}
@@ -231,6 +241,16 @@ export default function AssessmentResultsPage() {
                         {getPerformanceMessage(result.percentage)}
                       </p>
                     </div>
+
+                    {/* View Details Button */}
+                    <Button 
+                      variant="outline" 
+                      className="w-full"
+                      onClick={() => navigate(`/student/assessments/results/${result._id}`)}
+                    >
+                      <Eye className="h-4 w-4 mr-2" />
+                      View Detailed Results
+                    </Button>
                   </CardContent>
                 </Card>
               );

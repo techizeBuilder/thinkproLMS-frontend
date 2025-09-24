@@ -124,7 +124,8 @@ const BulkUploadForm: React.FC<BulkUploadFormProps> = ({
       'Answer Choice 9',
       'Answer Choice 10',
       'Correct Answer(s)',
-      'Difficulty'
+      'Difficulty',
+      'Explanation'
     ];
 
     const sampleData = [
@@ -145,7 +146,8 @@ const BulkUploadForm: React.FC<BulkUploadFormProps> = ({
         '',
         '',
         '2',
-        'Easy'
+        'Easy',
+        'Delhi is the capital of India and serves as the seat of the Government of India.'
       ]
     ];
 
@@ -187,11 +189,12 @@ const BulkUploadForm: React.FC<BulkUploadFormProps> = ({
                   <li>Grade (Grade 1 - Grade 10)</li>
                   <li>Subject</li>
                   <li>Module</li>
-                  <li>Answer Type (radio, checkbox, dropdown, multichoice)</li>
+                  <li>Answer Type (radio, checkbox)</li>
                   <li>Answer Choice 1, Answer Choice 2 (minimum required)</li>
                   <li>Answer Choice 3, Answer Choice 4, ... (optional, up to 15 total)</li>
                   <li>Correct Answer(s) (comma-separated indices, e.g., "1,3" for choices 1 and 3)</li>
                   <li>Difficulty (Easy, Medium, Tough)</li>
+                  <li>Explanation (optional explanation for the correct answer)</li>
                 </ul>
               </div>
               <Button

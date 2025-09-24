@@ -92,7 +92,7 @@ const QuestionBankPage: React.FC = () => {
   ];
 
   const difficulties = ["Easy", "Medium", "Tough"];
-  const answerTypes = ["radio", "checkbox", "dropdown", "multichoice"];
+  const answerTypes = ["radio", "checkbox"];
 
   useEffect(() => {
     fetchQuestions();

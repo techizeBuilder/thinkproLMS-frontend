@@ -89,7 +89,7 @@ export default function TakeAssessmentPage() {
 
     const question = (currentQuestion as any).questionId;
     
-    if (question.answerType === "radio" || question.answerType === "multichoice") {
+    if (question.answerType === "radio") {
       setSelectedAnswers([answerIndex]);
     } else if (question.answerType === "checkbox") {
       setSelectedAnswers(prev => 
@@ -302,7 +302,7 @@ export default function TakeAssessmentPage() {
                 }`}
                 onClick={() => handleAnswerChange(index)}
               >
-                {question.answerType === "radio" || question.answerType === "multichoice" ? (
+                {question.answerType === "radio" ? (
                   selectedAnswers.includes(index) ? (
                     <CheckCircle className="h-5 w-5 text-blue-600" />
                   ) : (

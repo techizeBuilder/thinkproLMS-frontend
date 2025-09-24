@@ -69,6 +69,7 @@ import AssessmentAnalyticsPage from "../pages/Dashboard/Mentor/Assessments/Analy
 import StudentAssessmentsPage from "../pages/Dashboard/Student/Assessments";
 import TakeAssessmentPage from "../pages/Dashboard/Student/Assessments/TakeAssessment";
 import StudentAssessmentResultsPage from "../pages/Dashboard/Student/Assessments/Results";
+import DetailedAssessmentResultsPage from "../pages/Dashboard/Student/Assessments/DetailedResults";
 import StudentDashboard from "../pages/Dashboard/Student/Dashboard";
 
 // Certificate Routes
@@ -443,6 +444,7 @@ export default function AppRouter() {
           <Route path="assessments" element={<StudentAssessmentsPage />} />
           <Route path="assessments/:id/take" element={<TakeAssessmentPage />} />
           <Route path="assessments/results" element={<StudentAssessmentResultsPage />} />
+          <Route path="assessments/results/:id" element={<DetailedAssessmentResultsPage />} />
           
           {/* Certificate Routes */}
           {studentCertificateRoutes}

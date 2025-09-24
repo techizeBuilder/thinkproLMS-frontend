@@ -12,6 +12,7 @@ export interface AssessmentQuestion {
       order: number;
     }>;
     correctAnswers: number[];
+    explanation: string;
     difficulty: string;
   };
   order: number;
@@ -142,6 +143,33 @@ export interface AvailableAssessment extends Assessment {
   isCurrentlyAvailable: boolean;
 }
 
+export interface DetailedQuestion {
+  questionId: string;
+  questionText: string;
+  answerType: string;
+  answerChoices: Array<{
+    text: string;
+    isCorrect: boolean;
+    order: number;
+  }>;
+  correctAnswers: number[];
+  explanation: string;
+  difficulty: string;
+  marks: number;
+  studentAnswer: {
+    selectedAnswers: number[];
+    isCorrect: boolean;
+    marksObtained: number;
+    timeSpent: number;
+  } | null;
+}
+
+export interface DetailedAssessmentResult extends AssessmentResponse {
+  assessment: Assessment & {
+    questions: DetailedQuestion[];
+  };
+}
+
 // Assessment API
 export const assessmentService = {
   // Create assessment
@@ -258,6 +286,12 @@ export const studentAssessmentService = {
   // Get assessment results
   getMyAssessmentResults: async () => {
     const response = await axiosInstance.get("/student-assessments/results");
+    return response.data;
+  },
+
+  // Get detailed assessment result
+  getDetailedAssessmentResult: async (resultId: string) => {
+    const response = await axiosInstance.get(`/student-assessments/results/${resultId}`);
     return response.data;
   },
 };
