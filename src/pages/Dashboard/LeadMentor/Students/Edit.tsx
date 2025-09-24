@@ -161,7 +161,7 @@ export default function EditStudentPage() {
                 />
               </div>
               <div className="space-y-2">
-                <Label>Email</Label>
+                <Label>Login ID</Label>
                 <Input
                   value={student.user.email}
                   disabled

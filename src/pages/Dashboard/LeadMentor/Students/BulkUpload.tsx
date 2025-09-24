@@ -90,14 +90,14 @@ export default function BulkUploadPage() {
       {
         name: "John Doe",
         grade: "Grade 10",
-        email: "john@example.com", // Optional
+        loginId: "john@example.com", // Optional
         parentEmail: "parent@example.com", // Optional
         parentPhoneNumber: "1234567890" // Optional
       },
       {
         name: "Jane Smith",
         grade: "Grade 5",
-        email: "", // Leave empty for system-generated
+        loginId: "", // Leave empty for system-generated
         parentEmail: "",
         parentPhoneNumber: ""
       }
@@ -105,9 +105,9 @@ export default function BulkUploadPage() {
 
     // Convert to CSV for simplicity (in a real app, you'd use a library like xlsx)
     const csvContent = [
-      "name,grade,email,parentEmail,parentPhoneNumber",
+      "name,grade,loginId,parentEmail,parentPhoneNumber",
       ...templateData.map(row => 
-        `${row.name},${row.grade},${row.email},${row.parentEmail},${row.parentPhoneNumber}`
+        `${row.name},${row.grade},${row.loginId},${row.parentEmail},${row.parentPhoneNumber}`
       )
     ].join("\n");
 
@@ -126,7 +126,7 @@ export default function BulkUploadPage() {
     if (!uploadResult) return;
 
     const csvContent = [
-      "Name,Student ID,Email,School,Grade,Generated Password,Status",
+      "Name,Student ID,Login ID,School,Grade,Generated Password,Status",
       ...uploadResult.successful.map(student => 
         `${student.name},${student.studentId},${student.email},${student.school},${student.grade},${student.generatedPassword || "N/A"},Success`
       )
@@ -171,9 +171,9 @@ export default function BulkUploadPage() {
         <CardContent className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <h4 className="font-medium mb-2">Option 1: With Email & Phone</h4>
+              <h4 className="font-medium mb-2">Option 1: With Login ID & Phone</h4>
               <ul className="text-sm text-gray-600 space-y-1">
-                <li>• Include student/parent email and phone number</li>
+                <li>• Include student/parent login ID and phone number</li>
                 <li>• Setup links will be sent to provided emails</li>
                 <li>• Students can set their own passwords</li>
                 <li>• Better for schools with digital communication</li>
@@ -182,7 +182,7 @@ export default function BulkUploadPage() {
             <div>
               <h4 className="font-medium mb-2">Option 2: System Generated</h4>
               <ul className="text-sm text-gray-600 space-y-1">
-                <li>• Leave email and phone fields empty</li>
+                <li>• Leave login ID and phone fields empty</li>
                 <li>• System generates unique student IDs</li>
                 <li>• Common password for all students</li>
                 <li>• Download credentials list for school distribution</li>
@@ -194,7 +194,7 @@ export default function BulkUploadPage() {
             <h4 className="font-medium text-blue-900 mb-2">Required Excel Columns:</h4>
             <div className="text-sm text-blue-800">
               <strong>Required:</strong> name, grade<br />
-              <strong>Optional:</strong> email, parentEmail, parentPhoneNumber<br />
+              <strong>Optional:</strong> loginId, parentEmail, parentPhoneNumber<br />
               <strong>Note:</strong> School will be selected from the dropdown below
             </div>
           </div>
@@ -264,7 +264,7 @@ export default function BulkUploadPage() {
               onCheckedChange={(checked) => setGenerateCredentials(checked as boolean)}
             />
             <Label htmlFor="generateCredentials" className="text-sm">
-              Generate User IDs and passwords (use when school doesn't provide email/phone)
+              Generate User IDs and passwords (use when school doesn't provide login ID/phone)
             </Label>
           </div>
 

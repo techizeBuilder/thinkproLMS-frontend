@@ -103,7 +103,7 @@ export default function CreateStudentPage() {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="email">Student Email (Optional)</Label>
+                <Label htmlFor="email">Student ID (Optional)</Label>
                 <Input
                   id="email"
                   name="email"
@@ -113,7 +113,7 @@ export default function CreateStudentPage() {
                   placeholder="student@example.com"
                 />
                 <p className="text-xs text-gray-500">
-                  If not provided, system will generate email and password
+                  If not provided, system will generate student ID and password
                 </p>
               </div>
             </div>
@@ -197,7 +197,7 @@ export default function CreateStudentPage() {
           <h4 className="font-medium text-blue-900 mb-2">Account Setup Information</h4>
           <div className="text-sm text-blue-800 space-y-1">
             <p>• If student/parent email is provided, a setup link will be sent to create the password.</p>
-            <p>• If no email is provided, system will generate a student ID and common password.</p>
+            <p>• If no student ID is provided, system will generate a student ID and common password.</p>
             <p>• Generated credentials can be downloaded later for sharing with the school.</p>
           </div>
         </div>

@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useAuth } from "@/contexts/AuthContext";
 import axiosInstance from "@/api/axiosInstance";
 
@@ -15,11 +16,18 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [userType, setUserType] = useState<"main" | "guest" | null>(null);
+  const [selectedRole, setSelectedRole] = useState<string>("");
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError("");
+
+    if (!selectedRole) {
+      setError("Please select your role");
+      setLoading(false);
+      return;
+    }
 
     try {
       const res = await axiosInstance.post("/auth/login", {
@@ -38,6 +46,40 @@ export default function Login() {
   const handleUserTypeSelection = (type: "main" | "guest") => {
     setUserType(type);
     setError("");
+  };
+
+  const getLoginIdLabel = () => {
+    switch (selectedRole) {
+      case "student":
+        return "Login ID";
+      case "mentor":
+        return "Email Address";
+      case "schooladmin":
+        return "Email Address";
+      case "leadmentor":
+        return "Email Address";
+      case "superadmin":
+        return "Email Address";
+      default:
+        return "Email Address";
+    }
+  };
+
+  const getLoginIdPlaceholder = () => {
+    switch (selectedRole) {
+      case "student":
+        return "Enter your login ID";
+      case "mentor":
+        return "Enter your email address";
+      case "schooladmin":
+        return "Enter your email address";
+      case "leadmentor":
+        return "Enter your email address";
+      case "superadmin":
+        return "Enter your email address";
+      default:
+        return "Enter your school email";
+    }
   };
 
   return (
@@ -104,15 +146,32 @@ export default function Login() {
             <CardContent>
               <form onSubmit={handleLogin} className="space-y-6">
                 <div className="space-y-2">
+                  <Label htmlFor="role" className="text-sm font-medium text-gray-700">
+                    Who are you logging in as?
+                  </Label>
+                  <Select value={selectedRole} onValueChange={setSelectedRole}>
+                    <SelectTrigger className="h-11 border-gray-200 focus:border-blue-500 focus:ring-blue-500">
+                      <SelectValue placeholder="Select your role" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="student">Student</SelectItem>
+                      <SelectItem value="mentor">Mentor</SelectItem>
+                      <SelectItem value="schooladmin">School Admin</SelectItem>
+                      <SelectItem value="leadmentor">Lead Mentor</SelectItem>
+                      <SelectItem value="superadmin">Super Admin</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
                   <Label htmlFor="email" className="text-sm font-medium text-gray-700">
-                    Email Address
+                    {getLoginIdLabel()}
                   </Label>
                   <Input
                     id="email"
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    placeholder="Enter your school email"
+                    placeholder={getLoginIdPlaceholder()}
                     className="h-11 border-gray-200 focus:border-blue-500 focus:ring-blue-500"
                     required
                   />
