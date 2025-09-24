@@ -278,8 +278,10 @@ export const studentAssessmentService = {
   },
 
   // Submit assessment
-  submitAssessment: async (responseId: string) => {
-    const response = await axiosInstance.post(`/student-assessments/${responseId}/submit`);
+  submitAssessment: async (responseId: string, autoSubmit = false) => {
+    const response = await axiosInstance.post(`/student-assessments/${responseId}/submit`, {
+      autoSubmit
+    });
     return response.data;
   },
 

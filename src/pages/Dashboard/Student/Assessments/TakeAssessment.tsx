@@ -28,6 +28,7 @@ export default function TakeAssessmentPage() {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [questionStartTime, setQuestionStartTime] = useState(Date.now());
+  const [answeredQuestions, setAnsweredQuestions] = useState<Set<number>>(new Set());
   
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const questionTimerRef = useRef<NodeJS.Timeout | null>(null);
@@ -113,10 +114,25 @@ export default function TakeAssessmentPage() {
         selectedAnswers,
         timeSpent
       );
+      
+      // Mark this question as answered
+      setAnsweredQuestions(prev => new Set([...prev, currentQuestionIndex]));
     } catch (error) {
       console.error("Error saving answer:", error);
       toast.error("Failed to save answer");
     }
+  };
+
+  const saveAllAnswers = async () => {
+    if (!response || !assessment) return;
+
+    // Save current answer if it has been answered
+    if (selectedAnswers.length > 0) {
+      await saveAnswer();
+    }
+
+    // Note: Other answers should already be saved when navigating between questions
+    // This function ensures the current answer is saved before submission
   };
 
   const handleNextQuestion = async () => {
@@ -147,9 +163,11 @@ export default function TakeAssessmentPage() {
   const submitAssessment = async (autoSubmit = false) => {
     try {
       setSubmitting(true);
-      await saveAnswer();
       
-      const result = await studentAssessmentService.submitAssessment(response!._id);
+      // Always save all answers before submitting
+      await saveAllAnswers();
+      
+      const result = await studentAssessmentService.submitAssessment(response!._id, autoSubmit);
       
       if (autoSubmit) {
         toast.error("Assessment auto-submitted due to time limit");
@@ -196,6 +214,7 @@ export default function TakeAssessmentPage() {
       </div>
     );
   }
+
 
   if (!assessment || !response) {
     return (
