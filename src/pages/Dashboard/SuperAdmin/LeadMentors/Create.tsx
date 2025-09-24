@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { ArrowLeft, Globe, Shield } from "lucide-react";
 import { leadMentorService, type CreateLeadMentorData } from "@/api/leadMentorService";
 import { schoolService, type School } from "@/api/schoolService";
@@ -28,6 +29,8 @@ export default function CreateLeadMentorPage() {
     hasAccessToAllSchools: false,
     permissions: [],
   });
+  const [creationMethod, setCreationMethod] = useState<"invite" | "credentials">("invite");
+  const [password, setPassword] = useState("");
 
   useEffect(() => {
     fetchSchools();
@@ -99,10 +102,16 @@ export default function CreateLeadMentorPage() {
     setLoading(true);
 
     try {
-      const response = await leadMentorService.create(formData);
+      const submitData = {
+        ...formData,
+        createWithCredentials: creationMethod === "credentials",
+        password: creationMethod === "credentials" ? password : undefined,
+      };
+      
+      const response = await leadMentorService.create(submitData);
       
       if (response.success) {
-        toast.success(response.message || "Lead mentor invited successfully");
+        toast.success(response.message || "Lead mentor created successfully");
         navigate(`${basePath}/lead-mentors`);
       }
     } catch (error: any) {
@@ -123,7 +132,7 @@ export default function CreateLeadMentorPage() {
           <ArrowLeft className="h-4 w-4" />
         </Button>
         <div>
-          <h1 className="text-3xl font-bold">Invite Lead Mentor</h1>
+          <h1 className="text-3xl font-bold">Create Lead Mentor</h1>
           <p className="text-gray-600">Add a new lead mentor</p>
         </div>
       </div>
@@ -173,6 +182,56 @@ export default function CreateLeadMentorPage() {
                 required
               />
             </div>
+
+            <div className="space-y-4">
+              <Label>Account Creation Method *</Label>
+              <RadioGroup
+                value={creationMethod}
+                onValueChange={(value) => setCreationMethod(value as "invite" | "credentials")}
+                className="space-y-3"
+              >
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="invite" id="invite" />
+                  <Label htmlFor="invite" className="cursor-pointer">
+                    <div>
+                      <div className="font-medium">Send Email Invitation</div>
+                      <div className="text-sm text-gray-500">
+                        Lead mentor will receive an email to set up their password
+                      </div>
+                    </div>
+                  </Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="credentials" id="credentials" />
+                  <Label htmlFor="credentials" className="cursor-pointer">
+                    <div>
+                      <div className="font-medium">Create with Manual Credentials</div>
+                      <div className="text-sm text-gray-500">
+                        Lead mentor will be created with provided password and auto-verified
+                      </div>
+                    </div>
+                  </Label>
+                </div>
+              </RadioGroup>
+            </div>
+
+            {creationMethod === "credentials" && (
+              <div className="space-y-2">
+                <Label htmlFor="password">Password *</Label>
+                <Input
+                  id="password"
+                  name="password"
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="Enter password for the lead mentor"
+                  required={creationMethod === "credentials"}
+                />
+                <p className="text-xs text-gray-500">
+                  The lead mentor will be able to log in immediately with this password
+                </p>
+              </div>
+            )}
 
             <div className="space-y-4">
               <Label>School Access</Label>
@@ -278,17 +337,29 @@ export default function CreateLeadMentorPage() {
 
             <div className="bg-blue-50 p-4 rounded-lg">
               <h4 className="font-medium text-blue-900 mb-2">What happens next?</h4>
-              <ul className="text-sm text-blue-800 space-y-1">
-                <li>• An invitation email will be sent to the provided email address</li>
-                <li>• The lead mentor will receive a setup link to create their password</li>
-                <li>• Once setup is complete, they can log in and access the lead mentor panel</li>
-                <li>• They will have access to manage school admins and other lead mentors</li>
-              </ul>
+              {creationMethod === "invite" ? (
+                <ul className="text-sm text-blue-800 space-y-1">
+                  <li>• An invitation email will be sent to the provided email address</li>
+                  <li>• The lead mentor will receive a setup link to create their password</li>
+                  <li>• Once setup is complete, they can log in and access the lead mentor panel</li>
+                  <li>• They will have access to manage school admins and other lead mentors</li>
+                </ul>
+              ) : (
+                <ul className="text-sm text-blue-800 space-y-1">
+                  <li>• The lead mentor account will be created immediately with the provided password</li>
+                  <li>• The lead mentor will be auto-verified and can log in right away</li>
+                  <li>• They can access the lead mentor panel immediately</li>
+                  <li>• They will have access to manage school admins and other lead mentors</li>
+                </ul>
+              )}
             </div>
 
             <div className="flex gap-4 pt-4">
-              <Button type="submit" disabled={loading || schoolsLoading}>
-                {loading ? "Sending Invitation..." : "Send Invitation"}
+              <Button type="submit" disabled={loading || schoolsLoading || (creationMethod === "credentials" && !password)}>
+                {loading 
+                  ? (creationMethod === "invite" ? "Sending Invitation..." : "Creating Lead Mentor...") 
+                  : (creationMethod === "invite" ? "Send Invitation" : "Create Lead Mentor")
+                }
               </Button>
               <Button 
                 type="button" 

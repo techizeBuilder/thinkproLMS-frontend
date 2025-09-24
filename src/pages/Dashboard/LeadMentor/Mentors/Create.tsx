@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { ArrowLeft, Plus } from "lucide-react";
 import axiosInstance from "@/api/axiosInstance";
 
@@ -30,6 +31,8 @@ export default function CreateMentorPage() {
     phoneNumber: "",
     schoolIds: [] as string[],
   });
+  const [creationMethod, setCreationMethod] = useState<"invite" | "credentials">("invite");
+  const [password, setPassword] = useState("");
 
   const salutations = ["Mr.", "Ms.", "Mrs.", "Dr.", "Prof."];
 
@@ -65,7 +68,13 @@ export default function CreateMentorPage() {
     setLoading(true);
 
     try {
-      await axiosInstance.post("/mentors", formData);
+      const submitData = {
+        ...formData,
+        createWithCredentials: creationMethod === "credentials",
+        password: creationMethod === "credentials" ? password : undefined,
+      };
+      
+      await axiosInstance.post("/mentors", submitData);
       navigate("/leadmentor/mentors");
     } catch (error: any) {
       console.error("Error creating mentor:", error);
@@ -87,7 +96,7 @@ export default function CreateMentorPage() {
           <ArrowLeft className="h-4 w-4" />
         </Button>
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Add School Mentor</h1>
+          <h1 className="text-3xl font-bold text-gray-900">Create School Mentor</h1>
           <p className="text-gray-600">Create a new mentor account and assign schools</p>
         </div>
       </div>
@@ -168,6 +177,56 @@ export default function CreateMentorPage() {
                 rows={3}
               />
             </div>
+
+            <div className="space-y-4">
+              <Label>Account Creation Method *</Label>
+              <RadioGroup
+                value={creationMethod}
+                onValueChange={(value) => setCreationMethod(value as "invite" | "credentials")}
+                className="space-y-3"
+              >
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="invite" id="invite" />
+                  <Label htmlFor="invite" className="cursor-pointer">
+                    <div>
+                      <div className="font-medium">Send Email Invitation</div>
+                      <div className="text-sm text-gray-500">
+                        Mentor will receive an email to set up their password
+                      </div>
+                    </div>
+                  </Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="credentials" id="credentials" />
+                  <Label htmlFor="credentials" className="cursor-pointer">
+                    <div>
+                      <div className="font-medium">Create with Manual Credentials</div>
+                      <div className="text-sm text-gray-500">
+                        Mentor will be created with provided password and auto-verified
+                      </div>
+                    </div>
+                  </Label>
+                </div>
+              </RadioGroup>
+            </div>
+
+            {creationMethod === "credentials" && (
+              <div className="space-y-2">
+                <Label htmlFor="password">Password *</Label>
+                <Input
+                  id="password"
+                  name="password"
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="Enter password for the mentor"
+                  required={creationMethod === "credentials"}
+                />
+                <p className="text-xs text-gray-500">
+                  The mentor will be able to log in immediately with this password
+                </p>
+              </div>
+            )}
           </CardContent>
         </Card>
 
@@ -209,6 +268,23 @@ export default function CreateMentorPage() {
           </CardContent>
         </Card>
 
+        <div className="bg-blue-50 p-4 rounded-lg">
+          <h4 className="font-medium text-blue-900 mb-2">What happens next?</h4>
+          {creationMethod === "invite" ? (
+            <ul className="text-sm text-blue-800 space-y-1">
+              <li>• An invitation email will be sent to the provided email address</li>
+              <li>• The mentor will receive a setup link to create their password</li>
+              <li>• Once setup is complete, they can log in and access the mentor panel</li>
+            </ul>
+          ) : (
+            <ul className="text-sm text-blue-800 space-y-1">
+              <li>• The mentor account will be created immediately with the provided password</li>
+              <li>• The mentor will be auto-verified and can log in right away</li>
+              <li>• They can access the mentor panel immediately</li>
+            </ul>
+          )}
+        </div>
+
         <div className="flex justify-end gap-4">
           <Button
             type="button"
@@ -219,15 +295,15 @@ export default function CreateMentorPage() {
           </Button>
           <Button
             type="submit"
-            disabled={loading || formData.schoolIds.length === 0}
+            disabled={loading || formData.schoolIds.length === 0 || (creationMethod === "credentials" && !password)}
             className="flex items-center gap-2"
           >
             {loading ? (
-              "Creating..."
+              creationMethod === "invite" ? "Sending Invitation..." : "Creating Mentor..."
             ) : (
               <>
                 <Plus className="h-4 w-4" />
-                Create Mentor & Send Invite
+                {creationMethod === "invite" ? "Create Mentor & Send Invite" : "Create Mentor"}
               </>
             )}
           </Button>
