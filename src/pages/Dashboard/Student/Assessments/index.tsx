@@ -53,7 +53,8 @@ export default function StudentAssessmentsPage() {
   };
 
   const handleStartAssessment = (assessment: AvailableAssessment) => {
-    if (assessment.hasAttempted && !assessment.canRetake) {
+    // Check if assessment is completed (not just attempted)
+    if (assessment.assessmentStatus === "completed") {
       toast.error("You have already completed this assessment");
       return;
     }
