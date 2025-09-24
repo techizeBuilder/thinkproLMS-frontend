@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -24,6 +24,14 @@ export default function ServiceForm({
 }: ServiceFormProps) {
   const [customSubject, setCustomSubject] = useState("");
   const [selectedGrades, setSelectedGrades] = useState<number[]>([]);
+
+  // Initialize selectedGrades from existing serviceDetails
+  useEffect(() => {
+    if (serviceDetails?.grades && serviceDetails.grades.length > 0) {
+      const grades = serviceDetails.grades.map(gradeData => gradeData.grade);
+      setSelectedGrades(grades);
+    }
+  }, [serviceDetails]);
 
   const updateServiceDetails = (updates: Partial<ServiceDetails>) => {
     const current = serviceDetails || {

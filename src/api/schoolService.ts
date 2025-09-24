@@ -31,11 +31,8 @@ export interface School {
   state: string;
   city: string;
   branchName?: string;
-  contractStartDate?: string;
-  contractEndDate?: string;
   projectStartDate?: string;
   projectEndDate?: string;
-  contractDocument?: string;
   schoolHeads?: SchoolHead[];
   serviceDetails?: ServiceDetails;
   isActive: boolean;
@@ -53,11 +50,8 @@ export interface CreateSchoolData {
   state: string;
   city: string;
   branchName?: string;
-  contractStartDate?: string;
-  contractEndDate?: string;
   projectStartDate?: string;
   projectEndDate?: string;
-  contractDocument?: File;
   schoolHeads?: SchoolHead[];
   serviceDetails?: ServiceDetails;
 }
@@ -104,11 +98,8 @@ export const schoolService = {
     if (data.logo) formData.append('logo', data.logo);
     if (data.affiliatedTo) formData.append('affiliatedTo', data.affiliatedTo);
     if (data.branchName) formData.append('branchName', data.branchName);
-    if (data.contractStartDate) formData.append('contractStartDate', data.contractStartDate);
-    if (data.contractEndDate) formData.append('contractEndDate', data.contractEndDate);
     if (data.projectStartDate) formData.append('projectStartDate', data.projectStartDate);
     if (data.projectEndDate) formData.append('projectEndDate', data.projectEndDate);
-    if (data.contractDocument) formData.append('contractDocument', data.contractDocument);
     
     // Add school head profile pictures
     if (data.schoolHeads) {
@@ -143,11 +134,8 @@ export const schoolService = {
     if (data.logo !== undefined) formData.append('logo', data.logo);
     if (data.affiliatedTo !== undefined) formData.append('affiliatedTo', data.affiliatedTo);
     if (data.branchName !== undefined) formData.append('branchName', data.branchName);
-    if (data.contractStartDate !== undefined) formData.append('contractStartDate', data.contractStartDate);
-    if (data.contractEndDate !== undefined) formData.append('contractEndDate', data.contractEndDate);
     if (data.projectStartDate !== undefined) formData.append('projectStartDate', data.projectStartDate);
     if (data.projectEndDate !== undefined) formData.append('projectEndDate', data.projectEndDate);
-    if (data.contractDocument !== undefined) formData.append('contractDocument', data.contractDocument);
     
     // Add school head profile pictures
     if (data.schoolHeads !== undefined) {

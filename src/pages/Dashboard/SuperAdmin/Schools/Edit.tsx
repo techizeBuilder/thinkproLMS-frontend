@@ -17,10 +17,8 @@ export default function EditSchoolPage() {
   const { id } = useParams<{ id: string }>();
   const [loading, setLoading] = useState(false);
   const [fetchLoading, setFetchLoading] = useState(true);
-  const [contractDocumentFile, setContractDocumentFile] = useState<File | null>(null);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [logoFile, setLogoFile] = useState<File | null>(null);
-  const [existingContractDocument, setExistingContractDocument] = useState<string | null>(null);
   const [existingImage, setExistingImage] = useState<string | null>(null);
   const [existingLogo, setExistingLogo] = useState<string | null>(null);
   const [formData, setFormData] = useState<UpdateSchoolData>({
@@ -31,8 +29,6 @@ export default function EditSchoolPage() {
     city: "",
     affiliatedTo: "",
     branchName: "",
-    contractStartDate: "",
-    contractEndDate: "",
     projectStartDate: "",
     projectEndDate: "",
     schoolHeads: [],
@@ -58,8 +54,6 @@ export default function EditSchoolPage() {
           city: school.city,
           affiliatedTo: school.affiliatedTo || "",
           branchName: school.branchName || "",
-          contractStartDate: school.contractStartDate ? new Date(school.contractStartDate).toISOString().split('T')[0] : "",
-          contractEndDate: school.contractEndDate ? new Date(school.contractEndDate).toISOString().split('T')[0] : "",
           projectStartDate: school.projectStartDate ? new Date(school.projectStartDate).toISOString().split('T')[0] : "",
           projectEndDate: school.projectEndDate ? new Date(school.projectEndDate).toISOString().split('T')[0] : "",
           schoolHeads: school.schoolHeads || [],
@@ -67,7 +61,6 @@ export default function EditSchoolPage() {
         });
         
         // Set existing file paths
-        setExistingContractDocument(school.contractDocument || null);
         setExistingImage(school.image || null);
         setExistingLogo(school.logo || null);
       }
@@ -87,14 +80,6 @@ export default function EditSchoolPage() {
     }));
   };
 
-  const handleContractDocumentUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0] || null;
-    setContractDocumentFile(file);
-    setFormData(prev => ({
-      ...prev,
-      contractDocument: file || undefined
-    }));
-  };
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0] || null;
@@ -347,36 +332,12 @@ export default function EditSchoolPage() {
           </CardContent>
         </Card>
 
-        {/* Contract and Project Dates */}
+        {/* Project Dates */}
         <Card>
           <CardHeader>
-            <CardTitle>Contract & Project Information</CardTitle>
+            <CardTitle>Project Information</CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="contractStartDate">Contract Start Date</Label>
-                <Input
-                  id="contractStartDate"
-                  name="contractStartDate"
-                  type="date"
-                  value={formData.contractStartDate}
-                  onChange={handleInputChange}
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="contractEndDate">Contract End Date</Label>
-                <Input
-                  id="contractEndDate"
-                  name="contractEndDate"
-                  type="date"
-                  value={formData.contractEndDate}
-                  onChange={handleInputChange}
-                />
-              </div>
-            </div>
-
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="projectStartDate">Project Start Date</Label>
@@ -399,44 +360,6 @@ export default function EditSchoolPage() {
                   onChange={handleInputChange}
                 />
               </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="contractDocument">Contract Signed Document</Label>
-              <div className="space-y-2">
-                {existingContractDocument && (
-                  <div className="text-sm text-blue-600">
-                    Current contract: <a href={getMediaUrl(existingContractDocument) || '#'} target="_blank" rel="noopener noreferrer" className="underline">View current contract</a>
-                  </div>
-                )}
-                <div className="flex items-center gap-4">
-                  <input
-                    id="contractDocument"
-                    type="file"
-                    accept=".pdf,.doc,.docx"
-                    onChange={handleContractDocumentUpload}
-                    className="hidden"
-                  />
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={() => document.getElementById('contractDocument')?.click()}
-                    className="flex items-center gap-2"
-                  >
-                    <Upload className="h-4 w-4" />
-                    {existingContractDocument ? 'Replace Contract Document' : 'Upload Contract Document'}
-                  </Button>
-                  {contractDocumentFile && (
-                    <span className="text-sm text-green-600">
-                      {contractDocumentFile.name}
-                    </span>
-                  )}
-                </div>
-              </div>
-              <p className="text-xs text-gray-500">
-                Supported formats: PDF, DOC, DOCX (Max 10MB)
-              </p>
             </div>
           </CardContent>
         </Card>

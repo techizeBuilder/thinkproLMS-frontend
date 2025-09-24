@@ -25,9 +25,6 @@ import ServiceForm from "@/components/ServiceForm";
 export default function CreateSchoolPage() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
-  const [contractDocumentFile, setContractDocumentFile] = useState<File | null>(
-    null
-  );
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [formData, setFormData] = useState<CreateSchoolData>({
@@ -38,8 +35,6 @@ export default function CreateSchoolPage() {
     city: "",
     affiliatedTo: "",
     branchName: "",
-    contractStartDate: "",
-    contractEndDate: "",
     projectStartDate: "",
     projectEndDate: "",
     schoolHeads: [],
@@ -56,16 +51,6 @@ export default function CreateSchoolPage() {
     }));
   };
 
-  const handleContractDocumentUpload = (
-    e: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    const file = e.target.files?.[0] || null;
-    setContractDocumentFile(file);
-    setFormData((prev) => ({
-      ...prev,
-      contractDocument: file || undefined,
-    }));
-  };
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0] || null;
@@ -298,36 +283,12 @@ export default function CreateSchoolPage() {
           </CardContent>
         </Card>
 
-        {/* Contract and Project Dates */}
+        {/* Project Dates */}
         <Card>
           <CardHeader>
-            <CardTitle>Contract & Project Information</CardTitle>
+            <CardTitle>Project Information</CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="contractStartDate">Contract Start Date</Label>
-                <Input
-                  id="contractStartDate"
-                  name="contractStartDate"
-                  type="date"
-                  value={formData.contractStartDate}
-                  onChange={handleInputChange}
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="contractEndDate">Contract End Date</Label>
-                <Input
-                  id="contractEndDate"
-                  name="contractEndDate"
-                  type="date"
-                  value={formData.contractEndDate}
-                  onChange={handleInputChange}
-                />
-              </div>
-            </div>
-
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="projectStartDate">Project Start Date</Label>
@@ -350,39 +311,6 @@ export default function CreateSchoolPage() {
                   onChange={handleInputChange}
                 />
               </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="contractDocument">Contract Signed Document</Label>
-              <div className="flex items-center gap-4">
-                <input
-                  id="contractDocument"
-                  type="file"
-                  accept=".pdf,.doc,.docx"
-                  onChange={handleContractDocumentUpload}
-                  className="hidden"
-                />
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() =>
-                    document.getElementById("contractDocument")?.click()
-                  }
-                  className="flex items-center gap-2"
-                >
-                  <Upload className="h-4 w-4" />
-                  Upload Contract Document
-                </Button>
-                {contractDocumentFile && (
-                  <span className="text-sm text-green-600">
-                    {contractDocumentFile.name}
-                  </span>
-                )}
-              </div>
-              <p className="text-xs text-gray-500">
-                Supported formats: PDF, DOC, DOCX (Max 10MB)
-              </p>
             </div>
           </CardContent>
         </Card>
