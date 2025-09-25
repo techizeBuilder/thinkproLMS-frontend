@@ -174,7 +174,7 @@ export default function ViewResourcePage() {
               
               <div className="flex items-center gap-2 text-sm">
                 <User className="h-4 w-4" />
-                <span>By {resource.uploadedBy.name}</span>
+                <span>By {resource.uploadedBy?.name || 'Unknown'}</span>
               </div>
 
               <div className="pt-2">

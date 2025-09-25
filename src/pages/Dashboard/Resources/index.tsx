@@ -243,7 +243,7 @@ export default function ResourcesPage() {
                     <div className="space-y-2">
                       <div className="flex items-center gap-2 text-sm text-gray-600">
                         <FolderOpen className="h-4 w-4" />
-                        <span>Uploaded by {resource.uploadedBy.name}</span>
+                        <span>Uploaded by {resource.uploadedBy?.name || 'Unknown'}</span>
                       </div>
                       <div className="flex items-center gap-2 text-sm text-gray-600">
                         <Eye className="h-4 w-4" />
@@ -358,7 +358,7 @@ export default function ResourcesPage() {
                     <div className="space-y-2">
                       <div className="flex items-center gap-2 text-sm text-gray-600">
                         <FolderOpen className="h-4 w-4" />
-                        <span>Uploaded by {resource.uploadedBy.name}</span>
+                        <span>Uploaded by {resource.uploadedBy?.name || 'Unknown'}</span>
                       </div>
                       <div className="flex items-center gap-2 text-sm text-gray-600">
                         <Eye className="h-4 w-4" />
@@ -475,7 +475,7 @@ export default function ResourcesPage() {
                         <div className="space-y-2">
                           <div className="flex items-center gap-2 text-sm text-gray-600">
                             <FolderOpen className="h-4 w-4" />
-                            <span>Uploaded by {resource.uploadedBy.name}</span>
+                            <span>Uploaded by {resource.uploadedBy?.name || 'Unknown'}</span>
                           </div>
                           <div className="flex items-center gap-2 text-sm text-gray-600">
                             <Eye className="h-4 w-4" />
@@ -590,7 +590,7 @@ export default function ResourcesPage() {
                         <div className="space-y-2">
                           <div className="flex items-center gap-2 text-sm text-gray-600">
                             <FolderOpen className="h-4 w-4" />
-                            <span>Uploaded by {resource.uploadedBy.name}</span>
+                            <span>Uploaded by {resource.uploadedBy?.name || 'Unknown'}</span>
                           </div>
                           <div className="flex items-center gap-2 text-sm text-gray-600">
                             <Eye className="h-4 w-4" />

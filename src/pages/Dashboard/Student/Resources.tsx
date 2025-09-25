@@ -183,7 +183,7 @@ export default function StudentResourcesPage() {
                       </div>
                     </div>
                     <div className="text-xs text-muted-foreground mt-2">
-                      Uploaded by {resource.uploadedBy.name} • {new Date(resource.createdAt).toLocaleDateString()}
+                      Uploaded by {resource.uploadedBy?.name || 'Unknown'} • {new Date(resource.createdAt).toLocaleDateString()}
                     </div>
                   </CardContent>
                 </Card>
@@ -246,7 +246,7 @@ export default function StudentResourcesPage() {
                       </div>
                     </div>
                     <div className="text-xs text-muted-foreground mt-2">
-                      Uploaded by {resource.uploadedBy.name} • {new Date(resource.createdAt).toLocaleDateString()}
+                      Uploaded by {resource.uploadedBy?.name || 'Unknown'} • {new Date(resource.createdAt).toLocaleDateString()}
                     </div>
                   </CardContent>
                 </Card>
