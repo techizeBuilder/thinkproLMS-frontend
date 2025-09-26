@@ -223,6 +223,14 @@ export const assessmentService = {
     return response.data;
   },
 
+  // Export assessment results to Excel
+  exportAssessmentResults: async (id: string) => {
+    const response = await axiosInstance.get(`/assessments/${id}/export`, {
+      responseType: 'blob',
+    });
+    return response;
+  },
+
   // Recalculate assessment statistics
   recalculateAssessmentStatistics: async (id: string) => {
     const response = await axiosInstance.post(`/assessments/${id}/recalculate-statistics`);

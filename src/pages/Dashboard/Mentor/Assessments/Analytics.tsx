@@ -51,8 +51,37 @@ export default function AssessmentAnalyticsPage() {
 
   const exportResults = async () => {
     try {
-      // TODO: Implement export functionality
-      toast.info("Export functionality will be implemented soon");
+      if (!id) return;
+      
+      const response = await assessmentService.exportAssessmentResults(id);
+      
+      // Create blob from response data
+      const blob = new Blob([response.data], {
+        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+      });
+      
+      // Create download link
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      
+      // Get filename from response headers or use default
+      const contentDisposition = response.headers['content-disposition'];
+      let filename = 'assessment_results.xlsx';
+      if (contentDisposition) {
+        const filenameMatch = contentDisposition.match(/filename="(.+)"/);
+        if (filenameMatch) {
+          filename = filenameMatch[1];
+        }
+      }
+      
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+      
+      toast.success("Assessment results exported successfully");
     } catch (error) {
       console.error("Error exporting results:", error);
       toast.error("Failed to export results");
