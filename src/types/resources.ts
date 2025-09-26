@@ -40,6 +40,10 @@ export interface ApiResource {
     city: string;
     state: string;
   };
+  module?: {
+    _id: string;
+    name: string;
+  };
   tags: string[];
   isPublic: boolean;
   isActive: boolean;
@@ -55,7 +59,7 @@ export interface ApiResource {
 }
 
 export type ResourceType = 'document' | 'video';
-export type UserType = 'mentor' | 'student';
+export type UserType = 'mentor' | 'student' | 'guest' | 'all';
 export type BucketType = 'documents' | 'videos';
 
 export interface DocumentResource extends Resource {
@@ -90,6 +94,10 @@ export interface CreateResourceData {
   description?: string;
   type: ResourceType;
   userType: UserType;
+  subject?: string;
+  grade?: string;
+  school?: string;
+  module?: string;
   url?: string;
   file?: File;
   tags?: string[];
@@ -103,6 +111,10 @@ export interface ResourceFilters {
   type?: ResourceType;
   userType?: UserType;
   bucket?: BucketType;
+  subject?: string;
+  grade?: string;
+  school?: string;
+  module?: string;
   tags?: string[];
   search?: string;
 }

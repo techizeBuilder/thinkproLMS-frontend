@@ -179,8 +179,14 @@ export default function ViewResourcePage() {
 
               <div className="pt-2">
                 <p className="text-sm font-medium mb-2">Target Audience:</p>
-                <Badge variant={resource.category === 'student' ? 'default' : 'secondary'}>
-                  {resource.category === 'student' ? 'Students' : 'Mentors'}
+                <Badge variant={
+                  resource.category === 'student' ? 'default' : 
+                  resource.category === 'mentor' ? 'secondary' :
+                  resource.category === 'guest' ? 'outline' : 'destructive'
+                }>
+                  {resource.category === 'student' ? 'Students' : 
+                   resource.category === 'mentor' ? 'Mentors' :
+                   resource.category === 'guest' ? 'Guests' : 'All Users'}
                 </Badge>
               </div>
 
@@ -195,6 +201,13 @@ export default function ViewResourcePage() {
                 <div className="pt-2">
                   <p className="text-sm font-medium mb-2">Grade:</p>
                   <Badge variant="outline">{resource.grade}</Badge>
+                </div>
+              )}
+
+              {resource.module && (
+                <div className="pt-2">
+                  <p className="text-sm font-medium mb-2">Module:</p>
+                  <Badge variant="outline">{resource.module.name}</Badge>
                 </div>
               )}
 

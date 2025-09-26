@@ -6,7 +6,7 @@ export interface Resource {
   title: string;
   description: string;
   type: "document" | "video";
-  category: "mentor" | "student";
+  category: "mentor" | "student" | "guest" | "all";
   content: {
     url: string;
     fileName?: string;
@@ -24,6 +24,10 @@ export interface Resource {
     name: string;
     city: string;
     state: string;
+  };
+  module?: {
+    _id: string;
+    name: string;
   };
   tags: string[];
   isPublic: boolean;
@@ -43,10 +47,11 @@ export interface CreateResourceData {
   title: string;
   description?: string;
   type: "document" | "video";
-  category: "mentor" | "student";
+  category: "mentor" | "student" | "guest" | "all";
   subject?: string;
   grade?: string;
   school?: string;
+  module?: string;
   tags?: string[];
   isPublic?: boolean;
   url?: string; // For external URLs
@@ -57,10 +62,11 @@ export interface UpdateResourceData extends Partial<CreateResourceData> {}
 
 export interface ResourceFilters {
   type?: "document" | "video";
-  category?: "mentor" | "student";
+  category?: "mentor" | "student" | "guest" | "all";
   subject?: string;
   grade?: string;
   school?: string;
+  module?: string;
   search?: string;
   page?: number;
   limit?: number;
@@ -136,6 +142,7 @@ export const resourceService = {
     if (data.subject) formData.append("subject", data.subject);
     if (data.grade) formData.append("grade", data.grade);
     if (data.school) formData.append("school", data.school);
+    if (data.module) formData.append("module", data.module);
     if (data.isPublic !== undefined)
       formData.append("isPublic", data.isPublic.toString());
     if (data.url) formData.append("url", data.url);
@@ -174,6 +181,7 @@ export const resourceService = {
     if (data.subject !== undefined) formData.append("subject", data.subject);
     if (data.grade !== undefined) formData.append("grade", data.grade);
     if (data.school !== undefined) formData.append("school", data.school);
+    if (data.module !== undefined) formData.append("module", data.module);
     if (data.isPublic !== undefined)
       formData.append("isPublic", data.isPublic.toString());
     if (data.url) formData.append("url", data.url);

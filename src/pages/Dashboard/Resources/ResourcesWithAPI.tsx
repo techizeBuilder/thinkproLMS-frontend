@@ -162,7 +162,7 @@ export default function ResourcesWithAPIPage() {
 
       {/* User Type Tabs */}
       <Tabs value={selectedUserType} onValueChange={(value) => setSelectedUserType(value as UserType)} className="mb-6">
-        <TabsList className="grid w-full grid-cols-2">
+        <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="student" className="flex items-center gap-2">
             <GraduationCap className="h-4 w-4" />
             Student Resources
@@ -173,6 +173,14 @@ export default function ResourcesWithAPIPage() {
               Mentor Resources
             </TabsTrigger>
           )}
+          <TabsTrigger value="guest" className="flex items-center gap-2">
+            <Users className="h-4 w-4" />
+            Guest Resources
+          </TabsTrigger>
+          <TabsTrigger value="all" className="flex items-center gap-2">
+            <Users className="h-4 w-4" />
+            All Resources
+          </TabsTrigger>
         </TabsList>
 
         {/* Student Resources */}
@@ -676,6 +684,406 @@ export default function ResourcesWithAPIPage() {
             </Tabs>
           </TabsContent>
         )}
+
+        {/* Guest Resources */}
+        <TabsContent value="guest" className="mt-6">
+          <Tabs value={selectedBucket} onValueChange={(value) => setSelectedBucket(value as BucketType)}>
+            <TabsList className="grid w-full grid-cols-2 mb-6">
+              <TabsTrigger value="documents" className="flex items-center gap-2">
+                <FileText className="h-4 w-4" />
+                Documents
+              </TabsTrigger>
+              <TabsTrigger value="videos" className="flex items-center gap-2">
+                <Video className="h-4 w-4" />
+                Videos
+              </TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="documents">
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-xl font-semibold">Guest Documents</h2>
+                {user?.role === 'leadmentor' && (
+                  <Button onClick={handleAddResource} className="flex items-center gap-2">
+                    <Plus className="h-4 w-4" />
+                    Add Document
+                  </Button>
+                )}
+              </div>
+
+              {loading ? (
+                <div className="flex justify-center items-center py-8">
+                  <Loader2 className="h-8 w-8 animate-spin" />
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {resources.map((resource) => (
+                    <Card key={resource._id} className="hover:shadow-lg transition-shadow">
+                      <CardHeader className="pb-3">
+                        <div className="flex items-start justify-between">
+                          <div className="flex items-center gap-2">
+                            {getResourceIcon(resource.type)}
+                            <CardTitle className="text-lg">{resource.title}</CardTitle>
+                          </div>
+                          {getFileTypeBadge(resource)}
+                        </div>
+                        <CardDescription className="line-clamp-2">
+                          {resource.description}
+                        </CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-2">
+                          <div className="flex items-center gap-2 text-sm text-gray-600">
+                            <FolderOpen className="h-4 w-4" />
+                            <span>Uploaded by {resource.uploadedBy?.name || 'Unknown'}</span>
+                          </div>
+                          <div className="flex items-center gap-2 text-sm text-gray-600">
+                            <Eye className="h-4 w-4" />
+                            <span>{resource.viewCount} views</span>
+                          </div>
+                          {resource.content.fileSize && (
+                            <div className="text-sm text-gray-600">
+                              Size: {formatFileSize(resource.content.fileSize)}
+                            </div>
+                          )}
+                          {resource.tags.length > 0 && (
+                            <div className="flex flex-wrap gap-1">
+                              {resource.tags.map((tag: string, index: number) => (
+                                <Badge key={index} variant="secondary" className="text-xs">
+                                  {tag}
+                                </Badge>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                        <div className="flex gap-2 mt-4">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleViewResource(resource)}
+                            className="flex-1"
+                          >
+                            <Eye className="h-4 w-4 mr-1" />
+                            View
+                          </Button>
+                          {user?.role === 'leadmentor' && (
+                            <>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => handleEditResource(resource._id)}
+                              >
+                                Edit
+                              </Button>
+                              <Button
+                                variant="destructive"
+                                size="sm"
+                                onClick={() => handleDeleteResource(resource._id)}
+                              >
+                                Delete
+                              </Button>
+                            </>
+                          )}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              )}
+            </TabsContent>
+
+            <TabsContent value="videos">
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-xl font-semibold">Guest Videos</h2>
+                {user?.role === 'leadmentor' && (
+                  <Button onClick={handleAddResource} className="flex items-center gap-2">
+                    <Plus className="h-4 w-4" />
+                    Add Video
+                  </Button>
+                )}
+              </div>
+
+              {loading ? (
+                <div className="flex justify-center items-center py-8">
+                  <Loader2 className="h-8 w-8 animate-spin" />
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {resources.map((resource) => (
+                    <Card key={resource._id} className="hover:shadow-lg transition-shadow">
+                      <CardHeader className="pb-3">
+                        <div className="flex items-start justify-between">
+                          <div className="flex items-center gap-2">
+                            {getResourceIcon(resource.type)}
+                            <CardTitle className="text-lg">{resource.title}</CardTitle>
+                          </div>
+                          {getFileTypeBadge(resource)}
+                        </div>
+                        <CardDescription className="line-clamp-2">
+                          {resource.description}
+                        </CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-2">
+                          <div className="flex items-center gap-2 text-sm text-gray-600">
+                            <FolderOpen className="h-4 w-4" />
+                            <span>Uploaded by {resource.uploadedBy?.name || 'Unknown'}</span>
+                          </div>
+                          <div className="flex items-center gap-2 text-sm text-gray-600">
+                            <Eye className="h-4 w-4" />
+                            <span>{resource.viewCount} views</span>
+                          </div>
+                          {resource.content.fileSize && (
+                            <div className="text-sm text-gray-600">
+                              Size: {formatFileSize(resource.content.fileSize)}
+                            </div>
+                          )}
+                          {resource.tags.length > 0 && (
+                            <div className="flex flex-wrap gap-1">
+                              {resource.tags.map((tag: string, index: number) => (
+                                <Badge key={index} variant="secondary" className="text-xs">
+                                  {tag}
+                                </Badge>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                        <div className="flex gap-2 mt-4">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleViewResource(resource)}
+                            className="flex-1"
+                          >
+                            <Eye className="h-4 w-4 mr-1" />
+                            View
+                          </Button>
+                          {user?.role === 'leadmentor' && (
+                            <>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => handleEditResource(resource._id)}
+                              >
+                                Edit
+                              </Button>
+                              <Button
+                                variant="destructive"
+                                size="sm"
+                                onClick={() => handleDeleteResource(resource._id)}
+                              >
+                                Delete
+                              </Button>
+                            </>
+                          )}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              )}
+            </TabsContent>
+          </Tabs>
+        </TabsContent>
+
+        {/* All Resources */}
+        <TabsContent value="all" className="mt-6">
+          <Tabs value={selectedBucket} onValueChange={(value) => setSelectedBucket(value as BucketType)}>
+            <TabsList className="grid w-full grid-cols-2 mb-6">
+              <TabsTrigger value="documents" className="flex items-center gap-2">
+                <FileText className="h-4 w-4" />
+                Documents
+              </TabsTrigger>
+              <TabsTrigger value="videos" className="flex items-center gap-2">
+                <Video className="h-4 w-4" />
+                Videos
+              </TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="documents">
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-xl font-semibold">All Documents</h2>
+                {user?.role === 'leadmentor' && (
+                  <Button onClick={handleAddResource} className="flex items-center gap-2">
+                    <Plus className="h-4 w-4" />
+                    Add Document
+                  </Button>
+                )}
+              </div>
+
+              {loading ? (
+                <div className="flex justify-center items-center py-8">
+                  <Loader2 className="h-8 w-8 animate-spin" />
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {resources.map((resource) => (
+                    <Card key={resource._id} className="hover:shadow-lg transition-shadow">
+                      <CardHeader className="pb-3">
+                        <div className="flex items-start justify-between">
+                          <div className="flex items-center gap-2">
+                            {getResourceIcon(resource.type)}
+                            <CardTitle className="text-lg">{resource.title}</CardTitle>
+                          </div>
+                          {getFileTypeBadge(resource)}
+                        </div>
+                        <CardDescription className="line-clamp-2">
+                          {resource.description}
+                        </CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-2">
+                          <div className="flex items-center gap-2 text-sm text-gray-600">
+                            <FolderOpen className="h-4 w-4" />
+                            <span>Uploaded by {resource.uploadedBy?.name || 'Unknown'}</span>
+                          </div>
+                          <div className="flex items-center gap-2 text-sm text-gray-600">
+                            <Eye className="h-4 w-4" />
+                            <span>{resource.viewCount} views</span>
+                          </div>
+                          {resource.content.fileSize && (
+                            <div className="text-sm text-gray-600">
+                              Size: {formatFileSize(resource.content.fileSize)}
+                            </div>
+                          )}
+                          {resource.tags.length > 0 && (
+                            <div className="flex flex-wrap gap-1">
+                              {resource.tags.map((tag: string, index: number) => (
+                                <Badge key={index} variant="secondary" className="text-xs">
+                                  {tag}
+                                </Badge>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                        <div className="flex gap-2 mt-4">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleViewResource(resource)}
+                            className="flex-1"
+                          >
+                            <Eye className="h-4 w-4 mr-1" />
+                            View
+                          </Button>
+                          {user?.role === 'leadmentor' && (
+                            <>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => handleEditResource(resource._id)}
+                              >
+                                Edit
+                              </Button>
+                              <Button
+                                variant="destructive"
+                                size="sm"
+                                onClick={() => handleDeleteResource(resource._id)}
+                              >
+                                Delete
+                              </Button>
+                            </>
+                          )}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              )}
+            </TabsContent>
+
+            <TabsContent value="videos">
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-xl font-semibold">All Videos</h2>
+                {user?.role === 'leadmentor' && (
+                  <Button onClick={handleAddResource} className="flex items-center gap-2">
+                    <Plus className="h-4 w-4" />
+                    Add Video
+                  </Button>
+                )}
+              </div>
+
+              {loading ? (
+                <div className="flex justify-center items-center py-8">
+                  <Loader2 className="h-8 w-8 animate-spin" />
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {resources.map((resource) => (
+                    <Card key={resource._id} className="hover:shadow-lg transition-shadow">
+                      <CardHeader className="pb-3">
+                        <div className="flex items-start justify-between">
+                          <div className="flex items-center gap-2">
+                            {getResourceIcon(resource.type)}
+                            <CardTitle className="text-lg">{resource.title}</CardTitle>
+                          </div>
+                          {getFileTypeBadge(resource)}
+                        </div>
+                        <CardDescription className="line-clamp-2">
+                          {resource.description}
+                        </CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-2">
+                          <div className="flex items-center gap-2 text-sm text-gray-600">
+                            <FolderOpen className="h-4 w-4" />
+                            <span>Uploaded by {resource.uploadedBy?.name || 'Unknown'}</span>
+                          </div>
+                          <div className="flex items-center gap-2 text-sm text-gray-600">
+                            <Eye className="h-4 w-4" />
+                            <span>{resource.viewCount} views</span>
+                          </div>
+                          {resource.content.fileSize && (
+                            <div className="text-sm text-gray-600">
+                              Size: {formatFileSize(resource.content.fileSize)}
+                            </div>
+                          )}
+                          {resource.tags.length > 0 && (
+                            <div className="flex flex-wrap gap-1">
+                              {resource.tags.map((tag: string, index: number) => (
+                                <Badge key={index} variant="secondary" className="text-xs">
+                                  {tag}
+                                </Badge>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                        <div className="flex gap-2 mt-4">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleViewResource(resource)}
+                            className="flex-1"
+                          >
+                            <Eye className="h-4 w-4 mr-1" />
+                            View
+                          </Button>
+                          {user?.role === 'leadmentor' && (
+                            <>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => handleEditResource(resource._id)}
+                              >
+                                Edit
+                              </Button>
+                              <Button
+                                variant="destructive"
+                                size="sm"
+                                onClick={() => handleDeleteResource(resource._id)}
+                              >
+                                Delete
+                              </Button>
+                            </>
+                          )}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              )}
+            </TabsContent>
+          </Tabs>
+        </TabsContent>
       </Tabs>
     </div>
   );
