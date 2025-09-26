@@ -9,54 +9,40 @@ import {
   Play, 
   Eye,
   Calendar,
-  User
+  User,
+  Loader2
 } from 'lucide-react';
-import type { Resource } from '@/types/resources';
-
-// Mock resource data - in real app, this would come from API
-const mockResource: Resource = {
-  id: '7',
-  title: 'Mentor Training Session',
-  description: 'Training video for new mentors',
-  type: 'video',
-  userType: 'mentor',
-  bucket: 'videos',
-  url: 'https://vimeo.com/987654321',
-  uploadedAt: new Date('2024-01-08'),
-  updatedAt: new Date('2024-01-08'),
-  uploadedBy: 'Lead Mentor',
-  tags: ['training', 'mentors'],
-  isActive: true
-};
+import type { Resource as ApiResource } from '@/api/resourceService';
+import { resourceService } from '@/api/resourceService';
+import { getResourceDisplayUrl } from '@/utils/resourceUtils';
+import { toast } from 'sonner';
 
 export default function MentorResourceViewPage() {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
   
-  const [resource, setResource] = useState<Resource | null>(null);
+  const [resource, setResource] = useState<ApiResource | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [viewCount, setViewCount] = useState(0);
 
   useEffect(() => {
     const loadResource = async () => {
+      if (!id) return;
+      
       setIsLoading(true);
       try {
-        // TODO: Replace with actual API call
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        
-        setResource(mockResource);
-        setViewCount(28); // Mock view count
+        const response = await resourceService.getById(id);
+        setResource(response.data);
       } catch (error) {
         console.error('Error loading resource:', error);
+        toast.error('Failed to load resource');
+        navigate('/mentor/resources');
       } finally {
         setIsLoading(false);
       }
     };
 
-    if (id) {
-      loadResource();
-    }
-  }, [id]);
+    loadResource();
+  }, [id, navigate]);
 
   const getEmbedUrl = (url: string): string => {
     // Handle YouTube URLs
@@ -84,8 +70,8 @@ export default function MentorResourceViewPage() {
   };
 
   const handleExternalOpen = () => {
-    if (resource?.url) {
-      window.open(resource.url, '_blank');
+    if (resource?.content.url) {
+      window.open(resource.content.url, '_blank');
     }
   };
 
@@ -118,8 +104,8 @@ export default function MentorResourceViewPage() {
     );
   }
 
-  const videoSource = getVideoSource(resource.url || '');
-  const embedUrl = getEmbedUrl(resource.url || '');
+  const videoSource = getVideoSource(resource.content.url || '');
+  const embedUrl = getEmbedUrl(resource.content.url || '');
 
   return (
     <div className="container mx-auto p-6 max-w-6xl">
@@ -157,7 +143,7 @@ export default function MentorResourceViewPage() {
                   <video
                     controls
                     className="w-full h-full"
-                    src={resource.url}
+                    src={resource.content.url}
                   >
                     Your browser does not support the video tag.
                   </video>
@@ -188,23 +174,23 @@ export default function MentorResourceViewPage() {
             <CardContent className="space-y-4">
               <div className="flex items-center gap-2 text-sm">
                 <Eye className="h-4 w-4" />
-                <span>{viewCount} views</span>
+                <span>{resource.viewCount} views</span>
               </div>
               
               <div className="flex items-center gap-2 text-sm">
                 <Calendar className="h-4 w-4" />
-                <span>Uploaded {resource.uploadedAt.toLocaleDateString()}</span>
+                <span>Uploaded {new Date(resource.createdAt).toLocaleDateString()}</span>
               </div>
               
               <div className="flex items-center gap-2 text-sm">
                 <User className="h-4 w-4" />
-                <span>By {resource.uploadedBy}</span>
+                <span>By {resource.uploadedBy.name}</span>
               </div>
 
               <div className="pt-2">
                 <p className="text-sm font-medium mb-2">Target Audience:</p>
-                <Badge variant={resource.userType === 'student' ? 'default' : 'secondary'}>
-                  {resource.userType === 'student' ? 'Students' : 'Mentors'}
+                <Badge variant={resource.category === 'student' ? 'default' : 'secondary'}>
+                  {resource.category === 'student' ? 'Students' : 'Mentors'}
                 </Badge>
               </div>
             </CardContent>
