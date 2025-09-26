@@ -1,13 +1,11 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Loader2, CheckCircle, Circle, BookOpen, GraduationCap, School as SchoolIcon } from "lucide-react";
-import { moduleCompletionService, type MentorModuleProgress, type MarkCompletionData, type School } from "@/api/moduleCompletionService";
+import { Loader2, BookOpen, GraduationCap, School as SchoolIcon, Check } from "lucide-react";
+import { moduleCompletionService, type MentorModuleProgress, type MarkCompletionData, type MarkSubtopicCompletionData, type MarkAllSubtopicCompletionData, type School } from "@/api/moduleCompletionService";
 import { toast } from "sonner";
 
 export default function ModuleProgressPage() {
@@ -17,7 +15,7 @@ export default function ModuleProgressPage() {
   const [selectedSchoolId, setSelectedSchoolId] = useState<string>("");
   const [updating, setUpdating] = useState<string | null>(null);
   const [notes, setNotes] = useState<{ [key: string]: string }>({});
-  const [completionPercentage, setCompletionPercentage] = useState<{ [key: string]: number }>({});
+  const [subtopicCompletions, setSubtopicCompletions] = useState<{ [key: string]: boolean }>({});
 
   useEffect(() => {
     loadAvailableSchools();
@@ -48,20 +46,29 @@ export default function ModuleProgressPage() {
       const data = await moduleCompletionService.getMentorModuleProgress(schoolId);
       setProgressData(data);
       
-      // Initialize notes and completion percentage from existing data
+      // Initialize notes and subtopic completions from existing data
       const initialNotes: { [key: string]: string } = {};
-      const initialPercentage: { [key: string]: number } = {};
+      const initialSubtopicCompletions: { [key: string]: boolean } = {};
       
       data.moduleProgress.forEach((module) => {
         module.moduleItems.forEach((item) => {
           const key = `${module.moduleId}-${item.moduleItemId}`;
           initialNotes[key] = item.notes;
-          initialPercentage[key] = item.completionPercentage;
+          
+          // Initialize subtopic completions
+          if (item.topics) {
+            item.topics.forEach((topic) => {
+              topic.subtopics.forEach((subtopic) => {
+                const subtopicKey = `${module.moduleId}-${item.moduleItemId}-${topic.topicId}-${subtopic.subtopicId}`;
+                initialSubtopicCompletions[subtopicKey] = subtopic.isCompleted;
+              });
+            });
+          }
         });
       });
       
       setNotes(initialNotes);
-      setCompletionPercentage(initialPercentage);
+      setSubtopicCompletions(initialSubtopicCompletions);
     } catch (error) {
       console.error("Error loading module progress:", error);
       toast.error("Failed to load module progress");
@@ -74,8 +81,7 @@ export default function ModuleProgressPage() {
     moduleId: string,
     moduleItemId: string,
     isCompleted: boolean,
-    notes: string = "",
-    completionPercentage: number = 0
+    notes: string = ""
   ) => {
     if (!progressData) return;
 
@@ -89,10 +95,38 @@ export default function ModuleProgressPage() {
         schoolId: progressData.school._id,
         isCompleted,
         notes,
-        completionPercentage,
       };
 
       await moduleCompletionService.markModuleItemCompleted(data);
+      
+      // If marking as completed, also mark all subtopics as completed
+      if (isCompleted) {
+        try {
+          const allSubtopicData: MarkAllSubtopicCompletionData = {
+            moduleId,
+            moduleItemId,
+            schoolId: progressData.school._id,
+          };
+          await moduleCompletionService.markAllSubtopicCompleted(allSubtopicData);
+          
+          // Update local subtopic completion state
+          const module = progressData.moduleProgress.find(m => m.moduleId === moduleId);
+          if (module) {
+            const moduleItem = module.moduleItems.find(item => item.moduleItemId === moduleItemId);
+            if (moduleItem && moduleItem.topics) {
+              moduleItem.topics.forEach(topic => {
+                topic.subtopics.forEach(subtopic => {
+                  const subtopicKey = `${moduleId}-${moduleItemId}-${topic.topicId}-${subtopic.subtopicId}`;
+                  setSubtopicCompletions(prev => ({ ...prev, [subtopicKey]: true }));
+                });
+              });
+            }
+          }
+        } catch (error) {
+          console.error("Error marking all subtopics completed:", error);
+          // Don't show error to user as the main completion was successful
+        }
+      }
       
       // Update local state
       setProgressData((prev) => {
@@ -111,7 +145,6 @@ export default function ModuleProgressPage() {
                       isCompleted,
                       completedAt: isCompleted ? new Date().toISOString() : null,
                       notes,
-                      completionPercentage,
                     };
                   }
                   return item;
@@ -150,9 +183,50 @@ export default function ModuleProgressPage() {
     setNotes((prev) => ({ ...prev, [key]: value }));
   };
 
-  const handlePercentageChange = (key: string, value: number) => {
-    setCompletionPercentage((prev) => ({ ...prev, [key]: value }));
+  const handleSubtopicCompletion = async (
+    moduleId: string,
+    moduleItemId: string,
+    topicId: string,
+    subtopicId: string,
+    isCompleted: boolean
+  ) => {
+    if (!progressData) return;
+
+    const subtopicKey = `${moduleId}-${moduleItemId}-${topicId}-${subtopicId}`;
+    setUpdating(subtopicKey);
+
+    try {
+      const data: MarkSubtopicCompletionData = {
+        moduleId,
+        moduleItemId,
+        topicId,
+        subtopicId,
+        schoolId: progressData.school._id,
+        isCompleted,
+      };
+
+      const response = await moduleCompletionService.markSubtopicCompleted(data);
+      
+      // Update local state
+      setSubtopicCompletions((prev) => ({ ...prev, [subtopicKey]: isCompleted }));
+      
+      // If all subtopics are completed, update the module item completion
+      if (response.data.moduleItemAutoCompleted) {
+        // Reload the module progress to reflect the auto-completion
+        await loadModuleProgress(progressData.school._id);
+        toast.success("All subtopics completed! Module item marked as completed.");
+      } else {
+        toast.success(isCompleted ? "Subtopic marked as completed" : "Subtopic marked as incomplete");
+      }
+    } catch (error: any) {
+      console.error("Error updating subtopic completion:", error);
+      console.error("Error details:", error.response?.data || error.message);
+      toast.error(`Failed to update subtopic completion: ${error.response?.data?.message || error.message}`);
+    } finally {
+      setUpdating(null);
+    }
   };
+
 
   if (loading) {
     return (
@@ -173,7 +247,7 @@ export default function ModuleProgressPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="p-6 space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">Module Progress</h1>
@@ -226,7 +300,7 @@ export default function ModuleProgressPage() {
             </div>
             <div>
               <p className="text-sm text-gray-600">Mentor</p>
-              <p className="font-medium">{progressData.mentor.name}</p>
+              <p className="font-medium">{progressData.mentor?.name || 'Not assigned'}</p>
             </div>
             <div>
               <p className="text-sm text-gray-600">Total Modules</p>
@@ -251,12 +325,6 @@ export default function ModuleProgressPage() {
                     {module.completedItems} of {module.totalItems} items completed
                   </p>
                 </div>
-                <div className="text-right">
-                  <div className="text-2xl font-bold text-green-600">
-                    {module.overallProgress}%
-                  </div>
-                  <Progress value={module.overallProgress} className="w-32 mt-2" />
-                </div>
               </div>
             </CardHeader>
             <CardContent>
@@ -271,28 +339,30 @@ export default function ModuleProgressPage() {
                       className="flex items-start gap-4 p-4 border rounded-lg"
                     >
                       <div className="flex items-center gap-2">
-                        <Checkbox
-                          id={item.moduleItemId}
-                          checked={item.isCompleted}
-                          disabled={isUpdating}
-                          onCheckedChange={(checked) => {
-                            const isCompleted = checked as boolean;
+                        <button
+                          onClick={() => {
+                            if (isUpdating) return;
+                            const isCompleted = !item.isCompleted;
                             const currentNotes = notes[key] || item.notes;
-                            const currentPercentage = completionPercentage[key] || item.completionPercentage;
                             handleMarkCompleted(
                               module.moduleId,
                               item.moduleItemId,
                               isCompleted,
-                              currentNotes,
-                              currentPercentage
+                              currentNotes
                             );
                           }}
-                        />
-                        {item.isCompleted ? (
-                          <CheckCircle className="h-5 w-5 text-green-500" />
-                        ) : (
-                          <Circle className="h-5 w-5 text-gray-400" />
-                        )}
+                          disabled={isUpdating}
+                          className={`
+                            w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all duration-200
+                            ${item.isCompleted 
+                              ? 'bg-green-500 border-green-500 text-white hover:bg-green-600' 
+                              : 'border-gray-300 hover:border-gray-400 hover:bg-gray-50'
+                            }
+                            ${isUpdating ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
+                          `}
+                        >
+                          {item.isCompleted && <Check className="h-4 w-4" />}
+                        </button>
                       </div>
                       
                       <div className="flex-1 space-y-3">
@@ -306,6 +376,73 @@ export default function ModuleProgressPage() {
                             </p>
                           )}
                         </div>
+                        
+                        {/* Topics and Subtopics */}
+                        {item.topics && item.topics.length > 0 && (
+                          <div className="space-y-3">
+                            {item.topics.map((topic) => (
+                              <div key={topic.topicId} className="ml-4 space-y-2">
+                                <div className="flex items-center gap-2">
+                                  <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                                  <span className="font-medium text-sm text-gray-700">
+                                    {topic.topicName}
+                                  </span>
+                                </div>
+                                
+                                {topic.subtopics && topic.subtopics.length > 0 && (
+                                  <div className="ml-6 space-y-2">
+                                    {topic.subtopics.map((subtopic) => {
+                                      const subtopicKey = `${module.moduleId}-${item.moduleItemId}-${topic.topicId}-${subtopic.subtopicId}`;
+                                      const isSubtopicCompleted = subtopic.isCompleted || subtopicCompletions[subtopicKey] || false;
+                                      const isSubtopicUpdating = updating === subtopicKey;
+                                      
+                                      return (
+                                        <div key={subtopic.subtopicId} className="flex items-start gap-3">
+                                          <button
+                                            onClick={() => {
+                                              handleSubtopicCompletion(
+                                                module.moduleId,
+                                                item.moduleItemId,
+                                                topic.topicId,
+                                                subtopic.subtopicId,
+                                                !isSubtopicCompleted
+                                              );
+                                            }}
+                                            disabled={isSubtopicUpdating}
+                                            className={`
+                                              w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all duration-200
+                                              ${isSubtopicCompleted 
+                                                ? 'bg-green-500 border-green-500 text-white hover:bg-green-600' 
+                                                : 'border-gray-300 hover:border-gray-400 hover:bg-gray-50'
+                                              }
+                                              ${isSubtopicUpdating ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
+                                            `}
+                                          >
+                                            {isSubtopicUpdating ? (
+                                              <Loader2 className="h-3 w-3 animate-spin" />
+                                            ) : isSubtopicCompleted ? (
+                                              <Check className="h-3 w-3" />
+                                            ) : null}
+                                          </button>
+                                        <div className="flex-1">
+                                          <span className="text-sm text-gray-600">
+                                            {subtopic.subtopicName}
+                                          </span>
+                                          {subtopic.subtopicDescription && (
+                                            <p className="text-xs text-gray-500 mt-1">
+                                              {subtopic.subtopicDescription}
+                                            </p>
+                                          )}
+                                        </div>
+                                      </div>
+                                      );
+                                    })}
+                                  </div>
+                                )}
+                              </div>
+                            ))}
+                          </div>
+                        )}
                         
                         {item.isCompleted && (
                           <div className="space-y-2">
@@ -323,24 +460,6 @@ export default function ModuleProgressPage() {
                               />
                             </div>
                             
-                            <div>
-                              <Label htmlFor={`percentage-${item.moduleItemId}`} className="text-sm">
-                                Completion Percentage
-                              </Label>
-                              <div className="flex items-center gap-2 mt-1">
-                                <input
-                                  type="range"
-                                  min="0"
-                                  max="100"
-                                  value={completionPercentage[key] || item.completionPercentage}
-                                  onChange={(e) => handlePercentageChange(key, parseInt(e.target.value))}
-                                  className="flex-1"
-                                />
-                                <span className="text-sm font-medium w-12">
-                                  {completionPercentage[key] || item.completionPercentage}%
-                                </span>
-                              </div>
-                            </div>
                             
                             {item.completedAt && (
                               <p className="text-xs text-gray-500">

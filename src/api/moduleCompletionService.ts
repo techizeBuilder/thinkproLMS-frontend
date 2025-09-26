@@ -1,5 +1,23 @@
 import axiosInstance from "./axiosInstance";
 
+export interface Subtopic {
+  subtopicId: string;
+  subtopicName: string;
+  subtopicDescription: string;
+  isActive: boolean;
+  isCompleted: boolean;
+  completedAt: string | null;
+  notes: string;
+}
+
+export interface Topic {
+  topicId: string;
+  topicName: string;
+  topicDescription: string;
+  subtopics: Subtopic[];
+  isActive: boolean;
+}
+
 export interface ModuleItemCompletion {
   moduleItemId: string;
   moduleItemName: string;
@@ -7,7 +25,7 @@ export interface ModuleItemCompletion {
   isCompleted: boolean;
   completedAt: string | null;
   notes: string;
-  completionPercentage: number;
+  topics: Topic[];
 }
 
 export interface ModuleProgress {
@@ -43,7 +61,22 @@ export interface MarkCompletionData {
   schoolId: string;
   isCompleted: boolean;
   notes?: string;
-  completionPercentage?: number;
+}
+
+export interface MarkSubtopicCompletionData {
+  moduleId: string;
+  moduleItemId: string;
+  topicId: string;
+  subtopicId: string;
+  schoolId: string;
+  isCompleted: boolean;
+  notes?: string;
+}
+
+export interface MarkAllSubtopicCompletionData {
+  moduleId: string;
+  moduleItemId: string;
+  schoolId: string;
 }
 
 export interface School {
@@ -116,5 +149,17 @@ export const moduleCompletionService = {
     
     const response = await axiosInstance.get("/module-completion/reports", { params });
     return response.data.data;
+  },
+
+  // Mark subtopic as completed
+  markSubtopicCompleted: async (data: MarkSubtopicCompletionData) => {
+    const response = await axiosInstance.post("/module-completion/mentor/mark-subtopic-completed", data);
+    return response.data;
+  },
+
+  // Mark all subtopics as completed
+  markAllSubtopicCompleted: async (data: MarkAllSubtopicCompletionData) => {
+    const response = await axiosInstance.post("/module-completion/mentor/mark-all-subtopics-completed", data);
+    return response.data;
   },
 };
