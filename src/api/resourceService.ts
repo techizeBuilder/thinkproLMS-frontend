@@ -107,7 +107,7 @@ export const resourceService = {
 
   // Get resources by category
   getByCategory: async (
-    category: "mentor" | "student",
+    category: "mentor" | "student" | "guest" | "all",
     filters: Omit<ResourceFilters, "category"> = {}
   ): Promise<ResourceListResponse> => {
     const params = new URLSearchParams();

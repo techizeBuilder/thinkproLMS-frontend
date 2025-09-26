@@ -9,12 +9,10 @@ import {
   Play, 
   Eye,
   Calendar,
-  User,
-  Loader2
+  User
 } from 'lucide-react';
 import type { Resource as ApiResource } from '@/api/resourceService';
 import { resourceService } from '@/api/resourceService';
-import { getResourceDisplayUrl } from '@/utils/resourceUtils';
 import { toast } from 'sonner';
 
 export default function MentorResourceViewPage() {
