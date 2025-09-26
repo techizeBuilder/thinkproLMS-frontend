@@ -66,6 +66,10 @@ import CreateAssessmentPage from "../pages/Dashboard/Mentor/Assessments/Create";
 import ViewAssessmentPage from "../pages/Dashboard/Mentor/Assessments/View";
 import EditAssessmentPage from "../pages/Dashboard/Mentor/Assessments/Edit";
 import AssessmentAnalyticsPage from "../pages/Dashboard/Mentor/Assessments/Analytics";
+
+// Module Progress Components
+import MentorModuleProgressPage from "../pages/Dashboard/Mentor/ModuleProgress";
+import LeadMentorModuleCompletionReportsPage from "../pages/Dashboard/LeadMentor/ModuleCompletionReports";
 import StudentAssessmentsPage from "../pages/Dashboard/Student/Assessments";
 import TakeAssessmentPage from "../pages/Dashboard/Student/Assessments/TakeAssessment";
 import StudentAssessmentResultsPage from "../pages/Dashboard/Student/Assessments/Results";
@@ -400,6 +404,9 @@ export default function AppRouter() {
               </PermissionProtectedRoute>
             } 
           />
+          
+          {/* Module Completion Reports */}
+          <Route path="module-completion-reports" element={<LeadMentorModuleCompletionReportsPage />} />
         </Route>
 
         {/* Mentor */}
@@ -425,6 +432,9 @@ export default function AppRouter() {
           <Route path="assessments/:id" element={<ViewAssessmentPage />} />
           <Route path="assessments/:id/edit" element={<EditAssessmentPage />} />
           <Route path="assessments/:id/analytics" element={<AssessmentAnalyticsPage />} />
+          
+          {/* Module Progress Management */}
+          <Route path="module-progress" element={<MentorModuleProgressPage />} />
         </Route>
 
         {/* Student */}

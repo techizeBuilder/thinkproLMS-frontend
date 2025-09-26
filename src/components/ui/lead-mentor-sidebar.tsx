@@ -83,6 +83,9 @@ export function LeadMentorSidebar({ className }: LeadMentorSidebarProps) {
             <SidebarNavItem to="/leadmentor/certificates" icon={Award}>
               Certificates
             </SidebarNavItem>
+            <SidebarNavItem to="/leadmentor/module-completion-reports" icon={FileText}>
+              Module Progress Reports
+            </SidebarNavItem>
           </SidebarNav>
         </SidebarGroup>
 
