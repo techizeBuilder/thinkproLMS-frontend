@@ -55,7 +55,7 @@ export interface CreateAssessmentData {
   title: string;
   instructions: string;
   grade: string;
-  section: string;
+  sections: string[];
   subject: string;
   modules: string[];
   startDate: string;

@@ -56,7 +56,7 @@ export default function CreateAssessmentPage() {
     instructions: "",
     school: "",
     grade: "",
-    section: "",
+    sections: [] as string[],
     subject: "",
     modules: [] as string[],
     startDate: "",
@@ -219,12 +219,12 @@ export default function CreateAssessmentPage() {
 
   const handleInputChange = (field: string, value: any) => {
     if (field === "school") {
-      // Reset grade and section when school changes
-      setFormData(prev => ({ ...prev, [field]: value, grade: "", section: "" }));
+      // Reset grade and sections when school changes
+      setFormData(prev => ({ ...prev, [field]: value, grade: "", sections: [] }));
       setAvailableSections([]);
     } else if (field === "grade") {
-      // Reset section when grade changes and update available sections
-      setFormData(prev => ({ ...prev, [field]: value, section: "" }));
+      // Reset sections when grade changes and update available sections
+      setFormData(prev => ({ ...prev, [field]: value, sections: [] }));
       
       if (value && hasServiceDetails) {
         // Find the selected grade in available grades and get its sections
@@ -254,6 +254,14 @@ export default function CreateAssessmentPage() {
 
     setFormData(prev => ({ ...prev, modules: newModules }));
     setQuestionFilters(prev => ({ ...prev, modules: newModules }));
+  };
+
+  const handleSectionToggle = (section: string) => {
+    const newSections = formData.sections.includes(section)
+      ? formData.sections.filter(s => s !== section)
+      : [...formData.sections, section];
+
+    setFormData(prev => ({ ...prev, sections: newSections }));
   };
 
   const handleQuestionSelect = (question: Question) => {
@@ -345,7 +353,7 @@ export default function CreateAssessmentPage() {
   };
 
   const validateForm = () => {
-    if (!formData.title || !formData.instructions || !formData.grade || !formData.section || !formData.subject) {
+    if (!formData.title || !formData.instructions || !formData.grade || !formData.sections || formData.sections.length === 0 || !formData.subject) {
       toast.error("Please fill in all required fields");
       return false;
     }
@@ -490,22 +498,33 @@ export default function CreateAssessmentPage() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="section">Section *</Label>
-                <Select value={formData.section} onValueChange={(value) => handleInputChange("section", value)}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select section" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {availableSections.map(section => (
-                      <SelectItem key={section} value={section}>{section}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <Label htmlFor="sections">Sections *</Label>
+                <div className="space-y-2">
+                  {availableSections.map(section => (
+                    <div key={section} className="flex items-center space-x-2">
+                      <input
+                        type="checkbox"
+                        id={`section-${section}`}
+                        checked={formData.sections.includes(section)}
+                        onChange={() => handleSectionToggle(section)}
+                        className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                      />
+                      <label htmlFor={`section-${section}`} className="text-sm font-medium text-gray-700">
+                        {section}
+                      </label>
+                    </div>
+                  ))}
+                </div>
                 {hasServiceDetails && availableSections.length === 0 && formData.grade && (
                   <p className="text-sm text-gray-500">No sections available for {formData.grade}. Please configure service details first.</p>
                 )}
                 {!hasServiceDetails && formData.school && (
                   <p className="text-sm text-gray-500">Service details not configured for this school. Please contact administrator.</p>
+                )}
+                {formData.sections.length > 0 && (
+                  <div className="mt-2">
+                    <p className="text-sm text-gray-600">Selected sections: {formData.sections.join(", ")}</p>
+                  </div>
                 )}
               </div>
 
@@ -599,7 +618,7 @@ export default function CreateAssessmentPage() {
             </div>
 
             <div className="flex justify-end">
-              <Button onClick={() => setStep(2)} disabled={!formData.grade || !formData.section || !formData.subject || ((user?.role === "superadmin" || user?.role === "leadmentor" || user?.role === "mentor") && !formData.school)}>
+              <Button onClick={() => setStep(2)} disabled={!formData.grade || formData.sections.length === 0 || !formData.subject || ((user?.role === "superadmin" || user?.role === "leadmentor" || user?.role === "mentor") && !formData.school)}>
                 Next: Select Questions
               </Button>
             </div>
@@ -739,7 +758,7 @@ export default function CreateAssessmentPage() {
                     <p><strong>School:</strong> {schools.find(s => s._id === formData.school)?.name || "Not selected"}</p>
                   )}
                   <p><strong>Grade:</strong> {formData.grade}</p>
-                  <p><strong>Section:</strong> {formData.section}</p>
+                  <p><strong>Sections:</strong> {formData.sections.join(", ")}</p>
                   <p><strong>Subject:</strong> {formData.subject}</p>
                   <p><strong>Modules:</strong> {formData.modules.join(", ") || "All"}</p>
                   <p><strong>Duration:</strong> {formData.duration} minutes</p>

@@ -249,7 +249,7 @@ export default function ViewAssessmentPage() {
             <CardContent>
               <div className="text-sm">
                 <span className="font-medium">{assessment.grade}</span>
-                <span className="text-gray-500"> - All sections</span>
+                <span className="text-gray-500"> - {assessment.sections.join(", ")}</span>
               </div>
             </CardContent>
           </Card>
