@@ -4,8 +4,12 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Loader2, BookOpen, GraduationCap, School as SchoolIcon, Check } from "lucide-react";
-import { moduleCompletionService, type MentorModuleProgress, type MarkCompletionData, type MarkSubtopicCompletionData, type MarkAllSubtopicCompletionData, type School } from "@/api/moduleCompletionService";
+import { Loader2, BookOpen, Check, X } from "lucide-react";
+import { MultiSelect } from "@/components/ui/multi-select";
+import { Button } from "@/components/ui/button";
+import { moduleCompletionService, type MentorModuleProgress, type MarkCompletionData, type MarkSubtopicCompletionData, type MarkAllSubtopicCompletionData, type MarkTopicCompletionData, type School } from "@/api/moduleCompletionService";
+import { subjectService, type Subject } from "@/api/subjectService";
+import { schoolService } from "@/api/schoolService";
 import { toast } from "sonner";
 
 export default function ModuleProgressPage() {
@@ -15,15 +19,22 @@ export default function ModuleProgressPage() {
   const [selectedSchoolId, setSelectedSchoolId] = useState<string>("");
   const [updating, setUpdating] = useState<string | null>(null);
   const [notes, setNotes] = useState<{ [key: string]: string }>({});
+  const [originalNotes, setOriginalNotes] = useState<{ [key: string]: string }>({});
   const [subtopicCompletions, setSubtopicCompletions] = useState<{ [key: string]: boolean }>({});
+  const [selectedGrades, setSelectedGrades] = useState<string[]>([]);
+  const [selectedSubjectIds, setSelectedSubjectIds] = useState<string[]>([]);
+  const [availableSubjects, setAvailableSubjects] = useState<Subject[]>([]);
+  const [availableGrades, setAvailableGrades] = useState<{ value: string; label: string }[]>([]);
 
   useEffect(() => {
     loadAvailableSchools();
+    loadAvailableSubjects();
   }, []);
 
   useEffect(() => {
     if (selectedSchoolId) {
       loadModuleProgress(selectedSchoolId);
+      loadSchoolGrades(selectedSchoolId);
     }
   }, [selectedSchoolId]);
 
@@ -40,6 +51,48 @@ export default function ModuleProgressPage() {
     }
   };
 
+  const loadAvailableSubjects = async () => {
+    try {
+      const subjects = await subjectService.getAllSubjects();
+      setAvailableSubjects(subjects.filter(s => s.isActive));
+    } catch (error) {
+      console.error("Error loading subjects:", error);
+      toast.error("Failed to load subjects");
+    }
+  };
+
+  const loadSchoolGrades = async (schoolId: string) => {
+    try {
+      const response = await schoolService.getServiceDetails(schoolId);
+      if (response.data.hasServiceDetails) {
+        const grades = response.data.grades.map(grade => ({
+          value: grade.grade, // grade.grade is already "Grade 8", "Grade 7", etc.
+          label: grade.grade  // Use the grade string directly as label
+        }));
+        setAvailableGrades(grades);
+      } else {
+        // Fallback to grades from module progress data
+        const uniqueGrades = Array.from(
+          new Set((progressData?.moduleProgress || []).map((m) => m.grade))
+        ).sort((a, b) => a - b);
+        setAvailableGrades(uniqueGrades.map(grade => ({
+          value: `Grade ${grade}`,
+          label: `Grade ${grade}`
+        })));
+      }
+    } catch (error) {
+      console.error("Error loading school grades:", error);
+      // Fallback to grades from module progress data
+      const uniqueGrades = Array.from(
+        new Set((progressData?.moduleProgress || []).map((m) => m.grade))
+      ).sort((a, b) => a - b);
+      setAvailableGrades(uniqueGrades.map(grade => ({
+        value: `Grade ${grade}`,
+        label: `Grade ${grade}`
+      })));
+    }
+  };
+
   const loadModuleProgress = async (schoolId: string) => {
     try {
       setLoading(true);
@@ -48,12 +101,14 @@ export default function ModuleProgressPage() {
       
       // Initialize notes and subtopic completions from existing data
       const initialNotes: { [key: string]: string } = {};
+      const initialOriginalNotes: { [key: string]: string } = {};
       const initialSubtopicCompletions: { [key: string]: boolean } = {};
       
       data.moduleProgress.forEach((module) => {
         module.moduleItems.forEach((item) => {
           const key = `${module.moduleId}-${item.moduleItemId}`;
           initialNotes[key] = item.notes;
+          initialOriginalNotes[key] = item.notes; // Store original notes for comparison
           
           // Initialize subtopic completions
           if (item.topics) {
@@ -68,6 +123,7 @@ export default function ModuleProgressPage() {
       });
       
       setNotes(initialNotes);
+      setOriginalNotes(initialOriginalNotes);
       setSubtopicCompletions(initialSubtopicCompletions);
     } catch (error) {
       console.error("Error loading module progress:", error);
@@ -183,6 +239,67 @@ export default function ModuleProgressPage() {
     setNotes((prev) => ({ ...prev, [key]: value }));
   };
 
+  const hasNotesChanged = (key: string) => {
+    const currentNotes = notes[key] || "";
+    const originalNotesValue = originalNotes[key] || "";
+    return currentNotes !== originalNotesValue;
+  };
+
+  const handleSaveNotes = async (moduleId: string, moduleItemId: string, notes: string) => {
+    if (!progressData) return;
+
+    const key = `${moduleId}-${moduleItemId}`;
+    setUpdating(key);
+
+    try {
+      const data = {
+        moduleId,
+        moduleItemId,
+        schoolId: progressData.school._id,
+        notes,
+      };
+
+      await moduleCompletionService.saveModuleItemNotes(data);
+      
+      // Update local state
+      setProgressData((prev) => {
+        if (!prev) return prev;
+        
+        return {
+          ...prev,
+          moduleProgress: prev.moduleProgress.map((module) => {
+            if (module.moduleId === moduleId) {
+              return {
+                ...module,
+                moduleItems: module.moduleItems.map((item) => {
+                  if (item.moduleItemId === moduleItemId) {
+                    return {
+                      ...item,
+                      notes,
+                    };
+                  }
+                  return item;
+                }),
+              };
+            }
+            return module;
+          }),
+        };
+      });
+
+      // Update original notes to reflect the saved state
+      const key = `${moduleId}-${moduleItemId}`;
+      setOriginalNotes((prev) => ({ ...prev, [key]: notes }));
+
+      toast.success("Notes saved successfully");
+    } catch (error) {
+      console.error("Error saving notes:", error);
+      toast.error("Failed to save notes");
+    } finally {
+      setUpdating(null);
+    }
+  };
+
   const handleSubtopicCompletion = async (
     moduleId: string,
     moduleItemId: string,
@@ -227,6 +344,40 @@ export default function ModuleProgressPage() {
     }
   };
 
+  const handleTopicCompletion = async (
+    moduleId: string,
+    moduleItemId: string,
+    topicId: string,
+    isCompleted: boolean
+  ) => {
+    if (!progressData) return;
+
+    const topicKey = `${moduleId}-${moduleItemId}-${topicId}`;
+    setUpdating(topicKey);
+
+    try {
+      const data: MarkTopicCompletionData = {
+        moduleId,
+        moduleItemId,
+        topicId,
+        schoolId: progressData.school._id,
+        isCompleted,
+      };
+
+      await moduleCompletionService.markTopicCompleted(data);
+
+      // Reload to reflect cascading subtopic/module updates
+      await loadModuleProgress(progressData.school._id);
+
+      toast.success(isCompleted ? "Topic marked as completed" : "Topic marked as incomplete");
+    } catch (error: any) {
+      console.error("Error updating topic completion:", error);
+      toast.error(`Failed to update topic completion: ${error.response?.data?.message || error.message}`);
+    } finally {
+      setUpdating(null);
+    }
+  };
+
 
   if (loading) {
     return (
@@ -246,79 +397,99 @@ export default function ModuleProgressPage() {
     );
   }
 
+  const clearFilters = () => {
+    setSelectedGrades([]);
+    setSelectedSubjectIds([]);
+  };
+
+  const filteredModules = (progressData?.moduleProgress || []).filter((m) => {
+    const gradeOk = selectedGrades.length === 0 || selectedGrades.some(selectedGrade => {
+      // Extract number from "Grade X" format
+      const gradeNumber = selectedGrade.replace('Grade ', '');
+      return gradeNumber === m.grade.toString();
+    });
+    const subjectOk =
+      selectedSubjectIds.length === 0 || selectedSubjectIds.includes(m.subject._id);
+    return gradeOk && subjectOk;
+  });
+
+  const subjectOptions = availableSubjects.map(subject => ({
+    value: subject._id,
+    label: subject.name
+  }));
+
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-6 space-y-4">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Module Progress</h1>
-          <p className="text-gray-600">
-            Track and manage module completion progress for your assigned schools
+          <h1 className="text-2xl font-bold">Module Progress</h1>
+          <p className="text-gray-600 text-sm">
+            Track and manage module completion progress
           </p>
         </div>
       </div>
 
-      {/* School Selection */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <SchoolIcon className="h-5 w-5" />
-            School Selection
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex items-center gap-4">
-            <Label htmlFor="school-select">Select School:</Label>
-            <Select value={selectedSchoolId} onValueChange={setSelectedSchoolId}>
-              <SelectTrigger className="w-80">
-                <SelectValue placeholder="Select a school" />
-              </SelectTrigger>
-              <SelectContent>
-                {availableSchools.map((school) => (
-                  <SelectItem key={school._id} value={school._id}>
-                    {school.name} - {school.city}, {school.state}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        </CardContent>
-      </Card>
+      {/* School Selection and Filters */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {/* School Selection */}
+        <div>
+          <Label htmlFor="school-select" className="text-sm font-medium">School</Label>
+          <Select value={selectedSchoolId} onValueChange={setSelectedSchoolId}>
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="Select a school" />
+            </SelectTrigger>
+            <SelectContent>
+              {availableSchools.map((school) => (
+                <SelectItem key={school._id} value={school._id}>
+                  {school.name} - {school.city}, {school.state}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
 
-      {/* School Info */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <GraduationCap className="h-5 w-5" />
-            {progressData.school.name}
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div>
-              <p className="text-sm text-gray-600">Location</p>
-              <p className="font-medium">{progressData.school.city}, {progressData.school.state}</p>
-            </div>
-            <div>
-              <p className="text-sm text-gray-600">Mentor</p>
-              <p className="font-medium">{progressData.mentor?.name || 'Not assigned'}</p>
-            </div>
-            <div>
-              <p className="text-sm text-gray-600">Total Modules</p>
-              <p className="font-medium">{progressData.moduleProgress.length}</p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+        {/* Grade Selection */}
+        <div>
+          <Label className="text-sm font-medium mb-2 block">Grades</Label>
+          <MultiSelect
+            options={availableGrades}
+            selected={selectedGrades}
+            onChange={setSelectedGrades}
+            placeholder="Select grades..."
+          />
+        </div>
+
+        {/* Subject Selection */}
+        <div>
+          <Label className="text-sm font-medium mb-2 block">Subjects</Label>
+          <MultiSelect
+            options={subjectOptions}
+            selected={selectedSubjectIds}
+            onChange={setSelectedSubjectIds}
+            placeholder="Select subjects..."
+          />
+        </div>
+      </div>
+
+      {/* Clear Filters */}
+      {(selectedGrades.length > 0 || selectedSubjectIds.length > 0) && (
+        <div className="flex justify-end">
+          <Button variant="ghost" size="sm" onClick={clearFilters} className="flex items-center gap-2">
+            <X className="h-4 w-4" />
+            Clear Filters
+          </Button>
+        </div>
+      )}
 
       {/* Module Progress */}
-      <div className="space-y-4">
-        {progressData.moduleProgress.map((module) => (
+      <div className="space-y-3">
+        {filteredModules.map((module) => (
           <Card key={module.moduleId}>
-            <CardHeader>
+            <CardHeader className="pb-3">
               <div className="flex items-center justify-between">
                 <div>
-                  <CardTitle className="flex items-center gap-2">
-                    <BookOpen className="h-5 w-5" />
+                  <CardTitle className="flex items-center gap-2 text-lg">
+                    <BookOpen className="h-4 w-4" />
                     Grade {module.grade} - {module.subject.name}
                   </CardTitle>
                   <p className="text-sm text-gray-600">
@@ -327,8 +498,8 @@ export default function ModuleProgressPage() {
                 </div>
               </div>
             </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
+            <CardContent className="pt-0">
+              <div className="space-y-3">
                 {module.moduleItems.map((item) => {
                   const key = `${module.moduleId}-${item.moduleItemId}`;
                   const isUpdating = updating === key;
@@ -336,7 +507,7 @@ export default function ModuleProgressPage() {
                   return (
                     <div
                       key={item.moduleItemId}
-                      className="flex items-start gap-4 p-4 border rounded-lg"
+                      className="flex items-start gap-3 p-3 border rounded-lg"
                     >
                       <div className="flex items-center gap-2">
                         <button
@@ -380,10 +551,35 @@ export default function ModuleProgressPage() {
                         {/* Topics and Subtopics */}
                         {item.topics && item.topics.length > 0 && (
                           <div className="space-y-3">
-                            {item.topics.map((topic) => (
+                            {item.topics.map((topic) => {
+                              const topicKey = `${module.moduleId}-${item.moduleItemId}-${topic.topicId}`;
+                              const isTopicUpdating = updating === topicKey;
+                              return (
                               <div key={topic.topicId} className="ml-4 space-y-2">
                                 <div className="flex items-center gap-2">
-                                  <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                                  <button
+                                    onClick={() => handleTopicCompletion(
+                                      module.moduleId,
+                                      item.moduleItemId,
+                                      topic.topicId,
+                                      !topic.isCompleted
+                                    )}
+                                    disabled={isTopicUpdating}
+                                    className={`
+                                      w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all duration-200
+                                      ${topic.isCompleted 
+                                        ? 'bg-green-500 border-green-500 text-white hover:bg-green-600' 
+                                        : 'border-gray-300 hover:border-gray-400 hover:bg-gray-50'
+                                      }
+                                      ${isTopicUpdating ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
+                                    `}
+                                  >
+                                    {isTopicUpdating ? (
+                                      <Loader2 className="h-3 w-3 animate-spin" />
+                                    ) : topic.isCompleted ? (
+                                      <Check className="h-3 w-3" />
+                                    ) : null}
+                                  </button>
                                   <span className="font-medium text-sm text-gray-700">
                                     {topic.topicName}
                                   </span>
@@ -440,7 +636,7 @@ export default function ModuleProgressPage() {
                                   </div>
                                 )}
                               </div>
-                            ))}
+                            );})}
                           </div>
                         )}
                         
@@ -458,8 +654,26 @@ export default function ModuleProgressPage() {
                                 className="mt-1"
                                 rows={2}
                               />
+                              {hasNotesChanged(key) && (
+                                <div className="flex justify-end mt-2">
+                                  <Button
+                                    size="sm"
+                                    onClick={() => handleSaveNotes(module.moduleId, item.moduleItemId, notes[key] || item.notes)}
+                                    disabled={updating === key}
+                                    className="text-xs"
+                                  >
+                                    {updating === key ? (
+                                      <>
+                                        <Loader2 className="h-3 w-3 animate-spin mr-1" />
+                                        Saving...
+                                      </>
+                                    ) : (
+                                      "Save Notes"
+                                    )}
+                                  </Button>
+                                </div>
+                              )}
                             </div>
-                            
                             
                             {item.completedAt && (
                               <p className="text-xs text-gray-500">

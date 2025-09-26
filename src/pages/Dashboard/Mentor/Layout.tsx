@@ -10,7 +10,7 @@ export default function MentorLayout() {
         <div className="flex-1 flex flex-col overflow-hidden">
           <header className="h-16 border-b bg-background px-6 flex items-center justify-between">
             <div>
-              <h1 className="text-2xl font-semibold">Mentor Portal</h1>
+              <h1 className="text-2xl font-semibold">School Mentor Portal</h1>
               <p className="text-sm text-muted-foreground">
                 Guide and support your students' learning journey
               </p>

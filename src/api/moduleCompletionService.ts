@@ -14,6 +14,9 @@ export interface Topic {
   topicId: string;
   topicName: string;
   topicDescription: string;
+  isCompleted: boolean;
+  completedAt: string | null;
+  notes: string;
   subtopics: Subtopic[];
   isActive: boolean;
 }
@@ -79,6 +82,15 @@ export interface MarkAllSubtopicCompletionData {
   schoolId: string;
 }
 
+export interface MarkTopicCompletionData {
+  moduleId: string;
+  moduleItemId: string;
+  topicId: string;
+  schoolId: string;
+  isCompleted: boolean;
+  notes?: string;
+}
+
 export interface School {
   _id: string;
   name: string;
@@ -110,10 +122,28 @@ export interface ModuleCompletionReport {
     progress: number;
     items: {
       moduleItemId: string;
+      moduleItemName: string;
+      moduleItemDescription: string;
       isCompleted: boolean;
       completedAt: string | null;
       notes: string;
       completionPercentage: number;
+      topics: {
+        topicId: string;
+        topicName: string;
+        topicDescription: string;
+        isCompleted: boolean;
+        completedAt: string | null;
+        notes: string;
+        subtopics: {
+          subtopicId: string;
+          subtopicName: string;
+          subtopicDescription: string;
+          isCompleted: boolean;
+          completedAt: string | null;
+          notes: string;
+        }[];
+      }[];
     }[];
   }[];
   totalItems: number;
@@ -160,6 +190,18 @@ export const moduleCompletionService = {
   // Mark all subtopics as completed
   markAllSubtopicCompleted: async (data: MarkAllSubtopicCompletionData) => {
     const response = await axiosInstance.post("/module-completion/mentor/mark-all-subtopics-completed", data);
+    return response.data;
+  },
+
+  // Mark topic as completed
+  markTopicCompleted: async (data: MarkTopicCompletionData) => {
+    const response = await axiosInstance.post("/module-completion/mentor/mark-topic-completed", data);
+    return response.data;
+  },
+
+  // Save notes for module item
+  saveModuleItemNotes: async (data: { moduleId: string; moduleItemId: string; schoolId: string; notes: string }) => {
+    const response = await axiosInstance.post("/module-completion/mentor/save-notes", data);
     return response.data;
   },
 };

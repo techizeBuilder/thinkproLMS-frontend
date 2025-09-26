@@ -291,32 +291,84 @@ export default function ModuleCompletionReportsPage() {
                           
                           <div className="space-y-2">
                             {module.items.map((item, index) => (
-                              <div
-                                key={index}
-                                className="flex items-center gap-3 p-2 bg-gray-50 rounded"
-                              >
-                                {item.isCompleted ? (
-                                  <CheckCircle className="h-4 w-4 text-green-500" />
-                                ) : (
-                                  <Circle className="h-4 w-4 text-gray-400" />
-                                )}
-                                <div className="flex-1">
-                                  <p className="text-sm font-medium">Module Item {index + 1}</p>
-                                  {item.notes && (
-                                    <p className="text-xs text-gray-600 mt-1">
-                                      Notes: {item.notes}
-                                    </p>
+                              <div key={index} className="p-2 bg-gray-50 rounded">
+                                <div className="flex items-center gap-3">
+                                  {item.isCompleted ? (
+                                    <CheckCircle className="h-4 w-4 text-green-500" />
+                                  ) : (
+                                    <Circle className="h-4 w-4 text-gray-400" />
                                   )}
-                                  {item.completedAt && (
-                                    <p className="text-xs text-gray-500 mt-1">
-                                      Completed: {new Date(item.completedAt).toLocaleDateString()}
-                                    </p>
+                                  <div className="flex-1">
+                                    <p className="text-sm font-medium">{item.moduleItemName}</p>
+                                    {item.moduleItemDescription && (
+                                      <p className="text-xs text-gray-600 mt-1">
+                                        {item.moduleItemDescription}
+                                      </p>
+                                    )}
+                                    {item.notes && (
+                                      <p className="text-xs text-gray-600 mt-1">
+                                        Notes: {item.notes}
+                                      </p>
+                                    )}
+                                    {item.completedAt && (
+                                      <p className="text-xs text-gray-500 mt-1">
+                                        Completed: {new Date(item.completedAt).toLocaleDateString()}
+                                      </p>
+                                    )}
+                                  </div>
+                                  {item.completionPercentage > 0 && (
+                                    <Badge variant="outline">
+                                      {item.completionPercentage}%
+                                    </Badge>
                                   )}
                                 </div>
-                                {item.completionPercentage > 0 && (
-                                  <Badge variant="outline">
-                                    {item.completionPercentage}%
-                                  </Badge>
+                                
+                                {/* Topics and Subtopics */}
+                                {item.topics && item.topics.length > 0 && (
+                                  <div className="ml-6 mt-2 space-y-2">
+                                    {item.topics.map((topic) => (
+                                      <div key={topic.topicId} className="border-l-2 border-gray-200 pl-3">
+                                        <div className="flex items-center gap-2">
+                                          {topic.isCompleted ? (
+                                            <CheckCircle className="h-3 w-3 text-green-500" />
+                                          ) : (
+                                            <Circle className="h-3 w-3 text-gray-400" />
+                                          )}
+                                          <span className="text-xs font-medium text-gray-700">
+                                            {topic.topicName}
+                                          </span>
+                                          {topic.completedAt && (
+                                            <span className="text-xs text-gray-500">
+                                              ({new Date(topic.completedAt).toLocaleDateString()})
+                                            </span>
+                                          )}
+                                        </div>
+                                        
+                                        {/* Subtopics */}
+                                        {topic.subtopics && topic.subtopics.length > 0 && (
+                                          <div className="ml-4 mt-1 space-y-1">
+                                            {topic.subtopics.map((subtopic) => (
+                                              <div key={subtopic.subtopicId} className="flex items-center gap-2">
+                                                {subtopic.isCompleted ? (
+                                                  <CheckCircle className="h-2 w-2 text-green-500" />
+                                                ) : (
+                                                  <Circle className="h-2 w-2 text-gray-400" />
+                                                )}
+                                                <span className="text-xs text-gray-600">
+                                                  {subtopic.subtopicName}
+                                                </span>
+                                                {subtopic.completedAt && (
+                                                  <span className="text-xs text-gray-500">
+                                                    ({new Date(subtopic.completedAt).toLocaleDateString()})
+                                                  </span>
+                                                )}
+                                              </div>
+                                            ))}
+                                          </div>
+                                        )}
+                                      </div>
+                                    ))}
+                                  </div>
                                 )}
                               </div>
                             ))}
