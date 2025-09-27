@@ -338,41 +338,21 @@ const QuestionBankPage: React.FC = () => {
             </div>
             <div>
               <label className="text-sm font-medium">Subject</label>
-              <Select
-                value={filters.subject || "all"}
-                onValueChange={(value) => handleFilterChange("subject", value)}
-              >
-                <SelectTrigger className="mt-1">
-                  <SelectValue placeholder="All Subjects" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Subjects</SelectItem>
-                  {subjects.map((subject) => (
-                    <SelectItem key={subject._id} value={subject.name}>
-                      {subject.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <Input
+                placeholder="Search subject (e.g., Mathematics)"
+                value={filters.subject || ""}
+                onChange={(e) => handleFilterChange("subject", e.target.value)}
+                className="mt-1"
+              />
             </div>
             <div>
               <label className="text-sm font-medium">Module</label>
-              <Select
-                value={filters.module || "all"}
-                onValueChange={(value) => handleFilterChange("module", value)}
-              >
-                <SelectTrigger className="mt-1">
-                  <SelectValue placeholder="All Modules" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Modules</SelectItem>
-                  {modules.map((module) => (
-                    <SelectItem key={module._id || module.name} value={module.name}>
-                      {module.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <Input
+                placeholder="Search module (e.g., Algebra)"
+                value={filters.module || ""}
+                onChange={(e) => handleFilterChange("module", e.target.value)}
+                className="mt-1"
+              />
             </div>
             <div>
               <label className="text-sm font-medium">Difficulty</label>

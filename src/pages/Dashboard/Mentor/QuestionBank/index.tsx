@@ -205,6 +205,15 @@ const MentorQuestionBankPage: React.FC = () => {
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
             <div>
+              <label className="text-sm font-medium mb-2 block">Search</label>
+              <Input
+                placeholder="Search questions..."
+                value={filters.search || ""}
+                onChange={(e) => handleFilterChange("search", e.target.value)}
+              />
+            </div>
+
+            <div>
               <label className="text-sm font-medium mb-2 block">Grade</label>
               <Select
                 value={filters.grade || "all"}
@@ -226,43 +235,20 @@ const MentorQuestionBankPage: React.FC = () => {
 
             <div>
               <label className="text-sm font-medium mb-2 block">Subject</label>
-              <Select
-                value={filters.subject || "all"}
-                onValueChange={(value) => handleFilterChange("subject", value)}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select Subject" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Subjects</SelectItem>
-                  {subjects.map((subject) => (
-                    <SelectItem key={subject._id} value={subject.name}>
-                      {subject.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <Input
+                placeholder="Search subject (e.g., Mathematics)"
+                value={filters.subject || ""}
+                onChange={(e) => handleFilterChange("subject", e.target.value)}
+              />
             </div>
 
             <div>
               <label className="text-sm font-medium mb-2 block">Module</label>
-              <Select
-                value={filters.module || "all"}
-                onValueChange={(value) => handleFilterChange("module", value)}
-                disabled={!filters.grade || !filters.subject}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select Module" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Modules</SelectItem>
-                  {modules.map((module) => (
-                    <SelectItem key={module._id} value={module.name}>
-                      {module.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <Input
+                placeholder="Search module (e.g., Algebra)"
+                value={filters.module || ""}
+                onChange={(e) => handleFilterChange("module", e.target.value)}
+              />
             </div>
 
             <div>
@@ -311,15 +297,6 @@ const MentorQuestionBankPage: React.FC = () => {
                   ))}
                 </SelectContent>
               </Select>
-            </div>
-
-            <div>
-              <label className="text-sm font-medium mb-2 block">Search</label>
-              <Input
-                placeholder="Search questions..."
-                value={filters.search || ""}
-                onChange={(e) => handleFilterChange("search", e.target.value)}
-              />
             </div>
           </div>
         </CardContent>
