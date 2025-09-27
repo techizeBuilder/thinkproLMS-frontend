@@ -26,7 +26,6 @@ import {
   FileText,
   Award,
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { LogoutButton } from "@/components/ui/logout-button";
 import { useAuth } from "@/contexts/AuthContext";
 

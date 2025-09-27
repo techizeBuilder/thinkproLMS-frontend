@@ -1,10 +1,7 @@
-import { useAuth } from '@/contexts/AuthContext';
 import ProfileCard from '@/components/Profile/ProfileCard';
-import { Badge } from '@/components/ui/badge';
 import { BookOpen, Award, FileText, BarChart3, Users, Target } from 'lucide-react';
 
 export default function StudentProfile() {
-  const { user } = useAuth();
 
   return (
     <div className="container mx-auto p-6">

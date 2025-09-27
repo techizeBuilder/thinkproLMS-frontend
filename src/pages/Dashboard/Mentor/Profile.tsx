@@ -1,10 +1,7 @@
-import { useAuth } from '@/contexts/AuthContext';
 import ProfileCard from '@/components/Profile/ProfileCard';
-import { Badge } from '@/components/ui/badge';
 import { GraduationCap, Users, BookOpen, FileText, BarChart3, Award } from 'lucide-react';
 
 export default function MentorProfile() {
-  const { user } = useAuth();
 
   return (
     <div className="container mx-auto p-6">

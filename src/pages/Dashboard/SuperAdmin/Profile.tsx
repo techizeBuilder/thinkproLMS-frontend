@@ -1,10 +1,8 @@
-import { useAuth } from '@/contexts/AuthContext';
 import ProfileCard from '@/components/Profile/ProfileCard';
 import { Badge } from '@/components/ui/badge';
 import { Crown, Settings, Database, Users, School } from 'lucide-react';
 
 export default function SuperAdminProfile() {
-  const { user } = useAuth();
 
   return (
     <div className="container mx-auto p-6">

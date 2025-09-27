@@ -13,7 +13,6 @@ import {
   useSidebar
 } from "@/components/ui/collapsible-sidebar"
 import { BookOpen, HomeIcon, Settings, User, Award, Clock, FolderOpen, ClipboardList } from "lucide-react"
-import { Button } from "@/components/ui/button"
 import { LogoutButton } from "@/components/ui/logout-button"
 
 interface StudentSidebarProps extends React.HTMLAttributes<HTMLDivElement> {}

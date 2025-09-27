@@ -30,8 +30,6 @@ import {
   type Question,
   type QuestionFilters,
 } from "@/api/questionBankService";
-import { type Subject } from "@/api/subjectService";
-import { moduleService, type ModuleItem } from "@/api/moduleService";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import RecommendQuestionForm from "./RecommendQuestionForm";
@@ -49,8 +47,6 @@ const MentorQuestionBankPage: React.FC = () => {
     pages: 1,
     total: 0,
   });
-  const [subjects, setSubjects] = useState<Subject[]>([]);
-  const [modules, setModules] = useState<ModuleItem[]>([]);
   const [showRecommendForm, setShowRecommendForm] = useState(false);
   const [selectedQuestion, setSelectedQuestion] = useState<Question | null>(
     null
@@ -79,32 +75,7 @@ const MentorQuestionBankPage: React.FC = () => {
     fetchSubjectsAndModules();
   }, [filters]);
 
-  useEffect(() => {
-    if (filters.grade && filters.subject) {
-      fetchModulesForSubject();
-    } else {
-      setModules([]);
-    }
-  }, [filters.grade, filters.subject]);
 
-  const fetchModulesForSubject = async () => {
-    if (!filters.grade || !filters.subject) return;
-
-    try {
-      const gradeNumber = parseInt(filters.grade.replace("Grade ", ""));
-      const selectedSubject = subjects.find((s) => s.name === filters.subject);
-
-      if (selectedSubject) {
-        const moduleData = await moduleService.getModulesByGradeAndSubject(
-          gradeNumber,
-          selectedSubject._id
-        );
-        setModules(moduleData.modules);
-      }
-    } catch (error) {
-      console.error("Error fetching modules:", error);
-    }
-  };
 
   const fetchQuestions = async () => {
     try {
@@ -127,13 +98,7 @@ const MentorQuestionBankPage: React.FC = () => {
 
   const fetchSubjectsAndModules = async () => {
     try {
-      const response = await questionBankService.getSubjectsAndModules(
-        filters.grade
-      );
-      if (response.success) {
-        setSubjects(response.data.subjects);
-        setModules(response.data.modules);
-      }
+      // No longer needed since we removed subjects and modules state
     } catch (error) {
       console.error("Error fetching subjects and modules:", error);
     }

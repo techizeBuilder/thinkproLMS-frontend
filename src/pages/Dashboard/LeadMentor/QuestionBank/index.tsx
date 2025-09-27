@@ -45,8 +45,6 @@ import {
   type Question,
   type QuestionFilters,
 } from "@/api/questionBankService";
-import { subjectService, type Subject } from '@/api/subjectService';
-import { moduleService, type ModuleItem } from '@/api/moduleService';
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import CreateQuestionForm from "./CreateQuestionForm";
@@ -67,8 +65,6 @@ const QuestionBankPage: React.FC = () => {
     pages: 1,
     total: 0,
   });
-  const [subjects, setSubjects] = useState<Subject[]>([]);
-  const [modules, setModules] = useState<ModuleItem[]>([]);
   const [selectedQuestion, setSelectedQuestion] = useState<Question | null>(
     null
   );
@@ -99,27 +95,7 @@ const QuestionBankPage: React.FC = () => {
     fetchSubjectsAndModules();
   }, [filters]);
 
-  useEffect(() => {
-    if (filters.grade && filters.subject) {
-      fetchModulesForSubject();
-    } else {
-      setModules([]);
-    }
-  }, [filters.grade, filters.subject]);
 
-  const fetchModulesForSubject = async () => {
-    try {
-      const gradeNumber = parseInt(filters.grade!.replace('Grade ', ''));
-      const selectedSubject = subjects.find(s => s.name === filters.subject);
-      
-      if (selectedSubject) {
-        const moduleData = await moduleService.getModulesByGradeAndSubject(gradeNumber, selectedSubject._id);
-        setModules(moduleData.modules);
-      }
-    } catch (error) {
-      console.error("Error fetching modules:", error);
-    }
-  };
 
   const fetchQuestions = async () => {
     try {
@@ -149,20 +125,7 @@ const QuestionBankPage: React.FC = () => {
 
   const fetchSubjectsAndModules = async () => {
     try {
-      const subjectsData = await subjectService.getAllSubjects();
-      setSubjects(subjectsData);
-      
-      if (filters.grade && filters.subject) {
-        const gradeNumber = parseInt(filters.grade.replace('Grade ', ''));
-        const selectedSubject = subjectsData.find(s => s.name === filters.subject);
-        
-        if (selectedSubject) {
-          const moduleData = await moduleService.getModulesByGradeAndSubject(gradeNumber, selectedSubject._id);
-          setModules(moduleData.modules);
-        }
-      } else {
-        setModules([]);
-      }
+      // No longer needed since we removed subjects state
     } catch (error) {
       console.error("Error fetching subjects and modules:", error);
     }

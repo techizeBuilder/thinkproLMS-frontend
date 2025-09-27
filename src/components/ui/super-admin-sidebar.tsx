@@ -13,7 +13,6 @@ import {
   useSidebar
 } from "@/components/ui/collapsible-sidebar"
 import { Building2, HomeIcon, Settings, Users, User, School, UserCheck, Crown, BookOpen, FileText, Layers, Award } from "lucide-react"
-import { Button } from "@/components/ui/button"
 import { LogoutButton } from "@/components/ui/logout-button"
 
 interface SuperAdminSidebarProps extends React.HTMLAttributes<HTMLDivElement> {}

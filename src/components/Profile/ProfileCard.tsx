@@ -1,6 +1,6 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { User, Mail, Shield, Calendar, School, Users } from 'lucide-react';
+import { User, Mail, Shield } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 
 interface ProfileCardProps {
