@@ -10,6 +10,14 @@ import NotFound from "../pages/NotFound";
 import SuperAdmin from "../pages/Dashboard/SuperAdmin";
 import Admin from "../pages/Dashboard/Admin";
 import LeadMentor from "../pages/Dashboard/LeadMentor";
+import SchoolAdmin from "../pages/Dashboard/SchoolAdmin";
+import SchoolAdminDashboard from "../pages/Dashboard/SchoolAdmin/Dashboard";
+import SchoolAdminMentorsPage from "../pages/Dashboard/SchoolAdmin/Mentors";
+import SchoolAdminStudentsPage from "../pages/Dashboard/SchoolAdmin/Students";
+import SchoolAdminModuleProgressPage from "../pages/Dashboard/SchoolAdmin/ModuleProgress";
+import SchoolAdminAssessmentReportsPage from "../pages/Dashboard/SchoolAdmin/AssessmentReports";
+import SchoolAdminSchoolsPage from "../pages/Dashboard/SchoolAdmin/Schools";
+import SchoolAdminSettingsPage from "../pages/Dashboard/SchoolAdmin/Settings";
 import AdminsPage from "../pages/Dashboard/SuperAdmin/Admins";
 import CreateAdminPage from "../pages/Dashboard/SuperAdmin/Admins/Create";
 
@@ -105,16 +113,11 @@ function ProtectedRoute({
   if (!user) return <Navigate to="/login" replace />;
   
   if (role && user.role !== role) {
-    // Special case: allow schooladmin to access admin routes
-    if (role === "admin" && user.role === "schooladmin") {
-      return children;
-    }
-    
     // Map roles to their appropriate routes for redirection
     const roleRouteMap: { [key: string]: string } = {
       superadmin: "/superadmin",
       leadmentor: "/leadmentor", 
-      schooladmin: "/admin",
+      schooladmin: "/schooladmin",
       admin: "/admin",
       mentor: "/mentor",
       student: "/student",
@@ -138,11 +141,10 @@ function RootRoute() {
   }
 
   // Redirect to user's role-based dashboard
-  // Map schooladmin to admin since they share the same dashboard
   const roleRouteMap: { [key: string]: string } = {
     superadmin: "/superadmin",
     leadmentor: "/leadmentor", 
-    schooladmin: "/admin",
+    schooladmin: "/schooladmin",
     admin: "/admin",
     mentor: "/mentor",
     student: "/student",
@@ -286,7 +288,7 @@ export default function AppRouter() {
           />
         </Route>
 
-        {/* Admin & School Admin */}
+        {/* Admin */}
         <Route
           path="/admin"
           element={
@@ -295,6 +297,24 @@ export default function AppRouter() {
             </ProtectedRoute>
           }
         />
+
+        {/* School Admin */}
+        <Route
+          path="/schooladmin"
+          element={
+            <ProtectedRoute role="schooladmin">
+              <SchoolAdmin />
+            </ProtectedRoute>
+          }
+        >
+          <Route index element={<SchoolAdminDashboard />} />
+          <Route path="mentors" element={<SchoolAdminMentorsPage />} />
+          <Route path="students" element={<SchoolAdminStudentsPage />} />
+          <Route path="module-progress" element={<SchoolAdminModuleProgressPage />} />
+          <Route path="assessment-reports" element={<SchoolAdminAssessmentReportsPage />} />
+          <Route path="schools" element={<SchoolAdminSchoolsPage />} />
+          <Route path="settings" element={<SchoolAdminSettingsPage />} />
+        </Route>
 
         {/* Lead Mentor */}
         <Route
