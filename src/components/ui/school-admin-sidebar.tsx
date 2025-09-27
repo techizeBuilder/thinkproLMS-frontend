@@ -14,6 +14,7 @@ import {
 import {
   HomeIcon,
   Settings,
+  User,
   UserCheck,
   GraduationCap,
   BookOpen,
@@ -71,14 +72,20 @@ export function SchoolAdminSidebar({ className }: SchoolAdminSidebarProps) {
             </SidebarNavItem>
           </SidebarNav>
         </SidebarGroup>
+
+        <SidebarGroup label="Account">
+          <SidebarNav>
+            <SidebarNavItem to="/schooladmin/profile" icon={User}>
+              Profile
+            </SidebarNavItem>
+            <SidebarNavItem to="/schooladmin/settings" icon={Settings}>
+              Settings
+            </SidebarNavItem>
+          </SidebarNav>
+        </SidebarGroup>
       </SidebarContent>
 
       <SidebarFooter>
-        <SidebarNav>
-          <SidebarNavItem to="/schooladmin/settings" icon={Settings}>
-            Settings
-          </SidebarNavItem>
-        </SidebarNav>
         <div className="p-2">
           <LogoutButton />
         </div>

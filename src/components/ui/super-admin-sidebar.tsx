@@ -93,8 +93,11 @@ export function SuperAdminSidebar({ className }: SuperAdminSidebarProps) {
           </SidebarNav>
         </SidebarGroup>
 
-        <SidebarGroup label="System">
+        <SidebarGroup label="Account">
           <SidebarNav>
+            <SidebarNavItem to="/superadmin/profile" icon={User}>
+              Profile
+            </SidebarNavItem>
             <SidebarNavItem to="/superadmin/settings" icon={Settings}>
               Settings
             </SidebarNavItem>
@@ -105,30 +108,18 @@ export function SuperAdminSidebar({ className }: SuperAdminSidebarProps) {
       <SidebarFooter>
         <div className="space-y-1">
           {!isCollapsed ? (
-            <>
-              <Button variant="ghost" className="w-full justify-start text-sm">
-                <User className="mr-3 h-4 w-4" />
-                Profile
-              </Button>
-              <LogoutButton 
-                variant="ghost" 
-                className="w-full justify-start text-sm" 
-                isCollapsed={false}
-              />
-            </>
+            <LogoutButton 
+              variant="ghost" 
+              className="w-full justify-start text-sm" 
+              isCollapsed={false}
+            />
           ) : (
-            <>
-              <Button variant="ghost" size="icon" className="w-full">
-                <User className="h-4 w-4" />
-                <span className="sr-only">Profile</span>
-              </Button>
-              <LogoutButton 
-                variant="ghost" 
-                size="icon" 
-                className="w-full" 
-                isCollapsed={true}
-              />
-            </>
+            <LogoutButton 
+              variant="ghost" 
+              size="icon" 
+              className="w-full" 
+              isCollapsed={true}
+            />
           )}
         </div>
       </SidebarFooter>

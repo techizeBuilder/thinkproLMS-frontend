@@ -83,7 +83,10 @@ export function LeadMentorSidebar({ className }: LeadMentorSidebarProps) {
             <SidebarNavItem to="/leadmentor/certificates" icon={Award}>
               Certificates
             </SidebarNavItem>
-            <SidebarNavItem to="/leadmentor/module-completion-reports" icon={FileText}>
+            <SidebarNavItem
+              to="/leadmentor/module-completion-reports"
+              icon={FileText}
+            >
               Module Progress Reports
             </SidebarNavItem>
           </SidebarNav>
@@ -111,8 +114,11 @@ export function LeadMentorSidebar({ className }: LeadMentorSidebarProps) {
           </SidebarGroup>
         )}
 
-        <SidebarGroup label="System">
+        <SidebarGroup label="Account">
           <SidebarNav>
+            <SidebarNavItem to="/leadmentor/profile" icon={User}>
+              Profile
+            </SidebarNavItem>
             <SidebarNavItem to="/leadmentor/settings" icon={Settings}>
               Settings
             </SidebarNavItem>
@@ -124,10 +130,6 @@ export function LeadMentorSidebar({ className }: LeadMentorSidebarProps) {
         <div className="space-y-1">
           {!isCollapsed ? (
             <>
-              <Button variant="ghost" className="w-full justify-start text-sm">
-                <User className="mr-3 h-4 w-4" />
-                Profile
-              </Button>
               <LogoutButton
                 variant="ghost"
                 className="w-full justify-start text-sm"
@@ -136,10 +138,6 @@ export function LeadMentorSidebar({ className }: LeadMentorSidebarProps) {
             </>
           ) : (
             <>
-              <Button variant="ghost" size="icon" className="w-full">
-                <User className="h-4 w-4" />
-                <span className="sr-only">Profile</span>
-              </Button>
               <LogoutButton
                 variant="ghost"
                 size="icon"

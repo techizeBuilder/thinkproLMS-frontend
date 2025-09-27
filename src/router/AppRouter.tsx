@@ -92,6 +92,14 @@ import SuperAdminDashboard from "../pages/Dashboard/SuperAdmin/Dashboard";
 import LeadMentorDashboard from "../pages/Dashboard/LeadMentor/Dashboard";
 import Student from "../pages/Dashboard/Student";
 
+// Profile Components
+import SuperAdminProfile from "../pages/Dashboard/SuperAdmin/Profile";
+import LeadMentorProfile from "../pages/Dashboard/LeadMentor/Profile";
+import SchoolAdminProfile from "../pages/Dashboard/SchoolAdmin/Profile";
+import MentorProfile from "../pages/Dashboard/Mentor/Profile";
+import StudentProfile from "../pages/Dashboard/Student/Profile";
+import GuestProfile from "../pages/Dashboard/Guest/Profile";
+
 // Guest Components
 import GuestLayout from "../components/Guest/GuestLayout";
 import GuestHome from "../pages/Guest/GuestHome";
@@ -178,6 +186,7 @@ export default function AppRouter() {
           }
         >
           <Route index element={<SuperAdminDashboard />} />
+          <Route path="profile" element={<SuperAdminProfile />} />
           <Route path="admins" element={<AdminsPage />} />
           <Route path="admins/create" element={<CreateAdminPage />} />
           
@@ -308,6 +317,7 @@ export default function AppRouter() {
           }
         >
           <Route index element={<SchoolAdminDashboard />} />
+          <Route path="profile" element={<SchoolAdminProfile />} />
           <Route path="mentors" element={<SchoolAdminMentorsPage />} />
           <Route path="students" element={<SchoolAdminStudentsPage />} />
           <Route path="module-progress" element={<SchoolAdminModuleProgressPage />} />
@@ -326,6 +336,7 @@ export default function AppRouter() {
           }
         >
           <Route index element={<LeadMentorDashboard />} />
+          <Route path="profile" element={<LeadMentorProfile />} />
           <Route path="school-admins" element={<SchoolAdminsPage />} />
           <Route path="school-admins/create" element={<CreateSchoolAdminPage />} />
           <Route path="school-admins/:id/edit" element={<LeadMentorEditSchoolAdminPage />} />
@@ -439,6 +450,7 @@ export default function AppRouter() {
           }
         >
           <Route index element={<MentorDashboard />} />
+          <Route path="profile" element={<MentorProfile />} />
           <Route path="students" element={<MentorStudentsPage />} />
           <Route path="resources" element={<MentorResourcesPage />} />
           <Route path="resources/:id/view" element={<MentorResourceViewPage />} />
@@ -467,6 +479,7 @@ export default function AppRouter() {
           }
         >
           <Route index element={<StudentDashboard />} />
+          <Route path="profile" element={<StudentProfile />} />
           <Route path="resources" element={<StudentResourcesPage />} />
           <Route path="resources/:id/view" element={<StudentResourceViewPage />} />
           
@@ -490,6 +503,7 @@ export default function AppRouter() {
           }
         >
           <Route index element={<GuestHome />} />
+          <Route path="profile" element={<GuestProfile />} />
           <Route path="resources" element={<GuestResources />} />
           <Route path="quizzes" element={<GuestQuizzes />} />
           <Route path="classes" element={<GuestClasses />} />

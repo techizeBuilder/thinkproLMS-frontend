@@ -45,6 +45,11 @@ export default function GuestSidebar() {
       path: "/guest/premium",
       icon: CreditCard,
     },
+    {
+      name: "Profile",
+      path: "/guest/profile",
+      icon: User,
+    },
   ];
 
   return (
