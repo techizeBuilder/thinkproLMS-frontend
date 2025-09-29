@@ -28,6 +28,7 @@ export interface ModuleItemCompletion {
   isCompleted: boolean;
   completedAt: string | null;
   notes: string;
+  status: "Pending" | "In Progress" | "Completed";
   topics: Topic[];
 }
 
@@ -62,8 +63,19 @@ export interface MarkCompletionData {
   moduleId: string;
   moduleItemId: string;
   schoolId: string;
+  section: string;
+  grade: string;
   isCompleted: boolean;
+  status?: "Pending" | "In Progress" | "Completed";
   notes?: string;
+}
+
+export interface UpdateModuleStatusData {
+  moduleId: string;
+  schoolId: string;
+  section: string;
+  grade: string;
+  status: "Pending" | "In Progress" | "Completed";
 }
 
 export interface MarkSubtopicCompletionData {
@@ -127,6 +139,7 @@ export interface ModuleCompletionReport {
       isCompleted: boolean;
       completedAt: string | null;
       notes: string;
+      status: "Pending" | "In Progress" | "Completed";
       completionPercentage: number;
       topics: {
         topicId: string;
@@ -153,8 +166,12 @@ export interface ModuleCompletionReport {
 
 export const moduleCompletionService = {
   // Get module progress for mentor
-  getMentorModuleProgress: async (schoolId?: string): Promise<MentorModuleProgress> => {
-    const params = schoolId ? { schoolId } : {};
+  getMentorModuleProgress: async (schoolId?: string, section?: string, grade?: string): Promise<MentorModuleProgress> => {
+    const params: any = {};
+    if (schoolId) params.schoolId = schoolId;
+    if (section) params.section = section;
+    if (grade) params.grade = grade;
+    
     const response = await axiosInstance.get("/module-completion/mentor/progress", { params });
     return response.data.data;
   },
@@ -165,6 +182,12 @@ export const moduleCompletionService = {
     return response.data;
   },
 
+  // Update module status for a specific section
+  updateModuleStatus: async (data: UpdateModuleStatusData) => {
+    const response = await axiosInstance.post("/module-completion/mentor/update-module-status", data);
+    return response.data;
+  },
+
   // Get available schools
   getAvailableSchools: async (): Promise<School[]> => {
     const response = await axiosInstance.get("/module-completion/schools");
@@ -172,10 +195,12 @@ export const moduleCompletionService = {
   },
 
   // Get module completion reports (lead mentor only)
-  getModuleCompletionReports: async (schoolId?: string, mentorId?: string): Promise<ModuleCompletionReport[]> => {
+  getModuleCompletionReports: async (schoolId?: string, mentorId?: string, section?: string, grade?: string): Promise<ModuleCompletionReport[]> => {
     const params: any = {};
     if (schoolId) params.schoolId = schoolId;
     if (mentorId) params.mentorId = mentorId;
+    if (section) params.section = section;
+    if (grade) params.grade = grade;
     
     const response = await axiosInstance.get("/module-completion/reports", { params });
     return response.data.data;
