@@ -21,10 +21,10 @@ import {
   Users,
   GraduationCap,
   BookOpen,
-  FolderOpen,
   Layers,
   FileText,
   Award,
+  Calendar,
 } from "lucide-react";
 import { LogoutButton } from "@/components/ui/logout-button";
 import { useAuth } from "@/contexts/AuthContext";
@@ -91,6 +91,19 @@ export function LeadMentorSidebar({ className }: LeadMentorSidebarProps) {
           </SidebarNav>
         </SidebarGroup>
 
+        {hasModulePermission && (
+          <SidebarGroup label="Curriculum">
+            <SidebarNav>
+              <SidebarNavItem to="/leadmentor/modules" icon={Layers}>
+                Modules
+              </SidebarNavItem>
+              <SidebarNavItem to="/leadmentor/sessions" icon={Calendar}>
+                Sessions
+              </SidebarNavItem>
+            </SidebarNav>
+          </SidebarGroup>
+        )}
+
         {hasResourcePermission && (
           <SidebarGroup label="Resources">
             <SidebarNav>
@@ -98,18 +111,6 @@ export function LeadMentorSidebar({ className }: LeadMentorSidebarProps) {
                 Resources
               </SidebarNavItem>
             </SidebarNav>
-            {hasModulePermission && (
-              <>
-                <SidebarNav>
-                  <SidebarNavItem to="/leadmentor/subjects" icon={FolderOpen}>
-                    Subjects
-                  </SidebarNavItem>
-                  <SidebarNavItem to="/leadmentor/modules" icon={Layers}>
-                    Modules
-                  </SidebarNavItem>
-                </SidebarNav>
-              </>
-            )}
           </SidebarGroup>
         )}
 

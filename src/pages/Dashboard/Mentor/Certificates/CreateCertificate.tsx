@@ -24,7 +24,7 @@ import {
 } from 'lucide-react';
 import { certificateService, type CertificateTemplate } from '@/api/certificateService';
 import { schoolService } from '@/api/schoolService';
-import { subjectService } from '@/api/subjectService';
+import { moduleService } from '@/api/moduleService';
 import { studentService } from '@/api/studentService';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
@@ -88,7 +88,7 @@ export default function CreateCertificatePage() {
       const [templatesRes, schoolsRes, subjectsRes] = await Promise.all([
         certificateService.getTemplates(),
         schoolService.getAll(),
-        subjectService.getAllSubjects(),
+        moduleService.getAllModules(),
       ]);
 
       setTemplates(templatesRes.data || []);

@@ -48,10 +48,12 @@ import EditStudentPage from "../pages/Dashboard/LeadMentor/Students/Edit";
 import BulkUploadStudentsPage from "../pages/Dashboard/LeadMentor/Students/BulkUpload";
 import PromoteGradePage from "../pages/Dashboard/LeadMentor/Students/Promote";
 import QuestionBankPage from "../pages/Dashboard/LeadMentor/QuestionBank";
-import SubjectsPage from "../pages/Dashboard/Subjects";
-import ModulesPage from "../pages/Dashboard/Modules";
+import ModulesPage from "../pages/Dashboard/Modules/index";
 import CreateModulePage from "../pages/Dashboard/Modules/Create";
 import EditModulePage from "../pages/Dashboard/Modules/Edit";
+import SessionsPage from "../pages/Dashboard/Sessions";
+import CreateSessionPage from "../pages/Dashboard/Sessions/Create";
+import EditSessionPage from "../pages/Dashboard/Sessions/Edit";
 import { ProtectedRoute as PermissionProtectedRoute } from "../components/ProtectedRoute";
 
 // Resources Management Components
@@ -262,15 +264,7 @@ export default function AppRouter() {
             } 
           />
           
-          {/* Resource & Modules Management */}
-          <Route 
-            path="subjects" 
-            element={
-              <PermissionProtectedRoute requiredPermission="add_modules">
-                <SubjectsPage />
-              </PermissionProtectedRoute>
-            } 
-          />
+          {/* Modules & Sessions Management */}
           <Route 
             path="modules" 
             element={
@@ -292,6 +286,30 @@ export default function AppRouter() {
             element={
               <PermissionProtectedRoute requiredPermission="add_modules">
                 <EditModulePage />
+              </PermissionProtectedRoute>
+            } 
+          />
+          <Route 
+            path="sessions" 
+            element={
+              <PermissionProtectedRoute requiredPermission="add_modules">
+                <SessionsPage />
+              </PermissionProtectedRoute>
+            } 
+          />
+          <Route 
+            path="sessions/create" 
+            element={
+              <PermissionProtectedRoute requiredPermission="add_modules">
+                <CreateSessionPage />
+              </PermissionProtectedRoute>
+            } 
+          />
+          <Route 
+            path="sessions/:id/edit" 
+            element={
+              <PermissionProtectedRoute requiredPermission="add_modules">
+                <EditSessionPage />
               </PermissionProtectedRoute>
             } 
           />
@@ -402,15 +420,7 @@ export default function AppRouter() {
             } 
           />
           
-          {/* Resource & Modules Management */}
-          <Route 
-            path="subjects" 
-            element={
-              <PermissionProtectedRoute requiredPermission="add_modules">
-                <SubjectsPage />
-              </PermissionProtectedRoute>
-            } 
-          />
+          {/* Modules & Sessions Management */}
           <Route 
             path="modules" 
             element={
@@ -432,6 +442,30 @@ export default function AppRouter() {
             element={
               <PermissionProtectedRoute requiredPermission="add_modules">
                 <EditModulePage />
+              </PermissionProtectedRoute>
+            } 
+          />
+          <Route 
+            path="sessions" 
+            element={
+              <PermissionProtectedRoute requiredPermission="add_modules">
+                <SessionsPage />
+              </PermissionProtectedRoute>
+            } 
+          />
+          <Route 
+            path="sessions/create" 
+            element={
+              <PermissionProtectedRoute requiredPermission="add_modules">
+                <CreateSessionPage />
+              </PermissionProtectedRoute>
+            } 
+          />
+          <Route 
+            path="sessions/:id/edit" 
+            element={
+              <PermissionProtectedRoute requiredPermission="add_modules">
+                <EditSessionPage />
               </PermissionProtectedRoute>
             } 
           />

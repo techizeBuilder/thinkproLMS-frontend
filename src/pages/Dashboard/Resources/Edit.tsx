@@ -22,9 +22,8 @@ import {
 import type { UserType } from '@/types/resources';
 import type { Resource as ApiResource, UpdateResourceData } from '@/api/resourceService';
 import { resourceService } from '@/api/resourceService';
-import { subjectService } from '@/api/subjectService';
+import { moduleService, type Module } from '@/api/moduleService';
 import { schoolService } from '@/api/schoolService';
-import type { Subject } from '@/api/subjectService';
 import type { School } from '@/api/schoolService';
 import { toast } from 'sonner';
 
@@ -49,7 +48,7 @@ export default function EditResourcePage() {
   const [newTag, setNewTag] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [isUpdating, setIsUpdating] = useState(false);
-  const [subjects, setSubjects] = useState<Subject[]>([]);
+  const [subjects, setSubjects] = useState<Module[]>([]);
   const [schools, setSchools] = useState<School[]>([]);
   const [activeTab, setActiveTab] = useState<'file' | 'url'>('file');
   const [resource, setResource] = useState<ApiResource | null>(null);
@@ -63,7 +62,7 @@ export default function EditResourcePage() {
         // Load resource data and form data in parallel
         const [resourceResponse, subjectsData, schoolsResponse] = await Promise.all([
           resourceService.getById(id),
-          subjectService.getAllSubjects(),
+          moduleService.getAllModules(),
           schoolService.getAll(),
         ]);
 

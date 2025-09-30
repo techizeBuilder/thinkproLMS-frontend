@@ -12,9 +12,8 @@ import { Badge } from '@/components/ui/badge';
 import { X, Upload, FileText, Video, Link } from 'lucide-react';
 import { toast } from 'sonner';
 import { resourceService, type CreateResourceData } from '@/api/resourceService';
-import { subjectService } from '@/api/subjectService';
+import { moduleService, type Module } from '@/api/moduleService';
 import { schoolService } from '@/api/schoolService';
-import type { Subject } from '@/api/subjectService';
 import type { School } from '@/api/schoolService';
 
 const resourceSchema = z.object({
@@ -46,7 +45,7 @@ export default function ResourceForm({ resource, onSuccess, onCancel }: Resource
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [inputTags, setInputTags] = useState('');
-  const [subjects, setSubjects] = useState<Subject[]>([]);
+  const [subjects, setSubjects] = useState<Module[]>([]);
   const [schools, setSchools] = useState<School[]>([]);
   const [isExternal, setIsExternal] = useState(false);
 
@@ -80,7 +79,7 @@ export default function ResourceForm({ resource, onSuccess, onCancel }: Resource
     const loadData = async () => {
       try {
         const [subjectsData, schoolsData] = await Promise.all([
-          subjectService.getAllSubjects(),
+          moduleService.getAllModules(),
           schoolService.getAllSchools(),
         ]);
         setSubjects(subjectsData);

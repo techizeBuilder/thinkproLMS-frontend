@@ -9,8 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Plus, Trash2, Check } from 'lucide-react';
 import { questionRecommendationService, type CreateQuestionData } from '@/api/questionBankService';
-import { subjectService, type Subject } from '@/api/subjectService';
-import { moduleService, type ModuleItem } from '@/api/moduleService';
+import { moduleService, type ModuleItem, type Module } from '@/api/moduleService';
 import { toast } from 'sonner';
 import { useEffect } from 'react';
 
@@ -40,7 +39,7 @@ const RecommendQuestionForm: React.FC<RecommendQuestionFormProps> = ({
     difficulty: 'Medium',
   });
   const [loading, setLoading] = useState(false);
-  const [subjects, setSubjects] = useState<Subject[]>([]);
+  const [subjects, setSubjects] = useState<Module[]>([]);
   const [modules, setModules] = useState<ModuleItem[]>([]);
 
   const grades = [
@@ -72,7 +71,7 @@ const RecommendQuestionForm: React.FC<RecommendQuestionFormProps> = ({
 
   const fetchSubjects = async () => {
     try {
-      const subjectsData = await subjectService.getAllSubjects();
+      const subjectsData = await moduleService.getAllModules();
       setSubjects(subjectsData);
     } catch (error) {
       console.error('Error fetching subjects:', error);

@@ -32,9 +32,8 @@ import {
 import type { UserType, ResourceType } from "@/types/resources";
 import type { CreateResourceData } from "@/api/resourceService";
 import { resourceService } from "@/api/resourceService";
-import { subjectService } from "@/api/subjectService";
-import { schoolService } from "@/api/schoolService";
 import { moduleService } from "@/api/moduleService";
+import { schoolService } from "@/api/schoolService";
 import { toast } from "sonner";
 
 export default function AddResourcePage() {
@@ -73,7 +72,7 @@ export default function AddResourcePage() {
       setLoadingData(true);
       try {
         const [subjectsData, schoolsData] = await Promise.all([
-          subjectService.getAllSubjects(),
+          moduleService.getAllModules(),
           schoolService.getAllSchools(),
         ]);
 

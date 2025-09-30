@@ -25,7 +25,7 @@ import {
 } from 'lucide-react';
 import { certificateService, type Certificate } from '@/api/certificateService';
 import { schoolService } from '@/api/schoolService';
-import { subjectService } from '@/api/subjectService';
+import { moduleService } from '@/api/moduleService';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 
@@ -104,7 +104,7 @@ export default function CertificatesPage() {
 
   const loadSubjects = async () => {
     try {
-      const subjectsData = await subjectService.getAllSubjects();
+      const subjectsData = await moduleService.getAllModules();
       setSubjects(subjectsData || []);
     } catch (error) {
       console.error('Error loading subjects:', error);

@@ -23,8 +23,7 @@ import {
   moduleCompletionService,
   type School,
 } from "@/api/moduleCompletionService";
-import { moduleService, type ModuleItem } from "@/api/moduleService";
-import { subjectService, type Subject } from "@/api/subjectService";
+import { moduleService, type ModuleItem, type Module } from "@/api/moduleService";
 import { schoolService, type AvailableGrade } from "@/api/schoolService";
 import { toast } from "sonner";
 
@@ -40,7 +39,7 @@ export default function ModuleProgressPage() {
   const [selectedGrade, setSelectedGrade] = useState<string>("");
   const [selectedSection, setSelectedSection] = useState<string>("");
   const [selectedSubjectId, setSelectedSubjectId] = useState<string>("");
-  const [availableSubjects, setAvailableSubjects] = useState<Subject[]>([]);
+  const [availableSubjects, setAvailableSubjects] = useState<Module[]>([]);
   const [availableGrades, setAvailableGrades] = useState<AvailableGrade[]>([]);
   const [availableSections, setAvailableSections] = useState<string[]>([]);
   const [hasServiceDetails, setHasServiceDetails] = useState(false);
@@ -202,7 +201,7 @@ export default function ModuleProgressPage() {
 
   const loadAvailableSubjects = async () => {
     try {
-      const subjects = await subjectService.getAllSubjects();
+      const subjects = await moduleService.getAllModules();
       const activeSubjects = subjects.filter((s) => s.isActive);
       setAvailableSubjects(activeSubjects);
 
