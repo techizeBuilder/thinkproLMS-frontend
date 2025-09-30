@@ -1,9 +1,15 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { toast } from 'sonner';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, FolderOpen } from 'lucide-react';
 import { moduleService } from '@/api/moduleService';
 import { useAuth } from '@/contexts/AuthContext';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
 export default function EditModule() {
   const { user } = useAuth();
@@ -48,8 +54,8 @@ export default function EditModule() {
 
     if (!formData.name.trim()) {
       toast.error('Please enter module name');
-        return;
-      }
+      return;
+    }
 
     try {
       setSubmitting(true);
@@ -71,90 +77,116 @@ export default function EditModule() {
 
   if (!hasPermission) {
     return (
-      <div className="p-6">
-        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-          <p className="text-red-600">You don't have permission to edit modules.</p>
-            </div>
+      <div className="space-y-6">
+        <Alert variant="destructive">
+          <AlertDescription>
+            You don't have permission to edit modules.
+          </AlertDescription>
+        </Alert>
       </div>
     );
   }
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
       </div>
     );
   }
 
   return (
-    <div className="p-6">
-      <div className="mb-6">
-        <button
+    <div className="space-y-6">
+      {/* Header */}
+      <div>
+        <Button
+          variant="ghost"
           onClick={() => {
             const basePath = user?.role === 'superadmin' ? '/superadmin' : '/leadmentor';
             navigate(`${basePath}/modules`);
           }}
-          className="flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-4"
+          className="mb-4"
         >
-          <ArrowLeft size={20} />
+          <ArrowLeft className="h-4 w-4 mr-2" />
           Back to Modules
-        </button>
-        <h1 className="text-2xl font-bold text-gray-900">Edit Module</h1>
+        </Button>
+        <div>
+          <h1 className="text-3xl font-bold">Edit Module</h1>
+          <p className="text-muted-foreground mt-1">
+            Update the module details
+          </p>
+        </div>
       </div>
 
-      <div className="bg-white rounded-lg shadow-md p-6 max-w-2xl">
-        <form onSubmit={handleSubmit}>
-      <div className="space-y-6">
-              <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Module Name <span className="text-red-500">*</span>
-              </label>
-              <input
+      {/* Form */}
+      <Card className="max-w-2xl">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <FolderOpen className="h-5 w-5" />
+            Module Details
+          </CardTitle>
+          <CardDescription>
+            Update the details for this module. All fields marked with * are required.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleSubmit} className="space-y-6">
+            {/* Module Name */}
+            <div className="space-y-2">
+              <Label htmlFor="name">
+                Module Name <span className="text-destructive">*</span>
+              </Label>
+              <Input
+                id="name"
                 type="text"
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                placeholder="Enter module name"
+                placeholder="e.g., Mathematics"
                 required
               />
+              <p className="text-xs text-muted-foreground">
+                Choose a clear, descriptive name for your module
+              </p>
             </div>
 
-              <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Description (Optional)
-              </label>
-              <textarea
+            {/* Description */}
+            <div className="space-y-2">
+              <Label htmlFor="description">Description (Optional)</Label>
+              <Textarea
+                id="description"
                 value={formData.description}
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                placeholder="Enter module description"
+                placeholder="Enter a brief description of the module"
                 rows={4}
               />
-                      </div>
+              <p className="text-xs text-muted-foreground">
+                Provide additional context about what this module covers
+              </p>
+            </div>
 
-            <div className="flex gap-4">
-              <button
+            {/* Action Buttons */}
+            <div className="flex gap-4 pt-4">
+              <Button
                 type="submit"
                 disabled={submitting}
-                className="flex-1 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
+                className="flex-1"
               >
                 {submitting ? 'Updating...' : 'Update Module'}
-              </button>
-              <button
+              </Button>
+              <Button
                 type="button"
+                variant="outline"
                 onClick={() => {
                   const basePath = user?.role === 'superadmin' ? '/superadmin' : '/leadmentor';
                   navigate(`${basePath}/modules`);
                 }}
-                className="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
               >
-            Cancel
-              </button>
+                Cancel
+              </Button>
             </div>
-        </div>
-        </form>
-      </div>
+          </form>
+        </CardContent>
+      </Card>
     </div>
   );
 }
