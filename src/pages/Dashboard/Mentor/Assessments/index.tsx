@@ -1,20 +1,26 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { 
   Plus, 
   Eye, 
   Edit, 
   Trash2, 
   BarChart3, 
-  Calendar,
-  Clock,
-  Users,
   BookOpen,
-  Send
+  Send,
+  XCircle
 } from "lucide-react";
 import { assessmentService, type Assessment } from "@/api/assessmentService";
 import { toast } from "sonner";
@@ -33,7 +39,14 @@ export default function MentorAssessmentsPage() {
   const loadAssessments = async () => {
     try {
       setLoading(true);
-      const filters = statusFilter !== "all" ? { status: statusFilter } : {};
+      const filters: any = {};
+      
+      if (statusFilter === "expired") {
+        filters.status = "expired";
+      } else if (statusFilter !== "all") {
+        filters.status = statusFilter;
+      }
+      
       const response = await assessmentService.getAssessments(filters);
       setAssessments(response.data || []);
     } catch (error) {
@@ -75,11 +88,27 @@ export default function MentorAssessmentsPage() {
     }
   };
 
+  const handleCancelAssessment = async (id: string) => {
+    const reason = prompt("Enter reason for cancelling the assessment (optional):");
+    
+    if (!confirm("Are you sure you want to cancel this assessment? Students will be notified.")) {
+      return;
+    }
+
+    try {
+      await assessmentService.cancelAssessment(id, reason || undefined);
+      toast.success("Assessment cancelled successfully");
+      loadAssessments();
+    } catch (error) {
+      console.error("Error cancelling assessment:", error);
+      toast.error("Failed to cancel assessment");
+    }
+  };
+
   const getStatusBadge = (status: string) => {
     const variants = {
       draft: "secondary",
       published: "default",
-      completed: "outline",
       cancelled: "destructive",
     } as const;
 
@@ -155,13 +184,13 @@ export default function MentorAssessmentsPage() {
             <SelectItem value="all">All Status</SelectItem>
             <SelectItem value="draft">Draft</SelectItem>
             <SelectItem value="published">Published</SelectItem>
-            <SelectItem value="completed">Completed</SelectItem>
             <SelectItem value="cancelled">Cancelled</SelectItem>
+            <SelectItem value="expired">Expired</SelectItem>
           </SelectContent>
         </Select>
       </div>
 
-      {/* Assessments Grid */}
+      {/* Assessments Table */}
       {assessments.length === 0 ? (
         <Card>
           <CardContent className="text-center py-12">
@@ -180,128 +209,156 @@ export default function MentorAssessmentsPage() {
           </CardContent>
         </Card>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {assessments.map((assessment) => (
-            <Card key={assessment._id} className="hover:shadow-lg transition-shadow">
-              <CardHeader>
-                <div className="flex items-start justify-between">
-                  <CardTitle className="text-lg line-clamp-2">{assessment.title}</CardTitle>
-                  {getStatusBadge(assessment.status)}
-                </div>
-                <div className="flex items-center gap-2 text-sm text-gray-600">
-                  <BookOpen className="h-4 w-4" />
-                  <span>{assessment.grade} - {assessment.subject}</span>
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {/* Assessment Details */}
-                <div className="space-y-2 text-sm">
-                  <div className="flex items-center gap-2">
-                    <Calendar className="h-4 w-4 text-gray-500" />
-                    <span>Start: {formatDate(assessment.startDate)}</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Calendar className="h-4 w-4 text-gray-500" />
-                    <span>End: {formatDate(assessment.endDate)}</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Clock className="h-4 w-4 text-gray-500" />
-                    <span>{assessment.duration} minutes</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Users className="h-4 w-4 text-gray-500" />
-                    <span>{assessment.totalAttempts} attempts</span>
-                  </div>
-                </div>
-
-                {/* Assessment Status Indicators */}
-                <div className="flex flex-wrap gap-2">
-                  {isAssessmentActive(assessment) && (
-                    <Badge variant="default" className="bg-green-100 text-green-800">
-                      Active
-                    </Badge>
-                  )}
-                  {isAssessmentUpcoming(assessment) && (
-                    <Badge variant="outline" className="border-blue-300 text-blue-700">
-                      Upcoming
-                    </Badge>
-                  )}
-                  {isAssessmentExpired(assessment) && (
-                    <Badge variant="outline" className="border-gray-300 text-gray-700">
-                      Expired
-                    </Badge>
-                  )}
-                </div>
-
-                {/* Statistics */}
-                {assessment.totalAttempts > 0 && (
-                  <div className="bg-gray-50 p-3 rounded-lg">
-                    <div className="grid grid-cols-2 gap-2 text-sm">
-                      <div>
-                        <span className="text-gray-600">Avg Score:</span>
-                        <span className="ml-1 font-medium">{assessment.averageScore.toFixed(1)}</span>
-                      </div>
-                      <div>
-                        <span className="text-gray-600">Completion:</span>
-                        <span className="ml-1 font-medium">{assessment.completionRate.toFixed(1)}%</span>
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {/* Actions */}
-                <div className="flex items-center gap-2 pt-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => navigate(`/mentor/assessments/${assessment._id}`)}
-                  >
-                    <Eye className="h-4 w-4" />
-                  </Button>
-                  
-                  {assessment.status === "draft" && (
-                    <>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => navigate(`/mentor/assessments/${assessment._id}/edit`)}
-                      >
-                        <Edit className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="default"
-                        size="sm"
-                        onClick={() => handlePublishAssessment(assessment._id)}
-                      >
-                        <Send className="h-4 w-4" />
-                      </Button>
-                    </>
-                  )}
-                  
-                  {assessment.totalAttempts > 0 && (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => navigate(`/mentor/assessments/${assessment._id}/analytics`)}
-                    >
-                      <BarChart3 className="h-4 w-4" />
-                    </Button>
-                  )}
-                  
-                  {assessment.status === "draft" && assessment.totalAttempts === 0 && (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleDeleteAssessment(assessment._id)}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+        <Card>
+          <CardContent className="p-0">
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Title</TableHead>
+                    <TableHead>Grade/Subject</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Duration</TableHead>
+                    <TableHead>Date Range</TableHead>
+                    <TableHead>Attempts</TableHead>
+                    <TableHead>Avg Score</TableHead>
+                    <TableHead>Created By</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {assessments.map((assessment) => (
+                    <TableRow key={assessment._id} className="hover:bg-gray-50">
+                      <TableCell className="font-medium max-w-xs">
+                        <div className="flex flex-col gap-1">
+                          <span className="line-clamp-1">{assessment.title}</span>
+                          <div className="flex gap-1 flex-wrap">
+                            {isAssessmentActive(assessment) && (
+                              <Badge variant="default" className="bg-green-100 text-green-800 text-xs">
+                                Active
+                              </Badge>
+                            )}
+                            {isAssessmentUpcoming(assessment) && (
+                              <Badge variant="outline" className="border-blue-300 text-blue-700 text-xs">
+                                Upcoming
+                              </Badge>
+                            )}
+                            {isAssessmentExpired(assessment) && (
+                              <Badge variant="outline" className="border-gray-300 text-gray-700 text-xs">
+                                Expired
+                              </Badge>
+                            )}
+                          </div>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="text-sm">
+                          <div>{assessment.grade}</div>
+                          <div className="text-gray-600">{assessment.subject}</div>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        {getStatusBadge(assessment.status)}
+                      </TableCell>
+                      <TableCell className="text-sm">
+                        {assessment.duration} min
+                      </TableCell>
+                      <TableCell className="text-sm">
+                        <div className="flex flex-col gap-1">
+                          <div>{formatDate(assessment.startDate)}</div>
+                          <div className="text-gray-600">{formatDate(assessment.endDate)}</div>
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-center">
+                        {assessment.totalAttempts}
+                      </TableCell>
+                      <TableCell className="text-center">
+                        {assessment.totalAttempts > 0 
+                          ? assessment.averageScore.toFixed(1) 
+                          : "-"}
+                      </TableCell>
+                      <TableCell>
+                        <div className="text-sm">
+                          <div className="font-medium">{assessment.createdBy.name}</div>
+                          <div className="text-gray-600 capitalize">({assessment.createdBy.role})</div>
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex items-center justify-end gap-1">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => navigate(`/mentor/assessments/${assessment._id}`)}
+                            title="View"
+                          >
+                            <Eye className="h-4 w-4" />
+                          </Button>
+                          
+                          {assessment.status === "draft" && (
+                            <>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => navigate(`/mentor/assessments/${assessment._id}/edit`)}
+                                title="Edit"
+                              >
+                                <Edit className="h-4 w-4" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handlePublishAssessment(assessment._id)}
+                                title="Publish"
+                                className="text-blue-600 hover:text-blue-700"
+                              >
+                                <Send className="h-4 w-4" />
+                              </Button>
+                            </>
+                          )}
+                          
+                          {assessment.status === "published" && (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleCancelAssessment(assessment._id)}
+                              title="Cancel Assessment"
+                              className="text-orange-600 hover:text-orange-700"
+                            >
+                              <XCircle className="h-4 w-4" />
+                            </Button>
+                          )}
+                          
+                          {assessment.totalAttempts > 0 && (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => navigate(`/mentor/assessments/${assessment._id}/analytics`)}
+                              title="Analytics"
+                            >
+                              <BarChart3 className="h-4 w-4" />
+                            </Button>
+                          )}
+                          
+                          {assessment.status === "draft" && assessment.totalAttempts === 0 && (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleDeleteAssessment(assessment._id)}
+                              title="Delete"
+                              className="text-red-600 hover:text-red-700"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          )}
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          </CardContent>
+        </Card>
       )}
     </div>
   );

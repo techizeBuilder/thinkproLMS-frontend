@@ -41,8 +41,9 @@ export interface Assessment {
     _id: string;
     name: string;
     email: string;
+    role: string;
   };
-  status: "draft" | "published" | "completed" | "cancelled";
+  status: "draft" | "published" | "cancelled";
   isActive: boolean;
   totalAttempts: number;
   averageScore: number;
@@ -213,6 +214,14 @@ export const assessmentService = {
   publishAssessment: async (id: string, notificationMessage?: string) => {
     const response = await axiosInstance.post(`/assessments/${id}/publish`, {
       notificationMessage,
+    });
+    return response.data;
+  },
+
+  // Cancel assessment
+  cancelAssessment: async (id: string, reason?: string) => {
+    const response = await axiosInstance.post(`/assessments/${id}/cancel`, {
+      reason,
     });
     return response.data;
   },
