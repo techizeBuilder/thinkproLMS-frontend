@@ -13,7 +13,8 @@ import {
   Calendar,
   Clock,
   Users,
-  BookOpen
+  BookOpen,
+  Send
 } from "lucide-react";
 import { assessmentService, type Assessment } from "@/api/assessmentService";
 import { toast } from "sonner";
@@ -53,6 +54,24 @@ export default function MentorAssessmentsPage() {
     } catch (error) {
       console.error("Error deleting assessment:", error);
       toast.error("Failed to delete assessment");
+    }
+  };
+
+  const handlePublishAssessment = async (id: string) => {
+    const notificationMessage = prompt("Enter notification message for students (optional):");
+    
+    try {
+      if (notificationMessage) {
+        await assessmentService.publishAssessment(id, notificationMessage);
+      } else {
+        await assessmentService.publishAssessment(id);
+      }
+      
+      toast.success("Assessment published successfully");
+      loadAssessments();
+    } catch (error) {
+      console.error("Error publishing assessment:", error);
+      toast.error("Failed to publish assessment");
     }
   };
 
@@ -241,13 +260,22 @@ export default function MentorAssessmentsPage() {
                   </Button>
                   
                   {assessment.status === "draft" && (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => navigate(`/mentor/assessments/${assessment._id}/edit`)}
-                    >
-                      <Edit className="h-4 w-4" />
-                    </Button>
+                    <>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => navigate(`/mentor/assessments/${assessment._id}/edit`)}
+                      >
+                        <Edit className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="default"
+                        size="sm"
+                        onClick={() => handlePublishAssessment(assessment._id)}
+                      >
+                        <Send className="h-4 w-4" />
+                      </Button>
+                    </>
                   )}
                   
                   {assessment.totalAttempts > 0 && (

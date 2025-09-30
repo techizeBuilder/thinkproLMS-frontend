@@ -10,7 +10,8 @@ import {
   BookOpen,
   Edit,
   BarChart3,
-  ArrowLeft
+  ArrowLeft,
+  Send
 } from "lucide-react";
 import { assessmentService, type Assessment } from "@/api/assessmentService";
 import { toast } from "sonner";
@@ -20,6 +21,7 @@ export default function ViewAssessmentPage() {
   const navigate = useNavigate();
   const [assessment, setAssessment] = useState<Assessment | null>(null);
   const [loading, setLoading] = useState(true);
+  const [publishing, setPublishing] = useState(false);
 
   useEffect(() => {
     const loadAssessment = async () => {
@@ -94,6 +96,32 @@ export default function ViewAssessmentPage() {
     }
   };
 
+  const handlePublish = async () => {
+    if (!id || !assessment) return;
+
+    const notificationMessage = prompt("Enter notification message for students (optional):");
+    
+    setPublishing(true);
+    try {
+      if (notificationMessage) {
+        await assessmentService.publishAssessment(id, notificationMessage);
+      } else {
+        await assessmentService.publishAssessment(id);
+      }
+
+      toast.success("Assessment published successfully");
+      
+      // Reload the assessment to show updated status
+      const response = await assessmentService.getAssessmentById(id);
+      setAssessment(response.data);
+    } catch (error) {
+      console.error("Error publishing assessment:", error);
+      toast.error("Failed to publish assessment");
+    } finally {
+      setPublishing(false);
+    }
+  };
+
   return (
     <div className="container mx-auto p-6 space-y-6">
       {/* Header */}
@@ -115,15 +143,25 @@ export default function ViewAssessmentPage() {
         <div className="flex items-center gap-2">
           {getStatusBadge(assessment.status)}
           {assessment.status === "draft" && (
-            <Button 
-              variant="outline"
-              onClick={() => navigate(`/mentor/assessments/${assessment._id}/edit`)}
-            >
-              <Edit className="h-4 w-4 mr-2" />
-              Edit
-            </Button>
+            <>
+              <Button 
+                variant="outline"
+                onClick={() => navigate(`/mentor/assessments/${assessment._id}/edit`)}
+              >
+                <Edit className="h-4 w-4 mr-2" />
+                Edit
+              </Button>
+              <Button 
+                onClick={handlePublish}
+                disabled={publishing}
+              >
+                <Send className="h-4 w-4 mr-2" />
+                {publishing ? "Publishing..." : "Publish"}
+              </Button>
+            </>
           )}
           <Button 
+            variant="outline"
             onClick={() => navigate(`/mentor/assessments/${assessment._id}/analytics`)}
           >
             <BarChart3 className="h-4 w-4 mr-2" />

@@ -12,7 +12,8 @@ import {
   Save,
   ArrowLeft,
   FileText,
-  Settings
+  Settings,
+  Send
 } from "lucide-react";
 import { assessmentService, type Assessment, type AssessmentQuestion } from "@/api/assessmentService";
 import AssessmentQuestionManager from "@/components/AssessmentQuestionManager";
@@ -24,6 +25,7 @@ export default function EditAssessmentPage() {
   const [assessment, setAssessment] = useState<Assessment | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [publishing, setPublishing] = useState(false);
 
   // Form state
   const [formData, setFormData] = useState({
@@ -98,6 +100,33 @@ export default function EditAssessmentPage() {
     setQuestions(updatedQuestions);
   };
 
+  const handlePublish = async () => {
+    if (!id) return;
+
+    const notificationMessage = prompt("Enter notification message for students (optional):");
+    
+    setPublishing(true);
+    try {
+      // First save any changes
+      await assessmentService.updateAssessment(id, formData);
+      
+      // Then publish
+      if (notificationMessage) {
+        await assessmentService.publishAssessment(id, notificationMessage);
+      } else {
+        await assessmentService.publishAssessment(id);
+      }
+
+      toast.success("Assessment published successfully");
+      navigate(`/mentor/assessments/${id}`);
+    } catch (error) {
+      console.error("Error publishing assessment:", error);
+      toast.error("Failed to publish assessment");
+    } finally {
+      setPublishing(false);
+    }
+  };
+
   // Check if assessment can be edited (only draft assessments)
   const canEdit = assessment && assessment.status === "draft";
   const canEditQuestions = canEdit;
@@ -155,13 +184,23 @@ export default function EditAssessmentPage() {
             Cancel
           </Button>
           {canEdit ? (
-            <Button 
-              onClick={handleSave}
-              disabled={saving}
-            >
-              <Save className="h-4 w-4 mr-2" />
-              {saving ? "Saving..." : "Save Changes"}
-            </Button>
+            <>
+              <Button 
+                variant="outline"
+                onClick={handleSave}
+                disabled={saving || publishing}
+              >
+                <Save className="h-4 w-4 mr-2" />
+                {saving ? "Saving..." : "Save Changes"}
+              </Button>
+              <Button 
+                onClick={handlePublish}
+                disabled={saving || publishing}
+              >
+                <Send className="h-4 w-4 mr-2" />
+                {publishing ? "Publishing..." : "Save & Publish"}
+              </Button>
+            </>
           ) : (
             <Button 
               disabled
