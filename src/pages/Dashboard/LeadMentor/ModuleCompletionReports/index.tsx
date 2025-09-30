@@ -1,80 +1,354 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
+import { useSearchParams } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { 
-  Loader2, 
-  CheckCircle, 
-  Circle, 
-  BookOpen, 
-  GraduationCap, 
-  School as SchoolIcon, 
-  Users, 
-  TrendingUp,
-  FileText
-} from "lucide-react";
-import { 
-  moduleCompletionService, 
-  type ModuleCompletionReport, 
-  type School 
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Loader2, BookOpen } from "lucide-react";
+import {
+  moduleCompletionService,
+  type School,
+  type MentorModuleProgress,
 } from "@/api/moduleCompletionService";
+import { mentorService, type Mentor } from "@/api/mentorService";
+import { schoolService, type AvailableGrade } from "@/api/schoolService";
 import { toast } from "sonner";
 
 export default function ModuleCompletionReportsPage() {
-  const [loading, setLoading] = useState(true);
-  const [reports, setReports] = useState<ModuleCompletionReport[]>([]);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [loading, setLoading] = useState(false);
   const [availableSchools, setAvailableSchools] = useState<School[]>([]);
-  const [selectedSchoolId, setSelectedSchoolId] = useState<string>("all");
-  const [selectedMentorId, setSelectedMentorId] = useState<string>("all");
-  const [activeTab, setActiveTab] = useState("overview");
+  const [availableMentors, setAvailableMentors] = useState<Mentor[]>([]);
+  const [availableGrades, setAvailableGrades] = useState<AvailableGrade[]>([]);
+  const [availableSections, setAvailableSections] = useState<string[]>([]);
+  const [hasServiceDetails, setHasServiceDetails] = useState(false);
+
+  // Filter states
+  const [selectedSchoolId, setSelectedSchoolId] = useState<string>("");
+  const [selectedMentorId, setSelectedMentorId] = useState<string>("");
+  const [selectedGrade, setSelectedGrade] = useState<string>("");
+  const [selectedSection, setSelectedSection] = useState<string>("");
+
+  // Module progress data
+  const [moduleProgress, setModuleProgress] =
+    useState<MentorModuleProgress | null>(null);
+
+  // Function to update URL parameters
+  const updateUrlParams = (params: {
+    school?: string;
+    mentor?: string;
+    grade?: string;
+    section?: string;
+  }) => {
+    const newSearchParams = new URLSearchParams(searchParams);
+
+    if (params.school !== undefined) {
+      if (params.school) {
+        newSearchParams.set("school", params.school);
+      } else {
+        newSearchParams.delete("school");
+      }
+    }
+
+    if (params.mentor !== undefined) {
+      if (params.mentor) {
+        newSearchParams.set("mentor", params.mentor);
+      } else {
+        newSearchParams.delete("mentor");
+      }
+    }
+
+    if (params.grade !== undefined) {
+      if (params.grade) {
+        newSearchParams.set("grade", params.grade);
+      } else {
+        newSearchParams.delete("grade");
+      }
+    }
+
+    if (params.section !== undefined) {
+      if (params.section) {
+        newSearchParams.set("section", params.section);
+      } else {
+        newSearchParams.delete("section");
+      }
+    }
+
+    setSearchParams(newSearchParams, { replace: true });
+  };
+
+  // Initialize from URL parameters
+  useEffect(() => {
+    const schoolParam = searchParams.get("school");
+    const mentorParam = searchParams.get("mentor");
+    const gradeParam = searchParams.get("grade");
+    const sectionParam = searchParams.get("section");
+
+    if (schoolParam) {
+      setSelectedSchoolId(schoolParam);
+    }
+    if (mentorParam) {
+      setSelectedMentorId(mentorParam);
+    }
+    if (gradeParam) {
+      setSelectedGrade(gradeParam);
+    }
+    if (sectionParam) {
+      setSelectedSection(sectionParam);
+    }
+  }, [searchParams]);
 
   useEffect(() => {
     loadAvailableSchools();
+    loadAvailableMentors();
   }, []);
 
+  // Load school service details when school changes
   useEffect(() => {
-    loadReports();
-  }, [selectedSchoolId, selectedMentorId]);
+    const fetchSchoolServiceDetails = async (schoolId: string) => {
+      try {
+        const response = await schoolService.getServiceDetails(schoolId);
+        if (response.success) {
+          setAvailableGrades(response.data.grades);
+          setHasServiceDetails(response.data.hasServiceDetails);
+
+          // Auto-select first grade if available and no grade in URL params
+          if (response.data.grades && response.data.grades.length > 0) {
+            const gradeParam = searchParams.get("grade");
+            if (!gradeParam) {
+              const firstGrade = response.data.grades[0].grade;
+              setSelectedGrade(firstGrade);
+              updateUrlParams({ grade: firstGrade });
+            }
+          }
+        }
+      } catch (error) {
+        console.error("Error fetching school service details:", error);
+        setAvailableGrades([]);
+        setHasServiceDetails(false);
+      }
+    };
+
+    if (selectedSchoolId) {
+      fetchSchoolServiceDetails(selectedSchoolId);
+      // Reset other filters when school changes (but preserve URL params if they exist)
+      const gradeParam = searchParams.get("grade");
+      const sectionParam = searchParams.get("section");
+
+      if (!gradeParam) {
+        setSelectedGrade("");
+        updateUrlParams({ grade: "" });
+      }
+      if (!sectionParam) {
+        setSelectedSection("");
+        updateUrlParams({ section: "" });
+      }
+      setAvailableSections([]);
+    } else {
+      setAvailableGrades([]);
+      setHasServiceDetails(false);
+      setAvailableSections([]);
+    }
+  }, [selectedSchoolId, searchParams]);
+
+  // Update available sections when grade changes
+  useEffect(() => {
+    if (selectedGrade && hasServiceDetails) {
+      const selectedGradeData = availableGrades.find(
+        (gradeData) => gradeData.grade === selectedGrade
+      );
+      const sections = selectedGradeData?.sections || [];
+      setAvailableSections(sections);
+
+      // Auto-select first section if available and no section in URL params
+      if (sections.length > 0) {
+        const sectionParam = searchParams.get("section");
+        if (!sectionParam) {
+          const firstSection = sections[0];
+          setSelectedSection(firstSection);
+          updateUrlParams({ section: firstSection });
+        }
+      } else {
+        setSelectedSection("");
+        updateUrlParams({ section: "" });
+      }
+    } else {
+      setAvailableSections([]);
+    }
+  }, [selectedGrade, availableGrades, hasServiceDetails, searchParams]);
 
   const loadAvailableSchools = async () => {
     try {
       const schools = await moduleCompletionService.getAvailableSchools();
       setAvailableSchools(schools);
+      if (schools.length > 0) {
+        setSelectedSchoolId(schools[0]._id);
+      }
     } catch (error) {
       console.error("Error loading schools:", error);
       toast.error("Failed to load schools");
     }
   };
 
-  const loadReports = async () => {
+  const loadAvailableMentors = async () => {
     try {
-      setLoading(true);
-      const schoolId = selectedSchoolId === "all" ? undefined : selectedSchoolId;
-      const mentorId = selectedMentorId === "all" ? undefined : selectedMentorId;
-      
-      const data = await moduleCompletionService.getModuleCompletionReports(schoolId, mentorId);
-      setReports(data);
+      const response = await mentorService.getAll();
+      if (response.success) {
+        setAvailableMentors(response.data);
+        if (response.data.length > 0) {
+          setSelectedMentorId(response.data[0]._id);
+        }
+      }
     } catch (error) {
-      console.error("Error loading reports:", error);
-      toast.error("Failed to load completion reports");
-    } finally {
-      setLoading(false);
+      console.error("Error loading mentors:", error);
+      toast.error("Failed to load mentors");
     }
   };
 
-  const getOverallStats = () => {
-    if (reports.length === 0) return { totalMentors: 0, totalSchools: 0, averageProgress: 0 };
-    
-    const totalMentors = new Set(reports.map(r => r.mentor._id)).size;
-    const totalSchools = new Set(reports.map(r => r.school._id)).size;
-    const averageProgress = reports.reduce((sum, report) => sum + report.overallProgress, 0) / reports.length;
-    
-    return { totalMentors, totalSchools, averageProgress: Math.round(averageProgress) };
-  };
+  const loadModuleProgress = useCallback(
+    async (
+      schoolId: string,
+      mentorId: string,
+      grade: string,
+      section: string
+    ) => {
+      try {
+        setLoading(true);
+        console.log("Loading module progress with filters:", {
+          schoolId,
+          mentorId,
+          grade,
+          section,
+        });
+
+        // Get module completion reports for the specific mentor and school
+        const reportsData =
+          await moduleCompletionService.getModuleCompletionReports(
+            schoolId,
+            mentorId,
+            section,
+            grade
+          );
+        console.log("Module completion reports data:", reportsData);
+
+        // Find the report for the specific mentor and school
+        const mentorReport = reportsData.find(
+          (report) =>
+            report.mentor._id === mentorId && report.school._id === schoolId
+        );
+        console.log({ mentorReport });
+
+        if (mentorReport) {
+          // Convert the report format to the expected MentorModuleProgress format
+          const progressData = {
+            school: mentorReport.school,
+            mentor: mentorReport.mentor,
+            moduleProgress: mentorReport.modules.map((module) => ({
+              moduleId: module.moduleId,
+              grade: module.grade,
+              subject: module.subject,
+              totalItems: module.totalItems,
+              completedItems: module.completedItems,
+              overallProgress: module.progress,
+              moduleItems: module.items.map((item) => ({
+                moduleItemId: item.moduleItemId,
+                moduleItemName: item.moduleItemName,
+                moduleItemDescription: item.moduleItemDescription,
+                isCompleted: item.isCompleted,
+                completedAt: item.completedAt,
+                notes: item.notes || "",
+                status: (() => {
+                  return item.status;
+                  // if (item.isCompleted) return "Completed";
+                  // // For now, if not completed, show as Pending
+                  // // TODO: Add logic to detect "In Progress" status based on completion percentage or other criteria
+                  // return "Pending";
+                })() as "Completed" | "Pending" | "In Progress",
+                topics: (item.topics || []).map((topic) => ({
+                  topicId: topic.topicId,
+                  topicName: topic.topicName,
+                  topicDescription: topic.topicDescription,
+                  isCompleted: topic.isCompleted,
+                  completedAt: topic.completedAt,
+                  notes: topic.notes || "",
+                  subtopics: (topic.subtopics || []).map((subtopic) => ({
+                    subtopicId: subtopic.subtopicId,
+                    subtopicName: subtopic.subtopicName,
+                    subtopicDescription: subtopic.subtopicDescription,
+                    isCompleted: subtopic.isCompleted,
+                    completedAt: subtopic.completedAt,
+                    notes: subtopic.notes || "",
+                    isActive: true,
+                  })),
+                  isActive: true,
+                })),
+              })),
+            })),
+          };
+          setModuleProgress(progressData as MentorModuleProgress);
+        } else {
+          setModuleProgress(null);
+        }
+      } catch (error) {
+        console.error("Error loading module progress:", error);
+        setModuleProgress(null);
+
+        if (error instanceof Error) {
+          toast.error(`Failed to load module progress: ${error.message}`);
+        } else {
+          toast.error("Failed to load module progress. Please try again.");
+        }
+      } finally {
+        setLoading(false);
+      }
+    },
+    []
+  );
+
+  // Load module progress when all filters are selected
+  useEffect(() => {
+    if (
+      selectedSchoolId &&
+      selectedMentorId &&
+      selectedGrade &&
+      selectedSection
+    ) {
+      console.log("Triggering loadModuleProgress with:", {
+        selectedSchoolId,
+        selectedMentorId,
+        selectedGrade,
+        selectedSection,
+      });
+      loadModuleProgress(
+        selectedSchoolId,
+        selectedMentorId,
+        selectedGrade,
+        selectedSection
+      );
+    }
+  }, [
+    selectedSchoolId,
+    selectedMentorId,
+    selectedGrade,
+    selectedSection,
+    loadModuleProgress,
+  ]);
 
   const getProgressColor = (progress: number) => {
     if (progress >= 80) return "text-green-600";
@@ -82,11 +356,7 @@ export default function ModuleCompletionReportsPage() {
     return "text-red-600";
   };
 
-  const getProgressBadgeVariant = (progress: number) => {
-    if (progress >= 80) return "default";
-    if (progress >= 60) return "secondary";
-    return "destructive";
-  };
+  console.log({ moduleProgress });
 
   if (loading) {
     return (
@@ -96,293 +366,292 @@ export default function ModuleCompletionReportsPage() {
     );
   }
 
-  const stats = getOverallStats();
-
   return (
-    <div className="space-y-6">
+    <div className="p-6 space-y-4">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Module Completion Reports</h1>
-          <p className="text-gray-600">
-            Monitor module completion progress across all mentors and schools
+          <h1 className="text-2xl font-bold">Module Completion Reports</h1>
+          <p className="text-gray-600 text-sm">
+            Monitor module completion progress for specific mentors and schools
           </p>
         </div>
       </div>
 
       {/* Filters */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <FileText className="h-5 w-5" />
-            Filters
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor="school-filter">Filter by School</Label>
-              <Select value={selectedSchoolId} onValueChange={setSelectedSchoolId}>
-                <SelectTrigger>
-                  <SelectValue placeholder="All Schools" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Schools</SelectItem>
-                  {availableSchools.map((school) => (
-                    <SelectItem key={school._id} value={school._id}>
-                      {school.name} - {school.city}, {school.state}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        {/* School Selection */}
+        <div>
+          <Label htmlFor="school-select" className="text-sm font-medium">
+            School
+          </Label>
+          <Select
+            value={selectedSchoolId}
+            onValueChange={(value) => {
+              setSelectedSchoolId(value);
+              updateUrlParams({ school: value });
+            }}
+          >
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="Select a school" />
+            </SelectTrigger>
+            <SelectContent>
+              {availableSchools.map((school) => (
+                <SelectItem key={school._id} value={school._id}>
+                  {school.name} - {school.city}, {school.state}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        {/* Mentor Selection */}
+        <div>
+          <Label htmlFor="mentor-select" className="text-sm font-medium">
+            Mentor
+          </Label>
+          <Select
+            value={selectedMentorId}
+            onValueChange={(value) => {
+              setSelectedMentorId(value);
+              updateUrlParams({ mentor: value });
+            }}
+          >
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="Select a mentor" />
+            </SelectTrigger>
+            <SelectContent>
+              {availableMentors.map((mentor) => (
+                <SelectItem key={mentor._id} value={mentor._id}>
+                  {mentor.user.name} ({mentor.user.email})
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        {/* Grade Selection */}
+        <div>
+          <Label htmlFor="grade-select" className="text-sm font-medium">
+            Grade
+          </Label>
+          <Select
+            value={selectedGrade}
+            onValueChange={(value) => {
+              setSelectedGrade(value);
+              updateUrlParams({ grade: value });
+            }}
+          >
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="Select grade" />
+            </SelectTrigger>
+            <SelectContent>
+              {hasServiceDetails
+                ? availableGrades.map((gradeData) => (
+                    <SelectItem key={gradeData.grade} value={gradeData.grade}>
+                      {gradeData.grade}
+                    </SelectItem>
+                  ))
+                : [
+                    "Grade 1",
+                    "Grade 2",
+                    "Grade 3",
+                    "Grade 4",
+                    "Grade 5",
+                    "Grade 6",
+                    "Grade 7",
+                    "Grade 8",
+                    "Grade 9",
+                    "Grade 10",
+                  ].map((grade) => (
+                    <SelectItem key={grade} value={grade}>
+                      {grade}
                     </SelectItem>
                   ))}
-                </SelectContent>
-              </Select>
-            </div>
-            
-            <div>
-              <Label htmlFor="mentor-filter">Filter by Mentor</Label>
-              <Select value={selectedMentorId} onValueChange={setSelectedMentorId}>
-                <SelectTrigger>
-                  <SelectValue placeholder="All Mentors" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Mentors</SelectItem>
-                  {Array.from(new Set(reports.map(r => r.mentor._id))).map((mentorId) => {
-                    const mentor = reports.find(r => r.mentor._id === mentorId)?.mentor;
-                    return (
-                      <SelectItem key={mentorId} value={mentorId}>
-                        {mentor?.name} ({mentor?.email})
-                      </SelectItem>
-                    );
-                  })}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+            </SelectContent>
+          </Select>
+        </div>
 
-      {/* Overview Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center gap-4">
-              <div className="p-3 bg-blue-100 rounded-full">
-                <Users className="h-6 w-6 text-blue-600" />
-              </div>
-              <div>
-                <p className="text-sm text-gray-600">Total Mentors</p>
-                <p className="text-2xl font-bold">{stats.totalMentors}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center gap-4">
-              <div className="p-3 bg-green-100 rounded-full">
-                <SchoolIcon className="h-6 w-6 text-green-600" />
-              </div>
-              <div>
-                <p className="text-sm text-gray-600">Total Schools</p>
-                <p className="text-2xl font-bold">{stats.totalSchools}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center gap-4">
-              <div className="p-3 bg-purple-100 rounded-full">
-                <TrendingUp className="h-6 w-6 text-purple-600" />
-              </div>
-              <div>
-                <p className="text-sm text-gray-600">Average Progress</p>
-                <p className="text-2xl font-bold">{stats.averageProgress}%</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+        {/* Section Selection */}
+        <div>
+          <Label htmlFor="section-select" className="text-sm font-medium">
+            Section
+          </Label>
+          <Select
+            value={selectedSection}
+            onValueChange={(value) => {
+              setSelectedSection(value);
+              updateUrlParams({ section: value });
+            }}
+          >
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="Select section" />
+            </SelectTrigger>
+            <SelectContent>
+              {availableSections.map((section) => (
+                <SelectItem key={section} value={section}>
+                  {section}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
       </div>
 
-      {/* Reports */}
-      {reports.length === 0 ? (
+      {/* Show message when filters are not complete */}
+      {(!selectedSchoolId ||
+        !selectedMentorId ||
+        !selectedGrade ||
+        !selectedSection) && (
         <Alert>
           <AlertDescription>
-            No completion reports found for the selected filters.
+            Please select School, Mentor, Grade, and Section to view module
+            progress.
           </AlertDescription>
         </Alert>
-      ) : (
-        <div className="space-y-4">
-          {reports.map((report) => (
-            <Card key={`${report.mentor._id}-${report.school._id}`}>
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <CardTitle className="flex items-center gap-2">
-                      <GraduationCap className="h-5 w-5" />
-                      {report.mentor.name}
-                    </CardTitle>
-                    <p className="text-sm text-gray-600">
-                      {report.school.name} - {report.school.city}, {report.school.state}
-                    </p>
-                    <p className="text-sm text-gray-500">
-                      {report.completedItems} of {report.totalItems} items completed
-                    </p>
-                  </div>
-                  <div className="text-right">
-                    <div className={`text-2xl font-bold ${getProgressColor(report.overallProgress)}`}>
-                      {report.overallProgress}%
-                    </div>
-                    <Badge variant={getProgressBadgeVariant(report.overallProgress)}>
-                      {report.overallProgress >= 80 ? "Excellent" : 
-                       report.overallProgress >= 60 ? "Good" : "Needs Attention"}
-                    </Badge>
-                    <Progress value={report.overallProgress} className="w-32 mt-2" />
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <Tabs value={activeTab} onValueChange={setActiveTab}>
-                  <TabsList>
-                    <TabsTrigger value="overview">Overview</TabsTrigger>
-                    <TabsTrigger value="modules">Module Details</TabsTrigger>
-                  </TabsList>
-                  
-                  <TabsContent value="overview" className="mt-4">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div>
-                        <h4 className="font-medium mb-2">Mentor Information</h4>
-                        <div className="space-y-1 text-sm">
-                          <p><strong>Name:</strong> {report.mentor.name}</p>
-                          <p><strong>Email:</strong> {report.mentor.email}</p>
-                        </div>
-                      </div>
-                      <div>
-                        <h4 className="font-medium mb-2">School Information</h4>
-                        <div className="space-y-1 text-sm">
-                          <p><strong>School:</strong> {report.school.name}</p>
-                          <p><strong>Location:</strong> {report.school.city}, {report.school.state}</p>
-                        </div>
-                      </div>
-                    </div>
-                  </TabsContent>
-                  
-                  <TabsContent value="modules" className="mt-4">
-                    <div className="space-y-4">
-                      {report.modules.map((module) => (
-                        <div key={module.moduleId} className="border rounded-lg p-4">
-                          <div className="flex items-center justify-between mb-3">
-                            <div>
-                              <h4 className="font-medium flex items-center gap-2">
-                                <BookOpen className="h-4 w-4" />
-                                Grade {module.grade} - {module.subject.name}
-                              </h4>
-                              <p className="text-sm text-gray-600">
-                                {module.completedItems} of {module.totalItems} items completed
-                              </p>
-                            </div>
-                            <div className="text-right">
-                              <div className={`text-lg font-bold ${getProgressColor(module.progress)}`}>
-                                {module.progress}%
-                              </div>
-                              <Progress value={module.progress} className="w-24 mt-1" />
-                            </div>
-                          </div>
-                          
-                          <div className="space-y-2">
-                            {module.items.map((item, index) => (
-                              <div key={index} className="p-2 bg-gray-50 rounded">
-                                <div className="flex items-center gap-3">
-                                  {item.isCompleted ? (
-                                    <CheckCircle className="h-4 w-4 text-green-500" />
-                                  ) : (
-                                    <Circle className="h-4 w-4 text-gray-400" />
-                                  )}
-                                  <div className="flex-1">
-                                    <p className="text-sm font-medium">{item.moduleItemName}</p>
-                                    {item.moduleItemDescription && (
-                                      <p className="text-xs text-gray-600 mt-1">
-                                        {item.moduleItemDescription}
-                                      </p>
-                                    )}
-                                    {item.notes && (
-                                      <p className="text-xs text-gray-600 mt-1">
-                                        Notes: {item.notes}
-                                      </p>
-                                    )}
-                                    {item.completedAt && (
-                                      <p className="text-xs text-gray-500 mt-1">
-                                        Completed: {new Date(item.completedAt).toLocaleDateString()}
-                                      </p>
-                                    )}
-                                  </div>
-                                  {item.completionPercentage > 0 && (
-                                    <Badge variant="outline">
-                                      {item.completionPercentage}%
-                                    </Badge>
-                                  )}
-                                </div>
-                                
-                                {/* Topics and Subtopics */}
-                                {item.topics && item.topics.length > 0 && (
-                                  <div className="ml-6 mt-2 space-y-2">
-                                    {item.topics.map((topic) => (
-                                      <div key={topic.topicId} className="border-l-2 border-gray-200 pl-3">
-                                        <div className="flex items-center gap-2">
-                                          {topic.isCompleted ? (
-                                            <CheckCircle className="h-3 w-3 text-green-500" />
-                                          ) : (
-                                            <Circle className="h-3 w-3 text-gray-400" />
-                                          )}
-                                          <span className="text-xs font-medium text-gray-700">
-                                            {topic.topicName}
-                                          </span>
-                                          {topic.completedAt && (
-                                            <span className="text-xs text-gray-500">
-                                              ({new Date(topic.completedAt).toLocaleDateString()})
-                                            </span>
-                                          )}
-                                        </div>
-                                        
-                                        {/* Subtopics */}
-                                        {topic.subtopics && topic.subtopics.length > 0 && (
-                                          <div className="ml-4 mt-1 space-y-1">
-                                            {topic.subtopics.map((subtopic) => (
-                                              <div key={subtopic.subtopicId} className="flex items-center gap-2">
-                                                {subtopic.isCompleted ? (
-                                                  <CheckCircle className="h-2 w-2 text-green-500" />
-                                                ) : (
-                                                  <Circle className="h-2 w-2 text-gray-400" />
-                                                )}
-                                                <span className="text-xs text-gray-600">
-                                                  {subtopic.subtopicName}
-                                                </span>
-                                                {subtopic.completedAt && (
-                                                  <span className="text-xs text-gray-500">
-                                                    ({new Date(subtopic.completedAt).toLocaleDateString()})
-                                                  </span>
-                                                )}
-                                              </div>
-                                            ))}
-                                          </div>
-                                        )}
-                                      </div>
-                                    ))}
-                                  </div>
-                                )}
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </TabsContent>
-                </Tabs>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
       )}
+
+      {/* Show loading state when modules are being loaded */}
+      {selectedSchoolId &&
+        selectedMentorId &&
+        selectedGrade &&
+        selectedSection &&
+        loading && (
+          <Alert>
+            <AlertDescription className="flex items-center gap-2">
+              <Loader2 className="h-4 w-4 animate-spin" />
+              Loading module progress for the selected criteria...
+            </AlertDescription>
+          </Alert>
+        )}
+
+      {/* Show message when no data is available */}
+      {selectedSchoolId &&
+        selectedMentorId &&
+        selectedGrade &&
+        selectedSection &&
+        !moduleProgress &&
+        !loading && (
+          <Alert>
+            <AlertDescription>
+              No module progress found for the selected criteria. Please try
+              selecting different criteria or contact your administrator if
+              modules should be available.
+            </AlertDescription>
+          </Alert>
+        )}
+
+      {/* Module Progress Table */}
+      {moduleProgress &&
+        moduleProgress.moduleProgress &&
+        moduleProgress.moduleProgress.length > 0 && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <BookOpen className="h-5 w-5" />
+                Module Progress for {moduleProgress.mentor.name}
+              </CardTitle>
+              <p className="text-sm text-gray-600">
+                {moduleProgress.school.name} - {moduleProgress.school.city},{" "}
+                {moduleProgress.school.state}
+              </p>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-6">
+                {moduleProgress.moduleProgress.map((module) => (
+                  <div key={module.moduleId} className="border rounded-lg p-4">
+                    <div className="flex items-center justify-between mb-4">
+                      <div>
+                        <h4 className="font-medium flex items-center gap-2">
+                          <BookOpen className="h-4 w-4" />
+                          Grade {module.grade} - {module.subject.name}
+                        </h4>
+                        <p className="text-sm text-gray-600">
+                          {
+                            module.moduleItems.filter(
+                              (item) => item.isCompleted
+                            ).length
+                          }{" "}
+                          of {module.moduleItems.length} items completed
+                        </p>
+                      </div>
+                      <div className="text-right">
+                        <div
+                          className={`text-lg font-bold ${getProgressColor(
+                            module.overallProgress
+                          )}`}
+                        >
+                          {module.overallProgress}%
+                        </div>
+                        <Progress
+                          value={module.overallProgress}
+                          className="w-24 mt-1"
+                        />
+                      </div>
+                    </div>
+
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead className="w-[50px]">#</TableHead>
+                          <TableHead>Module Item</TableHead>
+                          <TableHead>Description</TableHead>
+                          <TableHead className="w-[120px]">Status</TableHead>
+                          <TableHead className="w-[150px]">
+                            Completed At
+                          </TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {module.moduleItems.map((item, index) => (
+                          <TableRow key={item.moduleItemId}>
+                            <TableCell className="font-medium">
+                              {index + 1}
+                            </TableCell>
+                            <TableCell className="font-medium">
+                              {item.moduleItemName}
+                            </TableCell>
+                            <TableCell className="text-gray-600">
+                              {item.moduleItemDescription ||
+                                "No description available"}
+                            </TableCell>
+                            <TableCell>
+                              <Badge
+                                variant={
+                                  item.status === "Completed"
+                                    ? "default"
+                                    : item.status === "In Progress"
+                                    ? "secondary"
+                                    : "outline"
+                                }
+                                className={
+                                  item.status === "Completed"
+                                    ? "bg-green-100 text-green-800"
+                                    : item.status === "In Progress"
+                                    ? "bg-yellow-100 text-yellow-800"
+                                    : "bg-gray-100 text-gray-800"
+                                }
+                              >
+                                {item.status}
+                              </Badge>
+                            </TableCell>
+
+                            <TableCell className="text-sm text-gray-600">
+                              {item.completedAt
+                                ? new Date(
+                                    item.completedAt
+                                  ).toLocaleDateString()
+                                : "-"}
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        )}
     </div>
   );
 }
