@@ -486,7 +486,7 @@ export default function CreateAssessmentPage() {
                   <SelectContent>
                     {hasServiceDetails ? (
                       availableGrades.map(gradeData => (
-                        <SelectItem key={gradeData.grade} value={gradeData.grade}>{gradeData.grade}</SelectItem>
+                        <SelectItem key={gradeData.grade} value={gradeData.grade.toString()}>{gradeData.grade}</SelectItem>
                       ))
                     ) : (
                       ["Grade 1", "Grade 2", "Grade 3", "Grade 4", "Grade 5", 

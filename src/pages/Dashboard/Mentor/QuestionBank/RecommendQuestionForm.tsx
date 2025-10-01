@@ -18,10 +18,9 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
-import { Check, ChevronsUpDown } from 'lucide-react';
+import { Check, ChevronsUpDown, Plus, Trash2 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Plus, Trash2, Check as CheckIcon } from 'lucide-react';
 import { questionRecommendationService, type CreateQuestionData } from '@/api/questionBankService';
 import { questionBankService } from '@/api/questionBankService';
 import { toast } from 'sonner';

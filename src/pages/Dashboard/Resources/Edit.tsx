@@ -423,7 +423,7 @@ export default function EditResourcePage() {
                                   {session.grade}.{session.sessionNumber?.toString().padStart(2, '0')} {session.name}
                                 </span>
                                 {session.module && (
-                                  <span className="text-sm text-gray-500">{session.module.name}</span>
+                                  <span className="text-sm text-gray-500">{typeof session.module === 'string' ? session.module : session.module.name}</span>
                                 )}
                               </div>
                             </CommandItem>
@@ -509,22 +509,22 @@ export default function EditResourcePage() {
                     id="file"
                     type="file"
                     onChange={handleFileUpload}
-                    accept={getAcceptedFileTypes(formData.type)}
+                    accept={getAcceptedFileTypes(formData.type || '')}
                     className="hidden"
                   />
                   <Label htmlFor="file" className="cursor-pointer">
                     <div className="flex flex-col items-center gap-2">
-                      {getFileIcon(formData.type)}
+                      {getFileIcon(formData.type || '')}
                       <span className="text-sm font-medium">Click to upload or drag and drop</span>
                       <span className="text-xs text-gray-500">
-                        {getFileTypeDescription(formData.type)}
+                        {getFileTypeDescription(formData.type || '')}
                       </span>
                     </div>
                   </Label>
                 </div>
                 {formData.file && (
                   <div className="flex items-center gap-2 p-2 bg-gray-50 rounded">
-                    {getFileIcon(formData.type)}
+                    {getFileIcon(formData.type || '')}
                     <span className="text-sm">{formData.file.name}</span>
                     <span className="text-xs text-gray-500">
                       ({(formData.file.size / 1024 / 1024).toFixed(2)} MB)
@@ -533,7 +533,7 @@ export default function EditResourcePage() {
                 )}
                 {resource.content.fileName && !formData.file && (
                   <div className="flex items-center gap-2 p-2 bg-blue-50 rounded">
-                    {getFileIcon(formData.type)}
+                    {getFileIcon(formData.type || '')}
                     <span className="text-sm text-blue-700">Current file: {resource.content.fileName}</span>
                   </div>
                 )}

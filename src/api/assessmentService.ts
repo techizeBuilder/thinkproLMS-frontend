@@ -147,6 +147,8 @@ export interface AvailableAssessment extends Assessment {
   canRetake: boolean;
   assessmentStatus: "upcoming" | "available" | "expired" | "completed" | "in_progress" | "not_available";
   isCurrentlyAvailable: boolean;
+  subject?: string;
+  modules?: string[];
 }
 
 export interface DetailedQuestion {

@@ -361,7 +361,7 @@ const MentorQuestionBankPage: React.FC = () => {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {questions.map((question, index) => (
+                  {questions.map((question) => (
                     <TableRow key={question._id}>
                       <TableCell>
                         <span className="font-medium">{question.order}</span>

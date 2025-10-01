@@ -11,7 +11,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Loader2, BookOpen, Search, Users } from "lucide-react";
+import { Loader2, BookOpen, Search } from "lucide-react";
 import {
   Table,
   TableBody,

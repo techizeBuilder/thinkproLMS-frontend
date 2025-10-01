@@ -121,8 +121,8 @@ export default function ModuleProgressPage() {
             const gradeParam = searchParams.get("grade");
             if (!gradeParam) {
               const firstGrade = response.data.grades[0].grade;
-              setSelectedGrade(firstGrade);
-              updateUrlParams({ grade: firstGrade });
+              setSelectedGrade(firstGrade.toString());
+              updateUrlParams({ grade: firstGrade.toString() });
             }
           }
         }
@@ -164,7 +164,7 @@ export default function ModuleProgressPage() {
   useEffect(() => {
     if (selectedGrade && hasServiceDetails) {
       const selectedGradeData = availableGrades.find(
-        (gradeData) => gradeData.grade === selectedGrade
+        (gradeData) => gradeData.grade.toString() === selectedGrade
       );
       const sections = selectedGradeData?.sections || [];
       setAvailableSections(sections);
@@ -210,8 +210,10 @@ export default function ModuleProgressPage() {
         const subjectParam = searchParams.get("subject");
         if (!subjectParam) {
           const firstSubject = activeSubjects[0]._id;
-          setSelectedSubjectId(firstSubject);
-          updateUrlParams({ subject: firstSubject });
+          if (firstSubject) {
+            setSelectedSubjectId(firstSubject);
+            updateUrlParams({ subject: firstSubject });
+          }
         }
       }
     } catch (error) {
@@ -247,12 +249,12 @@ export default function ModuleProgressPage() {
         console.log("Raw module data:", moduleData);
 
         // Set the module items from the API response
-        const moduleItems = moduleData.modules || [];
+        const moduleItems = moduleData || [];
         setModules(moduleItems);
         console.log("Number of module items found:", moduleItems.length);
 
-        // Store the parent module ID for status updates
-        setParentModuleId(moduleData._id);
+        // Store the parent module ID for status updates (use first module's ID or empty string)
+        setParentModuleId(moduleItems.length > 0 ? moduleItems[0]._id : '');
 
         // Module statuses will be initialized by useEffect when modules are set
 
@@ -269,12 +271,12 @@ export default function ModuleProgressPage() {
           // Initialize module statuses with actual data from database
           const initialModuleStatuses: { [key: string]: string } = {};
 
-          moduleItems.forEach((moduleItem) => {
+          moduleItems.forEach((moduleItem: any) => {
             const moduleKey = moduleItem._id || moduleItem.name;
 
             // Find the corresponding module in progress data
             const moduleProgress = progressData.moduleProgress?.find(
-              (m: any) => m.moduleId === moduleData._id
+              (m: any) => m.moduleId === parentModuleId
             );
             const moduleItemProgress = moduleProgress?.moduleItems?.find(
               (item: any) => item.moduleItemId === moduleItem._id
@@ -307,7 +309,7 @@ export default function ModuleProgressPage() {
 
           // Fallback to default statuses if progress data fails to load
           const initialModuleStatuses: { [key: string]: string } = {};
-          moduleItems.forEach((moduleItem) => {
+          moduleItems.forEach((moduleItem: any) => {
             const moduleKey = moduleItem._id || moduleItem.name;
             initialModuleStatuses[moduleKey] = "Pending";
           });
@@ -501,7 +503,7 @@ export default function ModuleProgressPage() {
             <SelectContent>
               {hasServiceDetails
                 ? availableGrades.map((gradeData) => (
-                    <SelectItem key={gradeData.grade} value={gradeData.grade}>
+                    <SelectItem key={gradeData.grade} value={gradeData.grade.toString()}>
                       {gradeData.grade}
                     </SelectItem>
                   ))
@@ -567,7 +569,7 @@ export default function ModuleProgressPage() {
             </SelectTrigger>
             <SelectContent>
               {availableSubjects.map((subject) => (
-                <SelectItem key={subject._id} value={subject._id}>
+                <SelectItem key={subject._id} value={subject._id || ''}>
                   {subject.name}
                 </SelectItem>
               ))}

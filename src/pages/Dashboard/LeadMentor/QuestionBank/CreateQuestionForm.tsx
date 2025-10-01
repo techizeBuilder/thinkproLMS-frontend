@@ -173,6 +173,7 @@ const CreateQuestionForm: React.FC<CreateQuestionFormProps> = ({
         // Reset form
         setFormData({
           questionText: '',
+          session: '',
           grade: '',
           subject: '',
           module: '',

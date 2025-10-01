@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { Plus, Edit, Trash2, Search, BookOpen, GraduationCap, Calendar } from 'lucide-react';
-import { sessionService, Session } from '@/api/sessionService';
+import { sessionService, type Session } from '@/api/sessionService';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';

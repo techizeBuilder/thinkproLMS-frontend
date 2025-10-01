@@ -3,7 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { toast } from 'sonner';
 import { ArrowLeft, Plus, BookOpen } from 'lucide-react';
 import { sessionService } from '@/api/sessionService';
-import { moduleService, Module } from '@/api/moduleService';
+import { moduleService, type Module } from '@/api/moduleService';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';

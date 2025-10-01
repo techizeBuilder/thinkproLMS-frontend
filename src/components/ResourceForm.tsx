@@ -256,7 +256,7 @@ export default function ResourceForm({ resource, onSuccess, onCancel }: Resource
                 </SelectTrigger>
                 <SelectContent>
                   {subjects.map((subject) => (
-                    <SelectItem key={subject._id} value={subject._id}>
+                    <SelectItem key={subject._id} value={subject._id || ''}>
                       {subject.name}
                     </SelectItem>
                   ))}

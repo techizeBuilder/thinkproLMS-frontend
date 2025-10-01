@@ -43,9 +43,6 @@ import {
   Plus,
   Check,
   ChevronsUpDown,
-  FileSpreadsheet,
-  Image,
-  Music,
 } from "lucide-react";
 import type { UserType, ResourceType } from "@/types/resources";
 import type { CreateResourceData } from "@/api/resourceService";
@@ -343,7 +340,7 @@ export default function AddResourcePage() {
                                   {session.grade}.{session.sessionNumber?.toString().padStart(2, '0')} {session.name}
                                 </span>
                                 {session.module && (
-                                  <span className="text-sm text-gray-500">{session.module.name}</span>
+                                  <span className="text-sm text-gray-500">{typeof session.module === 'string' ? session.module : session.module.name}</span>
                                 )}
                               </div>
                             </CommandItem>

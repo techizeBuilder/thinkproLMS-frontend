@@ -24,6 +24,7 @@ const RecommendQuestionForm: React.FC<RecommendQuestionFormProps> = ({
 }) => {
   const [formData, setFormData] = useState<CreateQuestionData>({
     questionText: '',
+    session: '',
     grade: '',
     subject: '',
     module: '',
@@ -143,6 +144,7 @@ const RecommendQuestionForm: React.FC<RecommendQuestionFormProps> = ({
         // Reset form
         setFormData({
           questionText: '',
+          session: '',
           grade: '',
           subject: '',
           module: '',

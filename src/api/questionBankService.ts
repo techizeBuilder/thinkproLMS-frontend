@@ -86,6 +86,9 @@ export interface CreateQuestionData {
   correctAnswers: number[];
   explanation: string;
   difficulty: 'Easy' | 'Medium' | 'Tough';
+  grade?: string;
+  subject?: string;
+  module?: string;
 }
 
 export interface BulkQuestionData {
@@ -106,6 +109,9 @@ export interface QuestionFilters {
   search?: string;
   page?: number;
   limit?: number;
+  grade?: string;
+  subject?: string;
+  module?: string;
 }
 
 export interface RecommendationFilters {

@@ -9,6 +9,15 @@ export interface Module {
   updatedAt?: string;
 }
 
+export interface ModuleItem {
+  _id: string;
+  name: string;
+  description?: string;
+  isActive?: boolean;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
 export interface CreateModuleRequest {
   name: string;
   description?: string;
@@ -47,5 +56,11 @@ export const moduleService = {
   // Delete module
   deleteModule: async (id: string): Promise<void> => {
     await axiosInstance.delete(`/modules/${id}`);
+  },
+
+  // Get modules by grade and subject
+  getModulesByGradeAndSubject: async (grade: number, subjectId: string): Promise<ModuleItem[]> => {
+    const response = await axiosInstance.get(`/modules/by-grade-subject?grade=${grade}&subject=${subjectId}`);
+    return response.data.data;
   },
 };

@@ -384,7 +384,8 @@ export default function EditAssessmentPage() {
             currentQuestions={questions}
             onQuestionsUpdate={handleQuestionsUpdate}
             grade={assessment.grade}
-            session={assessment.session?._id}
+            subject={assessment.session?.module?.name || ''}
+            modules={[assessment.session?._id || '']}
             disabled={!canEditQuestions}
           />
         </TabsContent>

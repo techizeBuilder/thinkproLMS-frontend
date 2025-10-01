@@ -133,8 +133,8 @@ export default function ModuleCompletionReportsPage() {
             const gradeParam = searchParams.get("grade");
             if (!gradeParam) {
               const firstGrade = response.data.grades[0].grade;
-              setSelectedGrade(firstGrade);
-              updateUrlParams({ grade: firstGrade });
+              setSelectedGrade(firstGrade.toString());
+              updateUrlParams({ grade: firstGrade.toString() });
             }
           }
         }
@@ -171,7 +171,7 @@ export default function ModuleCompletionReportsPage() {
   useEffect(() => {
     if (selectedGrade && hasServiceDetails) {
       const selectedGradeData = availableGrades.find(
-        (gradeData) => gradeData.grade === selectedGrade
+        (gradeData) => gradeData.grade.toString() === selectedGrade
       );
       const sections = selectedGradeData?.sections || [];
       setAvailableSections(sections);
@@ -447,7 +447,7 @@ export default function ModuleCompletionReportsPage() {
             <SelectContent>
               {hasServiceDetails
                 ? availableGrades.map((gradeData) => (
-                    <SelectItem key={gradeData.grade} value={gradeData.grade}>
+                    <SelectItem key={gradeData.grade} value={gradeData.grade.toString()}>
                       {gradeData.grade}
                     </SelectItem>
                   ))
