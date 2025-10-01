@@ -53,8 +53,8 @@ export function MentorSidebar({ className }: MentorSidebarProps) {
             <SidebarNavItem to="/mentor/question-bank" icon={Database}>
               Question Bank
             </SidebarNavItem>
-            <SidebarNavItem to="/mentor/module-progress" icon={BookOpen}>
-              Module Progress
+            <SidebarNavItem to="/mentor/session-progress" icon={BookOpen}>
+              Session Progress
             </SidebarNavItem>
           </SidebarNav>
         </SidebarGroup>
