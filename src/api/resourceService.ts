@@ -34,6 +34,7 @@ export interface Resource {
     name: string;
     grade: number;
     sessionNumber: number;
+    displayName?: string;
   };
   tags: string[];
   isPublic: boolean;
@@ -154,7 +155,11 @@ export const resourceService = {
     if (data.session) formData.append("session", data.session);
     if (data.isPublic !== undefined)
       formData.append("isPublic", data.isPublic.toString());
-    if (data.url) formData.append("url", data.url);
+    
+    // Only add URL if no file is being uploaded
+    if (data.url && !data.file) {
+      formData.append("url", data.url);
+    }
 
     // Add tags
     if (data.tags && data.tags.length > 0) {

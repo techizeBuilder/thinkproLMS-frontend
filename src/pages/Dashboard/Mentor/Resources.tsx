@@ -272,7 +272,10 @@ export default function MentorResourcesPage() {
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => window.open(resource.content.url, '_blank')}
+                        onClick={() => {
+                          const url = getResourceDisplayUrl(resource);
+                          window.open(url, '_blank');
+                        }}
                       >
                         <ExternalLink className="h-4 w-4" />
                       </Button>
@@ -400,7 +403,10 @@ export default function MentorResourcesPage() {
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => window.open(resource.content.url, '_blank')}
+                        onClick={() => {
+                          const url = getResourceDisplayUrl(resource);
+                          window.open(url, '_blank');
+                        }}
                       >
                         <ExternalLink className="h-4 w-4" />
                       </Button>

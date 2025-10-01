@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 import type { Resource as ApiResource } from '@/api/resourceService';
 import { resourceService } from '@/api/resourceService';
+import { getResourceDisplayUrl } from '@/utils/resourceUtils';
 import { toast } from 'sonner';
 
 export default function MentorResourceViewPage() {
@@ -69,7 +70,8 @@ export default function MentorResourceViewPage() {
 
   const handleExternalOpen = () => {
     if (resource?.content.url) {
-      window.open(resource.content.url, '_blank');
+      const url = getResourceDisplayUrl(resource);
+      window.open(url, '_blank');
     }
   };
 

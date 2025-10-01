@@ -44,6 +44,12 @@ export interface ApiResource {
     _id: string;
     name: string;
   };
+  session?: {
+    _id: string;
+    name: string;
+    grade: number;
+    sessionNumber: number;
+  };
   tags: string[];
   isPublic: boolean;
   isActive: boolean;

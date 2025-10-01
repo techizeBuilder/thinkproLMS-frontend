@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 import type { Resource } from '@/api/resourceService';
 import { resourceService } from '@/api/resourceService';
+import { getResourceDisplayUrl } from '@/utils/resourceUtils';
 import { toast } from 'sonner';
 
 export default function ViewResourcePage() {
@@ -45,7 +46,8 @@ export default function ViewResourcePage() {
 
   const handleExternalOpen = () => {
     if (resource?.content.url) {
-      window.open(resource.content.url, '_blank');
+      const url = getResourceDisplayUrl(resource);
+      window.open(url, '_blank');
     }
   };
 
