@@ -9,9 +9,17 @@ export interface AnswerChoice {
 export interface Question {
   _id: string;
   questionText: string;
-  grade: string;
-  subject: string;
-  module: string;
+  session: {
+    _id: string;
+    name: string;
+    grade: number;
+    sessionNumber: number;
+    displayName?: string;
+    module: {
+      _id: string;
+      name: string;
+    };
+  };
   answerType: 'radio' | 'checkbox';
   answerChoices: AnswerChoice[];
   correctAnswers: number[];
@@ -37,9 +45,17 @@ export interface Question {
 export interface QuestionRecommendation {
   _id: string;
   questionText: string;
-  grade: string;
-  subject: string;
-  module: string;
+  session: {
+    _id: string;
+    name: string;
+    grade: number;
+    sessionNumber: number;
+    displayName?: string;
+    module: {
+      _id: string;
+      name: string;
+    };
+  };
   answerType: 'radio' | 'checkbox';
   answerChoices: AnswerChoice[];
   correctAnswers: number[];
@@ -64,9 +80,7 @@ export interface QuestionRecommendation {
 
 export interface CreateQuestionData {
   questionText: string;
-  grade: string;
-  subject: string;
-  module: string;
+  session: string;
   answerType: 'radio' | 'checkbox';
   answerChoices: { text: string; isCorrect: boolean }[];
   correctAnswers: number[];
@@ -76,9 +90,7 @@ export interface CreateQuestionData {
 
 export interface BulkQuestionData {
   questionText: string;
-  grade: string;
-  subject: string;
-  module: string;
+  session: string;
   answerType: string;
   answerChoices: string[];
   correctAnswers: number[];
@@ -88,9 +100,7 @@ export interface BulkQuestionData {
 }
 
 export interface QuestionFilters {
-  grade?: string;
-  subject?: string;
-  module?: string;
+  session?: string;
   difficulty?: string;
   answerType?: string;
   search?: string;
@@ -100,9 +110,7 @@ export interface QuestionFilters {
 
 export interface RecommendationFilters {
   status?: string;
-  grade?: string;
-  subject?: string;
-  module?: string;
+  session?: string;
   page?: number;
   limit?: number;
 }
@@ -152,10 +160,9 @@ export const questionBankService = {
     return response.data;
   },
 
-  // Get subjects and modules
-  getSubjectsAndModules: async (grade?: string) => {
-    const params = grade ? `?grade=${grade}` : '';
-    const response = await axiosInstance.get(`/question-bank/subjects-modules${params}`);
+  // Get sessions
+  getSessions: async () => {
+    const response = await axiosInstance.get('/sessions');
     return response.data;
   },
 };

@@ -3,6 +3,20 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from '@/components/ui/command';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
+import { Check, ChevronsUpDown } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -10,7 +24,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { CheckCircle, XCircle, Eye, Clock } from 'lucide-react';
-import { questionRecommendationService, type QuestionRecommendation, type RecommendationFilters } from '@/api/questionBankService';
+import { questionRecommendationService, questionBankService, type QuestionRecommendation, type RecommendationFilters } from '@/api/questionBankService';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 
@@ -42,11 +56,18 @@ const QuestionRecommendations: React.FC<QuestionRecommendationsProps> = ({
   const [showReviewDialog, setShowReviewDialog] = useState(false);
   const [reviewComments, setReviewComments] = useState('');
   const [reviewLoading, setReviewLoading] = useState(false);
-
-  const grades = [
-    'Grade 1', 'Grade 2', 'Grade 3', 'Grade 4', 'Grade 5',
-    'Grade 6', 'Grade 7', 'Grade 8', 'Grade 9', 'Grade 10'
-  ];
+  const [sessions, setSessions] = useState<{
+    _id: string;
+    name: string;
+    grade: number;
+    sessionNumber: number;
+    displayName?: string;
+    module: {
+      _id: string;
+      name: string;
+    };
+  }[]>([]);
+  const [sessionSelectOpen, setSessionSelectOpen] = useState(false);
 
   const statuses = [
     { value: 'pending', label: 'Pending Review' },
@@ -57,8 +78,20 @@ const QuestionRecommendations: React.FC<QuestionRecommendationsProps> = ({
   useEffect(() => {
     if (open) {
       fetchRecommendations();
+      fetchSessions();
     }
   }, [open, filters]);
+
+  const fetchSessions = async () => {
+    try {
+      const response = await questionBankService.getSessions();
+      if (response.success) {
+        setSessions(response.data);
+      }
+    } catch (error) {
+      console.error('Error fetching sessions:', error);
+    }
+  };
 
   const fetchRecommendations = async () => {
     try {
@@ -155,7 +188,7 @@ const QuestionRecommendations: React.FC<QuestionRecommendationsProps> = ({
               <CardTitle>Filters</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="text-sm font-medium">Status</label>
                   <Select value={filters.status || 'all'} onValueChange={(value) => handleFilterChange('status', value)}>
@@ -171,36 +204,64 @@ const QuestionRecommendations: React.FC<QuestionRecommendationsProps> = ({
                   </Select>
                 </div>
                 <div>
-                  <label className="text-sm font-medium">Grade</label>
-                  <Select value={filters.grade || 'all'} onValueChange={(value) => handleFilterChange('grade', value)}>
-                    <SelectTrigger className="mt-1">
-                      <SelectValue placeholder="All Grades" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">All Grades</SelectItem>
-                      {grades.map(grade => (
-                        <SelectItem key={grade} value={grade}>{grade}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div>
-                  <label className="text-sm font-medium">Subject</label>
-                  <Input
-                    placeholder="Filter by subject..."
-                    value={filters.subject || ''}
-                    onChange={(e) => handleFilterChange('subject', e.target.value)}
-                    className="mt-1"
-                  />
-                </div>
-                <div>
-                  <label className="text-sm font-medium">Module</label>
-                  <Input
-                    placeholder="Filter by module..."
-                    value={filters.module || ''}
-                    onChange={(e) => handleFilterChange('module', e.target.value)}
-                    className="mt-1"
-                  />
+                  <label className="text-sm font-medium">Session</label>
+                  <Popover open={sessionSelectOpen} onOpenChange={setSessionSelectOpen}>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        role="combobox"
+                        aria-expanded={sessionSelectOpen}
+                        className="w-full justify-between mt-1"
+                      >
+                        {filters.session
+                          ? sessions.find(session => session._id === filters.session)?.displayName || 
+                            sessions.find(session => session._id === filters.session)?.name
+                          : "All Sessions"}
+                        <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-full p-0">
+                      <Command>
+                        <CommandInput placeholder="Search sessions..." />
+                        <CommandList>
+                          <CommandEmpty>No sessions found.</CommandEmpty>
+                          <CommandGroup>
+                            <CommandItem
+                              value="all"
+                              onSelect={() => {
+                                handleFilterChange('session', '');
+                                setSessionSelectOpen(false);
+                              }}
+                            >
+                              <Check
+                                className={`mr-2 h-4 w-4 ${
+                                  !filters.session ? "opacity-100" : "opacity-0"
+                                }`}
+                              />
+                              All Sessions
+                            </CommandItem>
+                            {sessions.map((session) => (
+                              <CommandItem
+                                key={session._id}
+                                value={session.name}
+                                onSelect={() => {
+                                  handleFilterChange('session', session._id);
+                                  setSessionSelectOpen(false);
+                                }}
+                              >
+                                <Check
+                                  className={`mr-2 h-4 w-4 ${
+                                    filters.session === session._id ? "opacity-100" : "opacity-0"
+                                  }`}
+                                />
+                                {session.displayName || `${session.name} (Grade ${session.grade}, Session ${session.sessionNumber})`}
+                              </CommandItem>
+                            ))}
+                          </CommandGroup>
+                        </CommandList>
+                      </Command>
+                    </PopoverContent>
+                  </Popover>
                 </div>
               </div>
             </CardContent>
@@ -222,9 +283,7 @@ const QuestionRecommendations: React.FC<QuestionRecommendationsProps> = ({
                     <TableHeader>
                       <TableRow>
                         <TableHead>Question</TableHead>
-                        <TableHead>Grade</TableHead>
-                        <TableHead>Subject</TableHead>
-                        <TableHead>Module</TableHead>
+                        <TableHead>Session</TableHead>
                         <TableHead>Difficulty</TableHead>
                         <TableHead>Recommended By</TableHead>
                         <TableHead>Status</TableHead>
@@ -239,9 +298,19 @@ const QuestionRecommendations: React.FC<QuestionRecommendationsProps> = ({
                               {recommendation.questionText}
                             </div>
                           </TableCell>
-                          <TableCell>{recommendation.grade}</TableCell>
-                          <TableCell>{recommendation.subject}</TableCell>
-                          <TableCell>{recommendation.module}</TableCell>
+                          <TableCell>
+                            <div className="space-y-1">
+                              <div className="font-medium">
+                                {recommendation.session?.displayName || recommendation.session?.name}
+                              </div>
+                              <div className="text-sm text-gray-500">
+                                Grade {recommendation.session?.grade} • Session {recommendation.session?.sessionNumber}
+                              </div>
+                              <div className="text-sm text-gray-500">
+                                {recommendation.session?.module?.name}
+                              </div>
+                            </div>
+                          </TableCell>
                           <TableCell>
                             <Badge className={getDifficultyColor(recommendation.difficulty)}>
                               {recommendation.difficulty}
@@ -332,24 +401,28 @@ const QuestionRecommendations: React.FC<QuestionRecommendationsProps> = ({
                       </p>
                     </div>
                     
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
-                        <Label className="font-medium">Grade:</Label>
-                        <p>{selectedRecommendation.grade}</p>
-                      </div>
-                      <div>
-                        <Label className="font-medium">Subject:</Label>
-                        <p>{selectedRecommendation.subject}</p>
-                      </div>
-                      <div>
-                        <Label className="font-medium">Module:</Label>
-                        <p>{selectedRecommendation.module}</p>
+                        <Label className="font-medium">Session:</Label>
+                        <div className="mt-1 space-y-1">
+                          <p className="font-medium">
+                            {selectedRecommendation.session?.displayName || selectedRecommendation.session?.name}
+                          </p>
+                          <p className="text-sm text-gray-600">
+                            Grade {selectedRecommendation.session?.grade} • Session {selectedRecommendation.session?.sessionNumber}
+                          </p>
+                          <p className="text-sm text-gray-600">
+                            Module: {selectedRecommendation.session?.module?.name}
+                          </p>
+                        </div>
                       </div>
                       <div>
                         <Label className="font-medium">Difficulty:</Label>
-                        <Badge className={getDifficultyColor(selectedRecommendation.difficulty)}>
-                          {selectedRecommendation.difficulty}
-                        </Badge>
+                        <div className="mt-1">
+                          <Badge className={getDifficultyColor(selectedRecommendation.difficulty)}>
+                            {selectedRecommendation.difficulty}
+                          </Badge>
+                        </div>
                       </div>
                     </div>
 

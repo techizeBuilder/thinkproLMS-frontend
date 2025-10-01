@@ -10,6 +10,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Upload, Download, CheckCircle, XCircle, AlertCircle, FileSpreadsheet } from 'lucide-react';
 import { bulkUploadService, type BulkQuestionData } from '@/api/questionBankService';
 import { toast } from 'sonner';
+import * as XLSX from 'xlsx';
 
 interface BulkUploadFormProps {
   open: boolean;
@@ -106,60 +107,27 @@ const BulkUploadForm: React.FC<BulkUploadFormProps> = ({
   };
 
   const downloadTemplate = () => {
-    // Create a sample CSV template
-    const headers = [
-      'Question Text',
-      'Grade',
-      'Subject',
-      'Module',
-      'Answer Type',
-      'Answer Choice 1',
-      'Answer Choice 2',
-      'Answer Choice 3',
-      'Answer Choice 4',
-      'Answer Choice 5',
-      'Answer Choice 6',
-      'Answer Choice 7',
-      'Answer Choice 8',
-      'Answer Choice 9',
-      'Answer Choice 10',
-      'Correct Answer(s)',
-      'Difficulty',
-      'Explanation'
+    // Create sample data for Excel template
+    const data = [
+      ['Question Text', 'Session Name', 'Answer Type', 'Answer Choice 1', 'Answer Choice 2', 'Answer Choice 3', 'Answer Choice 4', 'Answer Choice 5', 'Answer Choice 6', 'Answer Choice 7', 'Answer Choice 8', 'Answer Choice 9', 'Answer Choice 10', 'Correct Answer(s)', 'Difficulty', 'Explanation'],
+      ['What is the capital of India?', 'Introduction to Indian Geography', 'radio', 'Mumbai', 'Delhi', 'Kolkata', 'Chennai', '', '', '', '', '', '', '2', 'Easy', 'Delhi is the capital of India and serves as the seat of the Government of India.'],
+      ['Which of the following are programming languages?', 'Introduction to Programming', 'checkbox', 'Python', 'HTML', 'JavaScript', 'CSS', 'Java', '', '', '', '', '', '1,3,5', 'Medium', 'Python, JavaScript, and Java are programming languages. HTML and CSS are markup and styling languages respectively.']
     ];
 
-    const sampleData = [
-      [
-        'What is the capital of India?',
-        'Grade 5',
-        'Geography',
-        'Indian Geography',
-        'radio',
-        'Mumbai',
-        'Delhi',
-        'Kolkata',
-        'Chennai',
-        '',
-        '',
-        '',
-        '',
-        '',
-        '',
-        '2',
-        'Easy',
-        'Delhi is the capital of India and serves as the seat of the Government of India.'
-      ]
-    ];
+    // Create workbook
+    const wb = XLSX.utils.book_new();
+    const ws = XLSX.utils.aoa_to_sheet(data);
+    
+    // Add worksheet to workbook
+    XLSX.utils.book_append_sheet(wb, ws, 'Question Bank Template');
 
-    const csvContent = [headers, ...sampleData]
-      .map(row => row.map(field => `"${field}"`).join(','))
-      .join('\n');
-
-    const blob = new Blob([csvContent], { type: 'text/csv' });
+    // Generate Excel file
+    const excelBuffer = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+    const blob = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = 'question_bank_template.csv';
+    a.download = 'question_bank_template.xlsx';
     a.click();
     window.URL.revokeObjectURL(url);
   };
@@ -186,9 +154,7 @@ const BulkUploadForm: React.FC<BulkUploadFormProps> = ({
                 <p className="mb-2">Required columns:</p>
                 <ul className="list-disc list-inside space-y-1 ml-4">
                   <li>Question Text</li>
-                  <li>Grade (Grade 1 - Grade 10)</li>
-                  <li>Subject</li>
-                  <li>Module</li>
+                  <li>Session Name (must match an existing session name in the system)</li>
                   <li>Answer Type (radio, checkbox)</li>
                   <li>Answer Choice 1, Answer Choice 2 (minimum required)</li>
                   <li>Answer Choice 3, Answer Choice 4, ... (optional, up to 15 total)</li>
@@ -196,6 +162,10 @@ const BulkUploadForm: React.FC<BulkUploadFormProps> = ({
                   <li>Difficulty (Easy, Medium, Tough)</li>
                   <li>Explanation (optional explanation for the correct answer)</li>
                 </ul>
+                <p className="mt-2 text-amber-600 font-medium">
+                  ⚠️ Important: The Session Name must exactly match an existing session name in the system. 
+                  If the session doesn't exist, the question will be skipped with an error.
+                </p>
               </div>
               <Button
                 variant="outline"
@@ -280,9 +250,7 @@ const BulkUploadForm: React.FC<BulkUploadFormProps> = ({
                       <TableRow>
                         <TableHead>Row</TableHead>
                         <TableHead>Question</TableHead>
-                        <TableHead>Grade</TableHead>
-                        <TableHead>Subject</TableHead>
-                        <TableHead>Module</TableHead>
+                        <TableHead>Session</TableHead>
                         <TableHead>Type</TableHead>
                         <TableHead>Difficulty</TableHead>
                         <TableHead>Choices</TableHead>
@@ -298,9 +266,11 @@ const BulkUploadForm: React.FC<BulkUploadFormProps> = ({
                               {question.questionText}
                             </div>
                           </TableCell>
-                          <TableCell>{question.grade}</TableCell>
-                          <TableCell>{question.subject}</TableCell>
-                          <TableCell>{question.module}</TableCell>
+                          <TableCell className="max-w-xs">
+                            <div className="truncate" title={question.session}>
+                              {question.session}
+                            </div>
+                          </TableCell>
                           <TableCell>{question.answerType}</TableCell>
                           <TableCell>
                             <Badge className={

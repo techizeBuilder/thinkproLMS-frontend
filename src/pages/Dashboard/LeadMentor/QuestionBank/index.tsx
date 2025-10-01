@@ -9,6 +9,20 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Check, ChevronsUpDown } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import {
   Table,
@@ -60,6 +74,18 @@ const QuestionBankPage: React.FC = () => {
     page: 1,
     limit: 10,
   });
+  const [sessions, setSessions] = useState<{
+    _id: string;
+    name: string;
+    grade: number;
+    sessionNumber: number;
+    displayName?: string;
+    module: {
+      _id: string;
+      name: string;
+    };
+  }[]>([]);
+  const [sessionSelectOpen, setSessionSelectOpen] = useState(false);
   const [pagination, setPagination] = useState({
     current: 1,
     pages: 1,
@@ -74,25 +100,13 @@ const QuestionBankPage: React.FC = () => {
   const [showRecommendations, setShowRecommendations] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const grades = [
-    "Grade 1",
-    "Grade 2",
-    "Grade 3",
-    "Grade 4",
-    "Grade 5",
-    "Grade 6",
-    "Grade 7",
-    "Grade 8",
-    "Grade 9",
-    "Grade 10",
-  ];
 
   const difficulties = ["Easy", "Medium", "Tough"];
   const answerTypes = ["radio", "checkbox"];
 
   useEffect(() => {
     fetchQuestions();
-    fetchSubjectsAndModules();
+    fetchSessions();
   }, [filters]);
 
 
@@ -123,11 +137,14 @@ const QuestionBankPage: React.FC = () => {
     }
   };
 
-  const fetchSubjectsAndModules = async () => {
+  const fetchSessions = async () => {
     try {
-      // No longer needed since we removed subjects state
+      const response = await questionBankService.getSessions();
+      if (response.success) {
+        setSessions(response.data);
+      }
     } catch (error) {
-      console.error("Error fetching subjects and modules:", error);
+      console.error("Error fetching sessions:", error);
     }
   };
 
@@ -138,11 +155,6 @@ const QuestionBankPage: React.FC = () => {
         [key]: value === "all" ? undefined : value,
         page: 1, // Reset to first page when filtering
       };
-      
-      // If subject changes, reset module
-      if (key === 'subject') {
-        newFilters.module = undefined;
-      }
       
       return newFilters;
     });
@@ -270,7 +282,7 @@ const QuestionBankPage: React.FC = () => {
           <CardTitle>Filters</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
             <div>
               <label className="text-sm font-medium">Search</label>
               <Input
@@ -281,41 +293,69 @@ const QuestionBankPage: React.FC = () => {
               />
             </div>
             <div>
-              <label className="text-sm font-medium">Grade</label>
-              <Select
-                value={filters.grade || "all"}
-                onValueChange={(value) => handleFilterChange("grade", value)}
-              >
-                <SelectTrigger className="mt-1">
-                  <SelectValue placeholder="All Grades" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Grades</SelectItem>
-                  {grades.map((grade) => (
-                    <SelectItem key={grade} value={grade}>
-                      {grade}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div>
-              <label className="text-sm font-medium">Subject</label>
-              <Input
-                placeholder="Search subject (e.g., Mathematics)"
-                value={filters.subject || ""}
-                onChange={(e) => handleFilterChange("subject", e.target.value)}
-                className="mt-1"
-              />
-            </div>
-            <div>
-              <label className="text-sm font-medium">Module</label>
-              <Input
-                placeholder="Search module (e.g., Algebra)"
-                value={filters.module || ""}
-                onChange={(e) => handleFilterChange("module", e.target.value)}
-                className="mt-1"
-              />
+              <label className="text-sm font-medium">Session</label>
+              <Popover open={sessionSelectOpen} onOpenChange={setSessionSelectOpen}>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    role="combobox"
+                    aria-expanded={sessionSelectOpen}
+                    className="w-full justify-between mt-1"
+                  >
+                    {filters.session
+                      ? sessions.find((session) => session._id === filters.session)?.displayName ||
+                        `${sessions.find((session) => session._id === filters.session)?.grade}.${sessions.find((session) => session._id === filters.session)?.sessionNumber?.toString().padStart(2, '0')} ${sessions.find((session) => session._id === filters.session)?.name}`
+                      : "All Sessions"}
+                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-full p-0">
+                  <Command>
+                    <CommandInput placeholder="Search sessions..." />
+                    <CommandList>
+                      <CommandEmpty>No sessions found.</CommandEmpty>
+                      <CommandGroup>
+                        <CommandItem
+                          value="all"
+                          onSelect={() => {
+                            handleFilterChange("session", "all");
+                            setSessionSelectOpen(false);
+                          }}
+                        >
+                          <Check
+                            className={`mr-2 h-4 w-4 ${
+                              !filters.session || filters.session === "all" ? "opacity-100" : "opacity-0"
+                            }`}
+                          />
+                          All Sessions
+                        </CommandItem>
+                        {sessions.map((session) => (
+                          <CommandItem
+                            key={session._id}
+                            value={`${session.displayName || `${session.grade}.${session.sessionNumber?.toString().padStart(2, '0')} ${session.name}`} ${session.module.name}`}
+                            onSelect={() => {
+                              handleFilterChange("session", session._id);
+                              setSessionSelectOpen(false);
+                            }}
+                          >
+                            <Check
+                              className={`mr-2 h-4 w-4 ${
+                                filters.session === session._id ? "opacity-100" : "opacity-0"
+                              }`}
+                            />
+                            <div className="flex flex-col">
+                              <span className="font-medium">
+                                {session.displayName || `${session.grade}.${session.sessionNumber?.toString().padStart(2, '0')} ${session.name}`}
+                              </span>
+                              <span className="text-sm text-gray-500">{session.module.name}</span>
+                            </div>
+                          </CommandItem>
+                        ))}
+                      </CommandGroup>
+                    </CommandList>
+                  </Command>
+                </PopoverContent>
+              </Popover>
             </div>
             <div>
               <label className="text-sm font-medium">Difficulty</label>
@@ -389,9 +429,7 @@ const QuestionBankPage: React.FC = () => {
                   <TableRow>
                     <TableHead>Order</TableHead>
                     <TableHead>Question</TableHead>
-                    <TableHead>Grade</TableHead>
-                    <TableHead>Subject</TableHead>
-                    <TableHead>Module</TableHead>
+                    <TableHead>Session</TableHead>
                     <TableHead>Type</TableHead>
                     <TableHead>Difficulty</TableHead>
                     <TableHead>Status</TableHead>
@@ -431,9 +469,16 @@ const QuestionBankPage: React.FC = () => {
                           {question.questionText}
                         </div>
                       </TableCell>
-                      <TableCell>{question.grade}</TableCell>
-                      <TableCell>{question.subject}</TableCell>
-                      <TableCell>{question.module}</TableCell>
+                      <TableCell>
+                        <div className="text-sm">
+                          <div className="font-medium">
+                            {question.session?.displayName || `${question.session?.grade}.${question.session?.sessionNumber?.toString().padStart(2, '0')} ${question.session?.name}`}
+                          </div>
+                          <div className="text-gray-500">
+                            {question.session?.module?.name}
+                          </div>
+                        </div>
+                      </TableCell>
                       <TableCell>
                         {getAnswerTypeLabel(question.answerType)}
                       </TableCell>
