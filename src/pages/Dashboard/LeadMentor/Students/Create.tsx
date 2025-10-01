@@ -39,8 +39,7 @@ export default function CreateStudentPage() {
   const [creationMethod, setCreationMethod] = useState<"invite" | "credentials">("invite");
   const [password, setPassword] = useState("");
 
-  const allGrades = ["Grade 1", "Grade 2", "Grade 3", "Grade 4", "Grade 5", 
-                     "Grade 6", "Grade 7", "Grade 8", "Grade 9", "Grade 10"];
+  const allGrades = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
 
   useEffect(() => {
     fetchSchools();
@@ -89,7 +88,9 @@ export default function CreateStudentPage() {
       
       if (value && hasServiceDetails) {
         // Find the selected grade in available grades and get its sections
-        const selectedGradeData = availableGrades.find(gradeData => gradeData.grade === value);
+        // Convert form value (string) to number for comparison
+        const gradeNumber = parseInt(value, 10);
+        const selectedGradeData = availableGrades.find(gradeData => gradeData.grade === gradeNumber);
         setAvailableSections(selectedGradeData?.sections || []);
       } else {
         setAvailableSections([]);
@@ -104,8 +105,18 @@ export default function CreateStudentPage() {
     setLoading(true);
 
     try {
+      // Convert grade to number (form values are strings)
+      const gradeNumber = parseInt(formData.grade, 10);
+      
+      if (!gradeNumber || gradeNumber < 1 || gradeNumber > 10) {
+        alert("Please select a valid grade (1-10)");
+        setLoading(false);
+        return;
+      }
+
       const submitData = {
         ...formData,
+        grade: gradeNumber,
         createWithCredentials: creationMethod === "credentials",
         password: creationMethod === "credentials" ? password : undefined,
       };
@@ -205,13 +216,13 @@ export default function CreateStudentPage() {
                   {hasServiceDetails ? (
                     availableGrades.map(gradeData => (
                       <option key={gradeData.grade} value={gradeData.grade}>
-                        {gradeData.grade}
+                        Grade {gradeData.grade}
                       </option>
                     ))
                   ) : (
                     allGrades.map(grade => (
                       <option key={grade} value={grade}>
-                        {grade}
+                        Grade {grade}
                       </option>
                     ))
                   )}

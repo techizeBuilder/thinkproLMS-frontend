@@ -178,7 +178,7 @@ export default function StudentAssessmentsPage() {
                 </div>
                 <div className="flex items-center gap-2 text-sm text-gray-600">
                   <BookOpen className="h-4 w-4" />
-                  <span>{assessment.grade} - {assessment.subject}</span>
+                  <span>{assessment.grade} - {assessment.session?.displayName || assessment.session?.name}</span>
                 </div>
               </CardHeader>
               <CardContent className="space-y-4">

@@ -17,18 +17,20 @@ import {
   Search
 } from "lucide-react";
 import { assessmentService } from "@/api/assessmentService";
-import { questionBankService } from "@/api/questionBankService";
 import { schoolService, type School, type AvailableGrade } from "@/api/schoolService";
 import { mentorService } from "@/api/mentorService";
+import { sessionService, type Session } from "@/api/sessionService";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 
 interface Question {
   _id: string;
   questionText: string;
-  grade: string;
-  subject: string;
-  module: string;
+  session: {
+    _id: string;
+    name: string;
+    displayName: string;
+  };
   answerType: string;
   answerChoices: Array<{
     text: string;
@@ -57,8 +59,7 @@ export default function CreateAssessmentPage() {
     school: "",
     grade: "",
     sections: [] as string[],
-    subject: "",
-    modules: [] as string[],
+    session: "",
     startDate: "",
     endDate: "",
     duration: 60,
@@ -69,8 +70,7 @@ export default function CreateAssessmentPage() {
   const [selectedQuestions, setSelectedQuestions] = useState<SelectedQuestion[]>([]);
   const [questionFilters, setQuestionFilters] = useState({
     grade: "",
-    subject: "",
-    modules: [] as string[],
+    session: "",
     difficulty: "all",
   });
   const [searchTerm, setSearchTerm] = useState("");
@@ -79,8 +79,7 @@ export default function CreateAssessmentPage() {
   // UI state
   const [loading, setLoading] = useState(false);
   const [step, setStep] = useState(1); // 1: Basic Info, 2: Questions, 3: Preview
-  const [subjects, setSubjects] = useState<string[]>([]);
-  const [modules, setModules] = useState<string[]>([]);
+  const [sessions, setSessions] = useState<Session[]>([]);
   
   // School and section state
   const [schools, setSchools] = useState<School[]>([]);
@@ -155,30 +154,36 @@ export default function CreateAssessmentPage() {
     }
   }, [formData.school]);
 
-  // Load subjects and modules
+  // Load sessions
   useEffect(() => {
-    const loadSubjectsAndModules = async () => {
+    const loadSessions = async () => {
       try {
-        const response = await questionBankService.getSubjectsAndModules(formData.grade);
-        setSubjects(response.data.subjects || []);
-        setModules(response.data.modules || []);
+        // Extract numeric grade from "Grade X" format
+        const gradeNumber = parseInt(formData.grade.replace(/\D/g, ''));
+        if (isNaN(gradeNumber)) {
+          console.error("Invalid grade format:", formData.grade);
+          setSessions([]);
+          return;
+        }
+        
+        const response = await sessionService.getSessionsByGrade(gradeNumber);
+        setSessions(response || []);
       } catch (error) {
-        console.error("Error loading subjects and modules:", error);
-        toast.error("Failed to load subjects and modules");
-        setSubjects([]);
-        setModules([]);
+        console.error("Error loading sessions:", error);
+        toast.error("Failed to load sessions");
+        setSessions([]);
       }
     };
 
     if (formData.grade) {
-      loadSubjectsAndModules();
+      loadSessions();
     }
   }, [formData.grade]);
 
   // Load questions when filters change
   useEffect(() => {
     const loadQuestions = async () => {
-      if (!questionFilters.grade || !questionFilters.subject) return;
+      if (!questionFilters.session) return;
 
       try {
         // Create filter object, excluding difficulty if it's "all"
@@ -237,24 +242,15 @@ export default function CreateAssessmentPage() {
       setFormData(prev => ({ ...prev, [field]: value }));
     }
 
-    // Update question filters when grade/subject changes
-    if (field === "grade" || field === "subject") {
+    // Update question filters when grade/session changes
+    if (field === "grade" || field === "session") {
       setQuestionFilters(prev => ({
         ...prev,
         [field]: value,
-        modules: field === "grade" ? [] : prev.modules,
       }));
     }
   };
 
-  const handleModuleToggle = (module: string) => {
-    const newModules = formData.modules.includes(module)
-      ? formData.modules.filter(m => m !== module)
-      : [...formData.modules, module];
-
-    setFormData(prev => ({ ...prev, modules: newModules }));
-    setQuestionFilters(prev => ({ ...prev, modules: newModules }));
-  };
 
   const handleSectionToggle = (section: string) => {
     const newSections = formData.sections.includes(section)
@@ -298,8 +294,12 @@ export default function CreateAssessmentPage() {
 
     setLoading(true);
     try {
+      // Extract numeric grade from "Grade X" format
+      const gradeNumber = parseInt(formData.grade.replace(/\D/g, ''));
+      
       const assessmentData = {
         ...formData,
+        grade: gradeNumber, // Send numeric grade instead of string
         questions: selectedQuestions.map(q => ({
           questionId: q._id,
           order: q.order,
@@ -325,8 +325,12 @@ export default function CreateAssessmentPage() {
     
     setLoading(true);
     try {
+      // Extract numeric grade from "Grade X" format
+      const gradeNumber = parseInt(formData.grade.replace(/\D/g, ''));
+      
       const assessmentData = {
         ...formData,
+        grade: gradeNumber, // Send numeric grade instead of string
         questions: selectedQuestions.map(q => ({
           questionId: q._id,
           order: q.order,
@@ -353,7 +357,7 @@ export default function CreateAssessmentPage() {
   };
 
   const validateForm = () => {
-    if (!formData.title || !formData.instructions || !formData.grade || !formData.sections || formData.sections.length === 0 || !formData.subject) {
+    if (!formData.title || !formData.instructions || !formData.grade || !formData.sections || formData.sections.length === 0 || !formData.session) {
       toast.error("Please fill in all required fields");
       return false;
     }
@@ -529,46 +533,23 @@ export default function CreateAssessmentPage() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="subject">Subject *</Label>
-                <Select value={formData.subject} onValueChange={(value) => handleInputChange("subject", value)}>
+                <Label htmlFor="session">Session *</Label>
+                <Select value={formData.session} onValueChange={(value) => handleInputChange("session", value)}>
                   <SelectTrigger>
-                    <SelectValue placeholder="Select subject" />
+                    <SelectValue placeholder="Select session" />
                   </SelectTrigger>
                   <SelectContent>
-                    {subjects.length > 0 ? (
-                      subjects.map(subject => (
-                        <SelectItem key={subject} value={subject}>{subject}</SelectItem>
+                    {sessions.length > 0 ? (
+                      sessions.map(session => (
+                        <SelectItem key={session._id} value={session._id!}>{session.displayName || `${session.grade}.${session.sessionNumber} ${session.name}`}</SelectItem>
                       ))
                     ) : (
-                      <SelectItem value="no-subjects" disabled>No subjects available</SelectItem>
+                      <SelectItem value="no-sessions" disabled>No sessions available</SelectItem>
                     )}
                   </SelectContent>
                 </Select>
-                {subjects.length === 0 && formData.grade && (
-                  <p className="text-sm text-gray-500">No subjects found for {formData.grade}. Please add questions to the question bank first.</p>
-                )}
-              </div>
-
-              <div className="space-y-2">
-                <Label>Modules</Label>
-                <div className="space-y-2 max-h-32 overflow-y-auto">
-                  {modules.length > 0 ? (
-                    modules.map(module => (
-                      <div key={module} className="flex items-center space-x-2">
-                        <Checkbox
-                          id={module}
-                          checked={formData.modules.includes(module)}
-                          onCheckedChange={() => handleModuleToggle(module)}
-                        />
-                        <Label htmlFor={module} className="text-sm">{module}</Label>
-                      </div>
-                    ))
-                  ) : (
-                    <p className="text-sm text-gray-500">No modules available</p>
-                  )}
-                </div>
-                {modules.length === 0 && formData.grade && formData.subject && (
-                  <p className="text-sm text-gray-500">No modules found for {formData.grade} {formData.subject}. Please add questions to the question bank first.</p>
+                {sessions.length === 0 && formData.grade && (
+                  <p className="text-sm text-gray-500">No sessions found for {formData.grade}. Please create sessions first.</p>
                 )}
               </div>
             </div>
@@ -618,7 +599,7 @@ export default function CreateAssessmentPage() {
             </div>
 
             <div className="flex justify-end">
-              <Button onClick={() => setStep(2)} disabled={!formData.grade || formData.sections.length === 0 || !formData.subject || ((user?.role === "superadmin" || user?.role === "leadmentor" || user?.role === "mentor") && !formData.school)}>
+              <Button onClick={() => setStep(2)} disabled={!formData.grade || formData.sections.length === 0 || !formData.session || ((user?.role === "superadmin" || user?.role === "leadmentor" || user?.role === "mentor") && !formData.school)}>
                 Next: Select Questions
               </Button>
             </div>
@@ -672,7 +653,7 @@ export default function CreateAssessmentPage() {
                             onCheckedChange={() => handleQuestionSelect(question)}
                           />
                           <Badge variant="outline">{question.difficulty}</Badge>
-                          <span className="text-sm text-gray-500">{question.module}</span>
+                          <span className="text-sm text-gray-500">{question.session?.displayName || question.session?.name}</span>
                         </div>
                         <p className="text-sm">{question.questionText}</p>
                       </div>
@@ -759,8 +740,7 @@ export default function CreateAssessmentPage() {
                   )}
                   <p><strong>Grade:</strong> {formData.grade}</p>
                   <p><strong>Sections:</strong> {formData.sections.join(", ")}</p>
-                  <p><strong>Subject:</strong> {formData.subject}</p>
-                  <p><strong>Modules:</strong> {formData.modules.join(", ") || "All"}</p>
+                  <p><strong>Session:</strong> {sessions.find(s => s._id === formData.session)?.displayName || sessions.find(s => s._id === formData.session)?.name || "Not selected"}</p>
                   <p><strong>Duration:</strong> {formData.duration} minutes</p>
                   <p><strong>Total Questions:</strong> {selectedQuestions.length}</p>
                   <p><strong>Total Marks:</strong> {totalMarks}</p>

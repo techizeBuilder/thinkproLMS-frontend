@@ -216,7 +216,8 @@ export default function MentorAssessmentsPage() {
                 <TableHeader>
                   <TableRow>
                     <TableHead>Title</TableHead>
-                    <TableHead>Grade/Subject</TableHead>
+                    <TableHead>Grade & Sections</TableHead>
+                    <TableHead>Session</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead>Duration</TableHead>
                     <TableHead>Date Range</TableHead>
@@ -253,8 +254,20 @@ export default function MentorAssessmentsPage() {
                       </TableCell>
                       <TableCell>
                         <div className="text-sm">
-                          <div>{assessment.grade}</div>
-                          <div className="text-gray-600">{assessment.subject}</div>
+                          <div className="font-medium">Grade {assessment.grade}</div>
+                          <div className="text-gray-600">
+                            {assessment.sections.length > 0 
+                              ? `Sections: ${assessment.sections.join(", ")}`
+                              : "No sections"
+                            }
+                          </div>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="text-sm">
+                          <div className="font-medium">
+                            {assessment.session?.displayName || assessment.session?.name || "No session"}
+                          </div>
                         </div>
                       </TableCell>
                       <TableCell>

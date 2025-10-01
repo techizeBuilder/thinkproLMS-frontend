@@ -193,16 +193,8 @@ export default function ViewAssessmentPage() {
                   <p>{assessment.grade}</p>
                 </div>
                 <div>
-                  <h4 className="font-medium text-sm text-gray-500 mb-1">Subject</h4>
-                  <p>{assessment.subject}</p>
-                </div>
-                <div>
-                  <h4 className="font-medium text-sm text-gray-500 mb-1">Modules</h4>
-                  <div className="flex flex-wrap gap-1">
-                    {assessment.modules.map((module, index) => (
-                      <Badge key={index} variant="outline">{module}</Badge>
-                    ))}
-                  </div>
+                  <h4 className="font-medium text-sm text-gray-500 mb-1">Session</h4>
+                  <p>{assessment.session?.displayName || assessment.session?.name}</p>
                 </div>
                 <div>
                   <h4 className="font-medium text-sm text-gray-500 mb-1">Duration</h4>

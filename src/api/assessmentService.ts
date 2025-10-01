@@ -26,8 +26,15 @@ export interface Assessment {
   instructions: string;
   grade: string;
   sections: string[];
-  subject: string;
-  modules: string[];
+  session: {
+    _id: string;
+    name: string;
+    displayName: string;
+    module: {
+      _id: string;
+      name: string;
+    };
+  };
   startDate: string;
   endDate: string;
   duration: number; // in minutes
@@ -55,10 +62,9 @@ export interface Assessment {
 export interface CreateAssessmentData {
   title: string;
   instructions: string;
-  grade: string;
+  grade: number;
   sections: string[];
-  subject: string;
-  modules: string[];
+  session: string;
   startDate: string;
   endDate: string;
   duration: number;
@@ -74,8 +80,7 @@ export interface AssessmentFilters {
 
 export interface QuestionFilters {
   grade?: string;
-  subject?: string;
-  modules?: string[];
+  session?: string;
   difficulty?: string;
 }
 

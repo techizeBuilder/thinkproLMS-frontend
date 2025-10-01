@@ -14,7 +14,7 @@ export interface GradeWithSections {
 }
 
 export interface AvailableGrade {
-  grade: string;
+  grade: number;
   sections: string[];
 }
 

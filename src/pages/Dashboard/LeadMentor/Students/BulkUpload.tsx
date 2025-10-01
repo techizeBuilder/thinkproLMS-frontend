@@ -91,7 +91,7 @@ export default function BulkUploadPage() {
     const templateData = [
       {
         name: "John Doe",
-        grade: "Grade 10",
+        grade: 10,
         section: "A",
         loginId: "john@example.com", // Optional
         parentEmail: "parent@example.com", // Optional
@@ -99,7 +99,7 @@ export default function BulkUploadPage() {
       },
       {
         name: "Jane Smith",
-        grade: "Grade 5",
+        grade: 5,
         section: "B",
         loginId: "", // Leave empty for system-generated
         parentEmail: "",
@@ -244,9 +244,9 @@ export default function BulkUploadPage() {
           <div className="bg-blue-50 p-4 rounded-lg">
             <h4 className="font-medium text-blue-900 mb-2">Required Excel Columns:</h4>
             <div className="text-sm text-blue-800">
-              <strong>Required:</strong> name, grade, section<br />
+              <strong>Required:</strong> name, grade (1-10), section<br />
               <strong>Optional:</strong> loginId, parentEmail, parentPhoneNumber<br />
-              <strong>Note:</strong> School will be selected from the dropdown below. If section is not provided, "A" will be used as default.
+              <strong>Note:</strong> School will be selected from the dropdown below. Grade should be a number (1-10). If section is not provided, "A" will be used as default.
             </div>
           </div>
 
