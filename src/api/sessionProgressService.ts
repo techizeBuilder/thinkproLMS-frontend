@@ -49,6 +49,17 @@ export interface UpdateSessionStatusData {
   notes?: string;
 }
 
+export interface LeadMentorMarkSessionCompletionData {
+  sessionId: string;
+  mentorId: string;
+  schoolId: string;
+  section: string;
+  grade: string;
+  isCompleted: boolean;
+  status?: "Pending" | "In Progress" | "Completed";
+  notes?: string;
+}
+
 export interface School {
   _id: string;
   name: string;
@@ -84,5 +95,23 @@ export const sessionProgressService = {
   getAvailableSchools: async (): Promise<School[]> => {
     const response = await axiosInstance.get("/session-progress/schools");
     return response.data.data;
+  },
+
+  // Lead Mentor specific methods
+  // Get session progress for a specific mentor (Lead Mentor view)
+  getLeadMentorSessionProgress: async (mentorId: string, schoolId?: string, section?: string, grade?: string): Promise<MentorSessionProgress> => {
+    const params: any = { mentorId };
+    if (schoolId) params.schoolId = schoolId;
+    if (section) params.section = section;
+    if (grade) params.grade = grade;
+    
+    const response = await axiosInstance.get("/session-progress/lead-mentor/progress", { params });
+    return response.data.data;
+  },
+
+  // Mark session as completed/incomplete for a specific mentor (Lead Mentor view)
+  markLeadMentorSessionCompleted: async (data: LeadMentorMarkSessionCompletionData) => {
+    const response = await axiosInstance.post("/session-progress/lead-mentor/mark-completed", data);
+    return response.data;
   },
 };

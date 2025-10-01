@@ -34,6 +34,7 @@ import EditLeadMentorPage from "../pages/Dashboard/SuperAdmin/LeadMentors/Edit";
 import SuperAdminMentorsPage from "../pages/Dashboard/SuperAdmin/Mentors";
 import CreateSuperAdminMentorPage from "../pages/Dashboard/SuperAdmin/Mentors/Create";
 import EditSuperAdminMentorPage from "../pages/Dashboard/SuperAdmin/Mentors/Edit";
+import SuperAdminSessionProgressPage from "../pages/Dashboard/SuperAdmin/SessionProgress";
 
 // LeadMentor Edit Components (re-exported from SuperAdmin)
 import LeadMentorEditSchoolAdminPage from "../pages/Dashboard/LeadMentor/SchoolAdmins/Edit";
@@ -48,6 +49,7 @@ import EditStudentPage from "../pages/Dashboard/LeadMentor/Students/Edit";
 import BulkUploadStudentsPage from "../pages/Dashboard/LeadMentor/Students/BulkUpload";
 import PromoteGradePage from "../pages/Dashboard/LeadMentor/Students/Promote";
 import QuestionBankPage from "../pages/Dashboard/LeadMentor/QuestionBank";
+import LeadMentorSessionProgressPage from "../pages/Dashboard/LeadMentor/SessionProgress";
 import ModulesPage from "../pages/Dashboard/Modules/index";
 import CreateModulePage from "../pages/Dashboard/Modules/Create";
 import EditModulePage from "../pages/Dashboard/Modules/Edit";
@@ -220,6 +222,9 @@ export default function AppRouter() {
           {/* Question Bank */}
           <Route path="question-bank" element={<QuestionBankPage />} />
           
+          {/* Session Progress */}
+          <Route path="session-progress" element={<SuperAdminSessionProgressPage />} />
+          
           {/* Assessment Management */}
           <Route path="assessments" element={<MentorAssessmentsPage />} />
           <Route path="assessments/create" element={<CreateAssessmentPage />} />
@@ -375,6 +380,9 @@ export default function AppRouter() {
           
           {/* Question Bank */}
           <Route path="question-bank" element={<QuestionBankPage />} />
+          
+          {/* Session Progress */}
+          <Route path="session-progress" element={<LeadMentorSessionProgressPage />} />
           
           {/* Assessment Management */}
           <Route path="assessments" element={<MentorAssessmentsPage />} />

@@ -12,7 +12,7 @@ import {
   SidebarFooter,
   useSidebar
 } from "@/components/ui/collapsible-sidebar"
-import { Building2, HomeIcon, Settings, Users, User, School, UserCheck, Crown, BookOpen, FileText, Layers, Award, Calendar } from "lucide-react"
+import { Building2, HomeIcon, Settings, Users, User, School, UserCheck, Crown, BookOpen, FileText, Layers, Award, Calendar, BarChart3 } from "lucide-react"
 import { LogoutButton } from "@/components/ui/logout-button"
 
 interface SuperAdminSidebarProps extends React.HTMLAttributes<HTMLDivElement> {}
@@ -74,6 +74,9 @@ export function SuperAdminSidebar({ className }: SuperAdminSidebarProps) {
             </SidebarNavItem>
             <SidebarNavItem to="/superadmin/certificates" icon={Award}>
               Certificates
+            </SidebarNavItem>
+            <SidebarNavItem to="/superadmin/session-progress" icon={BarChart3}>
+              Session Progress
             </SidebarNavItem>
           </SidebarNav>
         </SidebarGroup>

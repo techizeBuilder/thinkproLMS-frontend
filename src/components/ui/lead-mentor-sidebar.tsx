@@ -25,6 +25,7 @@ import {
   FileText,
   Award,
   Calendar,
+  BarChart3,
 } from "lucide-react";
 import { LogoutButton } from "@/components/ui/logout-button";
 import { useAuth } from "@/contexts/AuthContext";
@@ -87,6 +88,9 @@ export function LeadMentorSidebar({ className }: LeadMentorSidebarProps) {
               icon={FileText}
             >
               Module Progress Reports
+            </SidebarNavItem>
+            <SidebarNavItem to="/leadmentor/session-progress" icon={BarChart3}>
+              Session Progress
             </SidebarNavItem>
           </SidebarNav>
         </SidebarGroup>
