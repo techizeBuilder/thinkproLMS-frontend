@@ -9,6 +9,20 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Check, ChevronsUpDown } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import {
   Table,
@@ -18,7 +32,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Plus, Eye } from "lucide-react";
+import { Plus, Eye, CheckCircle, XCircle } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -42,6 +56,18 @@ const MentorQuestionBankPage: React.FC = () => {
     page: 1,
     limit: 10,
   });
+  const [sessions, setSessions] = useState<{
+    _id: string;
+    name: string;
+    grade: number;
+    sessionNumber: number;
+    displayName?: string;
+    module: {
+      _id: string;
+      name: string;
+    };
+  }[]>([]);
+  const [sessionSelectOpen, setSessionSelectOpen] = useState(false);
   const [pagination, setPagination] = useState({
     current: 1,
     pages: 1,
@@ -54,62 +80,61 @@ const MentorQuestionBankPage: React.FC = () => {
   const [showViewDialog, setShowViewDialog] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const grades = [
-    "Grade 1",
-    "Grade 2",
-    "Grade 3",
-    "Grade 4",
-    "Grade 5",
-    "Grade 6",
-    "Grade 7",
-    "Grade 8",
-    "Grade 9",
-    "Grade 10",
-  ];
-
   const difficulties = ["Easy", "Medium", "Tough"];
   const answerTypes = ["radio", "checkbox"];
 
   useEffect(() => {
     fetchQuestions();
-    fetchSubjectsAndModules();
+    fetchSessions();
   }, [filters]);
-
-
 
   const fetchQuestions = async () => {
     try {
       setLoading(true);
       setError(null);
+      console.log("Fetching questions with filters:", filters);
       const response = await questionBankService.getQuestions(filters);
+      console.log("Questions response:", response);
       if (response.success) {
         setQuestions(response.data.questions);
         setPagination(response.data.pagination);
       } else {
-        setError("Failed to fetch questions");
+        console.error("API returned success: false", response);
+        const errorMsg = response.message || "Failed to fetch questions";
+        setError(errorMsg);
+        toast.error(errorMsg);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching questions:", error);
-      setError("Failed to fetch questions");
+      const errorMsg = error.response?.data?.message || error.message || "Failed to fetch questions";
+      setError(errorMsg);
+      toast.error(errorMsg);
     } finally {
       setLoading(false);
     }
   };
 
-  const fetchSubjectsAndModules = async () => {
+  const fetchSessions = async () => {
     try {
-      // No longer needed since we removed subjects and modules state
+      const response = await questionBankService.getSessions();
+      if (response.success) {
+        setSessions(response.data);
+      }
     } catch (error) {
-      console.error("Error fetching subjects and modules:", error);
+      console.error("Error fetching sessions:", error);
     }
   };
 
   const handleFilterChange = (key: string, value: string) => {
-    setFilters((prev) => ({
-      ...prev,
-      [key]: value === "all" ? undefined : value,
-      page: 1, // Reset to first page when filtering
-    }));
+    setFilters((prev) => {
+      const newFilters = {
+        ...prev,
+        [key]: value === "all" ? undefined : value,
+        page: 1, // Reset to first page when filtering
+      };
+      
+      return newFilters;
+    });
   };
 
   const handlePageChange = (page: number) => {
@@ -124,6 +149,19 @@ const MentorQuestionBankPage: React.FC = () => {
   const handleViewQuestion = (question: Question) => {
     setSelectedQuestion(question);
     setShowViewDialog(true);
+  };
+
+  const getDifficultyColor = (difficulty: string) => {
+    switch (difficulty) {
+      case "Easy":
+        return "bg-green-100 text-green-800";
+      case "Medium":
+        return "bg-yellow-100 text-yellow-800";
+      case "Tough":
+        return "bg-red-100 text-red-800";
+      default:
+        return "bg-gray-100 text-gray-800";
+    }
   };
 
   const getAnswerTypeLabel = (type: string) => {
@@ -168,66 +206,91 @@ const MentorQuestionBankPage: React.FC = () => {
           <CardTitle>Filters</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
             <div>
-              <label className="text-sm font-medium mb-2 block">Search</label>
+              <label className="text-sm font-medium">Search</label>
               <Input
                 placeholder="Search questions..."
                 value={filters.search || ""}
                 onChange={(e) => handleFilterChange("search", e.target.value)}
+                className="mt-1"
               />
             </div>
-
             <div>
-              <label className="text-sm font-medium mb-2 block">Grade</label>
-              <Select
-                value={filters.grade || "all"}
-                onValueChange={(value) => handleFilterChange("grade", value)}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select Grade" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Grades</SelectItem>
-                  {grades.map((grade) => (
-                    <SelectItem key={grade} value={grade}>
-                      {grade}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <label className="text-sm font-medium">Session</label>
+              <Popover open={sessionSelectOpen} onOpenChange={setSessionSelectOpen}>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    role="combobox"
+                    aria-expanded={sessionSelectOpen}
+                    className="w-full justify-between mt-1"
+                  >
+                    {filters.session
+                      ? sessions.find((session) => session._id === filters.session)?.displayName ||
+                        `${sessions.find((session) => session._id === filters.session)?.grade}.${sessions.find((session) => session._id === filters.session)?.sessionNumber?.toString().padStart(2, '0')} ${sessions.find((session) => session._id === filters.session)?.name}`
+                      : "All Sessions"}
+                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-full p-0">
+                  <Command>
+                    <CommandInput placeholder="Search sessions..." />
+                    <CommandList>
+                      <CommandEmpty>No sessions found.</CommandEmpty>
+                      <CommandGroup>
+                        <CommandItem
+                          value="all"
+                          onSelect={() => {
+                            handleFilterChange("session", "all");
+                            setSessionSelectOpen(false);
+                          }}
+                        >
+                          <Check
+                            className={`mr-2 h-4 w-4 ${
+                              !filters.session || filters.session === "all" ? "opacity-100" : "opacity-0"
+                            }`}
+                          />
+                          All Sessions
+                        </CommandItem>
+                        {sessions.map((session) => (
+                          <CommandItem
+                            key={session._id}
+                            value={`${session.displayName || `${session.grade}.${session.sessionNumber?.toString().padStart(2, '0')} ${session.name}`} ${session.module.name}`}
+                            onSelect={() => {
+                              handleFilterChange("session", session._id);
+                              setSessionSelectOpen(false);
+                            }}
+                          >
+                            <Check
+                              className={`mr-2 h-4 w-4 ${
+                                filters.session === session._id ? "opacity-100" : "opacity-0"
+                              }`}
+                            />
+                            <div className="flex flex-col">
+                              <span className="font-medium">
+                                {session.displayName || `${session.grade}.${session.sessionNumber?.toString().padStart(2, '0')} ${session.name}`}
+                              </span>
+                              <span className="text-sm text-gray-500">{session.module.name}</span>
+                            </div>
+                          </CommandItem>
+                        ))}
+                      </CommandGroup>
+                    </CommandList>
+                  </Command>
+                </PopoverContent>
+              </Popover>
             </div>
-
             <div>
-              <label className="text-sm font-medium mb-2 block">Subject</label>
-              <Input
-                placeholder="Search subject (e.g., Mathematics)"
-                value={filters.subject || ""}
-                onChange={(e) => handleFilterChange("subject", e.target.value)}
-              />
-            </div>
-
-            <div>
-              <label className="text-sm font-medium mb-2 block">Module</label>
-              <Input
-                placeholder="Search module (e.g., Algebra)"
-                value={filters.module || ""}
-                onChange={(e) => handleFilterChange("module", e.target.value)}
-              />
-            </div>
-
-            <div>
-              <label className="text-sm font-medium mb-2 block">
-                Difficulty
-              </label>
+              <label className="text-sm font-medium">Difficulty</label>
               <Select
                 value={filters.difficulty || "all"}
                 onValueChange={(value) =>
                   handleFilterChange("difficulty", value)
                 }
               >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select Difficulty" />
+                <SelectTrigger className="mt-1">
+                  <SelectValue placeholder="All Difficulties" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Difficulties</SelectItem>
@@ -239,19 +302,16 @@ const MentorQuestionBankPage: React.FC = () => {
                 </SelectContent>
               </Select>
             </div>
-
             <div>
-              <label className="text-sm font-medium mb-2 block">
-                Answer Type
-              </label>
+              <label className="text-sm font-medium">Answer Type</label>
               <Select
                 value={filters.answerType || "all"}
                 onValueChange={(value) =>
                   handleFilterChange("answerType", value)
                 }
               >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select Type" />
+                <SelectTrigger className="mt-1">
+                  <SelectValue placeholder="All Types" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Types</SelectItem>
@@ -274,65 +334,75 @@ const MentorQuestionBankPage: React.FC = () => {
         </CardHeader>
         <CardContent>
           {loading ? (
-            <div className="flex justify-center items-center py-8">
-              <div className="text-gray-500">Loading questions...</div>
-            </div>
+            <div className="text-center py-8">Loading questions...</div>
           ) : error ? (
-            <div className="flex justify-center items-center py-8">
-              <div className="text-red-500">{error}</div>
+            <div className="text-center py-8">
+              <div className="text-red-600 mb-4">Error: {error}</div>
+              <Button onClick={fetchQuestions} variant="outline">
+                Retry
+              </Button>
             </div>
           ) : questions.length === 0 ? (
-            <div className="flex justify-center items-center py-8">
-              <div className="text-gray-500">No questions found</div>
+            <div className="text-center py-8 text-gray-500">
+              No questions found
             </div>
           ) : (
             <div className="space-y-4">
               <Table>
                 <TableHeader>
                   <TableRow>
+                    <TableHead>Order</TableHead>
                     <TableHead>Question</TableHead>
-                    <TableHead>Grade</TableHead>
-                    <TableHead>Subject</TableHead>
-                    <TableHead>Module</TableHead>
-                    <TableHead>Difficulty</TableHead>
+                    <TableHead>Session</TableHead>
                     <TableHead>Type</TableHead>
-                    <TableHead>Created By</TableHead>
+                    <TableHead>Difficulty</TableHead>
+                    <TableHead>Status</TableHead>
                     <TableHead>Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {questions.map((question) => (
+                  {questions.map((question, index) => (
                     <TableRow key={question._id}>
+                      <TableCell>
+                        <span className="font-medium">{question.order}</span>
+                      </TableCell>
                       <TableCell className="max-w-xs">
                         <div className="truncate" title={question.questionText}>
                           {question.questionText}
                         </div>
                       </TableCell>
                       <TableCell>
-                        <Badge variant="outline">{question.grade}</Badge>
+                        <div className="text-sm">
+                          <div className="font-medium">
+                            {question.session?.displayName || `${question.session?.grade}.${question.session?.sessionNumber?.toString().padStart(2, '0')} ${question.session?.name}`}
+                          </div>
+                          <div className="text-gray-500">
+                            {question.session?.module?.name}
+                          </div>
+                        </div>
                       </TableCell>
-                      <TableCell>{question.subject}</TableCell>
-                      <TableCell>{question.module}</TableCell>
+                      <TableCell>
+                        {getAnswerTypeLabel(question.answerType)}
+                      </TableCell>
                       <TableCell>
                         <Badge
-                          variant={
-                            question.difficulty === "Easy"
-                              ? "default"
-                              : question.difficulty === "Medium"
-                              ? "secondary"
-                              : "destructive"
-                          }
+                          className={getDifficultyColor(question.difficulty)}
                         >
                           {question.difficulty}
                         </Badge>
                       </TableCell>
                       <TableCell>
-                        <Badge variant="outline">
-                          {getAnswerTypeLabel(question.answerType)}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        {question.createdBy?.name || "Unknown"}
+                        {question.approvedBy ? (
+                          <Badge className="bg-green-100 text-green-800">
+                            <CheckCircle className="h-3 w-3 mr-1" />
+                            Approved
+                          </Badge>
+                        ) : (
+                          <Badge className="bg-yellow-100 text-yellow-800">
+                            <XCircle className="h-3 w-3 mr-1" />
+                            Pending
+                          </Badge>
+                        )}
                       </TableCell>
                       <TableCell>
                         <div className="flex items-center gap-2">
@@ -403,23 +473,40 @@ const MentorQuestionBankPage: React.FC = () => {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
                   <label className="text-sm font-medium text-gray-500">
-                    Grade
+                    Session
                   </label>
                   <div className="mt-1">
-                    <Badge variant="outline">{selectedQuestion.grade}</Badge>
+                    <div className="text-sm font-medium">
+                      {selectedQuestion.session?.displayName || `${selectedQuestion.session?.grade}.${selectedQuestion.session?.sessionNumber?.toString().padStart(2, '0')} ${selectedQuestion.session?.name}`}
+                    </div>
+                    <div className="text-xs text-gray-500">
+                      {selectedQuestion.session?.module?.name}
+                    </div>
                   </div>
                 </div>
                 <div>
                   <label className="text-sm font-medium text-gray-500">
-                    Subject
+                    Order
                   </label>
-                  <div className="mt-1 text-sm">{selectedQuestion.subject}</div>
+                  <div className="mt-1 text-sm">{selectedQuestion.order}</div>
                 </div>
                 <div>
                   <label className="text-sm font-medium text-gray-500">
-                    Module
+                    Status
                   </label>
-                  <div className="mt-1 text-sm">{selectedQuestion.module}</div>
+                  <div className="mt-1">
+                    {selectedQuestion.approvedBy ? (
+                      <Badge className="bg-green-100 text-green-800">
+                        <CheckCircle className="h-3 w-3 mr-1" />
+                        Approved
+                      </Badge>
+                    ) : (
+                      <Badge className="bg-yellow-100 text-yellow-800">
+                        <XCircle className="h-3 w-3 mr-1" />
+                        Pending
+                      </Badge>
+                    )}
+                  </div>
                 </div>
               </div>
 
@@ -430,13 +517,7 @@ const MentorQuestionBankPage: React.FC = () => {
                   </label>
                   <div className="mt-1">
                     <Badge
-                      variant={
-                        selectedQuestion.difficulty === "Easy"
-                          ? "default"
-                          : selectedQuestion.difficulty === "Medium"
-                          ? "secondary"
-                          : "destructive"
-                      }
+                      className={getDifficultyColor(selectedQuestion.difficulty)}
                     >
                       {selectedQuestion.difficulty}
                     </Badge>
@@ -494,6 +575,18 @@ const MentorQuestionBankPage: React.FC = () => {
                   ))}
                 </div>
               </div>
+
+              {/* Explanation */}
+              {selectedQuestion.explanation && (
+                <div>
+                  <label className="text-sm font-medium text-gray-500">
+                    Explanation
+                  </label>
+                  <div className="mt-1 p-4 bg-blue-50 rounded-lg">
+                    <p className="text-sm">{selectedQuestion.explanation}</p>
+                  </div>
+                </div>
+              )}
 
               {/* Metadata */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t">

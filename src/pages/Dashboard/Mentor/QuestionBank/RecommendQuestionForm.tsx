@@ -5,11 +5,25 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from '@/components/ui/command';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
+import { Check, ChevronsUpDown } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Plus, Trash2, Check } from 'lucide-react';
+import { Plus, Trash2, Check as CheckIcon } from 'lucide-react';
 import { questionRecommendationService, type CreateQuestionData } from '@/api/questionBankService';
-import { moduleService, type ModuleItem, type Module } from '@/api/moduleService';
+import { questionBankService } from '@/api/questionBankService';
 import { toast } from 'sonner';
 import { useEffect } from 'react';
 
@@ -26,9 +40,7 @@ const RecommendQuestionForm: React.FC<RecommendQuestionFormProps> = ({
 }) => {
   const [formData, setFormData] = useState<CreateQuestionData>({
     questionText: '',
-    grade: '',
-    subject: '',
-    module: '',
+    session: '',
     answerType: 'radio',
     answerChoices: [
       { text: '', isCorrect: false },
@@ -39,13 +51,18 @@ const RecommendQuestionForm: React.FC<RecommendQuestionFormProps> = ({
     difficulty: 'Medium',
   });
   const [loading, setLoading] = useState(false);
-  const [subjects, setSubjects] = useState<Module[]>([]);
-  const [modules, setModules] = useState<ModuleItem[]>([]);
-
-  const grades = [
-    'Grade 1', 'Grade 2', 'Grade 3', 'Grade 4', 'Grade 5',
-    'Grade 6', 'Grade 7', 'Grade 8', 'Grade 9', 'Grade 10'
-  ];
+  const [sessions, setSessions] = useState<{
+    _id: string;
+    name: string;
+    grade: number;
+    sessionNumber: number;
+    displayName?: string;
+    module: {
+      _id: string;
+      name: string;
+    };
+  }[]>([]);
+  const [sessionSelectOpen, setSessionSelectOpen] = useState(false);
 
   const difficulties = ['Easy', 'Medium', 'Tough'];
   const answerTypes = [
@@ -53,44 +70,22 @@ const RecommendQuestionForm: React.FC<RecommendQuestionFormProps> = ({
     { value: 'checkbox', label: 'Multiple Choice (Checkbox)' },
   ];
 
-  // Fetch subjects when form opens
+  // Fetch sessions when form opens
   useEffect(() => {
     if (open) {
-      fetchSubjects();
+      fetchSessions();
     }
   }, [open]);
 
-  // Fetch modules when grade and subject change
-  useEffect(() => {
-    if (formData.grade && formData.subject) {
-      fetchModules();
-    } else {
-      setModules([]);
-    }
-  }, [formData.grade, formData.subject]);
-
-  const fetchSubjects = async () => {
+  const fetchSessions = async () => {
     try {
-      const subjectsData = await moduleService.getAllModules();
-      setSubjects(subjectsData);
-    } catch (error) {
-      console.error('Error fetching subjects:', error);
-      toast.error('Failed to fetch subjects');
-    }
-  };
-
-  const fetchModules = async () => {
-    try {
-      const gradeNumber = parseInt(formData.grade.replace('Grade ', ''));
-      const selectedSubject = subjects.find(s => s.name === formData.subject);
-      
-      if (selectedSubject) {
-        const moduleData = await moduleService.getModulesByGradeAndSubject(gradeNumber, selectedSubject._id);
-        setModules(moduleData.modules);
+      const response = await questionBankService.getSessions();
+      if (response.success) {
+        setSessions(response.data);
       }
     } catch (error) {
-      console.error('Error fetching modules:', error);
-      toast.error('Failed to fetch modules');
+      console.error('Error fetching sessions:', error);
+      toast.error('Failed to fetch sessions');
     }
   };
 
@@ -158,16 +153,8 @@ const RecommendQuestionForm: React.FC<RecommendQuestionFormProps> = ({
       toast.error('Question text is required');
       return;
     }
-    if (!formData.grade) {
-      toast.error('Grade is required');
-      return;
-    }
-    if (!formData.subject) {
-      toast.error('Subject is required');
-      return;
-    }
-    if (!formData.module) {
-      toast.error('Module is required');
+    if (!formData.session) {
+      toast.error('Session is required');
       return;
     }
     if (formData.answerChoices.some(choice => !choice.text.trim())) {
@@ -188,9 +175,7 @@ const RecommendQuestionForm: React.FC<RecommendQuestionFormProps> = ({
         // Reset form
         setFormData({
           questionText: '',
-          grade: '',
-          subject: '',
-          module: '',
+          session: '',
           answerType: 'radio',
           answerChoices: [
             { text: '', isCorrect: false },
@@ -235,47 +220,57 @@ const RecommendQuestionForm: React.FC<RecommendQuestionFormProps> = ({
                 />
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-1 gap-4">
                 <div>
-                  <Label htmlFor="grade">Grade *</Label>
-                  <Select value={formData.grade} onValueChange={(value) => handleInputChange('grade', value)}>
-                    <SelectTrigger className="mt-1">
-                      <SelectValue placeholder="Select Grade" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {grades.map(grade => (
-                        <SelectItem key={grade} value={grade}>{grade}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div>
-                  <Label htmlFor="subject">Subject *</Label>
-                  <Select value={formData.subject} onValueChange={(value) => handleInputChange('subject', value)}>
-                    <SelectTrigger className="mt-1">
-                      <SelectValue placeholder="Select Subject" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {subjects.map(subject => (
-                        <SelectItem key={subject._id} value={subject.name}>{subject.name}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div>
-                  <Label htmlFor="module">Module *</Label>
-                  <Select value={formData.module} onValueChange={(value) => handleInputChange('module', value)}>
-                    <SelectTrigger className="mt-1">
-                      <SelectValue placeholder="Select Module" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {modules.map(module => (
-                        <SelectItem key={module._id || module.name} value={module.name}>{module.name}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <Label htmlFor="session">Session *</Label>
+                  <Popover open={sessionSelectOpen} onOpenChange={setSessionSelectOpen}>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        role="combobox"
+                        aria-expanded={sessionSelectOpen}
+                        className="w-full justify-between mt-1"
+                      >
+                        {formData.session
+                          ? sessions.find((session) => session._id === formData.session)?.displayName ||
+                            `${sessions.find((session) => session._id === formData.session)?.grade}.${sessions.find((session) => session._id === formData.session)?.sessionNumber?.toString().padStart(2, '0')} ${sessions.find((session) => session._id === formData.session)?.name}`
+                          : "Select Session"}
+                        <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-full p-0">
+                      <Command>
+                        <CommandInput placeholder="Search sessions..." />
+                        <CommandList>
+                          <CommandEmpty>No sessions found.</CommandEmpty>
+                          <CommandGroup>
+                            {sessions.map((session) => (
+                              <CommandItem
+                                key={session._id}
+                                value={`${session.displayName || `${session.grade}.${session.sessionNumber?.toString().padStart(2, '0')} ${session.name}`} ${session.module.name}`}
+                                onSelect={() => {
+                                  handleInputChange('session', session._id);
+                                  setSessionSelectOpen(false);
+                                }}
+                              >
+                                <Check
+                                  className={`mr-2 h-4 w-4 ${
+                                    formData.session === session._id ? "opacity-100" : "opacity-0"
+                                  }`}
+                                />
+                                <div className="flex flex-col">
+                                  <span className="font-medium">
+                                    {session.displayName || `${session.grade}.${session.sessionNumber?.toString().padStart(2, '0')} ${session.name}`}
+                                  </span>
+                                  <span className="text-sm text-gray-500">{session.module.name}</span>
+                                </div>
+                              </CommandItem>
+                            ))}
+                          </CommandGroup>
+                        </CommandList>
+                      </Command>
+                    </PopoverContent>
+                  </Popover>
                 </div>
               </div>
 
