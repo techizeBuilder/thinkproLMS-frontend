@@ -124,7 +124,7 @@ export default function PromoteGradePage() {
         `/students/promotion?schoolId=${selectedSchool}&grade=${selectedGrade}`
       );
       setStudents(response.data.data);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching students for promotion:", error);
       toast.error("Failed to fetch students");
       setStudents([]);
