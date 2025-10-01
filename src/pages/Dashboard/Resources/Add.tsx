@@ -18,8 +18,21 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import {
   ArrowLeft,
   Upload,
@@ -28,12 +41,16 @@ import {
   Video,
   X,
   Plus,
+  Check,
+  ChevronsUpDown,
+  FileSpreadsheet,
+  Image,
+  Music,
 } from "lucide-react";
 import type { UserType, ResourceType } from "@/types/resources";
 import type { CreateResourceData } from "@/api/resourceService";
 import { resourceService } from "@/api/resourceService";
-import { moduleService } from "@/api/moduleService";
-import { schoolService } from "@/api/schoolService";
+import { sessionService, type Session } from "@/api/sessionService";
 import { toast } from "sonner";
 
 export default function AddResourcePage() {
@@ -51,124 +68,42 @@ export default function AddResourcePage() {
 
   const [newTag, setNewTag] = useState("");
   const [isUploading, setIsUploading] = useState(false);
-  const [activeTab, setActiveTab] = useState<"file" | "url">("file");
+  const [contentMethod, setContentMethod] = useState<"file" | "url">("file");
 
-  // Additional form data for conditional fields
-  const [selectedSchool, setSelectedSchool] = useState<string>("");
-  const [selectedGrade, setSelectedGrade] = useState<string>("");
-  const [selectedSubject, setSelectedSubject] = useState<string>("");
-  const [selectedModule, setSelectedModule] = useState<string>("");
+  // Session selection for student/mentor resources
+  const [selectedSession, setSelectedSession] = useState<string>("");
+  const [sessions, setSessions] = useState<Session[]>([]);
+  const [loadingSessions, setLoadingSessions] = useState(false);
+  const [sessionSelectOpen, setSessionSelectOpen] = useState(false);
 
-  // Data for dropdowns
-  const [schools, setSchools] = useState<any[]>([]);
-  const [subjects, setSubjects] = useState<any[]>([]);
-  const [modules, setModules] = useState<any[]>([]);
-  const [availableGrades, setAvailableGrades] = useState<any[]>([]);
-  const [loadingData, setLoadingData] = useState(false);
-
-  // Load subjects and schools
+  // Load sessions when target audience is student or mentor
   useEffect(() => {
-    const loadData = async () => {
-      setLoadingData(true);
-      try {
-        const [subjectsData, schoolsData] = await Promise.all([
-          moduleService.getAllModules(),
-          schoolService.getAllSchools(),
-        ]);
-
-        setSubjects(subjectsData);
-        setSchools(schoolsData);
-      } catch (error) {
-        console.error("Error loading data:", error);
-        toast.error("Failed to load form data");
-      } finally {
-        setLoadingData(false);
+    const loadSessions = async () => {
+      if (formData.category === "student" || formData.category === "mentor") {
+        setLoadingSessions(true);
+        try {
+          const sessionsData = await sessionService.getAllSessions();
+          setSessions(sessionsData);
+        } catch (error) {
+          console.error("Error loading sessions:", error);
+          toast.error("Failed to load sessions");
+        } finally {
+          setLoadingSessions(false);
+        }
+      } else {
+        setSessions([]);
+        setSelectedSession("");
       }
     };
 
-    loadData();
-  }, []);
+    loadSessions();
+  }, [formData.category]);
 
   const handleInputChange = (field: keyof CreateResourceData, value: any) => {
     setFormData((prev) => ({
       ...prev,
       [field]: value,
     }));
-  };
-
-  // Handle school selection and load grades
-  const handleSchoolChange = async (schoolId: string) => {
-    setSelectedSchool(schoolId);
-    setSelectedGrade("");
-    setSelectedSubject("");
-    setSelectedModule("");
-    setModules([]);
-
-    if (schoolId) {
-      try {
-        const response = await schoolService.getServiceDetails(schoolId);
-        if (response.success && response.data.hasServiceDetails) {
-          console.log("Available grades from API:", response.data.grades);
-          setAvailableGrades(response.data.grades);
-        } else {
-          setAvailableGrades([]);
-        }
-      } catch (error) {
-        console.error("Error loading school grades:", error);
-        toast.error("Failed to load school grades");
-      }
-    } else {
-      setAvailableGrades([]);
-    }
-  };
-
-  // Helper function to extract numeric grade from various formats
-  const extractNumericGrade = (gradeString: string): number | null => {
-    if (!gradeString) return null;
-    
-    // Try direct parsing first (in case it's already a number string)
-    const directParse = parseInt(gradeString, 10);
-    if (!isNaN(directParse)) return directParse;
-    
-    // Extract all numbers from the string
-    const numbers = gradeString.match(/\d+/g);
-    if (numbers && numbers.length > 0) {
-      return parseInt(numbers[0], 10);
-    }
-    
-    return null;
-  };
-
-  // Handle subject selection and load modules
-  const handleSubjectChange = async (subjectId: string, grade: string) => {
-    setSelectedSubject(subjectId);
-    setSelectedModule("");
-
-    if (subjectId && grade) {
-      try {
-        console.log("Grade value received:", grade, "Type:", typeof grade);
-        const numericGrade = extractNumericGrade(grade);
-        console.log("Extracted numeric grade:", numericGrade);
-        
-        if (numericGrade === null) {
-          console.error("Invalid grade format:", grade);
-          toast.error("Invalid grade format");
-          setModules([]);
-          return;
-        }
-
-        const response = await moduleService.getModulesByGradeAndSubject(
-          numericGrade,
-          subjectId
-        );
-        setModules(response.modules || []);
-      } catch (error) {
-        console.error("Error loading modules:", error);
-        setModules([]);
-      }
-    } else {
-      setModules([]);
-    }
   };
 
   const handleAddTag = () => {
@@ -209,33 +144,28 @@ export default function AddResourcePage() {
         return;
       }
 
-      // Validate conditional fields for student/mentor resources
+      // Validate session selection for student/mentor resources
       if (formData.category === "student" || formData.category === "mentor") {
-        if (!selectedSchool || !selectedGrade || !selectedSubject) {
-          toast.error(
-            "Please select school, grade, and subject for student/mentor resources"
-          );
+        if (!selectedSession) {
+          toast.error("Please select a session for student/mentor resources");
           return;
         }
       }
 
-      if (activeTab === "file" && !formData.file) {
+      if (contentMethod === "file" && !formData.file) {
         toast.error("Please select a file to upload");
         return;
       }
 
-      if (activeTab === "url" && !formData.url) {
+      if (contentMethod === "url" && !formData.url) {
         toast.error("Please provide an external URL");
         return;
       }
 
-      // Prepare the resource data with additional fields
+      // Prepare the resource data with session field
       const resourceData = {
         ...formData,
-        school: selectedSchool || undefined,
-        grade: selectedGrade || undefined,
-        subject: selectedSubject || undefined,
-        module: selectedModule || undefined,
+        session: selectedSession || undefined,
       };
 
       console.log("Resource data being submitted:", resourceData);
@@ -253,12 +183,33 @@ export default function AddResourcePage() {
     }
   };
 
-  const handleTabChange = (tab: "file" | "url") => {
-    setActiveTab(tab);
-    if (tab === "file") {
-      setFormData((prev) => ({ ...prev, url: "" }));
-    } else {
-      setFormData((prev) => ({ ...prev, file: undefined }));
+  const getFileIcon = (type: string) => {
+    switch (type) {
+      case "video":
+        return <Video className="h-5 w-5" />;
+      case "document":
+      default:
+        return <FileText className="h-5 w-5" />;
+    }
+  };
+
+  const getAcceptedFileTypes = (type: string) => {
+    switch (type) {
+      case "video":
+        return "video/mp4,video/avi,video/mov,video/wmv";
+      case "document":
+      default:
+        return ".pdf,.pptx,.xlsx,.docx,.doc,.xls,.ppt";
+    }
+  };
+
+  const getFileTypeDescription = (type: string) => {
+    switch (type) {
+      case "video":
+        return "Supported formats: MP4, AVI, MOV, WMV";
+      case "document":
+      default:
+        return "Supported formats: PDF, PPTX, XLSX, DOCX, DOC, XLS, PPT";
     }
   };
 
@@ -281,14 +232,15 @@ export default function AddResourcePage() {
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
+        {/* Basic Information */}
         <Card>
           <CardHeader>
-            <CardTitle>Resource Information</CardTitle>
+            <CardTitle>Basic Information</CardTitle>
             <CardDescription>
-              Provide basic information about the resource
+              Provide basic details about the resource
             </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="title">Title *</Label>
@@ -334,217 +286,197 @@ export default function AddResourcePage() {
                 rows={3}
               />
             </div>
-
-            <div className="space-y-2">
-              <Label>Resource Type *</Label>
-              <Tabs
-                value={formData.type}
-                onValueChange={(value: string) =>
-                  handleInputChange("type", value as ResourceType)
-                }
-              >
-                <TabsList className="grid w-full grid-cols-2">
-                  <TabsTrigger
-                    value="document"
-                    className="flex items-center gap-2"
-                  >
-                    <FileText className="h-4 w-4" />
-                    Document
-                  </TabsTrigger>
-                  <TabsTrigger
-                    value="video"
-                    className="flex items-center gap-2"
-                  >
-                    <Video className="h-4 w-4" />
-                    Video
-                  </TabsTrigger>
-                </TabsList>
-              </Tabs>
-            </div>
           </CardContent>
         </Card>
 
-        {/* Conditional Fields - Only show for student/mentor resources */}
-        {(formData.category === "student" ||
-          formData.category === "mentor") && (
+        {/* Session Selection - Only show for student/mentor resources */}
+        {(formData.category === "student" || formData.category === "mentor") && (
           <Card>
             <CardHeader>
-              <CardTitle>Targeting Details</CardTitle>
+              <CardTitle>Session Association</CardTitle>
               <CardDescription>
-                Specify the school, grade, subject, and module for this resource
+                Link this resource to a specific session
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {/* School Selection */}
-                <div className="space-y-2">
-                  <Label htmlFor="school">School *</Label>
-                  <Select
-                    value={selectedSchool}
-                    onValueChange={handleSchoolChange}
-                    disabled={loadingData}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select a school" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {schools.map((school) => (
-                        <SelectItem key={school._id} value={school._id}>
-                          {school.name} - {school.city}, {school.state}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                {/* Grade Selection */}
-                <div className="space-y-2">
-                  <Label htmlFor="grade">Grade *</Label>
-                  <Select
-                    value={selectedGrade}
-                    onValueChange={(value) => {
-                      setSelectedGrade(value);
-                      setSelectedSubject("");
-                      setSelectedModule("");
-                      setModules([]);
-                    }}
-                    disabled={!selectedSchool || availableGrades.length === 0}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select a grade" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {availableGrades.map((grade) => (
-                        <SelectItem key={grade.grade} value={grade.grade}>
-                          {grade.grade}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {/* Subject Selection */}
-                <div className="space-y-2">
-                  <Label htmlFor="subject">Subject *</Label>
-                  <Select
-                    value={selectedSubject}
-                    onValueChange={(value) =>
-                      handleSubjectChange(value, selectedGrade)
-                    }
-                    disabled={!selectedGrade}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select a subject" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {subjects.map((subject) => (
-                        <SelectItem key={subject._id} value={subject._id}>
-                          {subject.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                {/* Module Selection */}
-                <div className="space-y-2">
-                  <Label htmlFor="module">Module</Label>
-                  <Select
-                    value={selectedModule}
-                    onValueChange={setSelectedModule}
-                    disabled={!selectedSubject || modules.length === 0}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select a module (optional)" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {modules.map((module) => (
-                        <SelectItem key={module._id} value={module._id}>
-                          {module.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
+              <div className="space-y-2">
+                <Label htmlFor="session">Session *</Label>
+                <Popover open={sessionSelectOpen} onOpenChange={setSessionSelectOpen}>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      role="combobox"
+                      aria-expanded={sessionSelectOpen}
+                      className="w-full justify-between"
+                      disabled={loadingSessions}
+                    >
+                      {selectedSession
+                        ? sessions.find((session) => session._id === selectedSession)
+                          ? `${sessions.find((session) => session._id === selectedSession)?.grade}.${sessions.find((session) => session._id === selectedSession)?.sessionNumber?.toString().padStart(2, '0')} ${sessions.find((session) => session._id === selectedSession)?.name}`
+                          : "Select session..."
+                        : "Select session..."}
+                      <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-full p-0">
+                    <Command>
+                      <CommandInput placeholder="Search sessions..." />
+                      <CommandList>
+                        <CommandEmpty>No sessions found.</CommandEmpty>
+                        <CommandGroup>
+                          {sessions.map((session) => (
+                            <CommandItem
+                              key={session._id}
+                              value={`${session.grade}.${session.sessionNumber?.toString().padStart(2, '0')} ${session.name}`}
+                              onSelect={() => {
+                                setSelectedSession(session._id!);
+                                setSessionSelectOpen(false);
+                              }}
+                            >
+                              <Check
+                                className={`mr-2 h-4 w-4 ${
+                                  selectedSession === session._id ? "opacity-100" : "opacity-0"
+                                }`}
+                              />
+                              <div className="flex flex-col">
+                                <span className="font-medium">
+                                  {session.grade}.{session.sessionNumber?.toString().padStart(2, '0')} {session.name}
+                                </span>
+                                {session.module && (
+                                  <span className="text-sm text-gray-500">{session.module.name}</span>
+                                )}
+                              </div>
+                            </CommandItem>
+                          ))}
+                        </CommandGroup>
+                      </CommandList>
+                    </Command>
+                  </PopoverContent>
+                </Popover>
+                {loadingSessions && (
+                  <p className="text-sm text-muted-foreground">Loading sessions...</p>
+                )}
               </div>
             </CardContent>
           </Card>
         )}
 
+        {/* Content Type and Method */}
         <Card>
           <CardHeader>
-            <CardTitle>Resource Content</CardTitle>
+            <CardTitle>Content Details</CardTitle>
             <CardDescription>
-              Upload a file or provide a URL link
+              Choose the resource type and how you want to provide the content
             </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <Tabs
-              value={activeTab}
-              onValueChange={(value) =>
-                handleTabChange(value as "file" | "url")
-              }
-              className="w-full"
-            >
-              <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="file" className="flex items-center gap-2">
-                  <Upload className="h-4 w-4" />
-                  Upload File
-                </TabsTrigger>
-                <TabsTrigger value="url" className="flex items-center gap-2">
-                  <Link className="h-4 w-4" />
-                  URL Link
-                </TabsTrigger>
-              </TabsList>
+          <CardContent className="space-y-6">
+            {/* Resource Type Selection */}
+            <div className="space-y-3">
+              <Label>Resource Type *</Label>
+              <RadioGroup
+                value={formData.type}
+                onValueChange={(value) => handleInputChange("type", value as ResourceType)}
+                className="grid grid-cols-2 gap-4"
+              >
+                <div className="flex items-center space-x-2 p-4 border rounded-lg hover:bg-gray-50 cursor-pointer">
+                  <RadioGroupItem value="document" id="document" />
+                  <Label htmlFor="document" className="flex items-center gap-2 cursor-pointer">
+                    <FileText className="h-4 w-4" />
+                    Document
+                  </Label>
+                </div>
+                <div className="flex items-center space-x-2 p-4 border rounded-lg hover:bg-gray-50 cursor-pointer">
+                  <RadioGroupItem value="video" id="video" />
+                  <Label htmlFor="video" className="flex items-center gap-2 cursor-pointer">
+                    <Video className="h-4 w-4" />
+                    Video
+                  </Label>
+                </div>
+              </RadioGroup>
+            </div>
 
-              <TabsContent value="file" className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="file">Upload File</Label>
+            {/* Content Method Selection */}
+            <div className="space-y-3">
+              <Label>How would you like to provide the content?</Label>
+              <RadioGroup
+                value={contentMethod}
+                onValueChange={(value) => setContentMethod(value as "file" | "url")}
+                className="grid grid-cols-2 gap-4"
+              >
+                <div className="flex items-center space-x-2 p-4 border rounded-lg hover:bg-gray-50 cursor-pointer">
+                  <RadioGroupItem value="file" id="file-method" />
+                  <Label htmlFor="file-method" className="flex items-center gap-2 cursor-pointer">
+                    <Upload className="h-4 w-4" />
+                    Upload File
+                  </Label>
+                </div>
+                <div className="flex items-center space-x-2 p-4 border rounded-lg hover:bg-gray-50 cursor-pointer">
+                  <RadioGroupItem value="url" id="url-method" />
+                  <Label htmlFor="url-method" className="flex items-center gap-2 cursor-pointer">
+                    <Link className="h-4 w-4" />
+                    External URL
+                  </Label>
+                </div>
+              </RadioGroup>
+            </div>
+
+            {/* Content Input Based on Method */}
+            {contentMethod === "file" ? (
+              <div className="space-y-3">
+                <Label htmlFor="file">Upload File</Label>
+                <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-gray-400 transition-colors">
                   <Input
                     id="file"
                     type="file"
                     onChange={handleFileUpload}
-                    accept={
-                      formData.type === "video"
-                        ? "video/mp4,video/avi,video/mov"
-                        : ".pdf,.pptx,.xlsx,.docx"
-                    }
+                    accept={getAcceptedFileTypes(formData.type)}
+                    className="hidden"
                   />
-                  <p className="text-sm text-muted-foreground">
-                    {formData.type === "video"
-                      ? "Supported formats: MP4, AVI, MOV"
-                      : "Supported formats: PDF, PPTX, XLSX, DOCX"}
-                  </p>
+                  <Label htmlFor="file" className="cursor-pointer">
+                    <div className="flex flex-col items-center gap-2">
+                      {getFileIcon(formData.type)}
+                      <span className="text-sm font-medium">Click to upload or drag and drop</span>
+                      <span className="text-xs text-gray-500">
+                        {getFileTypeDescription(formData.type)}
+                      </span>
+                    </div>
+                  </Label>
                 </div>
-              </TabsContent>
-
-              <TabsContent value="url" className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="url">Resource URL</Label>
-                  <Input
-                    id="url"
-                    type="url"
-                    value={formData.url}
-                    onChange={(e) => handleInputChange("url", e.target.value)}
-                    placeholder={
-                      formData.type === "video"
-                        ? "https://youtube.com/watch?v=... or https://vimeo.com/..."
-                        : "https://example.com/document.pdf"
-                    }
-                  />
-                  <p className="text-sm text-muted-foreground">
-                    {formData.type === "video"
-                      ? "YouTube, Vimeo, or direct video links"
-                      : "Direct links to documents or external resources"}
-                  </p>
-                </div>
-              </TabsContent>
-            </Tabs>
+                {formData.file && (
+                  <div className="flex items-center gap-2 p-2 bg-gray-50 rounded">
+                    {getFileIcon(formData.type)}
+                    <span className="text-sm">{formData.file.name}</span>
+                    <span className="text-xs text-gray-500">
+                      ({(formData.file.size / 1024 / 1024).toFixed(2)} MB)
+                    </span>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="space-y-3">
+                <Label htmlFor="url">Resource URL</Label>
+                <Input
+                  id="url"
+                  type="url"
+                  value={formData.url}
+                  onChange={(e) => handleInputChange("url", e.target.value)}
+                  placeholder={
+                    formData.type === "video"
+                      ? "https://youtube.com/watch?v=... or https://vimeo.com/..."
+                      : "https://example.com/document.pdf"
+                  }
+                />
+                <p className="text-sm text-gray-500">
+                  {formData.type === "video"
+                    ? "YouTube, Vimeo, or direct video links"
+                    : "Direct links to documents or external resources"}
+                </p>
+              </div>
+            )}
           </CardContent>
         </Card>
 
+        {/* Tags */}
         <Card>
           <CardHeader>
             <CardTitle>Tags</CardTitle>
@@ -606,4 +538,3 @@ export default function AddResourcePage() {
     </div>
   );
 }
-

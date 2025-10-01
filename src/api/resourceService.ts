@@ -29,6 +29,12 @@ export interface Resource {
     _id: string;
     name: string;
   };
+  session?: {
+    _id: string;
+    name: string;
+    grade: number;
+    sessionNumber: number;
+  };
   tags: string[];
   isPublic: boolean;
   isActive: boolean;
@@ -52,6 +58,7 @@ export interface CreateResourceData {
   grade?: string;
   school?: string;
   module?: string;
+  session?: string;
   tags?: string[];
   isPublic?: boolean;
   url?: string; // For external URLs
@@ -67,6 +74,7 @@ export interface ResourceFilters {
   grade?: string;
   school?: string;
   module?: string;
+  session?: string;
   search?: string;
   page?: number;
   limit?: number;
@@ -143,6 +151,7 @@ export const resourceService = {
     if (data.grade) formData.append("grade", data.grade);
     if (data.school) formData.append("school", data.school);
     if (data.module) formData.append("module", data.module);
+    if (data.session) formData.append("session", data.session);
     if (data.isPublic !== undefined)
       formData.append("isPublic", data.isPublic.toString());
     if (data.url) formData.append("url", data.url);
@@ -182,6 +191,7 @@ export const resourceService = {
     if (data.grade !== undefined) formData.append("grade", data.grade);
     if (data.school !== undefined) formData.append("school", data.school);
     if (data.module !== undefined) formData.append("module", data.module);
+    if (data.session !== undefined) formData.append("session", data.session);
     if (data.isPublic !== undefined)
       formData.append("isPublic", data.isPublic.toString());
     if (data.url) formData.append("url", data.url);
