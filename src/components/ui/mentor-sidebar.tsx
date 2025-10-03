@@ -14,11 +14,14 @@ import {
 } from "@/components/ui/collapsible-sidebar"
 import { BookOpen, HomeIcon, Settings, User, Users, MessageSquare, BarChart3, FolderOpen, ClipboardList, Database } from "lucide-react"
 import { LogoutButton } from "@/components/ui/logout-button"
+import { Badge } from "@/components/ui/badge"
+import { useUnreadMessageCount } from "@/hooks/useUnreadMessageCount"
 
 interface MentorSidebarProps extends React.HTMLAttributes<HTMLDivElement> {}
 
 export function MentorSidebar({ className }: MentorSidebarProps) {
   const { isCollapsed } = useSidebar()
+  const unreadCount = useUnreadMessageCount()
 
   return (
     <Sidebar className={cn("", className)}>
@@ -59,14 +62,6 @@ export function MentorSidebar({ className }: MentorSidebarProps) {
           </SidebarNav>
         </SidebarGroup>
 
-        <SidebarGroup label="Communication">
-          <SidebarNav>
-            <SidebarNavItem to="/mentor/messages" icon={MessageSquare}>
-              Messages
-            </SidebarNavItem>
-          </SidebarNav>
-        </SidebarGroup>
-
         <SidebarGroup label="Analytics">
           <SidebarNav>
             <SidebarNavItem to="/mentor/analytics" icon={BarChart3}>
@@ -78,7 +73,14 @@ export function MentorSidebar({ className }: MentorSidebarProps) {
         <SidebarGroup label="Communication">
           <SidebarNav>
             <SidebarNavItem to="/mentor/messages" icon={MessageSquare}>
-              Messages
+              <div className="flex items-center justify-between w-full">
+                <span>Messages</span>
+                {unreadCount > 0 && !isCollapsed && (
+                  <Badge variant="default" className="ml-auto text-xs px-1.5 py-0 h-5">
+                    {unreadCount}
+                  </Badge>
+                )}
+              </div>
             </SidebarNavItem>
           </SidebarNav>
         </SidebarGroup>

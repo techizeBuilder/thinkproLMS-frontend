@@ -14,11 +14,14 @@ import {
 } from "@/components/ui/collapsible-sidebar"
 import { Building2, HomeIcon, Settings, Users, User, School, UserCheck, Crown, BookOpen, FileText, Layers, Award, Calendar, BarChart3, MessageSquare } from "lucide-react"
 import { LogoutButton } from "@/components/ui/logout-button"
+import { Badge } from "@/components/ui/badge"
+import { useUnreadMessageCount } from "@/hooks/useUnreadMessageCount"
 
 interface SuperAdminSidebarProps extends React.HTMLAttributes<HTMLDivElement> {}
 
 export function SuperAdminSidebar({ className }: SuperAdminSidebarProps) {
   const { isCollapsed } = useSidebar()
+  const unreadCount = useUnreadMessageCount()
 
   return (
     <Sidebar className={cn("h-screen", className)}>
@@ -103,7 +106,14 @@ export function SuperAdminSidebar({ className }: SuperAdminSidebarProps) {
         <SidebarGroup label="Communication">
           <SidebarNav>
             <SidebarNavItem to="/superadmin/messages" icon={MessageSquare}>
-              Messages
+              <div className="flex items-center justify-between w-full">
+                <span>Messages</span>
+                {unreadCount > 0 && !isCollapsed && (
+                  <Badge variant="default" className="ml-auto text-xs px-1.5 py-0 h-5">
+                    {unreadCount}
+                  </Badge>
+                )}
+              </div>
             </SidebarNavItem>
           </SidebarNav>
         </SidebarGroup>

@@ -88,7 +88,8 @@ const Messages: React.FC = () => {
 
     // Handle message notifications
     const handleMessageNotification = (data: { message: Message; conversationId: string }) => {
-      toast.success(`New message from ${data.message.sender.name}`);
+      // Don't show toast if user is already viewing this conversation
+      // Toast should only show when user is on other pages
       loadConversations();
     };
 

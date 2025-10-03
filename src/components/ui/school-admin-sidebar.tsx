@@ -10,6 +10,7 @@ import {
   SidebarToggle,
   SidebarGroup,
   SidebarFooter,
+  useSidebar,
 } from "@/components/ui/collapsible-sidebar";
 import {
   HomeIcon,
@@ -23,10 +24,14 @@ import {
   MessageSquare,
 } from "lucide-react";
 import { LogoutButton } from "@/components/ui/logout-button";
+import { Badge } from "@/components/ui/badge";
+import { useUnreadMessageCount } from "@/hooks/useUnreadMessageCount";
 
 interface SchoolAdminSidebarProps extends React.HTMLAttributes<HTMLDivElement> {}
 
 export function SchoolAdminSidebar({ className }: SchoolAdminSidebarProps) {
+  const { isCollapsed } = useSidebar();
+  const unreadCount = useUnreadMessageCount();
 
   return (
     <Sidebar className={cn("h-screen", className)}>
@@ -77,7 +82,14 @@ export function SchoolAdminSidebar({ className }: SchoolAdminSidebarProps) {
         <SidebarGroup label="Communication">
           <SidebarNav>
             <SidebarNavItem to="/schooladmin/messages" icon={MessageSquare}>
-              Messages
+              <div className="flex items-center justify-between w-full">
+                <span>Messages</span>
+                {unreadCount > 0 && !isCollapsed && (
+                  <Badge variant="default" className="ml-auto text-xs px-1.5 py-0 h-5">
+                    {unreadCount}
+                  </Badge>
+                )}
+              </div>
             </SidebarNavItem>
           </SidebarNav>
         </SidebarGroup>

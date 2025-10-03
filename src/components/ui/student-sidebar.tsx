@@ -25,11 +25,14 @@ import {
 } from "lucide-react";
 import { LogoutButton } from "@/components/ui/logout-button";
 import { NotificationBell } from "@/components/ui/notification-bell";
+import { Badge } from "@/components/ui/badge";
+import { useUnreadMessageCount } from "@/hooks/useUnreadMessageCount";
 
 interface StudentSidebarProps extends React.HTMLAttributes<HTMLDivElement> {}
 
 export function StudentSidebar({ className }: StudentSidebarProps) {
-  const { isCollapsed } = useSidebar();
+  const { isCollapsed } = useSidebar()
+  const unreadCount = useUnreadMessageCount();
 
   return (
     <Sidebar className={cn("", className)}>
@@ -81,7 +84,14 @@ export function StudentSidebar({ className }: StudentSidebarProps) {
         <SidebarGroup label="Communication">
           <SidebarNav>
             <SidebarNavItem to="/student/messages" icon={MessageSquare}>
-              Messages
+              <div className="flex items-center justify-between w-full">
+                <span>Messages</span>
+                {unreadCount > 0 && !isCollapsed && (
+                  <Badge variant="default" className="ml-auto text-xs px-1.5 py-0 h-5">
+                    {unreadCount}
+                  </Badge>
+                )}
+              </div>
             </SidebarNavItem>
           </SidebarNav>
         </SidebarGroup>
