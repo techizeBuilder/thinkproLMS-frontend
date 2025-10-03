@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { MessageSquare } from "lucide-react";
+import { MessageSquare, Wifi, WifiOff } from "lucide-react";
 import ConversationList from "@/components/Messages/ConversationList";
 import MessageList from "@/components/Messages/MessageList";
 import MessageInput from "@/components/Messages/MessageInput";
@@ -9,11 +9,11 @@ import NewMessageDialog from "@/components/Messages/NewMessageDialog";
 import {
   getConversations,
   getMessages,
-  sendMessage,
   getOrCreateConversation,
   Conversation,
   Message,
 } from "@/api/messageService";
+import { useSocket } from "@/contexts/SocketContext";
 import { toast } from "sonner";
 
 const Messages: React.FC = () => {
@@ -23,6 +23,20 @@ const Messages: React.FC = () => {
   const [isLoadingConversations, setIsLoadingConversations] = useState(false);
   const [isLoadingMessages, setIsLoadingMessages] = useState(false);
   const [currentUserId, setCurrentUserId] = useState<string>("");
+  const [isTyping, setIsTyping] = useState(false);
+  const [typingTimeout, setTypingTimeout] = useState<NodeJS.Timeout | null>(null);
+
+  const { 
+    socket, 
+    isConnected, 
+    onlineUsers,
+    sendMessage: socketSendMessage,
+    joinConversation,
+    leaveConversation,
+    startTyping,
+    stopTyping,
+    markMessagesAsRead,
+  } = useSocket();
 
   useEffect(() => {
     // Get current user ID from localStorage
@@ -38,8 +52,85 @@ const Messages: React.FC = () => {
   useEffect(() => {
     if (selectedConversationId) {
       loadMessages(selectedConversationId);
+      joinConversation(selectedConversationId);
+
+      return () => {
+        leaveConversation(selectedConversationId);
+      };
     }
-  }, [selectedConversationId]);
+  }, [selectedConversationId, joinConversation, leaveConversation]);
+
+  // Socket event listeners
+  useEffect(() => {
+    if (!socket) return;
+
+    // Handle new messages
+    const handleNewMessage = (data: { message: Message; conversationId: string }) => {
+      // Add message to list if we're viewing this conversation
+      if (data.conversationId === selectedConversationId) {
+        setMessages((prev) => {
+          // Avoid duplicates
+          if (prev.some(m => m._id === data.message._id)) {
+            return prev;
+          }
+          return [...prev, data.message];
+        });
+
+        // Mark as read if we're the receiver
+        if (data.message.receiver._id === currentUserId) {
+          markMessagesAsRead(data.conversationId, [data.message._id]);
+        }
+      }
+
+      // Refresh conversations list
+      loadConversations();
+    };
+
+    // Handle message notifications
+    const handleMessageNotification = (data: { message: Message; conversationId: string }) => {
+      toast.success(`New message from ${data.message.sender.name}`);
+      loadConversations();
+    };
+
+    // Handle conversation updates
+    const handleConversationUpdate = () => {
+      loadConversations();
+    };
+
+    // Handle typing updates
+    const handleTypingUpdate = (data: { conversationId: string; userId: string; isTyping: boolean }) => {
+      if (data.conversationId === selectedConversationId && data.userId !== currentUserId) {
+        setIsTyping(data.isTyping);
+      }
+    };
+
+    // Handle message read status
+    const handleMessageRead = (data: { conversationId: string; messageIds: string[] }) => {
+      if (data.conversationId === selectedConversationId) {
+        setMessages((prev) =>
+          prev.map((msg) =>
+            data.messageIds.includes(msg._id)
+              ? { ...msg, isRead: true, readAt: new Date().toISOString() }
+              : msg
+          )
+        );
+      }
+    };
+
+    socket.on("message:new", handleNewMessage);
+    socket.on("message:notification", handleMessageNotification);
+    socket.on("conversation:updated", handleConversationUpdate);
+    socket.on("typing:update", handleTypingUpdate);
+    socket.on("message:read", handleMessageRead);
+
+    return () => {
+      socket.off("message:new", handleNewMessage);
+      socket.off("message:notification", handleMessageNotification);
+      socket.off("conversation:updated", handleConversationUpdate);
+      socket.off("typing:update", handleTypingUpdate);
+      socket.off("message:read", handleMessageRead);
+    };
+  }, [socket, selectedConversationId, currentUserId, markMessagesAsRead]);
 
   const loadConversations = async () => {
     try {
@@ -59,6 +150,17 @@ const Messages: React.FC = () => {
       setIsLoadingMessages(true);
       const response = await getMessages(conversationId);
       setMessages(response.messages);
+
+      // Mark unread messages as read
+      const unreadMessages = response.messages.filter(
+        (msg: Message) => msg.receiver._id === currentUserId && !msg.isRead
+      );
+      if (unreadMessages.length > 0) {
+        markMessagesAsRead(
+          conversationId,
+          unreadMessages.map((msg: Message) => msg._id)
+        );
+      }
     } catch (error: any) {
       console.error("Error loading messages:", error);
       toast.error(error.response?.data?.message || "Failed to load messages");
@@ -67,7 +169,7 @@ const Messages: React.FC = () => {
     }
   };
 
-  const handleSendMessage = async (content: string) => {
+  const handleSendMessage = useCallback((content: string) => {
     if (!selectedConversationId) return;
 
     const selectedConversation = conversations.find(
@@ -76,24 +178,41 @@ const Messages: React.FC = () => {
 
     if (!selectedConversation) return;
 
-    try {
-      const response = await sendMessage({
-        receiverId: selectedConversation.participant._id,
-        content,
-      });
+    // Send via socket for real-time delivery
+    socketSendMessage({
+      conversationId: selectedConversationId,
+      receiverId: selectedConversation.participant._id,
+      content,
+    });
 
-      // Add the new message to the list
-      setMessages((prev) => [...prev, response.message]);
+    // Stop typing indicator
+    stopTyping(selectedConversationId, selectedConversation.participant._id);
+  }, [selectedConversationId, conversations, socketSendMessage, stopTyping]);
 
-      // Refresh conversations to update last message
-      loadConversations();
+  const handleTyping = useCallback((content: string) => {
+    if (!selectedConversationId) return;
 
-      toast.success("Message sent");
-    } catch (error: any) {
-      console.error("Error sending message:", error);
-      toast.error(error.response?.data?.message || "Failed to send message");
+    const selectedConversation = conversations.find(
+      (c) => c._id === selectedConversationId
+    );
+
+    if (!selectedConversation) return;
+
+    // Clear existing timeout
+    if (typingTimeout) {
+      clearTimeout(typingTimeout);
     }
-  };
+
+    // Start typing
+    startTyping(selectedConversationId, selectedConversation.participant._id);
+
+    // Set timeout to stop typing after 2 seconds of inactivity
+    const timeout = setTimeout(() => {
+      stopTyping(selectedConversationId, selectedConversation.participant._id);
+    }, 2000);
+
+    setTypingTimeout(timeout);
+  }, [selectedConversationId, conversations, typingTimeout, startTyping, stopTyping]);
 
   const handleSelectUser = async (userId: string) => {
     try {
@@ -119,6 +238,11 @@ const Messages: React.FC = () => {
     0
   );
 
+  // Check if selected participant is online
+  const isParticipantOnline = selectedConversation
+    ? onlineUsers.includes(selectedConversation.participant._id)
+    : false;
+
   return (
     <div className="container mx-auto p-6 max-w-7xl">
       <div className="mb-6">
@@ -133,6 +257,17 @@ const Messages: React.FC = () => {
             </div>
           </div>
           <div className="flex items-center gap-2">
+            {isConnected ? (
+              <Badge variant="outline" className="gap-1">
+                <Wifi className="h-3 w-3" />
+                Online
+              </Badge>
+            ) : (
+              <Badge variant="destructive" className="gap-1">
+                <WifiOff className="h-3 w-3" />
+                Offline
+              </Badge>
+            )}
             {totalUnreadCount > 0 && (
               <Badge variant="default" className="text-sm">
                 {totalUnreadCount} unread
@@ -164,15 +299,25 @@ const Messages: React.FC = () => {
           {selectedConversation ? (
             <>
               <CardHeader className="border-b">
-                <div className="flex items-center gap-2">
-                  <CardTitle>{selectedConversation.participant.name}</CardTitle>
-                  <Badge variant="secondary" className="text-xs">
-                    {selectedConversation.participant.role}
-                  </Badge>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <CardTitle>{selectedConversation.participant.name}</CardTitle>
+                      <Badge variant="secondary" className="text-xs">
+                        {selectedConversation.participant.role}
+                      </Badge>
+                      {isParticipantOnline && (
+                        <Badge variant="outline" className="gap-1 text-xs">
+                          <div className="h-2 w-2 rounded-full bg-green-500" />
+                          Online
+                        </Badge>
+                      )}
+                    </div>
+                    <p className="text-sm text-muted-foreground">
+                      {selectedConversation.participant.email}
+                    </p>
+                  </div>
                 </div>
-                <p className="text-sm text-muted-foreground">
-                  {selectedConversation.participant.email}
-                </p>
               </CardHeader>
               <CardContent className="flex-1 p-0 overflow-hidden flex flex-col">
                 <div className="flex-1 overflow-hidden">
@@ -181,8 +326,16 @@ const Messages: React.FC = () => {
                     currentUserId={currentUserId}
                     isLoading={isLoadingMessages}
                   />
+                  {isTyping && (
+                    <div className="px-4 py-2 text-sm text-muted-foreground italic">
+                      {selectedConversation.participant.name} is typing...
+                    </div>
+                  )}
                 </div>
-                <MessageInput onSendMessage={handleSendMessage} />
+                <MessageInput 
+                  onSendMessage={handleSendMessage}
+                  onTyping={handleTyping}
+                />
               </CardContent>
             </>
           ) : (
@@ -203,4 +356,3 @@ const Messages: React.FC = () => {
 };
 
 export default Messages;
-

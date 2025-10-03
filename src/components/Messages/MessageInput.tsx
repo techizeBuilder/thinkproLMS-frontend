@@ -1,15 +1,17 @@
-import React, { useState, KeyboardEvent } from "react";
+import React, { useState, KeyboardEvent, ChangeEvent } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Send } from "lucide-react";
 
 interface MessageInputProps {
   onSendMessage: (content: string) => void;
+  onTyping?: (content: string) => void;
   disabled?: boolean;
 }
 
 const MessageInput: React.FC<MessageInputProps> = ({
   onSendMessage,
+  onTyping,
   disabled = false,
 }) => {
   const [message, setMessage] = useState("");
@@ -18,6 +20,16 @@ const MessageInput: React.FC<MessageInputProps> = ({
     if (message.trim() && !disabled) {
       onSendMessage(message.trim());
       setMessage("");
+    }
+  };
+
+  const handleChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
+    const value = e.target.value;
+    setMessage(value);
+    
+    // Trigger typing indicator
+    if (onTyping && value.length > 0) {
+      onTyping(value);
     }
   };
 
@@ -33,7 +45,7 @@ const MessageInput: React.FC<MessageInputProps> = ({
       <div className="flex gap-2 items-end">
         <Textarea
           value={message}
-          onChange={(e) => setMessage(e.target.value)}
+          onChange={handleChange}
           onKeyDown={handleKeyDown}
           placeholder="Type a message... (Press Enter to send, Shift+Enter for new line)"
           disabled={disabled}
