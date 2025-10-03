@@ -9,6 +9,9 @@ import { ArrowLeft, Plus } from "lucide-react";
 import axiosInstance from "@/api/axiosInstance";
 import { useStudentsPath } from "@/utils/navigation";
 import { schoolService, type AvailableGrade } from "@/api/schoolService";
+import { PhoneInput } from "@/components/ui/phone-input";
+import { isValidPhoneNumber } from "@/utils/validation";
+import { toast } from "sonner";
 
 interface School {
   _id: string;
@@ -102,6 +105,13 @@ export default function CreateStudentPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Validate parent phone number if provided
+    if (formData.parentPhoneNumber && !isValidPhoneNumber(formData.parentPhoneNumber)) {
+      toast.error("Please enter a valid parent phone number");
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -109,7 +119,7 @@ export default function CreateStudentPage() {
       const gradeNumber = parseInt(formData.grade, 10);
       
       if (!gradeNumber || gradeNumber < 1 || gradeNumber > 10) {
-        alert("Please select a valid grade (1-10)");
+        toast.error("Please select a valid grade (1-10)");
         setLoading(false);
         return;
       }
@@ -306,16 +316,12 @@ export default function CreateStudentPage() {
                   If provided, parent will receive setup email to create password for student
                 </p>
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="parentPhoneNumber">Parent Phone Number</Label>
-                <Input
-                  id="parentPhoneNumber"
-                  name="parentPhoneNumber"
-                  value={formData.parentPhoneNumber}
-                  onChange={handleInputChange}
-                  placeholder="Enter parent phone number"
-                />
-              </div>
+              <PhoneInput
+                label="Parent Phone Number"
+                value={formData.parentPhoneNumber}
+                onChange={(value) => setFormData(prev => ({ ...prev, parentPhoneNumber: value }))}
+                required={false}
+              />
             </div>
           </CardContent>
         </Card>

@@ -10,6 +10,7 @@ import { schoolAdminService, type CreateSchoolAdminData } from "@/api/schoolAdmi
 import { schoolService, type School } from "@/api/schoolService";
 import { MultiSelect } from "@/components/ui/multi-select";
 import { toast } from "sonner";
+import { isValidPhoneNumber, getPhoneNumberError } from "@/utils/validation";
 
 export default function CreateSchoolAdminPage() {
   const navigate = useNavigate();
@@ -29,6 +30,7 @@ export default function CreateSchoolAdminPage() {
   });
   const [creationMethod, setCreationMethod] = useState<"invite" | "credentials">("invite");
   const [password, setPassword] = useState("");
+  const [phoneError, setPhoneError] = useState<string | null>(null);
 
   useEffect(() => {
     fetchSchools();
@@ -53,10 +55,23 @@ export default function CreateSchoolAdminPage() {
       ...prev,
       [name]: value
     }));
+
+    // Validate phone number on change
+    if (name === 'phoneNumber') {
+      const error = getPhoneNumberError(value);
+      setPhoneError(error);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Validate phone number before submission
+    if (formData.phoneNumber && !isValidPhoneNumber(formData.phoneNumber)) {
+      toast.error("Please enter a valid phone number");
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -136,9 +151,16 @@ export default function CreateSchoolAdminPage() {
                 type="tel"
                 value={formData.phoneNumber}
                 onChange={handleInputChange}
-                placeholder="Enter phone number"
+                placeholder="e.g., 9876543210 or +919876543210"
                 required
+                className={phoneError ? "border-red-500" : ""}
               />
+              {phoneError && (
+                <p className="text-sm text-red-500">{phoneError}</p>
+              )}
+              {!phoneError && formData.phoneNumber && (
+                <p className="text-xs text-green-600">✓ Valid phone number</p>
+              )}
             </div>
 
             <div className="space-y-2">
@@ -230,7 +252,7 @@ export default function CreateSchoolAdminPage() {
             </div>
 
             <div className="flex gap-4 pt-4">
-              <Button type="submit" disabled={loading || schoolsLoading || (creationMethod === "credentials" && !password)}>
+              <Button type="submit" disabled={loading || schoolsLoading || !!phoneError || (creationMethod === "credentials" && !password)}>
                 {loading 
                   ? (creationMethod === "invite" ? "Sending Invitation..." : "Creating Admin...") 
                   : (creationMethod === "invite" ? "Send Invitation" : "Create Admin")

@@ -10,6 +10,8 @@ import { leadMentorService, type CreateLeadMentorData } from "@/api/leadMentorSe
 import { schoolService, type School } from "@/api/schoolService";
 import { PERMISSIONS, PERMISSION_LABELS, PERMISSION_DESCRIPTIONS } from "@/constants/permissions";
 import { toast } from "sonner";
+import { PhoneInput } from "@/components/ui/phone-input";
+import { isValidPhoneNumber } from "@/utils/validation";
 
 export default function CreateLeadMentorPage() {
   const navigate = useNavigate();
@@ -99,6 +101,13 @@ export default function CreateLeadMentorPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Validate phone number before submission
+    if (formData.phoneNumber && !isValidPhoneNumber(formData.phoneNumber)) {
+      toast.error("Please enter a valid phone number");
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -170,18 +179,12 @@ export default function CreateLeadMentorPage() {
               </div>
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="phoneNumber">Phone Number *</Label>
-              <Input
-                id="phoneNumber"
-                name="phoneNumber"
-                type="tel"
-                value={formData.phoneNumber}
-                onChange={handleInputChange}
-                placeholder="Enter phone number"
-                required
-              />
-            </div>
+            <PhoneInput
+              label="Phone Number"
+              value={formData.phoneNumber}
+              onChange={(value) => setFormData(prev => ({ ...prev, phoneNumber: value }))}
+              required
+            />
 
             <div className="space-y-4">
               <Label>Account Creation Method *</Label>

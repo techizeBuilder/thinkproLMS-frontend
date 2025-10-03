@@ -7,6 +7,8 @@ import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useAuth } from "@/contexts/AuthContext";
 import axiosInstance from "@/api/axiosInstance";
+import { PhoneInput } from "@/components/ui/phone-input";
+import { isValidPhoneNumber } from "@/utils/validation";
 
 export default function GuestRegister() {
   const { login } = useAuth();
@@ -51,6 +53,13 @@ export default function GuestRegister() {
 
     if (formData.password.length < 6) {
       setError("Password must be at least 6 characters long");
+      setLoading(false);
+      return;
+    }
+
+    // Validate phone number if provided
+    if (formData.phoneNumber && !isValidPhoneNumber(formData.phoneNumber)) {
+      setError("Please enter a valid phone number");
       setLoading(false);
       return;
     }
@@ -192,16 +201,10 @@ export default function GuestRegister() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="phoneNumber" className="text-sm font-medium text-gray-700">
-                    Phone Number *
-                  </Label>
-                  <Input
-                    id="phoneNumber"
-                    type="tel"
+                  <PhoneInput
+                    label="Phone Number"
                     value={formData.phoneNumber}
-                    onChange={(e) => handleInputChange("phoneNumber", e.target.value)}
-                    placeholder="Enter your phone number"
-                    className="h-11 border-gray-200 focus:border-green-500 focus:ring-green-500"
+                    onChange={(value) => handleInputChange("phoneNumber", value)}
                     required
                   />
                 </div>

@@ -9,6 +9,9 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { ArrowLeft, Plus } from "lucide-react";
 import axiosInstance from "@/api/axiosInstance";
+import { PhoneInput } from "@/components/ui/phone-input";
+import { isValidPhoneNumber } from "@/utils/validation";
+import { toast } from "sonner";
 
 interface School {
   _id: string;
@@ -65,6 +68,13 @@ export default function CreateMentorPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Validate phone number before submission
+    if (formData.phoneNumber && !isValidPhoneNumber(formData.phoneNumber)) {
+      toast.error("Please enter a valid phone number");
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -75,10 +85,11 @@ export default function CreateMentorPage() {
       };
       
       await axiosInstance.post("/mentors", submitData);
+      toast.success("Mentor created successfully");
       navigate("/leadmentor/mentors");
     } catch (error: any) {
       console.error("Error creating mentor:", error);
-      alert(error.response?.data?.message || "Failed to create mentor");
+      toast.error(error.response?.data?.message || "Failed to create mentor");
     } finally {
       setLoading(false);
     }
@@ -152,17 +163,12 @@ export default function CreateMentorPage() {
                   placeholder="mentor@example.com"
                 />
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="phoneNumber">Phone Number *</Label>
-                <Input
-                  id="phoneNumber"
-                  name="phoneNumber"
-                  value={formData.phoneNumber}
-                  onChange={handleInputChange}
-                  required
-                  placeholder="Enter phone number"
-                />
-              </div>
+              <PhoneInput
+                label="Phone Number"
+                value={formData.phoneNumber}
+                onChange={(value) => setFormData(prev => ({ ...prev, phoneNumber: value }))}
+                required
+              />
             </div>
 
             <div className="space-y-2">
