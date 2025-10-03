@@ -61,9 +61,9 @@ export function SuperAdminSidebar({ className }: SuperAdminSidebarProps) {
             <SidebarNavItem to="/superadmin/admins" icon={Building2}>
               SuperAdmins
             </SidebarNavItem>
-            <SidebarNavItem to="/superadmin/users" icon={Users}>
+            {/* <SidebarNavItem to="/superadmin/users" icon={Users}>
               All Users
-            </SidebarNavItem>
+            </SidebarNavItem> */}
           </SidebarNav>
         </SidebarGroup>
 

@@ -1,7 +1,10 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { User, Mail, Shield } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { User, Mail, Shield, KeyRound } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
+import { useState } from 'react';
+import { ResetPasswordDialog } from '@/components/ResetPasswordDialog';
 
 interface ProfileCardProps {
   children?: React.ReactNode;
@@ -11,6 +14,7 @@ interface ProfileCardProps {
 
 export default function ProfileCard({ children, title, description }: ProfileCardProps) {
   const { user } = useAuth();
+  const [showResetPassword, setShowResetPassword] = useState(false);
 
   const getRoleDisplayName = (role: string) => {
     const roleMap: { [key: string]: string } = {
@@ -84,9 +88,30 @@ export default function ProfileCard({ children, title, description }: ProfileCar
           </div>
         )}
 
+        {/* Reset Password Button */}
+        <div className="pt-4 border-t">
+          <Button
+            variant="outline"
+            onClick={() => setShowResetPassword(true)}
+            className="w-full sm:w-auto"
+          >
+            <KeyRound className="h-4 w-4 mr-2" />
+            Reset Password
+          </Button>
+        </div>
+
         {/* Role-specific content */}
         {children}
       </CardContent>
+
+      {/* Reset Password Dialog */}
+      <ResetPasswordDialog
+        open={showResetPassword}
+        onOpenChange={setShowResetPassword}
+        userId={user.id}
+        userName={user.name || 'User'}
+        userEmail={user.email}
+      />
     </Card>
   );
 }

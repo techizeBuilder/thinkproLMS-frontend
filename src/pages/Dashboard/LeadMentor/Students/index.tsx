@@ -14,10 +14,12 @@ import {
   GraduationCap,
   Eye,
   ArrowUp,
+  KeyRound,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import axiosInstance from "@/api/axiosInstance";
 import { useStudentsPath } from "@/utils/navigation";
+import { ResetPasswordDialog } from "@/components/ResetPasswordDialog";
 
 interface School {
   _id: string;
@@ -31,6 +33,7 @@ interface School {
 interface Student {
   _id: string;
   user: {
+    _id: string;
     name: string;
     email: string;
     isVerified: boolean;
@@ -60,6 +63,11 @@ export default function StudentsPage() {
   const [loadingPassword, setLoadingPassword] = useState<{
     [key: string]: boolean;
   }>({});
+  const [resetPasswordUser, setResetPasswordUser] = useState<{
+    id: string;
+    name: string;
+    email: string;
+  } | null>(null);
   const navigate = useNavigate();
   const studentsPath = useStudentsPath();
 
@@ -360,6 +368,20 @@ export default function StudentsPage() {
                     variant="ghost"
                     size="sm"
                     onClick={() =>
+                      setResetPasswordUser({
+                        id: student.user._id,
+                        name: student.user.name,
+                        email: student.user.email,
+                      })
+                    }
+                    title="Reset Password"
+                  >
+                    <KeyRound className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() =>
                       navigate(`${studentsPath}/${student._id}/edit`)
                     }
                   >
@@ -423,6 +445,17 @@ export default function StudentsPage() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Reset Password Dialog */}
+      {resetPasswordUser && (
+        <ResetPasswordDialog
+          open={!!resetPasswordUser}
+          onOpenChange={(open) => !open && setResetPasswordUser(null)}
+          userId={resetPasswordUser.id}
+          userName={resetPasswordUser.name}
+          userEmail={resetPasswordUser.email}
+        />
+      )}
     </div>
   );
 }

@@ -3,7 +3,7 @@ import { Link, useLocation } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Edit, Trash2, Mail, Phone, Crown, Globe } from "lucide-react";
+import { Plus, Edit, Trash2, Mail, Phone, Crown, Globe, KeyRound } from "lucide-react";
 import { leadMentorService, type LeadMentor } from "@/api/leadMentorService";
 import {
   AlertDialog,
@@ -17,12 +17,18 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
+import { ResetPasswordDialog } from "@/components/ResetPasswordDialog";
 
 export default function LeadMentorsPage() {
   const location = useLocation();
   const [leadMentors, setLeadMentors] = useState<LeadMentor[]>([]);
   const [loading, setLoading] = useState(true);
   const [deleteLoading, setDeleteLoading] = useState<string | null>(null);
+  const [resetPasswordUser, setResetPasswordUser] = useState<{
+    id: string;
+    name: string;
+    email: string;
+  } | null>(null);
   
   // Determine the base path based on current route
   const isLeadMentor = location.pathname.includes('/leadmentor');
@@ -126,6 +132,20 @@ export default function LeadMentorsPage() {
                     </div>
                   </div>
                   <div className="flex gap-2">
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      onClick={() =>
+                        setResetPasswordUser({
+                          id: mentor.user._id,
+                          name: mentor.user.name,
+                          email: mentor.user.email,
+                        })
+                      }
+                      title="Reset Password"
+                    >
+                      <KeyRound className="h-4 w-4" />
+                    </Button>
                     <Link to={`${basePath}/lead-mentors/${mentor._id}/edit`}>
                       <Button variant="outline" size="icon">
                         <Edit className="h-4 w-4" />
@@ -207,6 +227,17 @@ export default function LeadMentorsPage() {
             </Card>
           ))}
         </div>
+      )}
+
+      {/* Reset Password Dialog */}
+      {resetPasswordUser && (
+        <ResetPasswordDialog
+          open={!!resetPasswordUser}
+          onOpenChange={(open) => !open && setResetPasswordUser(null)}
+          userId={resetPasswordUser.id}
+          userName={resetPasswordUser.name}
+          userEmail={resetPasswordUser.email}
+        />
       )}
     </div>
   );
