@@ -245,45 +245,35 @@ const Messages: React.FC = () => {
     : false;
 
   return (
-    <div className="container mx-auto p-6 max-w-7xl">
-      <div className="mb-6">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <MessageSquare className="h-8 w-8 text-primary" />
-            <div>
-              <h1 className="text-3xl font-bold">Messages</h1>
-              <p className="text-sm text-muted-foreground">
-                Communicate with your colleagues and students
-              </p>
-            </div>
-          </div>
-          <div className="flex items-center gap-2">
-            {isConnected ? (
-              <Badge variant="outline" className="gap-1">
-                <Wifi className="h-3 w-3" />
-                Online
-              </Badge>
-            ) : (
-              <Badge variant="destructive" className="gap-1">
-                <WifiOff className="h-3 w-3" />
-                Offline
-              </Badge>
-            )}
-            {totalUnreadCount > 0 && (
-              <Badge variant="default" className="text-sm">
-                {totalUnreadCount} unread
-              </Badge>
-            )}
-            <NewMessageDialog onSelectUser={handleSelectUser} />
-          </div>
+    <div className="container mx-auto p-3 max-w-7xl">
+      <div className="mb-3 flex items-center justify-between">
+        <h1 className="text-2xl font-bold">Messages</h1>
+        <div className="flex items-center gap-2">
+          {isConnected ? (
+            <Badge variant="outline" className="gap-1">
+              <Wifi className="h-3 w-3" />
+              Online
+            </Badge>
+          ) : (
+            <Badge variant="destructive" className="gap-1">
+              <WifiOff className="h-3 w-3" />
+              Offline
+            </Badge>
+          )}
+          {totalUnreadCount > 0 && (
+            <Badge variant="default" className="text-sm">
+              {totalUnreadCount} unread
+            </Badge>
+          )}
+          <NewMessageDialog onSelectUser={handleSelectUser} />
         </div>
       </div>
 
-      <div className="grid grid-cols-12 gap-4 h-[calc(100vh-220px)]">
+      <div className="grid grid-cols-12 gap-3 h-[calc(100vh-140px)]">
         {/* Conversations List */}
         <Card className="col-span-12 md:col-span-4 flex flex-col h-full">
-          <CardHeader className="border-b">
-            <CardTitle>Conversations</CardTitle>
+          <CardHeader className="border-b py-3">
+            <CardTitle className="text-lg">Conversations</CardTitle>
           </CardHeader>
           <CardContent className="flex-1 p-0 overflow-hidden">
             <ConversationList
@@ -299,11 +289,11 @@ const Messages: React.FC = () => {
         <Card className="col-span-12 md:col-span-8 flex flex-col h-full">
           {selectedConversation ? (
             <>
-              <CardHeader className="border-b">
+              <CardHeader className="border-b py-3">
                 <div className="flex items-center justify-between">
                   <div>
                     <div className="flex items-center gap-2">
-                      <CardTitle>{selectedConversation.participant.name}</CardTitle>
+                      <CardTitle className="text-lg">{selectedConversation.participant.name}</CardTitle>
                       <Badge variant="secondary" className="text-xs">
                         {selectedConversation.participant.role}
                       </Badge>
@@ -314,7 +304,7 @@ const Messages: React.FC = () => {
                         </Badge>
                       )}
                     </div>
-                    <p className="text-sm text-muted-foreground">
+                    <p className="text-xs text-muted-foreground">
                       {selectedConversation.participant.email}
                     </p>
                   </div>

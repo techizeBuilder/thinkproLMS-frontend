@@ -13,12 +13,9 @@ import {
   useSidebar,
 } from "@/components/ui/collapsible-sidebar";
 import {
-  BookOpen,
   HomeIcon,
-  Settings,
   User,
   Award,
-  Clock,
   FolderOpen,
   ClipboardList,
   MessageSquare,
@@ -50,37 +47,6 @@ export function StudentSidebar({ className }: StudentSidebarProps) {
           </SidebarNav>
         </SidebarGroup>
 
-        <SidebarGroup label="Learning">
-          <SidebarNav>
-            <SidebarNavItem to="/student/courses" icon={BookOpen}>
-              My Courses
-            </SidebarNavItem>
-            <SidebarNavItem to="/student/resources" icon={FolderOpen}>
-              Resources
-            </SidebarNavItem>
-            <SidebarNavItem to="/student/assessments" icon={ClipboardList}>
-              Assessments
-            </SidebarNavItem>
-            <SidebarNavItem to="/student/notifications" icon={NotificationBell}>
-              Notifications
-            </SidebarNavItem>
-            <SidebarNavItem to="/student/progress" icon={Clock}>
-              Progress
-            </SidebarNavItem>
-          </SidebarNav>
-        </SidebarGroup>
-
-        <SidebarGroup label="Achievements">
-          <SidebarNav>
-            <SidebarNavItem to="/student/achievements" icon={Award}>
-              Achievements
-            </SidebarNavItem>
-            <SidebarNavItem to="/student/certificates" icon={Award}>
-              Certificates
-            </SidebarNavItem>
-          </SidebarNav>
-        </SidebarGroup>
-
         <SidebarGroup label="Communication">
           <SidebarNav>
             <SidebarNavItem to="/student/messages" icon={MessageSquare}>
@@ -96,13 +62,27 @@ export function StudentSidebar({ className }: StudentSidebarProps) {
           </SidebarNav>
         </SidebarGroup>
 
+        <SidebarGroup label="Learning">
+          <SidebarNav>
+            <SidebarNavItem to="/student/resources" icon={FolderOpen}>
+              Resources
+            </SidebarNavItem>
+            <SidebarNavItem to="/student/assessments" icon={ClipboardList}>
+              Assessments
+            </SidebarNavItem>
+            <SidebarNavItem to="/student/notifications" icon={NotificationBell}>
+              Notifications
+            </SidebarNavItem>
+            <SidebarNavItem to="/student/certificates" icon={Award}>
+              Certificates
+            </SidebarNavItem>
+          </SidebarNav>
+        </SidebarGroup>
+
         <SidebarGroup label="Account">
           <SidebarNav>
             <SidebarNavItem to="/student/profile" icon={User}>
               Profile
-            </SidebarNavItem>
-            <SidebarNavItem to="/student/settings" icon={Settings}>
-              Settings
             </SidebarNavItem>
           </SidebarNav>
         </SidebarGroup>

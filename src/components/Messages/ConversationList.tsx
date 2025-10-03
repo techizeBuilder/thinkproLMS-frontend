@@ -89,13 +89,13 @@ const ConversationList: React.FC<ConversationListProps> = ({
 
   return (
     <ScrollArea className="h-full">
-      <div className="space-y-1 p-2">
+      <div className="space-y-1 p-1.5">
         {conversations.map((conversation) => (
           <div
             key={conversation._id}
             onClick={() => onSelectConversation(conversation._id)}
             className={cn(
-              "p-3 rounded-lg cursor-pointer transition-colors border",
+              "p-2 rounded-lg cursor-pointer transition-colors border",
               selectedConversationId === conversation._id
                 ? "bg-primary/10 border-primary"
                 : "hover:bg-accent border-transparent"

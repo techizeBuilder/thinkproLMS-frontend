@@ -12,7 +12,7 @@ import {
   SidebarFooter,
   useSidebar
 } from "@/components/ui/collapsible-sidebar"
-import { BookOpen, HomeIcon, Settings, Users, User, GraduationCap } from "lucide-react"
+import { HomeIcon, User } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { LogoutButton } from "@/components/ui/logout-button"
 
@@ -33,28 +33,6 @@ export function AdminSidebar({ className }: AdminSidebarProps) {
           <SidebarNav>
             <SidebarNavItem to="/admin" icon={HomeIcon}>
               Dashboard
-            </SidebarNavItem>
-          </SidebarNav>
-        </SidebarGroup>
-
-        <SidebarGroup label="Content">
-          <SidebarNav>
-            <SidebarNavItem to="/admin/courses" icon={BookOpen}>
-              Courses
-            </SidebarNavItem>
-            <SidebarNavItem to="/admin/students" icon={GraduationCap}>
-              Students
-            </SidebarNavItem>
-          </SidebarNav>
-        </SidebarGroup>
-
-        <SidebarGroup label="Management">
-          <SidebarNav>
-            <SidebarNavItem to="/admin/users" icon={Users}>
-              Users
-            </SidebarNavItem>
-            <SidebarNavItem to="/admin/settings" icon={Settings}>
-              Settings
             </SidebarNavItem>
           </SidebarNav>
         </SidebarGroup>

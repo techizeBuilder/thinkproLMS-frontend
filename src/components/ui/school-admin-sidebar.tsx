@@ -49,6 +49,21 @@ export function SchoolAdminSidebar({ className }: SchoolAdminSidebarProps) {
           </SidebarNav>
         </SidebarGroup>
 
+        <SidebarGroup label="Communication">
+          <SidebarNav>
+            <SidebarNavItem to="/schooladmin/messages" icon={MessageSquare}>
+              <div className="flex items-center justify-between w-full">
+                <span>Messages</span>
+                {unreadCount > 0 && !isCollapsed && (
+                  <Badge variant="default" className="ml-auto text-xs px-1.5 py-0 h-5">
+                    {unreadCount}
+                  </Badge>
+                )}
+              </div>
+            </SidebarNavItem>
+          </SidebarNav>
+        </SidebarGroup>
+
         <SidebarGroup label="Management">
           <SidebarNav>
             <SidebarNavItem to="/schooladmin/mentors" icon={UserCheck}>
@@ -75,21 +90,6 @@ export function SchoolAdminSidebar({ className }: SchoolAdminSidebarProps) {
           <SidebarNav>
             <SidebarNavItem to="/schooladmin/schools" icon={School}>
               Assigned Schools
-            </SidebarNavItem>
-          </SidebarNav>
-        </SidebarGroup>
-
-        <SidebarGroup label="Communication">
-          <SidebarNav>
-            <SidebarNavItem to="/schooladmin/messages" icon={MessageSquare}>
-              <div className="flex items-center justify-between w-full">
-                <span>Messages</span>
-                {unreadCount > 0 && !isCollapsed && (
-                  <Badge variant="default" className="ml-auto text-xs px-1.5 py-0 h-5">
-                    {unreadCount}
-                  </Badge>
-                )}
-              </div>
             </SidebarNavItem>
           </SidebarNav>
         </SidebarGroup>

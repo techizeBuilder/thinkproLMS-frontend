@@ -79,15 +79,15 @@ const MessageList: React.FC<MessageListProps> = ({
 
   return (
     <ScrollArea className="h-full" ref={scrollRef}>
-      <div className="p-4 space-y-4">
+      <div className="p-3 space-y-3">
         {Object.entries(messageGroups).map(([dateKey, dateMessages]) => (
           <div key={dateKey}>
-            <div className="flex items-center justify-center mb-4">
-              <span className="text-xs text-muted-foreground bg-accent px-3 py-1 rounded-full">
+            <div className="flex items-center justify-center mb-3">
+              <span className="text-xs text-muted-foreground bg-accent px-2 py-0.5 rounded-full">
                 {dateKey}
               </span>
             </div>
-            <div className="space-y-3">
+            <div className="space-y-2">
               {dateMessages.map((message) => {
                 const isCurrentUser = message.sender._id === currentUserId;
 
@@ -101,7 +101,7 @@ const MessageList: React.FC<MessageListProps> = ({
                   >
                     <div
                       className={cn(
-                        "max-w-[70%] rounded-lg px-4 py-2 shadow-sm",
+                        "max-w-[70%] rounded-lg px-3 py-2 shadow-sm",
                         isCurrentUser
                           ? "bg-primary text-primary-foreground"
                           : "bg-accent"

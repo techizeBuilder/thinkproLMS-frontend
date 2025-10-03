@@ -14,7 +14,6 @@ import {
 } from "@/components/ui/collapsible-sidebar";
 import {
   HomeIcon,
-  Settings,
   User,
   UserCheck,
   Crown,
@@ -56,6 +55,21 @@ export function LeadMentorSidebar({ className }: LeadMentorSidebarProps) {
           <SidebarNav>
             <SidebarNavItem to="/leadmentor" icon={HomeIcon}>
               Dashboard
+            </SidebarNavItem>
+          </SidebarNav>
+        </SidebarGroup>
+
+        <SidebarGroup label="Communication">
+          <SidebarNav>
+            <SidebarNavItem to="/leadmentor/messages" icon={MessageSquare}>
+              <div className="flex items-center justify-between w-full">
+                <span>Messages</span>
+                {unreadCount > 0 && !isCollapsed && (
+                  <Badge variant="default" className="ml-auto text-xs px-1.5 py-0 h-5">
+                    {unreadCount}
+                  </Badge>
+                )}
+              </div>
             </SidebarNavItem>
           </SidebarNav>
         </SidebarGroup>
@@ -122,28 +136,10 @@ export function LeadMentorSidebar({ className }: LeadMentorSidebarProps) {
           </SidebarGroup>
         )}
 
-        <SidebarGroup label="Communication">
-          <SidebarNav>
-            <SidebarNavItem to="/leadmentor/messages" icon={MessageSquare}>
-              <div className="flex items-center justify-between w-full">
-                <span>Messages</span>
-                {unreadCount > 0 && !isCollapsed && (
-                  <Badge variant="default" className="ml-auto text-xs px-1.5 py-0 h-5">
-                    {unreadCount}
-                  </Badge>
-                )}
-              </div>
-            </SidebarNavItem>
-          </SidebarNav>
-        </SidebarGroup>
-
         <SidebarGroup label="Account">
           <SidebarNav>
             <SidebarNavItem to="/leadmentor/profile" icon={User}>
               Profile
-            </SidebarNavItem>
-            <SidebarNavItem to="/leadmentor/settings" icon={Settings}>
-              Settings
             </SidebarNavItem>
           </SidebarNav>
         </SidebarGroup>

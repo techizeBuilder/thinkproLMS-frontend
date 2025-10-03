@@ -41,7 +41,7 @@ const MessageInput: React.FC<MessageInputProps> = ({
   };
 
   return (
-    <div className="p-4 border-t bg-background">
+    <div className="p-3 border-t bg-background">
       <div className="flex gap-2 items-end">
         <Textarea
           value={message}
@@ -49,7 +49,7 @@ const MessageInput: React.FC<MessageInputProps> = ({
           onKeyDown={handleKeyDown}
           placeholder="Type a message... (Press Enter to send, Shift+Enter for new line)"
           disabled={disabled}
-          className="resize-none min-h-[60px] max-h-[120px]"
+          className="resize-none min-h-[50px] max-h-[100px]"
           rows={2}
         />
         <Button

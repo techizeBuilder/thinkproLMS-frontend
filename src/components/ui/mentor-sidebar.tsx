@@ -12,7 +12,7 @@ import {
   SidebarFooter,
   useSidebar
 } from "@/components/ui/collapsible-sidebar"
-import { BookOpen, HomeIcon, Settings, User, Users, MessageSquare, BarChart3, FolderOpen, ClipboardList, Database } from "lucide-react"
+import { BookOpen, HomeIcon, User, Users, MessageSquare, FolderOpen, ClipboardList, Database } from "lucide-react"
 import { LogoutButton } from "@/components/ui/logout-button"
 import { Badge } from "@/components/ui/badge"
 import { useUnreadMessageCount } from "@/hooks/useUnreadMessageCount"
@@ -39,11 +39,23 @@ export function MentorSidebar({ className }: MentorSidebarProps) {
           </SidebarNav>
         </SidebarGroup>
 
+        <SidebarGroup label="Communication">
+          <SidebarNav>
+            <SidebarNavItem to="/mentor/messages" icon={MessageSquare}>
+              <div className="flex items-center justify-between w-full">
+                <span>Messages</span>
+                {unreadCount > 0 && !isCollapsed && (
+                  <Badge variant="default" className="ml-auto text-xs px-1.5 py-0 h-5">
+                    {unreadCount}
+                  </Badge>
+                )}
+              </div>
+            </SidebarNavItem>
+          </SidebarNav>
+        </SidebarGroup>
+
         <SidebarGroup label="Teaching">
           <SidebarNav>
-            <SidebarNavItem to="/mentor/courses" icon={BookOpen}>
-              My Courses
-            </SidebarNavItem>
             <SidebarNavItem to="/mentor/resources" icon={FolderOpen}>
               Resources
             </SidebarNavItem>
@@ -62,36 +74,10 @@ export function MentorSidebar({ className }: MentorSidebarProps) {
           </SidebarNav>
         </SidebarGroup>
 
-        <SidebarGroup label="Analytics">
-          <SidebarNav>
-            <SidebarNavItem to="/mentor/analytics" icon={BarChart3}>
-              Student Progress
-            </SidebarNavItem>
-          </SidebarNav>
-        </SidebarGroup>
-
-        <SidebarGroup label="Communication">
-          <SidebarNav>
-            <SidebarNavItem to="/mentor/messages" icon={MessageSquare}>
-              <div className="flex items-center justify-between w-full">
-                <span>Messages</span>
-                {unreadCount > 0 && !isCollapsed && (
-                  <Badge variant="default" className="ml-auto text-xs px-1.5 py-0 h-5">
-                    {unreadCount}
-                  </Badge>
-                )}
-              </div>
-            </SidebarNavItem>
-          </SidebarNav>
-        </SidebarGroup>
-
         <SidebarGroup label="Account">
           <SidebarNav>
             <SidebarNavItem to="/mentor/profile" icon={User}>
               Profile
-            </SidebarNavItem>
-            <SidebarNavItem to="/mentor/settings" icon={Settings}>
-              Settings
             </SidebarNavItem>
           </SidebarNav>
         </SidebarGroup>
