@@ -1,6 +1,6 @@
-import * as React from "react"
-import { cn } from "@/lib/utils"
-import { 
+import * as React from "react";
+import { cn } from "@/lib/utils";
+import {
   Sidebar,
   SidebarContent,
   SidebarHeader,
@@ -10,15 +10,25 @@ import {
   SidebarToggle,
   SidebarGroup,
   SidebarFooter,
-  useSidebar
-} from "@/components/ui/collapsible-sidebar"
-import { BookOpen, HomeIcon, Settings, User, Award, Clock, FolderOpen, ClipboardList } from "lucide-react"
-import { LogoutButton } from "@/components/ui/logout-button"
+  useSidebar,
+} from "@/components/ui/collapsible-sidebar";
+import {
+  BookOpen,
+  HomeIcon,
+  Settings,
+  User,
+  Award,
+  Clock,
+  FolderOpen,
+  ClipboardList,
+} from "lucide-react";
+import { LogoutButton } from "@/components/ui/logout-button";
+import { NotificationBell } from "@/components/ui/notification-bell";
 
 interface StudentSidebarProps extends React.HTMLAttributes<HTMLDivElement> {}
 
 export function StudentSidebar({ className }: StudentSidebarProps) {
-  const { isCollapsed } = useSidebar()
+  const { isCollapsed } = useSidebar();
 
   return (
     <Sidebar className={cn("", className)}>
@@ -26,7 +36,7 @@ export function StudentSidebar({ className }: StudentSidebarProps) {
         <SidebarTitle>Student Portal</SidebarTitle>
         <SidebarToggle />
       </SidebarHeader>
-      
+
       <SidebarContent>
         <SidebarGroup label="Dashboard">
           <SidebarNav>
@@ -46,6 +56,9 @@ export function StudentSidebar({ className }: StudentSidebarProps) {
             </SidebarNavItem>
             <SidebarNavItem to="/student/assessments" icon={ClipboardList}>
               Assessments
+            </SidebarNavItem>
+            <SidebarNavItem to="/student/notifications" icon={NotificationBell}>
+              Notifications
             </SidebarNavItem>
             <SidebarNavItem to="/student/progress" icon={Clock}>
               Progress
@@ -79,21 +92,21 @@ export function StudentSidebar({ className }: StudentSidebarProps) {
       <SidebarFooter>
         <div className="space-y-1">
           {!isCollapsed ? (
-            <LogoutButton 
-              variant="ghost" 
-              className="w-full justify-start text-sm" 
+            <LogoutButton
+              variant="ghost"
+              className="w-full justify-start text-sm"
               isCollapsed={false}
             />
           ) : (
-            <LogoutButton 
-              variant="ghost" 
-              size="icon" 
-              className="w-full" 
+            <LogoutButton
+              variant="ghost"
+              size="icon"
+              className="w-full"
               isCollapsed={true}
             />
           )}
         </div>
       </SidebarFooter>
     </Sidebar>
-  )
+  );
 }

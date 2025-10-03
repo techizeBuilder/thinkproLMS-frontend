@@ -87,6 +87,7 @@ import TakeAssessmentPage from "../pages/Dashboard/Student/Assessments/TakeAsses
 import StudentAssessmentResultsPage from "../pages/Dashboard/Student/Assessments/Results";
 import DetailedAssessmentResultsPage from "../pages/Dashboard/Student/Assessments/DetailedResults";
 import StudentDashboard from "../pages/Dashboard/Student/Dashboard";
+import StudentNotificationsPage from "../pages/Dashboard/Student/Notifications";
 
 // Certificate Routes
 import { certificateRoutes, studentCertificateRoutes } from "./certificateRoutes";
@@ -530,6 +531,9 @@ export default function AppRouter() {
           <Route path="assessments/:id/take" element={<TakeAssessmentPage />} />
           <Route path="assessments/results" element={<StudentAssessmentResultsPage />} />
           <Route path="assessments/results/:id" element={<DetailedAssessmentResultsPage />} />
+          
+          {/* Notification Routes */}
+          <Route path="notifications" element={<StudentNotificationsPage />} />
           
           {/* Certificate Routes */}
           {studentCertificateRoutes}
