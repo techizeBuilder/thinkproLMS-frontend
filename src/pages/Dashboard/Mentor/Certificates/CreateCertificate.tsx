@@ -23,8 +23,8 @@ import {
   Loader2
 } from 'lucide-react';
 import { certificateService, type CertificateTemplate } from '@/api/certificateService';
-import { schoolService } from '@/api/schoolService';
-import { moduleService } from '@/api/moduleService';
+import { schoolService, type School, type AvailableGrade } from '@/api/schoolService';
+import { sessionService, type Session } from '@/api/sessionService';
 import { studentService } from '@/api/studentService';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
@@ -49,10 +49,12 @@ export default function CreateCertificatePage() {
   };
   const [loading, setLoading] = useState(false);
   const [templates, setTemplates] = useState<CertificateTemplate[]>([]);
-  const [schools, setSchools] = useState<any[]>([]);
-  const [subjects, setSubjects] = useState<any[]>([]);
+  const [schools, setSchools] = useState<School[]>([]);
+  const [sessions, setSessions] = useState<Session[]>([]);
   const [students, setStudents] = useState<Student[]>([]);
   const [selectedStudents, setSelectedStudents] = useState<string[]>([]);
+  const [availableGrades, setAvailableGrades] = useState<AvailableGrade[]>([]);
+  const [hasServiceDetails, setHasServiceDetails] = useState(false);
 
   const [formData, setFormData] = useState({
     title: '',
@@ -60,18 +62,13 @@ export default function CreateCertificatePage() {
     templateId: '',
     schoolId: '',
     grade: '',
-    subjectId: '',
+    sessionId: '',
     accomplishment: '',
     validUntil: '',
     signatureName: '',
     signatureDesignation: '',
     signatureImage: '',
   });
-
-  const grades = [
-    'Grade 1', 'Grade 2', 'Grade 3', 'Grade 4', 'Grade 5',
-    'Grade 6', 'Grade 7', 'Grade 8', 'Grade 9', 'Grade 10'
-  ];
 
   useEffect(() => {
     loadInitialData();
@@ -83,17 +80,68 @@ export default function CreateCertificatePage() {
     }
   }, [formData.schoolId, formData.grade]);
 
+  // Load school service details when school changes
+  useEffect(() => {
+    const fetchSchoolServiceDetails = async (schoolId: string) => {
+      try {
+        const response = await schoolService.getServiceDetails(schoolId);
+        if (response.success) {
+          setAvailableGrades(response.data.grades);
+          setHasServiceDetails(response.data.hasServiceDetails);
+        }
+      } catch (error) {
+        console.error('Error fetching school service details:', error);
+        setAvailableGrades([]);
+        setHasServiceDetails(false);
+      }
+    };
+
+    if (formData.schoolId) {
+      fetchSchoolServiceDetails(formData.schoolId);
+    } else {
+      setAvailableGrades([]);
+      setHasServiceDetails(false);
+    }
+  }, [formData.schoolId]);
+
+  // Load sessions when grade changes
+  useEffect(() => {
+    const loadSessions = async () => {
+      try {
+        // Extract numeric grade from "Grade X" format or use the number directly
+        const gradeNumber = typeof formData.grade === 'string' 
+          ? parseInt(formData.grade.replace(/\D/g, ''))
+          : formData.grade;
+        
+        if (isNaN(gradeNumber)) {
+          console.error('Invalid grade format:', formData.grade);
+          setSessions([]);
+          return;
+        }
+        
+        const response = await sessionService.getSessionsByGrade(gradeNumber);
+        setSessions(response || []);
+      } catch (error) {
+        console.error('Error loading sessions:', error);
+        toast.error('Failed to load sessions');
+        setSessions([]);
+      }
+    };
+
+    if (formData.grade) {
+      loadSessions();
+    }
+  }, [formData.grade]);
+
   const loadInitialData = async () => {
     try {
-      const [templatesRes, schoolsRes, subjectsRes] = await Promise.all([
+      const [templatesRes, schoolsRes] = await Promise.all([
         certificateService.getTemplates(),
         schoolService.getAll(),
-        moduleService.getAllModules(),
       ]);
 
       setTemplates(templatesRes.data || []);
       setSchools(schoolsRes.data || []);
-      setSubjects(subjectsRes || []);
     } catch (error) {
       console.error('Error loading initial data:', error);
       toast.error('Failed to load required data');
@@ -106,8 +154,8 @@ export default function CreateCertificatePage() {
         schoolId: formData.schoolId,
         grade: formData.grade,
       });
-      if (formData.subjectId) {
-        params.append('subjectId', formData.subjectId);
+      if (formData.sessionId) {
+        params.append('sessionId', formData.sessionId);
       }
 
       const response = await studentService.getForCertificate(params.toString());
@@ -119,7 +167,15 @@ export default function CreateCertificatePage() {
   };
 
   const handleInputChange = (field: string, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+    if (field === 'schoolId') {
+      // Reset grade and session when school changes
+      setFormData(prev => ({ ...prev, [field]: value, grade: '', sessionId: '' }));
+    } else if (field === 'grade') {
+      // Reset session when grade changes
+      setFormData(prev => ({ ...prev, [field]: value, sessionId: '' }));
+    } else {
+      setFormData(prev => ({ ...prev, [field]: value }));
+    }
   };
 
   const handleStudentSelection = (studentId: string, checked: boolean) => {
@@ -304,36 +360,62 @@ export default function CreateCertificatePage() {
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="grade">Grade *</Label>
-                    <Select value={formData.grade} onValueChange={(value) => handleInputChange('grade', value)}>
+                    <Select 
+                      value={formData.grade} 
+                      onValueChange={(value) => handleInputChange('grade', value)}
+                      disabled={!formData.schoolId}
+                    >
                       <SelectTrigger>
                         <SelectValue placeholder="Select grade" />
                       </SelectTrigger>
                       <SelectContent>
-                        {grades.map((grade) => (
-                          <SelectItem key={grade} value={grade}>
-                            {grade}
-                          </SelectItem>
-                        ))}
+                        {hasServiceDetails ? (
+                          availableGrades.map((gradeData) => (
+                            <SelectItem key={gradeData.grade} value={gradeData.grade.toString()}>
+                              Grade {gradeData.grade}
+                            </SelectItem>
+                          ))
+                        ) : (
+                          ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10'].map((grade) => (
+                            <SelectItem key={grade} value={grade}>
+                              Grade {grade}
+                            </SelectItem>
+                          ))
+                        )}
                       </SelectContent>
                     </Select>
+                    {hasServiceDetails && availableGrades.length === 0 && formData.schoolId && (
+                      <p className="text-sm text-muted-foreground">No grades available for this school. Please configure service details first.</p>
+                    )}
                   </div>
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="subject">Subject (Optional)</Label>
-                  <Select value={formData.subjectId} onValueChange={(value) => handleInputChange('subjectId', value)}>
+                  <Label htmlFor="session">Session (Optional)</Label>
+                  <Select 
+                    value={formData.sessionId} 
+                    onValueChange={(value) => handleInputChange('sessionId', value)}
+                    disabled={!formData.grade}
+                  >
                     <SelectTrigger>
-                      <SelectValue placeholder="Select subject (optional)" />
+                      <SelectValue placeholder="Select session (optional)" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="none">No specific subject</SelectItem>
-                      {subjects.map((subject) => (
-                        <SelectItem key={subject._id} value={subject._id}>
-                          {subject.name}
-                        </SelectItem>
-                      ))}
+                      <SelectItem value="none">No specific session</SelectItem>
+                      {sessions.length > 0 ? (
+                        sessions.map((session) => (
+                          <SelectItem key={session._id} value={session._id!}>
+                            {session.displayName || `${session.grade}.${session.sessionNumber} ${session.name}`}
+                          </SelectItem>
+                        ))
+                      ) : formData.grade ? (
+                        <SelectItem value="no-sessions" disabled>No sessions available</SelectItem>
+                      ) : null}
                     </SelectContent>
                   </Select>
+                  {sessions.length === 0 && formData.grade && (
+                    <p className="text-sm text-muted-foreground">No sessions found for Grade {formData.grade}. Please create sessions first.</p>
+                  )}
                 </div>
               </CardContent>
             </Card>
