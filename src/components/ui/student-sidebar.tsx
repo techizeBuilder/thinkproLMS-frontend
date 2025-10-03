@@ -21,6 +21,7 @@ import {
   Clock,
   FolderOpen,
   ClipboardList,
+  MessageSquare,
 } from "lucide-react";
 import { LogoutButton } from "@/components/ui/logout-button";
 import { NotificationBell } from "@/components/ui/notification-bell";
@@ -73,6 +74,14 @@ export function StudentSidebar({ className }: StudentSidebarProps) {
             </SidebarNavItem>
             <SidebarNavItem to="/student/certificates" icon={Award}>
               Certificates
+            </SidebarNavItem>
+          </SidebarNav>
+        </SidebarGroup>
+
+        <SidebarGroup label="Communication">
+          <SidebarNav>
+            <SidebarNavItem to="/student/messages" icon={MessageSquare}>
+              Messages
             </SidebarNavItem>
           </SidebarNav>
         </SidebarGroup>

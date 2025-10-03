@@ -75,6 +75,14 @@ export function MentorSidebar({ className }: MentorSidebarProps) {
           </SidebarNav>
         </SidebarGroup>
 
+        <SidebarGroup label="Communication">
+          <SidebarNav>
+            <SidebarNavItem to="/mentor/messages" icon={MessageSquare}>
+              Messages
+            </SidebarNavItem>
+          </SidebarNav>
+        </SidebarGroup>
+
         <SidebarGroup label="Account">
           <SidebarNav>
             <SidebarNavItem to="/mentor/profile" icon={User}>

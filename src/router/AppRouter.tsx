@@ -105,6 +105,9 @@ import MentorProfile from "../pages/Dashboard/Mentor/Profile";
 import StudentProfile from "../pages/Dashboard/Student/Profile";
 import GuestProfile from "../pages/Dashboard/Guest/Profile";
 
+// Messaging Component
+import Messages from "../pages/Messages/Messages";
+
 // Guest Components
 import GuestLayout from "../components/Guest/GuestLayout";
 import GuestHome from "../pages/Guest/GuestHome";
@@ -319,6 +322,9 @@ export default function AppRouter() {
               </PermissionProtectedRoute>
             } 
           />
+          
+          {/* Messaging */}
+          <Route path="messages" element={<Messages />} />
         </Route>
 
         {/* Admin */}
@@ -348,6 +354,9 @@ export default function AppRouter() {
           <Route path="assessment-reports" element={<SchoolAdminAssessmentReportsPage />} />
           <Route path="schools" element={<SchoolAdminSchoolsPage />} />
           <Route path="settings" element={<SchoolAdminSettingsPage />} />
+          
+          {/* Messaging */}
+          <Route path="messages" element={<Messages />} />
         </Route>
 
         {/* Lead Mentor */}
@@ -481,6 +490,9 @@ export default function AppRouter() {
           
           {/* Module Completion Reports */}
           <Route path="module-completion-reports" element={<LeadMentorModuleCompletionReportsPage />} />
+          
+          {/* Messaging */}
+          <Route path="messages" element={<Messages />} />
         </Route>
 
         {/* Mentor */}
@@ -510,6 +522,9 @@ export default function AppRouter() {
           
           {/* Session Progress Management */}
           <Route path="session-progress" element={<MentorSessionProgressPage />} />
+          
+          {/* Messaging */}
+          <Route path="messages" element={<Messages />} />
         </Route>
 
         {/* Student */}
@@ -537,6 +552,9 @@ export default function AppRouter() {
           
           {/* Certificate Routes */}
           {studentCertificateRoutes}
+          
+          {/* Messaging */}
+          <Route path="messages" element={<Messages />} />
         </Route>
 
         {/* Guest */}

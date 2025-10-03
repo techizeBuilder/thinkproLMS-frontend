@@ -26,6 +26,7 @@ import {
   Award,
   Calendar,
   BarChart3,
+  MessageSquare,
 } from "lucide-react";
 import { LogoutButton } from "@/components/ui/logout-button";
 import { useAuth } from "@/contexts/AuthContext";
@@ -117,6 +118,14 @@ export function LeadMentorSidebar({ className }: LeadMentorSidebarProps) {
             </SidebarNav>
           </SidebarGroup>
         )}
+
+        <SidebarGroup label="Communication">
+          <SidebarNav>
+            <SidebarNavItem to="/leadmentor/messages" icon={MessageSquare}>
+              Messages
+            </SidebarNavItem>
+          </SidebarNav>
+        </SidebarGroup>
 
         <SidebarGroup label="Account">
           <SidebarNav>

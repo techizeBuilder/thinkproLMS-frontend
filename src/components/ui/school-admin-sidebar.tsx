@@ -20,6 +20,7 @@ import {
   BookOpen,
   BarChart3,
   School,
+  MessageSquare,
 } from "lucide-react";
 import { LogoutButton } from "@/components/ui/logout-button";
 
@@ -69,6 +70,14 @@ export function SchoolAdminSidebar({ className }: SchoolAdminSidebarProps) {
           <SidebarNav>
             <SidebarNavItem to="/schooladmin/schools" icon={School}>
               Assigned Schools
+            </SidebarNavItem>
+          </SidebarNav>
+        </SidebarGroup>
+
+        <SidebarGroup label="Communication">
+          <SidebarNav>
+            <SidebarNavItem to="/schooladmin/messages" icon={MessageSquare}>
+              Messages
             </SidebarNavItem>
           </SidebarNav>
         </SidebarGroup>
