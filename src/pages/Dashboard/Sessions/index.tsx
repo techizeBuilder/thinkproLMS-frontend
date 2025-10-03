@@ -1,20 +1,28 @@
-import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { toast } from 'sonner';
-import { Plus, Edit, Trash2, Search, BookOpen, GraduationCap, Calendar } from 'lucide-react';
-import { sessionService, type Session } from '@/api/sessionService';
-import { useAuth } from '@/contexts/AuthContext';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
+import {
+  Plus,
+  Edit,
+  Trash2,
+  Search,
+  BookOpen,
+  GraduationCap,
+  Calendar,
+} from "lucide-react";
+import { sessionService, type Session } from "@/api/sessionService";
+import { useAuth } from "@/contexts/AuthContext";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
+} from "@/components/ui/select";
 import {
   Table,
   TableBody,
@@ -22,7 +30,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table';
+} from "@/components/ui/table";
 
 export default function Sessions() {
   const { user } = useAuth();
@@ -30,11 +38,12 @@ export default function Sessions() {
   const [sessions, setSessions] = useState<Session[]>([]);
   const [filteredSessions, setFilteredSessions] = useState<Session[]>([]);
   const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedGrade, setSelectedGrade] = useState('all');
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedGrade, setSelectedGrade] = useState("all");
 
   // Check if user has permission to manage sessions
-  const hasPermission = user?.permissions?.includes('add_modules');
+  const hasPermission =
+    user?.role === "superadmin" || user?.permissions?.includes("add_modules");
 
   useEffect(() => {
     fetchSessions();
@@ -51,14 +60,19 @@ export default function Sessions() {
     if (searchTerm) {
       filtered = filtered.filter(
         (session) =>
-          session.displayName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          session.displayName
+            ?.toLowerCase()
+            .includes(searchTerm.toLowerCase()) ||
           session.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          (typeof session.module === 'object' && session.module.name.toLowerCase().includes(searchTerm.toLowerCase()))
+          (typeof session.module === "object" &&
+            session.module.name
+              .toLowerCase()
+              .includes(searchTerm.toLowerCase()))
       );
     }
 
     // Filter by grade
-    if (selectedGrade !== 'all') {
+    if (selectedGrade !== "all") {
       filtered = filtered.filter((s) => s.grade === parseInt(selectedGrade));
     }
 
@@ -72,25 +86,25 @@ export default function Sessions() {
       setSessions(data);
       setFilteredSessions(data);
     } catch (error) {
-      console.error('Error fetching sessions:', error);
-      toast.error('Failed to fetch sessions');
+      console.error("Error fetching sessions:", error);
+      toast.error("Failed to fetch sessions");
     } finally {
       setLoading(false);
     }
   };
 
   const handleDelete = async (id: string) => {
-    if (!window.confirm('Are you sure you want to delete this session?')) {
+    if (!window.confirm("Are you sure you want to delete this session?")) {
       return;
     }
 
     try {
       await sessionService.deleteSession(id);
-      toast.success('Session deleted successfully');
+      toast.success("Session deleted successfully");
       fetchSessions();
     } catch (error) {
-      console.error('Error deleting session:', error);
-      toast.error('Failed to delete session');
+      console.error("Error deleting session:", error);
+      toast.error("Failed to delete session");
     }
   };
 
@@ -115,7 +129,8 @@ export default function Sessions() {
         {hasPermission && (
           <Button
             onClick={() => {
-              const basePath = user?.role === 'superadmin' ? '/superadmin' : '/leadmentor';
+              const basePath =
+                user?.role === "superadmin" ? "/superadmin" : "/leadmentor";
               navigate(`${basePath}/sessions/create`);
             }}
           >
@@ -210,13 +225,16 @@ export default function Sessions() {
               <h3 className="text-lg font-semibold mb-2">No sessions found</h3>
               <p className="text-muted-foreground mb-4">
                 {sessions.length === 0
-                  ? 'Get started by creating your first session.'
-                  : 'No sessions match your current filters.'}
+                  ? "Get started by creating your first session."
+                  : "No sessions match your current filters."}
               </p>
               {hasPermission && sessions.length === 0 && (
                 <Button
                   onClick={() => {
-                    const basePath = user?.role === 'superadmin' ? '/superadmin' : '/leadmentor';
+                    const basePath =
+                      user?.role === "superadmin"
+                        ? "/superadmin"
+                        : "/leadmentor";
                     navigate(`${basePath}/sessions/create`);
                   }}
                 >
@@ -234,7 +252,9 @@ export default function Sessions() {
                   <TableHead>Grade</TableHead>
                   <TableHead>Description</TableHead>
                   <TableHead>Created Date</TableHead>
-                  {hasPermission && <TableHead className="text-right">Actions</TableHead>}
+                  {hasPermission && (
+                    <TableHead className="text-right">Actions</TableHead>
+                  )}
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -250,9 +270,9 @@ export default function Sessions() {
                     </TableCell>
                     <TableCell>
                       <Badge variant="outline">
-                        {typeof session.module === 'object'
+                        {typeof session.module === "object"
                           ? session.module.name
-                          : 'N/A'}
+                          : "N/A"}
                       </Badge>
                     </TableCell>
                     <TableCell>
@@ -263,13 +283,13 @@ export default function Sessions() {
                     </TableCell>
                     <TableCell className="max-w-xs">
                       <p className="text-sm text-muted-foreground truncate">
-                        {session.description || '-'}
+                        {session.description || "-"}
                       </p>
                     </TableCell>
                     <TableCell className="text-sm text-muted-foreground">
                       {session.createdAt
                         ? new Date(session.createdAt).toLocaleDateString()
-                        : '-'}
+                        : "-"}
                     </TableCell>
                     {hasPermission && (
                       <TableCell className="text-right">
@@ -279,10 +299,12 @@ export default function Sessions() {
                             size="icon"
                             onClick={() => {
                               const basePath =
-                                user?.role === 'superadmin'
-                                  ? '/superadmin'
-                                  : '/leadmentor';
-                              navigate(`${basePath}/sessions/${session._id}/edit`);
+                                user?.role === "superadmin"
+                                  ? "/superadmin"
+                                  : "/leadmentor";
+                              navigate(
+                                `${basePath}/sessions/${session._id}/edit`
+                              );
                             }}
                           >
                             <Edit className="h-4 w-4" />

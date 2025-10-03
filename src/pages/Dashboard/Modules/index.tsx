@@ -1,12 +1,12 @@
-import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { toast } from 'sonner';
-import { Plus, Edit, Trash2, Search, FolderOpen, Calendar } from 'lucide-react';
-import { moduleService, type Module } from '@/api/moduleService';
-import { useAuth } from '@/contexts/AuthContext';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Card, CardContent } from '@/components/ui/card';
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
+import { Plus, Edit, Trash2, Search, FolderOpen, Calendar } from "lucide-react";
+import { moduleService, type Module } from "@/api/moduleService";
+import { useAuth } from "@/contexts/AuthContext";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Card, CardContent } from "@/components/ui/card";
 import {
   Table,
   TableBody,
@@ -14,7 +14,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table';
+} from "@/components/ui/table";
 
 export default function Modules() {
   const { user } = useAuth();
@@ -22,10 +22,11 @@ export default function Modules() {
   const [modules, setModules] = useState<Module[]>([]);
   const [filteredModules, setFilteredModules] = useState<Module[]>([]);
   const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState("");
 
   // Check if user has permission to manage modules
-  const hasPermission = user?.permissions?.includes('add_modules');
+  const hasPermission =
+    user?.role === "superadmin" || user?.permissions?.includes("add_modules");
 
   useEffect(() => {
     fetchModules();
@@ -57,25 +58,25 @@ export default function Modules() {
       setModules(data);
       setFilteredModules(data);
     } catch (error) {
-      console.error('Error fetching modules:', error);
-      toast.error('Failed to fetch modules');
+      console.error("Error fetching modules:", error);
+      toast.error("Failed to fetch modules");
     } finally {
       setLoading(false);
     }
   };
 
   const handleDelete = async (id: string) => {
-    if (!window.confirm('Are you sure you want to delete this module?')) {
+    if (!window.confirm("Are you sure you want to delete this module?")) {
       return;
     }
 
     try {
       await moduleService.deleteModule(id);
-      toast.success('Module deleted successfully');
+      toast.success("Module deleted successfully");
       fetchModules();
     } catch (error) {
-      console.error('Error deleting module:', error);
-      toast.error('Failed to delete module');
+      console.error("Error deleting module:", error);
+      toast.error("Failed to delete module");
     }
   };
 
@@ -100,7 +101,8 @@ export default function Modules() {
         {hasPermission && (
           <Button
             onClick={() => {
-              const basePath = user?.role === 'superadmin' ? '/superadmin' : '/leadmentor';
+              const basePath =
+                user?.role === "superadmin" ? "/superadmin" : "/leadmentor";
               navigate(`${basePath}/modules/create`);
             }}
           >
@@ -165,13 +167,16 @@ export default function Modules() {
               <h3 className="text-lg font-semibold mb-2">No modules found</h3>
               <p className="text-muted-foreground mb-4">
                 {modules.length === 0
-                  ? 'Get started by creating your first module.'
-                  : 'No modules match your current search.'}
+                  ? "Get started by creating your first module."
+                  : "No modules match your current search."}
               </p>
               {hasPermission && modules.length === 0 && (
                 <Button
                   onClick={() => {
-                    const basePath = user?.role === 'superadmin' ? '/superadmin' : '/leadmentor';
+                    const basePath =
+                      user?.role === "superadmin"
+                        ? "/superadmin"
+                        : "/leadmentor";
                     navigate(`${basePath}/modules/create`);
                   }}
                 >
@@ -188,7 +193,9 @@ export default function Modules() {
                   <TableHead>Description</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead>Created Date</TableHead>
-                  {hasPermission && <TableHead className="text-right">Actions</TableHead>}
+                  {hasPermission && (
+                    <TableHead className="text-right">Actions</TableHead>
+                  )}
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -204,7 +211,7 @@ export default function Modules() {
                     </TableCell>
                     <TableCell className="max-w-md">
                       <p className="text-sm text-muted-foreground truncate">
-                        {module.description || '-'}
+                        {module.description || "-"}
                       </p>
                     </TableCell>
                     <TableCell>
@@ -215,7 +222,7 @@ export default function Modules() {
                     <TableCell className="text-sm text-muted-foreground">
                       {module.createdAt
                         ? new Date(module.createdAt).toLocaleDateString()
-                        : '-'}
+                        : "-"}
                     </TableCell>
                     {hasPermission && (
                       <TableCell className="text-right">
@@ -225,10 +232,12 @@ export default function Modules() {
                             size="icon"
                             onClick={() => {
                               const basePath =
-                                user?.role === 'superadmin'
-                                  ? '/superadmin'
-                                  : '/leadmentor';
-                              navigate(`${basePath}/modules/${module._id}/edit`);
+                                user?.role === "superadmin"
+                                  ? "/superadmin"
+                                  : "/leadmentor";
+                              navigate(
+                                `${basePath}/modules/${module._id}/edit`
+                              );
                             }}
                           >
                             <Edit className="h-4 w-4" />
