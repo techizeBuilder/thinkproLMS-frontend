@@ -233,7 +233,7 @@ export default function CreateAssessmentPage() {
       
       if (value && hasServiceDetails) {
         // Find the selected grade in available grades and get its sections
-        const selectedGradeData = availableGrades.find(gradeData => gradeData.grade === value);
+        const selectedGradeData = availableGrades.find(gradeData => gradeData.grade === parseInt(value));
         setAvailableSections(selectedGradeData?.sections || []);
       } else {
         setAvailableSections([]);
