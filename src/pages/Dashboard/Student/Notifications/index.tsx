@@ -28,9 +28,11 @@ import {
   type Notification,
   type NotificationFilters,
 } from "@/api/notificationService";
+import { useAuth } from "@/contexts/AuthContext";
 // import { formatDistanceToNow } from "date-fns";
 
 export default function StudentNotificationsPage() {
+  const { user } = useAuth();
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [loading, setLoading] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
@@ -74,7 +76,7 @@ export default function StudentNotificationsPage() {
           notification._id === notificationId
             ? {
                 ...notification,
-                readBy: [...notification.readBy, "current-user"],
+                readBy: [...notification.readBy, user?.id || ""],
               }
             : notification
         )
@@ -135,12 +137,11 @@ export default function StudentNotificationsPage() {
   };
 
   const isNotificationRead = (notification: Notification) => {
-    // This would need to be updated with actual user ID
-    return notification.readBy.includes("current-user");
+    return notification.readBy.includes(user?.id || "");
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 px-8 py-4">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -220,7 +221,11 @@ export default function StudentNotificationsPage() {
             <div className="space-y-2">
               <label className="text-sm font-medium">Status</label>
               <Select
-                value={filters.isRead === undefined ? "all" : filters.isRead.toString()}
+                value={
+                  filters.isRead === undefined
+                    ? "all"
+                    : filters.isRead.toString()
+                }
                 onValueChange={(value) =>
                   setFilters((prev) => ({
                     ...prev,
