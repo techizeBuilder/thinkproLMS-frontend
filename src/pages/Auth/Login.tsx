@@ -41,20 +41,60 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
-        {/* Logo Section */}
-        <div className="text-center mb-8">
-          <div className="mx-auto w-24 h-24 mb-4 rounded-full bg-white shadow-lg flex items-center justify-center">
-            <img 
-              src="/fancy-logo.jpg" 
-              alt="ThinkPro LMS" 
-              className="w-16 h-16 object-contain rounded-full"
-            />
+    <div className="min-h-screen flex">
+      {/* Left Side - Branding */}
+      <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-blue-600 via-purple-600 to-indigo-700 relative overflow-hidden">
+        {/* Background Pattern */}
+        <div className="absolute inset-0 opacity-10" style={{
+          backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.1'%3E%3Ccircle cx='30' cy='30' r='2'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`
+        }}></div>
+        
+        {/* Floating Elements */}
+        <div className="absolute top-20 left-20 w-32 h-32 bg-white/10 rounded-full blur-xl"></div>
+        <div className="absolute bottom-20 right-20 w-40 h-40 bg-white/5 rounded-full blur-2xl"></div>
+        <div className="absolute top-1/2 left-10 w-24 h-24 bg-white/15 rounded-full blur-lg"></div>
+        
+        {/* Content */}
+        <div className="mx-auto relative z-10 flex flex-col justify-center items-center text-center p-12">
+          <div className="mb-8">
+            <div className="w-[240px] h-[240px] rounded-full bg-white/20 backdrop-blur-sm shadow-2xl flex items-center justify-center mb-6">
+              <img 
+                src="/fancy-logo.jpg" 
+                alt="ThinkPro LMS" 
+                className="w-[200px] h-[200px] object-cover rounded-full"
+              />
+            </div>
           </div>
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">Welcome to ThinkPro LMS</h1>
-          <p className="text-gray-600">Choose how you'd like to access the platform</p>
+          <h1 className="text-4xl font-bold text-white mb-4">Welcome to ThinkPro LMS</h1>
+          <p className="text-xl text-white/90 mb-8 max-w-md">
+            Empowering education through innovative learning management solutions
+          </p>
+          <div className="flex items-center space-x-4 text-white/80">
+            <div className="w-2 h-2 bg-white/60 rounded-full"></div>
+            <span>Secure & Reliable</span>
+            <div className="w-2 h-2 bg-white/60 rounded-full"></div>
+            <span>Modern Interface</span>
+            <div className="w-2 h-2 bg-white/60 rounded-full"></div>
+            <span>Easy to Use</span>
+          </div>
         </div>
+      </div>
+
+      {/* Right Side - Login Form */}
+      <div className="w-full lg:w-1/2 flex items-center justify-center p-8">
+        <div className="w-full max-w-md">
+          {/* Mobile Logo */}
+          <div className="lg:hidden text-center mb-8">
+            <div className="mx-auto w-20 h-20 mb-4 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 shadow-lg flex items-center justify-center">
+              <img 
+                src="/fancy-logo.jpg" 
+                alt="ThinkPro LMS" 
+                className="w-12 h-12 object-contain rounded-full"
+              />
+            </div>
+            <h1 className="text-2xl font-bold text-gray-900 mb-2">Welcome to ThinkPro LMS</h1>
+            <p className="text-gray-600">Choose how you'd like to access the platform</p>
+          </div>
 
         {!userType ? (
           /* User Type Selection */
@@ -67,19 +107,21 @@ export default function Login() {
             <CardContent className="space-y-4">
               <Button
                 onClick={() => handleUserTypeSelection("main")}
-                className="w-full h-16 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-medium shadow-lg hover:shadow-xl transition-all duration-200 flex flex-col items-center justify-center space-y-1"
+                className="w-full h-20 bg-gradient-to-r from-blue-500 via-purple-500 to-indigo-500 hover:from-blue-600 hover:via-purple-600 hover:to-indigo-600 text-white font-semibold shadow-xl hover:shadow-2xl transition-all duration-300 flex flex-col items-center justify-center space-y-2 group relative overflow-hidden rounded-xl"
               >
-                <span className="text-lg font-semibold">School Member</span>
-                <span className="text-sm opacity-90">Student, Teacher, or Admin from registered school</span>
+                <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                <span className="text-xl font-bold relative z-10">School Member</span>
+                <span className="text-sm opacity-90 relative z-10">Student, Teacher, or Admin from registered school</span>
               </Button>
               
               <Button
                 onClick={() => handleUserTypeSelection("guest")}
                 variant="outline"
-                className="w-full h-16 border-2 border-green-500 text-green-600 hover:bg-green-50 font-medium shadow-lg hover:shadow-xl transition-all duration-200 flex flex-col items-center justify-center space-y-1"
+                className="w-full h-20 border-2 border-emerald-400 text-emerald-600 hover:bg-emerald-50 hover:border-emerald-500 font-semibold shadow-xl hover:shadow-2xl transition-all duration-300 flex flex-col items-center justify-center space-y-2 group relative rounded-xl"
               >
-                <span className="text-lg font-semibold">Guest User</span>
-                <span className="text-sm opacity-90">Explore content, take quizzes, request demos</span>
+                <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                <span className="text-xl font-bold relative z-10">Guest User</span>
+                <span className="text-sm opacity-90 relative z-10">Explore content, take quizzes, request demos</span>
               </Button>
             </CardContent>
           </Card>
@@ -196,11 +238,12 @@ export default function Login() {
           </Card>
         )}
 
-        {/* Footer */}
-        <div className="text-center mt-8">
-          <p className="text-sm text-gray-500">
-            © 2024 ThinkPro LMS. All rights reserved.
-          </p>
+          {/* Footer */}
+          <div className="text-center mt-8">
+            <p className="text-sm text-gray-500">
+              © 2024 ThinkPro LMS. All rights reserved.
+            </p>
+          </div>
         </div>
       </div>
     </div>
