@@ -46,6 +46,8 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
 
     // Extract base URL (remove /api if present)
     const baseUrl = API_URL.replace("/api", "");
+    
+    console.log("🔌 Attempting to connect to socket server at:", baseUrl);
 
     // Connect to socket server
     const newSocket = io(baseUrl, {
@@ -53,6 +55,16 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
         token,
       },
       transports: ["websocket", "polling"],
+      upgrade: true,
+      rememberUpgrade: true,
+      timeout: 20000,
+      forceNew: false,
+      reconnection: true,
+      reconnectionAttempts: 5,
+      reconnectionDelay: 1000,
+      reconnectionDelayMax: 5000,
+      // Add path for production if needed
+      path: "/socket.io/",
     });
 
     newSocket.on("connect", () => {
@@ -84,6 +96,27 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
 
     newSocket.on("connect_error", (error) => {
       console.error("Socket connection error:", error);
+      console.error("Error details:", {
+        message: error.message,
+        name: error.name,
+        stack: error.stack,
+      });
+    });
+
+    newSocket.on("reconnect", (attemptNumber) => {
+      console.log(`🔄 Reconnected to socket server after ${attemptNumber} attempts`);
+    });
+
+    newSocket.on("reconnect_attempt", (attemptNumber) => {
+      console.log(`🔄 Attempting to reconnect to socket server (attempt ${attemptNumber})`);
+    });
+
+    newSocket.on("reconnect_error", (error) => {
+      console.error("Socket reconnection error:", error);
+    });
+
+    newSocket.on("reconnect_failed", () => {
+      console.error("❌ Failed to reconnect to socket server after all attempts");
     });
 
     setSocket(newSocket);
