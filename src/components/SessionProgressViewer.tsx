@@ -1,5 +1,4 @@
 import { useState, useEffect, useCallback } from "react";
-import { useSearchParams } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -38,7 +37,6 @@ export default function SessionProgressViewer({
   title = "Session Progress Overview",
   description = "Monitor and manage session completion progress for mentors",
 }: SessionProgressViewerProps) {
-  const [searchParams, setSearchParams] = useSearchParams();
   const [loading, setLoading] = useState(false);
   const [sessions, setSessions] = useState<SessionProgress[]>([]);
   const [availableSchools, setAvailableSchools] = useState<School[]>([]);
@@ -59,70 +57,8 @@ export default function SessionProgressViewer({
   const [availableSections, setAvailableSections] = useState<string[]>([]);
   const [hasServiceDetails, setHasServiceDetails] = useState(false);
 
-  // Function to update URL parameters
-  const updateUrlParams = (params: {
-    mentorId?: string;
-    schoolId?: string;
-    grade?: string;
-    section?: string;
-  }) => {
-    const newSearchParams = new URLSearchParams(searchParams);
 
-    if (params.mentorId !== undefined) {
-      if (params.mentorId) {
-        newSearchParams.set("mentorId", params.mentorId);
-      } else {
-        newSearchParams.delete("mentorId");
-      }
-    }
-
-    if (params.schoolId !== undefined) {
-      if (params.schoolId) {
-        newSearchParams.set("schoolId", params.schoolId);
-      } else {
-        newSearchParams.delete("schoolId");
-      }
-    }
-
-    if (params.grade !== undefined) {
-      if (params.grade) {
-        newSearchParams.set("grade", params.grade);
-      } else {
-        newSearchParams.delete("grade");
-      }
-    }
-
-    if (params.section !== undefined) {
-      if (params.section) {
-        newSearchParams.set("section", params.section);
-      } else {
-        newSearchParams.delete("section");
-      }
-    }
-
-    setSearchParams(newSearchParams, { replace: true });
-  };
-
-  // Initialize from URL parameters - only run once on mount
-  useEffect(() => {
-    const mentorIdParam = searchParams.get("mentorId");
-    const schoolIdParam = searchParams.get("schoolId");
-    const gradeParam = searchParams.get("grade");
-    const sectionParam = searchParams.get("section");
-
-    if (mentorIdParam) {
-      setSelectedMentorId(mentorIdParam);
-    }
-    if (schoolIdParam) {
-      setSelectedSchoolId(schoolIdParam);
-    }
-    if (gradeParam) {
-      setSelectedGrade(gradeParam);
-    }
-    if (sectionParam) {
-      setSelectedSection(sectionParam);
-    }
-  }, []); // Only run once on mount
+  // Auto-select first available options in sequence
 
   useEffect(() => {
     loadAvailableMentors();
@@ -152,6 +88,10 @@ export default function SessionProgressViewer({
         if (response.success) {
           setAvailableGrades(response.data.grades);
           setHasServiceDetails(response.data.hasServiceDetails);
+          // Auto-select first grade when school changes
+          if (response.data.grades && response.data.grades.length > 0) {
+            setSelectedGrade(response.data.grades[0].grade.toString());
+          }
         }
       } catch (error) {
         console.error("Error fetching school service details:", error);
@@ -184,8 +124,10 @@ export default function SessionProgressViewer({
       const sections = selectedGradeData?.sections || [];
       setAvailableSections(sections);
 
-      // Clear section when grade changes
-      setSelectedSection("");
+      // Auto-select first section when grade changes
+      if (sections.length > 0) {
+        setSelectedSection(sections[0]);
+      }
     } else {
       setAvailableSections([]);
     }
@@ -197,6 +139,10 @@ export default function SessionProgressViewer({
       const response = await mentorService.getAll();
       if (response.success) {
         setAvailableMentors(response.data);
+        // Auto-select first mentor on initial load
+        if (response.data.length > 0) {
+          setSelectedMentorId(response.data[0]._id);
+        }
       }
     } catch (error) {
       console.error("Error loading mentors:", error);
@@ -213,6 +159,10 @@ export default function SessionProgressViewer({
       if (response.success) {
         const mentor = response.data;
         setAvailableSchools(mentor.assignedSchools);
+        // Auto-select first school when mentor changes
+        if (mentor.assignedSchools.length > 0) {
+          setSelectedSchoolId(mentor.assignedSchools[0]._id);
+        }
       }
     } catch (error) {
       console.error("Error loading mentor schools:", error);
@@ -363,7 +313,6 @@ export default function SessionProgressViewer({
             value={selectedMentorId}
             onValueChange={(value) => {
               setSelectedMentorId(value);
-              updateUrlParams({ mentorId: value });
             }}
             disabled={loadingMentors}
           >
@@ -391,7 +340,6 @@ export default function SessionProgressViewer({
             value={selectedSchoolId}
             onValueChange={(value) => {
               setSelectedSchoolId(value);
-              updateUrlParams({ schoolId: value });
             }}
             disabled={loadingSchools}
           >
@@ -419,7 +367,6 @@ export default function SessionProgressViewer({
             value={selectedGrade}
             onValueChange={(value) => {
               setSelectedGrade(value);
-              updateUrlParams({ grade: value });
             }}
             disabled={loadingGrades}
           >
@@ -467,7 +414,6 @@ export default function SessionProgressViewer({
             value={selectedSection}
             onValueChange={(value) => {
               setSelectedSection(value);
-              updateUrlParams({ section: value });
             }}
           >
             <SelectTrigger className="w-full h-8">
