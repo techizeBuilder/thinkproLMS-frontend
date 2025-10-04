@@ -175,6 +175,13 @@ export const resourceService = {
       headers: {
         "Content-Type": "multipart/form-data",
       },
+      timeout: 300000, // 5 minutes timeout for large files
+      onUploadProgress: (progressEvent) => {
+        if (progressEvent.total) {
+          const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+          console.log(`Upload Progress: ${percentCompleted}%`);
+        }
+      },
     });
     return response.data;
   },
@@ -214,6 +221,13 @@ export const resourceService = {
     const response = await axiosInstance.put(`/resources/${id}`, formData, {
       headers: {
         "Content-Type": "multipart/form-data",
+      },
+      timeout: 300000, // 5 minutes timeout for large files
+      onUploadProgress: (progressEvent) => {
+        if (progressEvent.total) {
+          const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+          console.log(`Upload Progress: ${percentCompleted}%`);
+        }
       },
     });
     return response.data;

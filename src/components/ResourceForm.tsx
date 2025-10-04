@@ -340,9 +340,14 @@ export default function ResourceForm({ resource, onSuccess, onCancel }: Resource
                   }
                 />
                 {selectedFile && (
-                  <p className="text-sm text-gray-600 mt-1">
-                    Selected: {selectedFile.name} ({(selectedFile.size / 1024 / 1024).toFixed(2)} MB)
-                  </p>
+                  <div className="text-sm text-gray-600 mt-1">
+                    <p>Selected: {selectedFile.name} ({(selectedFile.size / 1024 / 1024).toFixed(2)} MB)</p>
+                    {selectedFile.size > 200 * 1024 * 1024 && (
+                      <p className="text-amber-600 mt-1">
+                        ⚠️ Large file detected. Upload may take longer and could fail on some servers.
+                      </p>
+                    )}
+                  </div>
                 )}
               </div>
             ) : (
