@@ -9,7 +9,7 @@ interface NotificationBellProps {
 
 export function NotificationBell({ className }: NotificationBellProps) {
   const [unreadCount, setUnreadCount] = useState(0);
-  const [loading, setLoading] = useState(false);
+  const [, setLoading] = useState(false);
 
   useEffect(() => {
     loadUnreadCount();

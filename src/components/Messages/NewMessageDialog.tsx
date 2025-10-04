@@ -12,7 +12,7 @@ import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
 import { MessageSquarePlus, Search } from "lucide-react";
-import { getAvailableUsers, User } from "@/api/messageService";
+import { getAvailableUsers, type User } from "@/api/messageService";
 import { cn } from "@/lib/utils";
 
 interface NewMessageDialogProps {

@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from "react";
-import { Message } from "@/api/messageService";
+import type { Message } from "@/api/messageService";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 

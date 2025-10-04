@@ -252,7 +252,7 @@ export default function StudentNotificationsPage() {
                 <Input
                   placeholder="Search notifications..."
                   className="pl-10"
-                  onChange={(e) => {
+                  onChange={() => {
                     // Implement search functionality
                   }}
                 />

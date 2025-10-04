@@ -1,5 +1,5 @@
 import React from "react";
-import { Conversation } from "@/api/messageService";
+import type { Conversation } from "@/api/messageService";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";

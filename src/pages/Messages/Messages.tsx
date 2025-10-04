@@ -10,8 +10,8 @@ import {
   getConversations,
   getMessages,
   getOrCreateConversation,
-  Conversation,
-  Message,
+  type Conversation,
+  type Message,
 } from "@/api/messageService";
 import { useSocket } from "@/contexts/SocketContext";
 import { toast } from "sonner";
@@ -87,7 +87,7 @@ const Messages: React.FC = () => {
     };
 
     // Handle message notifications
-    const handleMessageNotification = (data: { message: Message; conversationId: string }) => {
+    const handleMessageNotification = () => {
       // Don't show toast if user is already viewing this conversation
       // Toast should only show when user is on other pages
       loadConversations();
@@ -190,7 +190,7 @@ const Messages: React.FC = () => {
     stopTyping(selectedConversationId, selectedConversation.participant._id);
   }, [selectedConversationId, conversations, socketSendMessage, stopTyping]);
 
-  const handleTyping = useCallback((content: string) => {
+  const handleTyping = useCallback((_content: string) => {
     if (!selectedConversationId) return;
 
     const selectedConversation = conversations.find(
