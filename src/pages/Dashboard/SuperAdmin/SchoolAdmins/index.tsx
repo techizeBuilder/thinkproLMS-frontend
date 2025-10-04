@@ -3,7 +3,7 @@ import { Link, useLocation } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Edit, Trash2, Mail, Phone, CheckCircle } from "lucide-react";
+import { Plus, Edit, Trash2, Mail, Phone, CheckCircle, KeyRound } from "lucide-react";
 import { schoolAdminService, type SchoolAdmin } from "@/api/schoolAdminService";
 import {
   AlertDialog,
@@ -17,12 +17,18 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
+import { ResetPasswordDialog } from "@/components/ResetPasswordDialog";
 
 export default function SchoolAdminsPage() {
   const location = useLocation();
   const [schoolAdmins, setSchoolAdmins] = useState<SchoolAdmin[]>([]);
   const [loading, setLoading] = useState(true);
   const [deleteLoading, setDeleteLoading] = useState<string | null>(null);
+  const [resetPasswordUser, setResetPasswordUser] = useState<{
+    id: string;
+    name: string;
+    email: string;
+  } | null>(null);
   
   // Determine the base path based on current route
   const isLeadMentor = location.pathname.includes('/leadmentor');
@@ -123,6 +129,20 @@ export default function SchoolAdminsPage() {
                     </div>
                   </div>
                   <div className="flex gap-2">
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      onClick={() =>
+                        setResetPasswordUser({
+                          id: admin.user._id,
+                          name: admin.user.name,
+                          email: admin.user.email,
+                        })
+                      }
+                      title="Reset Password"
+                    >
+                      <KeyRound className="h-4 w-4" />
+                    </Button>
                     <Link to={`${basePath}/school-admins/${admin._id}/edit`}>
                       <Button variant="outline" size="icon">
                         <Edit className="h-4 w-4" />
@@ -191,6 +211,17 @@ export default function SchoolAdminsPage() {
             </Card>
           ))}
         </div>
+      )}
+
+      {/* Reset Password Dialog */}
+      {resetPasswordUser && (
+        <ResetPasswordDialog
+          open={!!resetPasswordUser}
+          onOpenChange={(open) => !open && setResetPasswordUser(null)}
+          userId={resetPasswordUser.id}
+          userName={resetPasswordUser.name}
+          userEmail={resetPasswordUser.email}
+        />
       )}
     </div>
   );

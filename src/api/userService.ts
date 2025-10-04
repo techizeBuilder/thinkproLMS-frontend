@@ -20,7 +20,8 @@ export interface ResetPasswordResponse {
  * Permissions:
  * - SuperAdmin: can reset anyone's password
  * - LeadMentor: can reset anyone except SuperAdmin
- * - SchoolAdmin: can reset Mentor and Student passwords
+ * - SchoolAdmin: can reset anyone except SuperAdmin and LeadMentor
+ * - Mentor (SchoolMentor): can reset students' passwords only
  * - Students: can only reset their own password
  */
 export const resetPassword = async (

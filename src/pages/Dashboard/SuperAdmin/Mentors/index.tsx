@@ -3,9 +3,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Search, Edit, Trash2, Mail, Phone, MapPin } from "lucide-react";
+import { Plus, Search, Edit, Trash2, Mail, Phone, MapPin, KeyRound } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import axiosInstance from "@/api/axiosInstance";
+import { ResetPasswordDialog } from "@/components/ResetPasswordDialog";
 
 interface School {
   _id: string;
@@ -38,6 +39,11 @@ export default function MentorsPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedSchool, setSelectedSchool] = useState("");
   const [schools, setSchools] = useState<School[]>([]);
+  const [resetPasswordUser, setResetPasswordUser] = useState<{
+    id: string;
+    name: string;
+    email: string;
+  } | null>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -173,6 +179,20 @@ export default function MentorsPage() {
                   <Button
                     variant="ghost"
                     size="sm"
+                    onClick={() =>
+                      setResetPasswordUser({
+                        id: mentor.user._id,
+                        name: mentor.user.name,
+                        email: mentor.user.email,
+                      })
+                    }
+                    title="Reset Password"
+                  >
+                    <KeyRound className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
                     onClick={() => navigate(`/superadmin/mentors/${mentor._id}/edit`)}
                   >
                     <Edit className="h-4 w-4" />
@@ -231,6 +251,17 @@ export default function MentorsPage() {
             <p className="text-gray-500">No mentors found</p>
           </CardContent>
         </Card>
+      )}
+
+      {/* Reset Password Dialog */}
+      {resetPasswordUser && (
+        <ResetPasswordDialog
+          open={!!resetPasswordUser}
+          onOpenChange={(open) => !open && setResetPasswordUser(null)}
+          userId={resetPasswordUser.id}
+          userName={resetPasswordUser.name}
+          userEmail={resetPasswordUser.email}
+        />
       )}
     </div>
   );
