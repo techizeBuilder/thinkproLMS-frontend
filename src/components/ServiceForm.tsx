@@ -68,9 +68,30 @@ export default function ServiceForm({
 
     // Update service details with grades that have sections
     const currentGrades = serviceDetails?.grades || [];
-    const updatedGrades = currentGrades.filter((g) =>
-      newSelectedGrades.includes(g.grade)
-    );
+    let updatedGrades;
+    
+    if (checked) {
+      // When adding a grade, initialize it with default section "A" if it doesn't exist
+      const existingGrade = currentGrades.find((g) => g.grade === grade);
+      if (existingGrade) {
+        // Grade already exists, keep it
+        updatedGrades = currentGrades.filter((g) =>
+          newSelectedGrades.includes(g.grade)
+        );
+      } else {
+        // Add new grade with default section "A"
+        const otherGrades = currentGrades.filter((g) =>
+          newSelectedGrades.includes(g.grade)
+        );
+        updatedGrades = [...otherGrades, { grade, sections: ["A"] }];
+      }
+    } else {
+      // When removing a grade, filter it out
+      updatedGrades = currentGrades.filter((g) =>
+        newSelectedGrades.includes(g.grade)
+      );
+    }
+    
     updateServiceDetails({ grades: updatedGrades });
   };
 
@@ -131,7 +152,8 @@ export default function ServiceForm({
       updatedGrades[gradeIndex].sections.push("");
       updateServiceDetails({ grades: updatedGrades });
     } else {
-      // Add new grade with sections
+      // Add new grade with sections - this should not happen if grade is selected
+      // but if it does, add it with an empty section
       const newGrade: GradeWithSections = { grade, sections: [""] };
       updateServiceDetails({ grades: [...currentGrades, newGrade] });
     }
@@ -160,7 +182,7 @@ export default function ServiceForm({
       const updatedGrades = [...currentGrades];
       updatedGrades[gradeIndex].sections.splice(sectionIndex, 1);
 
-      // If no sections left, remove the grade
+      // If no sections left, remove the grade and update selected grades
       if (updatedGrades[gradeIndex].sections.length === 0) {
         updatedGrades.splice(gradeIndex, 1);
         setSelectedGrades(selectedGrades.filter((g) => g !== grade));
