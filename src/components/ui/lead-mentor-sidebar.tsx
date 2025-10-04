@@ -65,7 +65,10 @@ export function LeadMentorSidebar({ className }: LeadMentorSidebarProps) {
               <div className="flex items-center justify-between w-full">
                 <span>Messages</span>
                 {unreadCount > 0 && !isCollapsed && (
-                  <Badge variant="default" className="ml-auto text-xs px-1.5 py-0 h-5">
+                  <Badge
+                    variant="default"
+                    className="ml-auto text-xs px-1.5 py-0 h-5"
+                  >
                     {unreadCount}
                   </Badge>
                 )}
@@ -100,12 +103,6 @@ export function LeadMentorSidebar({ className }: LeadMentorSidebarProps) {
             </SidebarNavItem>
             <SidebarNavItem to="/leadmentor/certificates" icon={Award}>
               Certificates
-            </SidebarNavItem>
-            <SidebarNavItem
-              to="/leadmentor/module-completion-reports"
-              icon={FileText}
-            >
-              Module Progress Reports
             </SidebarNavItem>
             <SidebarNavItem to="/leadmentor/session-progress" icon={BarChart3}>
               Session Progress
