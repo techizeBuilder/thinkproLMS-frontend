@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useEffect, useState, useCallback } from "react";
 import { io, Socket } from "socket.io-client";
 import { API_URL } from "@/api/axiosInstance";
+import { getSocketConfig, getBestTransport } from "@/utils/socketConfig";
 
 interface SocketContextType {
   socket: Socket | null;
@@ -49,24 +50,51 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
     
     console.log("🔌 Attempting to connect to socket server at:", baseUrl);
 
-    // Connect to socket server
-    const newSocket = io(baseUrl, {
-      auth: {
-        token,
-      },
-      transports: ["websocket", "polling"],
-      upgrade: true,
-      rememberUpgrade: true,
-      timeout: 20000,
-      forceNew: false,
-      reconnection: true,
-      reconnectionAttempts: 5,
-      reconnectionDelay: 1000,
-      reconnectionDelayMax: 5000,
-      // Add path for production if needed
-      path: "/socket.io/",
-    });
+    // Initialize socket connection with dynamic configuration
+    const initializeSocket = async () => {
+      try {
+        // Get the best transport method for this environment
+        const transports = await getBestTransport(baseUrl);
+        const socketConfig = getSocketConfig();
+        
+        console.log("🚀 Using transports:", transports);
+        
+        // Connect to socket server with optimized configuration
+        const newSocket = io(baseUrl, {
+          auth: {
+            token,
+          },
+          ...socketConfig,
+          transports, // Override transports from config
+        });
+        
+        setupSocketEventHandlers(newSocket);
+        setSocket(newSocket);
+        
+      } catch (error) {
+        console.error("Failed to initialize socket:", error);
+        // Fallback to basic polling connection
+        const fallbackSocket = io(baseUrl, {
+          auth: { token },
+          transports: ["polling"],
+          upgrade: false,
+          timeout: 10000,
+        });
+        setupSocketEventHandlers(fallbackSocket);
+        setSocket(fallbackSocket);
+      }
+    };
+    
+    initializeSocket();
+    
+    return () => {
+      if (socket) {
+        socket.close();
+      }
+    };
+  }, []);
 
+  const setupSocketEventHandlers = (newSocket: Socket) => {
     newSocket.on("connect", () => {
       console.log("✅ Connected to socket server");
       setIsConnected(true);
@@ -118,13 +146,7 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
     newSocket.on("reconnect_failed", () => {
       console.error("❌ Failed to reconnect to socket server after all attempts");
     });
-
-    setSocket(newSocket);
-
-    return () => {
-      newSocket.close();
-    };
-  }, []);
+  };
 
   const sendMessage = useCallback((data: {
     conversationId: string;

@@ -4,7 +4,16 @@ import { useSocket } from "@/contexts/SocketContext";
 
 export const useUnreadMessageCount = () => {
   const [unreadCount, setUnreadCount] = useState(0);
-  const { socket } = useSocket();
+  
+  // Safely get socket context - return 0 if not available
+  let socket = null;
+  try {
+    const socketContext = useSocket();
+    socket = socketContext.socket;
+  } catch (error) {
+    // Socket context not available, continue without socket
+    console.warn("Socket context not available for unread message count");
+  }
 
   const fetchUnreadCount = async () => {
     try {
