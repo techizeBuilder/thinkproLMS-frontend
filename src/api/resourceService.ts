@@ -175,7 +175,7 @@ export const resourceService = {
       headers: {
         "Content-Type": "multipart/form-data",
       },
-      timeout: 300000, // 5 minutes timeout for large files
+      timeout: 1800000, // 30 minutes timeout for large files (500MB)
       onUploadProgress: (progressEvent) => {
         if (progressEvent.total) {
           const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
@@ -222,7 +222,7 @@ export const resourceService = {
       headers: {
         "Content-Type": "multipart/form-data",
       },
-      timeout: 300000, // 5 minutes timeout for large files
+      timeout: 1800000, // 30 minutes timeout for large files (500MB)
       onUploadProgress: (progressEvent) => {
         if (progressEvent.total) {
           const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
