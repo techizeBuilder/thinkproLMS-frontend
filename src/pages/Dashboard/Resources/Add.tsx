@@ -47,6 +47,7 @@ import {
 import type { UserType, ResourceType } from "@/types/resources";
 import type { CreateResourceData } from "@/api/resourceService";
 import { resourceService } from "@/api/resourceService";
+import { useUpload } from "@/contexts/UploadContext";
 import { sessionService, type Session } from "@/api/sessionService";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
@@ -74,6 +75,7 @@ export default function AddResourcePage() {
   const [sessions, setSessions] = useState<Session[]>([]);
   const [loadingSessions, setLoadingSessions] = useState(false);
   const [sessionSelectOpen, setSessionSelectOpen] = useState(false);
+  const { startUpload, updateProgress, finishUpload } = useUpload();
 
   // Load sessions when target audience is student or mentor
   useEffect(() => {
@@ -169,12 +171,21 @@ export default function AddResourcePage() {
 
       console.log("Resource data being submitted:", resourceData);
 
-      // Create the resource
-      await resourceService.create(resourceData);
+      // Start global upload UI before starting request
+      const fileName = resourceData.file?.name || (resourceData.url ? resourceData.url : "");
+      startUpload({ id: `${Date.now()}`, title: resourceData.title, fileName });
 
-      toast.success("Resource created successfully!");
+      // Navigate back immediately after starting upload
       const basePath = user?.role === 'superadmin' ? '/superadmin' : '/leadmentor';
       navigate(`${basePath}/resources`);
+
+      // Create the resource with progress callback
+      await resourceService.create(resourceData, (percent) => {
+        updateProgress(percent);
+      });
+
+      finishUpload();
+      toast.success("Resource created successfully!");
     } catch (error) {
       console.error("Error creating resource:", error);
       toast.error("Failed to create resource. Please try again.");

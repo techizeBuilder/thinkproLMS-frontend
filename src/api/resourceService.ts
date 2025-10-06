@@ -66,6 +66,8 @@ export interface CreateResourceData {
   file?: File; // For file uploads
 }
 
+export type UploadProgressCallback = (percent: number) => void;
+
 export interface UpdateResourceData extends Partial<CreateResourceData> {}
 
 export interface ResourceFilters {
@@ -139,7 +141,10 @@ export const resourceService = {
   },
 
   // Create new resource
-  create: async (data: CreateResourceData): Promise<ResourceResponse> => {
+  create: async (
+    data: CreateResourceData,
+    onProgress?: UploadProgressCallback
+  ): Promise<ResourceResponse> => {
     const formData = new FormData();
 
     // Add text fields
@@ -179,7 +184,7 @@ export const resourceService = {
       onUploadProgress: (progressEvent) => {
         if (progressEvent.total) {
           const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
-          console.log(`Upload Progress: ${percentCompleted}%`);
+          if (onProgress) onProgress(percentCompleted);
         }
       },
     });
@@ -223,12 +228,7 @@ export const resourceService = {
         "Content-Type": "multipart/form-data",
       },
       timeout: 1800000, // 30 minutes timeout for large files (500MB)
-      onUploadProgress: (progressEvent) => {
-        if (progressEvent.total) {
-          const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
-          console.log(`Upload Progress: ${percentCompleted}%`);
-        }
-      },
+      onUploadProgress: () => {},
     });
     return response.data;
   },
