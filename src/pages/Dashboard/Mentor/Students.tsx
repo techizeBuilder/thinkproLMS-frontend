@@ -24,6 +24,7 @@ import {
 } from "lucide-react";
 import { studentService } from "@/api/studentService";
 import { mentorService } from "@/api/mentorService";
+import ProfilePictureDisplay from "@/components/ProfilePictureDisplay";
 
 interface School {
   _id: string;
@@ -334,9 +335,11 @@ export default function MentorStudentsPage() {
                   <TableRow key={student._id} className="hover:bg-muted/50">
                     <TableCell className="font-medium">
                       <div className="flex items-center gap-2">
-                        <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                          <User className="h-4 w-4 text-blue-600" />
-                        </div>
+                        <ProfilePictureDisplay
+                          profilePicture={student.user.profilePicture}
+                          name={student.user.name}
+                          size="sm"
+                        />
                         {student.user.name}
                       </div>
                     </TableCell>

@@ -7,6 +7,7 @@ import { Plus, Search, Edit, Trash2, Mail, Phone, MapPin, KeyRound } from "lucid
 import { useNavigate } from "react-router-dom";
 import axiosInstance from "@/api/axiosInstance";
 import { ResetPasswordDialog } from "@/components/ResetPasswordDialog";
+import ProfilePictureDisplay from "@/components/ProfilePictureDisplay";
 
 interface School {
   _id: string;
@@ -165,14 +166,21 @@ export default function MentorsPage() {
           <Card key={mentor._id} className="hover:shadow-lg transition-shadow">
             <CardHeader className="pb-3">
               <div className="flex justify-between items-start">
-                <div>
-                  <CardTitle className="text-lg">
-                    {mentor.salutation} {mentor.user.name}
-                  </CardTitle>
-                  <div className="flex items-center gap-2 mt-1">
-                    <Badge variant={mentor.user.isVerified ? "default" : "secondary"}>
-                      {mentor.user.isVerified ? "Verified" : "Pending"}
-                    </Badge>
+                <div className="flex items-center gap-3">
+                  <ProfilePictureDisplay
+                    profilePicture={mentor.user.profilePicture}
+                    name={mentor.user.name}
+                    size="md"
+                  />
+                  <div>
+                    <CardTitle className="text-lg">
+                      {mentor.salutation} {mentor.user.name}
+                    </CardTitle>
+                    <div className="flex items-center gap-2 mt-1">
+                      <Badge variant={mentor.user.isVerified ? "default" : "secondary"}>
+                        {mentor.user.isVerified ? "Verified" : "Pending"}
+                      </Badge>
+                    </div>
                   </div>
                 </div>
                 <div className="flex gap-2">

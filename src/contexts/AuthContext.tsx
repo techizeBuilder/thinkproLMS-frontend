@@ -8,6 +8,7 @@ type User = {
   name: string;
   leadMentorId?: string;
   permissions?: string[];
+  profilePicture?: string | null;
 } | null;
 
 interface AuthContextType {

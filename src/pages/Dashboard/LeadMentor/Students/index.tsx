@@ -20,6 +20,7 @@ import { useNavigate } from "react-router-dom";
 import axiosInstance from "@/api/axiosInstance";
 import { useStudentsPath } from "@/utils/navigation";
 import { ResetPasswordDialog } from "@/components/ResetPasswordDialog";
+import ProfilePictureDisplay from "@/components/ProfilePictureDisplay";
 
 interface School {
   _id: string;
@@ -305,9 +306,11 @@ export default function StudentsPage() {
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
-                    <User className="h-6 w-6 text-blue-600" />
-                  </div>
+                  <ProfilePictureDisplay
+                    profilePicture={student.user.profilePicture}
+                    name={student.user.name}
+                    size="md"
+                  />
                   <div className="flex-1">
                     <div className="flex items-center gap-2">
                       <h3 className="font-semibold text-lg">
