@@ -328,10 +328,6 @@ export default function EditAssessmentPage() {
                     <span className="font-medium">{assessment.grade}</span>
                   </div>
                   <div className="flex justify-between text-sm">
-                    <span>Session:</span>
-                    <span className="font-medium">{assessment.session?.displayName || assessment.session?.name}</span>
-                  </div>
-                  <div className="flex justify-between text-sm">
                     <span>Questions:</span>
                     <span className="font-medium">{questions.length}</span>
                   </div>
@@ -348,17 +344,6 @@ export default function EditAssessmentPage() {
                 </CardContent>
               </Card>
 
-              {/* Session */}
-              <Card>
-                <CardHeader>
-                  <CardTitle>Session</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="flex items-center gap-2">
-                    <Badge variant="outline">{assessment.session?.displayName || assessment.session?.name}</Badge>
-                  </div>
-                </CardContent>
-              </Card>
             </div>
           </div>
         </TabsContent>

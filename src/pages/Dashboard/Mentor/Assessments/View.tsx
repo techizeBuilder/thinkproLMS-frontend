@@ -193,10 +193,6 @@ export default function ViewAssessmentPage() {
                   <p>{assessment.grade}</p>
                 </div>
                 <div>
-                  <h4 className="font-medium text-sm text-gray-500 mb-1">Session</h4>
-                  <p>{assessment.session?.displayName || assessment.session?.name}</p>
-                </div>
-                <div>
                   <h4 className="font-medium text-sm text-gray-500 mb-1">Duration</h4>
                   <p>{assessment.duration} minutes</p>
                 </div>

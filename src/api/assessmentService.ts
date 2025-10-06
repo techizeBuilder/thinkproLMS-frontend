@@ -64,7 +64,7 @@ export interface CreateAssessmentData {
   instructions: string;
   grade: number;
   sections: string[];
-  session: string;
+  session?: string;
   startDate: string;
   endDate: string;
   duration: number;

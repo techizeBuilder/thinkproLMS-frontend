@@ -371,8 +371,8 @@ export default function DetailedAssessmentResultsPage() {
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <h4 className="font-semibold mb-2">Session & Grade</h4>
-              <p className="text-gray-600">{result.assessment.session?.displayName || result.assessment.session?.name} - {result.assessment.grade}</p>
+              <h4 className="font-semibold mb-2">Grade</h4>
+              <p className="text-gray-600">Grade {result.assessment.grade}</p>
             </div>
             <div>
               <h4 className="font-semibold mb-2">Submitted On</h4>

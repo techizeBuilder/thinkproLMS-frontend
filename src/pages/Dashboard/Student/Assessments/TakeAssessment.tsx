@@ -359,7 +359,7 @@ export default function TakeAssessmentPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold">{assessment.title}</h1>
-          <p className="text-gray-600">{assessment.grade} - {assessment.session?.displayName || assessment.session?.name}</p>
+          <p className="text-gray-600">Grade {assessment.grade}</p>
         </div>
         <div className="flex items-center gap-4">
           {/* Network Status */}

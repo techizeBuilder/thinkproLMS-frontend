@@ -154,36 +154,29 @@ export default function CreateAssessmentPage() {
     }
   }, [formData.school]);
 
-  // Load sessions
+  // Session selection not required anymore, but we still keep sessions in state if needed elsewhere
   useEffect(() => {
     const loadSessions = async () => {
       try {
-        // Extract numeric grade from "Grade X" format
         const gradeNumber = parseInt(formData.grade.replace(/\D/g, ''));
         if (isNaN(gradeNumber)) {
-          console.error("Invalid grade format:", formData.grade);
           setSessions([]);
           return;
         }
-        
         const response = await sessionService.getSessionsByGrade(gradeNumber);
         setSessions(response || []);
       } catch (error) {
-        console.error("Error loading sessions:", error);
-        toast.error("Failed to load sessions");
         setSessions([]);
       }
     };
-
-    if (formData.grade) {
-      loadSessions();
-    }
+    if (formData.grade) loadSessions();
   }, [formData.grade]);
 
-  // Load questions when filters change
+  // Load questions when grade/difficulty filter changes
   useEffect(() => {
     const loadQuestions = async () => {
-      if (!questionFilters.session) return;
+      // Fetch by grade's sessions in backend, only need grade
+      if (!questionFilters.grade) return;
 
       try {
         // Create filter object, excluding difficulty if it's "all"
@@ -191,7 +184,8 @@ export default function CreateAssessmentPage() {
         if (filters.difficulty === "all") {
           delete filters.difficulty;
         }
-        
+        // Do not send session; backend will derive from grade
+        delete filters.session;
         const response = await assessmentService.getQuestionsForAssessment(filters);
         setAvailableQuestions(response.data || []);
       } catch (error) {
@@ -242,8 +236,8 @@ export default function CreateAssessmentPage() {
       setFormData(prev => ({ ...prev, [field]: value }));
     }
 
-    // Update question filters when grade/session changes
-    if (field === "grade" || field === "session") {
+    // Update question filters when grade changes
+    if (field === "grade") {
       setQuestionFilters(prev => ({
         ...prev,
         [field]: value,
@@ -357,7 +351,7 @@ export default function CreateAssessmentPage() {
   };
 
   const validateForm = () => {
-    if (!formData.title || !formData.instructions || !formData.grade || !formData.sections || formData.sections.length === 0 || !formData.session) {
+    if (!formData.title || !formData.instructions || !formData.grade || !formData.sections || formData.sections.length === 0) {
       toast.error("Please fill in all required fields");
       return false;
     }
@@ -532,26 +526,7 @@ export default function CreateAssessmentPage() {
                 )}
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="session">Session *</Label>
-                <Select value={formData.session} onValueChange={(value) => handleInputChange("session", value)}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select session" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {sessions.length > 0 ? (
-                      sessions.map(session => (
-                        <SelectItem key={session._id} value={session._id!}>{session.displayName || `${session.grade}.${session.sessionNumber} ${session.name}`}</SelectItem>
-                      ))
-                    ) : (
-                      <SelectItem value="no-sessions" disabled>No sessions available</SelectItem>
-                    )}
-                  </SelectContent>
-                </Select>
-                {sessions.length === 0 && formData.grade && (
-                  <p className="text-sm text-gray-500">No sessions found for {formData.grade}. Please create sessions first.</p>
-                )}
-              </div>
+              {/* Session selection removed as per new requirement */}
             </div>
 
             <div className="space-y-2">
@@ -599,7 +574,7 @@ export default function CreateAssessmentPage() {
             </div>
 
             <div className="flex justify-end">
-              <Button onClick={() => setStep(2)} disabled={!formData.grade || formData.sections.length === 0 || !formData.session || ((user?.role === "superadmin" || user?.role === "leadmentor" || user?.role === "mentor") && !formData.school)}>
+              <Button onClick={() => setStep(2)} disabled={!formData.grade || formData.sections.length === 0 || ((user?.role === "superadmin" || user?.role === "leadmentor" || user?.role === "mentor") && !formData.school)}>
                 Next: Select Questions
               </Button>
             </div>
@@ -740,7 +715,7 @@ export default function CreateAssessmentPage() {
                   )}
                   <p><strong>Grade:</strong> {formData.grade}</p>
                   <p><strong>Sections:</strong> {formData.sections.join(", ")}</p>
-                  <p><strong>Session:</strong> {sessions.find(s => s._id === formData.session)?.displayName || sessions.find(s => s._id === formData.session)?.name || "Not selected"}</p>
+                  {/* Session removed from preview */}
                   <p><strong>Duration:</strong> {formData.duration} minutes</p>
                   <p><strong>Total Questions:</strong> {selectedQuestions.length}</p>
                   <p><strong>Total Marks:</strong> {totalMarks}</p>

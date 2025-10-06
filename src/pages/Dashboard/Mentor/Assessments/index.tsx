@@ -266,7 +266,7 @@ export default function MentorAssessmentsPage() {
                       <TableCell>
                         <div className="text-sm">
                           <div className="font-medium">
-                            {assessment.session?.displayName || assessment.session?.name || "No session"}
+                            Grade {assessment.grade}
                           </div>
                         </div>
                       </TableCell>
