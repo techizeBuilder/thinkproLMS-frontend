@@ -17,11 +17,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
-  Search,
-  User,
-  GraduationCap,
-} from "lucide-react";
+import { Search, User, GraduationCap } from "lucide-react";
 import { studentService } from "@/api/studentService";
 import { mentorService } from "@/api/mentorService";
 import ProfilePictureDisplay from "@/components/ProfilePictureDisplay";
@@ -127,7 +123,7 @@ export default function MentorStudentsPage() {
 
     try {
       // Fetch students from all assigned schools
-      const schoolIds = mentor.assignedSchools.map(school => school._id);
+      const schoolIds = mentor.assignedSchools.map((school) => school._id);
       const allStudents: Student[] = [];
 
       for (const schoolId of schoolIds) {
@@ -297,7 +293,9 @@ export default function MentorStudentsPage() {
                 <p className="text-sm font-medium text-muted-foreground">
                   Assigned Schools
                 </p>
-                <p className="text-2xl font-bold">{mentor.assignedSchools.length}</p>
+                <p className="text-2xl font-bold">
+                  {mentor.assignedSchools.length}
+                </p>
               </div>
               <GraduationCap className="h-8 w-8 text-muted-foreground" />
             </div>
@@ -336,11 +334,13 @@ export default function MentorStudentsPage() {
                   <TableRow key={student._id} className="hover:bg-muted/50">
                     <TableCell className="font-medium">
                       <div className="flex items-center gap-2">
-                        <ProfilePictureDisplay
-                          profilePicture={student.user.profilePicture}
-                          name={student.user.name}
-                          size="sm"
-                        />
+                        <div className="w-8 h-8">
+                          <ProfilePictureDisplay
+                            profilePicture={student.user.profilePicture}
+                            name={student.user.name}
+                            size="sm"
+                          />
+                        </div>
                         {student.user.name}
                       </div>
                     </TableCell>

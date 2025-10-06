@@ -3,7 +3,16 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Search, Edit, Trash2, Mail, Phone, MapPin, KeyRound } from "lucide-react";
+import {
+  Plus,
+  Search,
+  Edit,
+  Trash2,
+  Mail,
+  Phone,
+  MapPin,
+  KeyRound,
+} from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import axiosInstance from "@/api/axiosInstance";
 import { ResetPasswordDialog } from "@/components/ResetPasswordDialog";
@@ -121,8 +130,8 @@ export default function MentorsPage() {
           <h1 className="text-3xl font-bold text-gray-900">School Mentors</h1>
           <p className="text-gray-600">Manage mentors assigned to schools</p>
         </div>
-        <Button 
-          onClick={() => navigate("/superadmin/mentors/create")} 
+        <Button
+          onClick={() => navigate("/superadmin/mentors/create")}
           className="flex items-center gap-2"
         >
           <Plus className="h-4 w-4" />
@@ -168,17 +177,23 @@ export default function MentorsPage() {
             <CardHeader className="pb-3">
               <div className="flex justify-between items-start">
                 <div className="flex items-center gap-3">
-                  <ProfilePictureDisplay
-                    profilePicture={mentor.user.profilePicture}
-                    name={mentor.user.name}
-                    size="md"
-                  />
+                  <div className="w-12 h-12">
+                    <ProfilePictureDisplay
+                      profilePicture={mentor.user.profilePicture}
+                      name={mentor.user.name}
+                      size="md"
+                    />
+                  </div>
                   <div>
                     <CardTitle className="text-lg">
                       {mentor.salutation} {mentor.user.name}
                     </CardTitle>
                     <div className="flex items-center gap-2 mt-1">
-                      <Badge variant={mentor.user.isVerified ? "default" : "secondary"}>
+                      <Badge
+                        variant={
+                          mentor.user.isVerified ? "default" : "secondary"
+                        }
+                      >
                         {mentor.user.isVerified ? "Verified" : "Pending"}
                       </Badge>
                     </div>
@@ -202,7 +217,9 @@ export default function MentorsPage() {
                   <Button
                     variant="ghost"
                     size="sm"
-                    onClick={() => navigate(`/superadmin/mentors/${mentor._id}/edit`)}
+                    onClick={() =>
+                      navigate(`/superadmin/mentors/${mentor._id}/edit`)
+                    }
                   >
                     <Edit className="h-4 w-4" />
                   </Button>
@@ -230,7 +247,7 @@ export default function MentorsPage() {
                 <MapPin className="h-4 w-4 mt-0.5" />
                 <span className="flex-1">{mentor.address}</span>
               </div>
-              
+
               {/* Assigned Schools */}
               <div className="pt-2 border-t">
                 <p className="text-xs font-medium text-gray-500 mb-2">
@@ -238,7 +255,11 @@ export default function MentorsPage() {
                 </p>
                 <div className="flex flex-wrap gap-1">
                   {mentor.assignedSchools.slice(0, 2).map((school) => (
-                    <Badge key={school._id} variant="outline" className="text-xs">
+                    <Badge
+                      key={school._id}
+                      variant="outline"
+                      className="text-xs"
+                    >
                       {school.name}
                     </Badge>
                   ))}

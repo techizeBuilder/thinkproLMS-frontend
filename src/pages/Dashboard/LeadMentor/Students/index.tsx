@@ -3,7 +3,18 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Search, Edit, Trash2, Download, Upload, GraduationCap, Eye, ArrowUp, KeyRound } from "lucide-react";
+import {
+  Plus,
+  Search,
+  Edit,
+  Trash2,
+  Download,
+  Upload,
+  GraduationCap,
+  Eye,
+  ArrowUp,
+  KeyRound,
+} from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import axiosInstance from "@/api/axiosInstance";
 import { useStudentsPath } from "@/utils/navigation";
@@ -295,11 +306,13 @@ export default function StudentsPage() {
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-4">
-                  <ProfilePictureDisplay
-                    profilePicture={student.user.profilePicture}
-                    name={student.user.name}
-                    size="md"
-                  />
+                  <div className="w-12 h-12">
+                    <ProfilePictureDisplay
+                      profilePicture={student.user.profilePicture}
+                      name={student.user.name}
+                      size="md"
+                    />
+                  </div>
                   <div className="flex-1">
                     <div className="flex items-center gap-2">
                       <h3 className="font-semibold text-lg">
