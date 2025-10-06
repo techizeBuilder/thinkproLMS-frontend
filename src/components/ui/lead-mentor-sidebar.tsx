@@ -40,8 +40,8 @@ export function LeadMentorSidebar({ className }: LeadMentorSidebarProps) {
   const unreadCount = useUnreadMessageCount();
 
   // Check if user has permission to manage modules and resources
-  const hasModulePermission = user?.permissions?.includes("add_modules");
-  const hasResourcePermission = user?.permissions?.includes("add_resources");
+  const hasModulePermission = user?.role === "superadmin" || user?.permissions?.includes("add_modules");
+  const hasResourcePermission = user?.role === "superadmin" || user?.permissions?.includes("add_resources");
 
   return (
     <Sidebar className={cn("h-screen", className)}>

@@ -48,9 +48,11 @@ import type { UserType, ResourceType } from "@/types/resources";
 import type { CreateResourceData } from "@/api/resourceService";
 import { resourceService } from "@/api/resourceService";
 import { sessionService, type Session } from "@/api/sessionService";
+import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 
 export default function AddResourcePage() {
+  const { user } = useAuth();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
 
@@ -171,7 +173,8 @@ export default function AddResourcePage() {
       await resourceService.create(resourceData);
 
       toast.success("Resource created successfully!");
-      navigate("/leadmentor/resources");
+      const basePath = user?.role === 'superadmin' ? '/superadmin' : '/leadmentor';
+      navigate(`${basePath}/resources`);
     } catch (error) {
       console.error("Error creating resource:", error);
       toast.error("Failed to create resource. Please try again.");
@@ -216,7 +219,10 @@ export default function AddResourcePage() {
         <Button
           variant="outline"
           size="sm"
-          onClick={() => navigate("/leadmentor/resources")}
+          onClick={() => {
+            const basePath = user?.role === 'superadmin' ? '/superadmin' : '/leadmentor';
+            navigate(`${basePath}/resources`);
+          }}
         >
           <ArrowLeft className="h-4 w-4" />
         </Button>
@@ -523,7 +529,10 @@ export default function AddResourcePage() {
           <Button
             type="button"
             variant="outline"
-            onClick={() => navigate("/leadmentor/resources")}
+            onClick={() => {
+              const basePath = user?.role === 'superadmin' ? '/superadmin' : '/leadmentor';
+              navigate(`${basePath}/resources`);
+            }}
           >
             Cancel
           </Button>

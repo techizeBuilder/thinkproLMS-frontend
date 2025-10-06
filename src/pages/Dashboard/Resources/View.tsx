@@ -15,9 +15,11 @@ import {
 import type { Resource } from '@/api/resourceService';
 import { resourceService } from '@/api/resourceService';
 import { getResourceDisplayUrl } from '@/utils/resourceUtils';
+import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 
 export default function ViewResourcePage() {
+  const { user } = useAuth();
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
   
@@ -35,7 +37,8 @@ export default function ViewResourcePage() {
       } catch (error) {
         console.error('Error loading resource:', error);
         toast.error('Failed to load resource');
-        navigate('/leadmentor/resources');
+        const basePath = user?.role === 'superadmin' ? '/superadmin' : '/leadmentor';
+        navigate(`${basePath}/resources`);
       } finally {
         setIsLoading(false);
       }
@@ -72,7 +75,10 @@ export default function ViewResourcePage() {
           <p className="text-muted-foreground mb-4">
             The requested resource could not be found.
           </p>
-          <Button onClick={() => navigate('/leadmentor/resources')}>
+          <Button onClick={() => {
+            const basePath = user?.role === 'superadmin' ? '/superadmin' : '/leadmentor';
+            navigate(`${basePath}/resources`);
+          }}>
             Back to Resources
           </Button>
         </div>
@@ -89,7 +95,10 @@ export default function ViewResourcePage() {
         <Button
           variant="outline"
           size="sm"
-          onClick={() => navigate('/leadmentor/resources')}
+          onClick={() => {
+            const basePath = user?.role === 'superadmin' ? '/superadmin' : '/leadmentor';
+            navigate(`${basePath}/resources`);
+          }}
         >
           <ArrowLeft className="h-4 w-4" />
         </Button>
@@ -245,7 +254,10 @@ export default function ViewResourcePage() {
               <Button
                 variant="outline"
                 className="w-full justify-start"
-                onClick={() => navigate(`/leadmentor/resources/${resource._id}/edit`)}
+                onClick={() => {
+                  const basePath = user?.role === 'superadmin' ? '/superadmin' : '/leadmentor';
+                  navigate(`${basePath}/resources/${resource._id}/edit`);
+                }}
               >
                 Edit Resource
               </Button>

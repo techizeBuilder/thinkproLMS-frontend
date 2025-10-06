@@ -21,7 +21,7 @@ export default function CreateModule() {
   });
 
   // Check if user has permission to manage modules
-  const hasPermission = user?.permissions?.includes('add_modules');
+  const hasPermission = user?.role === 'superadmin' || user?.permissions?.includes('add_modules');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

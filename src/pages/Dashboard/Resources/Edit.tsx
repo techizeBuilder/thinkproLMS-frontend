@@ -38,9 +38,11 @@ import type { UserType } from '@/types/resources';
 import type { Resource as ApiResource, UpdateResourceData } from '@/api/resourceService';
 import { resourceService } from '@/api/resourceService';
 import { sessionService, type Session } from '@/api/sessionService';
+import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 
 export default function EditResourcePage() {
+  const { user } = useAuth();
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
   
@@ -94,7 +96,8 @@ export default function EditResourcePage() {
       } catch (error) {
         console.error('Error loading data:', error);
         toast.error('Failed to load resource data');
-        navigate('/leadmentor/resources');
+        const basePath = user?.role === 'superadmin' ? '/superadmin' : '/leadmentor';
+        navigate(`${basePath}/resources`);
       } finally {
         setIsLoading(false);
       }
