@@ -79,7 +79,7 @@ export default function CreateAssessmentPage() {
   // UI state
   const [loading, setLoading] = useState(false);
   const [step, setStep] = useState(1); // 1: Basic Info, 2: Questions, 3: Preview
-  const [sessions, setSessions] = useState<Session[]>([]);
+  const [, setSessions] = useState<Session[]>([]);
   
   // School and section state
   const [schools, setSchools] = useState<School[]>([]);

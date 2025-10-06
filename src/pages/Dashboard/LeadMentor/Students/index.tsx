@@ -3,19 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import {
-  Plus,
-  Search,
-  Edit,
-  Trash2,
-  Download,
-  Upload,
-  User,
-  GraduationCap,
-  Eye,
-  ArrowUp,
-  KeyRound,
-} from "lucide-react";
+import { Plus, Search, Edit, Trash2, Download, Upload, GraduationCap, Eye, ArrowUp, KeyRound } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import axiosInstance from "@/api/axiosInstance";
 import { useStudentsPath } from "@/utils/navigation";
@@ -39,6 +27,7 @@ interface Student {
     email: string;
     isVerified: boolean;
     createdAt: string;
+    profilePicture?: string | null;
   };
   school: School;
   studentId: string;

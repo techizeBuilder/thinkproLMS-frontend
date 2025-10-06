@@ -1,4 +1,3 @@
-import React from "react";
 import { User } from "lucide-react";
 
 interface ProfilePictureDisplayProps {
@@ -16,13 +15,7 @@ export default function ProfilePictureDisplay({
   className = "",
   showFallback = true,
 }: ProfilePictureDisplayProps) {
-  const sizeClasses = {
-    xs: "w-6 h-6",
-    sm: "w-8 h-8",
-    md: "w-12 h-12",
-    lg: "w-16 h-16",
-    xl: "w-24 h-24",
-  };
+  // Container size is controlled by parent; icon scales via size prop
 
   const iconSizes = {
     xs: "h-3 w-3",

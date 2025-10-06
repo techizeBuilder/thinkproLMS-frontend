@@ -43,6 +43,7 @@ interface Student {
     email: string;
     isVerified: boolean;
     createdAt: string;
+    profilePicture?: string | null;
   };
   rollNumber: string;
   grade: string;

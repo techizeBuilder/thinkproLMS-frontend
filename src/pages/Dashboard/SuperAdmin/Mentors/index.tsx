@@ -25,6 +25,7 @@ interface Mentor {
     email: string;
     isVerified: boolean;
     createdAt: string;
+    profilePicture?: string | null;
   };
   salutation: string;
   address: string;
