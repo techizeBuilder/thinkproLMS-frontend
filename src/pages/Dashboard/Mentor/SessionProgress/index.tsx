@@ -316,6 +316,18 @@ export default function SessionProgressPage() {
     (session.description && session.description.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
+  // Calculate session status counts
+  const sessionCounts = filteredSessions.reduce((counts, session) => {
+    const status = session.status || "Pending";
+    counts[status] = (counts[status] || 0) + 1;
+    return counts;
+  }, {} as Record<string, number>);
+
+  const totalSessions = filteredSessions.length;
+  const pendingCount = sessionCounts["Pending"] || 0;
+  const inProgressCount = sessionCounts["In Progress"] || 0;
+  const completedCount = sessionCounts["Completed"] || 0;
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -459,6 +471,44 @@ export default function SessionProgressPage() {
               be available.
             </AlertDescription>
           </Alert>
+        )}
+
+      {/* Session Summary Report */}
+      {selectedSchoolId &&
+        selectedGrade &&
+        selectedSection &&
+        sessions &&
+        sessions.length > 0 && (
+          <Card>
+            <CardContent className="p-6">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div className="text-center p-4 bg-gray-50 rounded-lg">
+                  <div className="text-2xl font-bold text-gray-700">
+                    {totalSessions}
+                  </div>
+                  <div className="text-sm text-gray-600">Total</div>
+                </div>
+                <div className="text-center p-4 bg-gray-100 rounded-lg">
+                  <div className="text-2xl font-bold text-gray-600">
+                    {pendingCount}
+                  </div>
+                  <div className="text-sm text-gray-600">Pending</div>
+                </div>
+                <div className="text-center p-4 bg-blue-50 rounded-lg">
+                  <div className="text-2xl font-bold text-blue-600">
+                    {inProgressCount}
+                  </div>
+                  <div className="text-sm text-blue-600">In Progress</div>
+                </div>
+                <div className="text-center p-4 bg-green-50 rounded-lg">
+                  <div className="text-2xl font-bold text-green-600">
+                    {completedCount}
+                  </div>
+                  <div className="text-sm text-green-600">Completed</div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         )}
 
       {/* Sessions Table */}
