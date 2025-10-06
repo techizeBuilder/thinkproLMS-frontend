@@ -87,7 +87,7 @@ export function Sidebar({ children, className, ...props }: SidebarProps) {
   return (
     <div
       className={cn(
-        "relative flex h-full flex-col border-r bg-background transition-all duration-300 ease-in-out",
+        "relative flex h-screen flex-col border-r bg-background transition-all duration-300 ease-in-out",
         "md:relative md:translate-x-0", // Desktop behavior
         isCollapsed ? "w-16" : "w-64",
         className

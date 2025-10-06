@@ -105,7 +105,7 @@ export default function Mentor() {
   if (loading) {
     return (
       <SidebarProvider defaultCollapsed={false}>
-        <div className="flex min-h-screen bg-background">
+        <div className="flex h-screen bg-background">
           <MentorSidebar />
           <div className="flex-1 flex flex-col overflow-hidden">
             <header className="h-16 border-b bg-background px-6 flex items-center justify-between">
@@ -132,7 +132,7 @@ export default function Mentor() {
 
   return (
     <SidebarProvider defaultCollapsed={false}>
-      <div className="flex min-h-screen bg-background">
+      <div className="flex h-screen bg-background">
         <MentorSidebar />
         <div className="flex-1 flex flex-col overflow-hidden">
           <header className="h-16 border-b bg-background px-6 flex items-center justify-between">
