@@ -30,7 +30,7 @@ const ConversationList: React.FC<ConversationListProps> = ({
     if (diffMins < 60) return `${diffMins}m ago`;
     if (diffHours < 24) return `${diffHours}h ago`;
     if (diffDays < 7) return `${diffDays}d ago`;
-    
+
     return date.toLocaleDateString();
   };
 
@@ -71,7 +71,9 @@ const ConversationList: React.FC<ConversationListProps> = ({
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-full">
-        <div className="text-sm text-muted-foreground">Loading conversations...</div>
+        <div className="text-sm text-muted-foreground">
+          Loading conversations...
+        </div>
       </div>
     );
   }
@@ -90,56 +92,61 @@ const ConversationList: React.FC<ConversationListProps> = ({
   return (
     <ScrollArea className="h-full">
       <div className="space-y-1 p-1.5">
-        {conversations.map((conversation) => (
-          <div
-            key={conversation._id}
-            onClick={() => onSelectConversation(conversation._id)}
-            className={cn(
-              "p-2 rounded-lg cursor-pointer transition-colors border",
-              selectedConversationId === conversation._id
-                ? "bg-primary/10 border-primary"
-                : "hover:bg-accent border-transparent"
-            )}
-          >
-            <div className="flex items-start justify-between gap-2">
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 mb-1">
-                  <h4 className="font-medium text-sm truncate">
-                    {conversation.participant.name}
-                  </h4>
-                  <Badge
-                    variant="secondary"
-                    className={cn("text-xs", getRoleColor(conversation.participant.role))}
-                  >
-                    {getRoleLabel(conversation.participant.role)}
-                  </Badge>
+        {conversations.map(
+          (conversation) =>
+            conversation.participant && (
+              <div
+                key={conversation._id}
+                onClick={() => onSelectConversation(conversation._id)}
+                className={cn(
+                  "p-2 rounded-lg cursor-pointer transition-colors border",
+                  selectedConversationId === conversation._id
+                    ? "bg-primary/10 border-primary"
+                    : "hover:bg-accent border-transparent"
+                )}
+              >
+                <div className="flex items-start justify-between gap-2">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-1">
+                      <h4 className="font-medium text-sm truncate">
+                        {conversation.participant.name}
+                      </h4>
+                      <Badge
+                        variant="secondary"
+                        className={cn(
+                          "text-xs",
+                          getRoleColor(conversation.participant.role)
+                        )}
+                      >
+                        {getRoleLabel(conversation.participant.role)}
+                      </Badge>
+                    </div>
+                    {conversation.lastMessage && (
+                      <p className="text-xs text-muted-foreground truncate">
+                        {conversation.lastMessage.content}
+                      </p>
+                    )}
+                  </div>
+                  <div className="flex flex-col items-end gap-1 flex-shrink-0">
+                    <span className="text-xs text-muted-foreground whitespace-nowrap">
+                      {formatTime(conversation.lastMessageAt)}
+                    </span>
+                    {conversation.unreadCount > 0 && (
+                      <Badge
+                        variant="default"
+                        className="bg-primary text-primary-foreground text-xs px-2"
+                      >
+                        {conversation.unreadCount}
+                      </Badge>
+                    )}
+                  </div>
                 </div>
-                {conversation.lastMessage && (
-                  <p className="text-xs text-muted-foreground truncate">
-                    {conversation.lastMessage.content}
-                  </p>
-                )}
               </div>
-              <div className="flex flex-col items-end gap-1 flex-shrink-0">
-                <span className="text-xs text-muted-foreground whitespace-nowrap">
-                  {formatTime(conversation.lastMessageAt)}
-                </span>
-                {conversation.unreadCount > 0 && (
-                  <Badge
-                    variant="default"
-                    className="bg-primary text-primary-foreground text-xs px-2"
-                  >
-                    {conversation.unreadCount}
-                  </Badge>
-                )}
-              </div>
-            </div>
-          </div>
-        ))}
+            )
+        )}
       </div>
     </ScrollArea>
   );
 };
 
 export default ConversationList;
-
