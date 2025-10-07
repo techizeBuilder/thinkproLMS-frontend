@@ -30,6 +30,7 @@ interface School {
 interface Mentor {
   _id: string;
   user: {
+    _id: string;
     name: string;
     email: string;
     isVerified: boolean;
@@ -205,7 +206,7 @@ export default function MentorsPage() {
                     size="sm"
                     onClick={() =>
                       setResetPasswordUser({
-                        id: mentor._id,
+                        id: mentor.user._id,
                         name: mentor.user.name,
                         email: mentor.user.email,
                       })
