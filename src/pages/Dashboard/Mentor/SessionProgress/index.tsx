@@ -1,5 +1,4 @@
 import { useState, useEffect, useCallback } from "react";
-import { useSearchParams } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -12,6 +11,8 @@ import {
 } from "@/components/ui/select";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Loader2, BookOpen, Search } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@/components/ui/button";
 import {
   Table,
   TableBody,
@@ -32,7 +33,6 @@ import { toast } from "sonner";
 // Remove the duplicate interface since we're importing it from the service
 
 export default function SessionProgressPage() {
-  const [searchParams, setSearchParams] = useSearchParams();
   const [loading, setLoading] = useState(false);
   const [sessions, setSessions] = useState<SessionProgress[]>([]);
   const [availableSchools, setAvailableSchools] = useState<School[]>([]);
@@ -46,45 +46,10 @@ export default function SessionProgressPage() {
   const [availableGrades, setAvailableGrades] = useState<AvailableGrade[]>([]);
   const [availableSections, setAvailableSections] = useState<string[]>([]);
   const [hasServiceDetails, setHasServiceDetails] = useState(false);
+  const [notesDrafts, setNotesDrafts] = useState<Record<string, string>>({});
+  const [savingNotesFor, setSavingNotesFor] = useState<string | null>(null);
 
-  // Function to update URL parameters
-  const updateUrlParams = (params: {
-    grade?: string;
-    section?: string;
-  }) => {
-    const newSearchParams = new URLSearchParams(searchParams);
-
-    if (params.grade !== undefined) {
-      if (params.grade) {
-        newSearchParams.set("grade", params.grade);
-      } else {
-        newSearchParams.delete("grade");
-      }
-    }
-
-    if (params.section !== undefined) {
-      if (params.section) {
-        newSearchParams.set("section", params.section);
-      } else {
-        newSearchParams.delete("section");
-      }
-    }
-
-    setSearchParams(newSearchParams, { replace: true });
-  };
-
-  // Initialize from URL parameters
-  useEffect(() => {
-    const gradeParam = searchParams.get("grade");
-    const sectionParam = searchParams.get("section");
-
-    if (gradeParam) {
-      setSelectedGrade(gradeParam);
-    }
-    if (sectionParam) {
-      setSelectedSection(sectionParam);
-    }
-  }, [searchParams]);
+  // Removed URL parameter syncing; default to first available options
 
   useEffect(() => {
     loadAvailableSchools();
@@ -99,14 +64,10 @@ export default function SessionProgressPage() {
           setAvailableGrades(response.data.grades);
           setHasServiceDetails(response.data.hasServiceDetails);
 
-          // Auto-select first grade if available and no grade in URL params
+          // Auto-select first grade if available
           if (response.data.grades && response.data.grades.length > 0) {
-            const gradeParam = searchParams.get("grade");
-            if (!gradeParam) {
-              const firstGrade = response.data.grades[0].grade;
-              setSelectedGrade(firstGrade.toString());
-              updateUrlParams({ grade: firstGrade.toString() });
-            }
+            const firstGrade = response.data.grades[0].grade;
+            setSelectedGrade(firstGrade.toString());
           }
         }
       } catch (error) {
@@ -118,25 +79,15 @@ export default function SessionProgressPage() {
 
     if (selectedSchoolId) {
       fetchSchoolServiceDetails(selectedSchoolId);
-      // Reset other filters when school changes (but preserve URL params if they exist)
-      const gradeParam = searchParams.get("grade");
-      const sectionParam = searchParams.get("section");
-
-      if (!gradeParam) {
-        setSelectedGrade("");
-        updateUrlParams({ grade: "" });
-      }
-      if (!sectionParam) {
-        setSelectedSection("");
-        updateUrlParams({ section: "" });
-      }
+      // Reset sections when school changes; grade will be set after fetch
+      setSelectedSection("");
       setAvailableSections([]);
     } else {
       setAvailableGrades([]);
       setHasServiceDetails(false);
       setAvailableSections([]);
     }
-  }, [selectedSchoolId, searchParams]);
+  }, [selectedSchoolId]);
 
   // Update available sections when grade changes
   useEffect(() => {
@@ -147,22 +98,17 @@ export default function SessionProgressPage() {
       const sections = selectedGradeData?.sections || [];
       setAvailableSections(sections);
 
-      // Auto-select first section if available and no section in URL params
+      // Auto-select first section if available
       if (sections.length > 0) {
-        const sectionParam = searchParams.get("section");
-        if (!sectionParam) {
-          const firstSection = sections[0];
-          setSelectedSection(firstSection);
-          updateUrlParams({ section: firstSection });
-        }
+        const firstSection = sections[0];
+        setSelectedSection(firstSection);
       } else {
         setSelectedSection("");
-        updateUrlParams({ section: "" });
       }
     } else {
       setAvailableSections([]);
     }
-  }, [selectedGrade, availableGrades, hasServiceDetails, searchParams]);
+  }, [selectedGrade, availableGrades, hasServiceDetails]);
 
   const loadAvailableSchools = async () => {
     try {
@@ -199,6 +145,12 @@ export default function SessionProgressPage() {
         // The API now returns sessions instead of modules
         const sessionProgress = progressData.sessions || [];
         setSessions(sessionProgress);
+        // Initialize notes drafts from loaded sessions
+        const nextDrafts: Record<string, string> = {};
+        for (const s of sessionProgress) {
+          nextDrafts[s.sessionId] = s.notes || "";
+        }
+        setNotesDrafts(nextDrafts);
 
         console.log("Number of sessions found:", sessionProgress.length);
 
@@ -226,6 +178,37 @@ export default function SessionProgressPage() {
     },
     []
   );
+
+  const handleSaveNotes = async (sessionId: string) => {
+    const session = sessions.find((s) => s.sessionId === sessionId);
+    if (!session) return;
+    const notes = notesDrafts[sessionId] ?? "";
+    try {
+      setSavingNotesFor(sessionId);
+      await sessionProgressService.updateSessionStatus({
+        sessionId,
+        schoolId: selectedSchoolId,
+        section: selectedSection,
+        grade: selectedGrade,
+        status: session.status || "Pending",
+        notes,
+      });
+      setSessions((prev) => prev.map((s) => (s.sessionId === sessionId ? { ...s, notes } : s)));
+      toast.success("Notes saved");
+    } catch (error: any) {
+      const errorMessage =
+        error?.response?.data?.message || error?.message || "Failed to save notes";
+      toast.error(errorMessage);
+    } finally {
+      setSavingNotesFor(null);
+    }
+  };
+
+  const isNotesDirty = (sessionId: string) => {
+    const saved = sessions.find((s) => s.sessionId === sessionId)?.notes || "";
+    const draft = notesDrafts[sessionId] ?? "";
+    return draft !== saved;
+  };
 
   // Load sessions when all filters are selected
   useEffect(() => {
@@ -337,25 +320,25 @@ export default function SessionProgressPage() {
   }
 
   return (
-    <div className="p-6 space-y-4">
+    <div className="p-4 space-y-3">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">Session Progress</h1>
-          <p className="text-gray-600 text-sm">
+          <h1 className="text-xl font-bold">Session Progress</h1>
+          <p className="text-gray-600 text-xs">
             Track and manage session completion progress
           </p>
         </div>
       </div>
 
       {/* School Selection and Filters */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
         {/* School Selection */}
         <div>
-          <Label htmlFor="school-select" className="text-sm font-medium">
+          <Label htmlFor="school-select" className="text-xs font-medium">
             School
           </Label>
           <Select value={selectedSchoolId} onValueChange={setSelectedSchoolId}>
-            <SelectTrigger className="w-full">
+            <SelectTrigger className="w-full h-8">
               <SelectValue placeholder="Select a school" />
             </SelectTrigger>
             <SelectContent>
@@ -370,17 +353,16 @@ export default function SessionProgressPage() {
 
         {/* Grade Selection */}
         <div>
-          <Label htmlFor="grade-select" className="text-sm font-medium">
+          <Label htmlFor="grade-select" className="text-xs font-medium">
             Grade
           </Label>
           <Select
             value={selectedGrade}
             onValueChange={(value) => {
               setSelectedGrade(value);
-              updateUrlParams({ grade: value });
             }}
           >
-            <SelectTrigger className="w-full">
+            <SelectTrigger className="w-full h-8">
               <SelectValue placeholder="Select grade" />
             </SelectTrigger>
             <SelectContent>
@@ -412,17 +394,16 @@ export default function SessionProgressPage() {
 
         {/* Section Selection */}
         <div>
-          <Label htmlFor="section-select" className="text-sm font-medium">
+          <Label htmlFor="section-select" className="text-xs font-medium">
             Section
           </Label>
           <Select
             value={selectedSection}
             onValueChange={(value) => {
               setSelectedSection(value);
-              updateUrlParams({ section: value });
             }}
           >
-            <SelectTrigger className="w-full">
+            <SelectTrigger className="w-full h-8">
               <SelectValue placeholder="Select section" />
             </SelectTrigger>
             <SelectContent>
@@ -480,31 +461,31 @@ export default function SessionProgressPage() {
         sessions &&
         sessions.length > 0 && (
           <Card>
-            <CardContent className="p-6">
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <div className="text-center p-4 bg-gray-50 rounded-lg">
-                  <div className="text-2xl font-bold text-gray-700">
+            <CardContent className="p-3">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                <div className="text-center p-2 bg-gray-50 rounded">
+                  <div className="text-lg font-bold text-gray-700">
                     {totalSessions}
                   </div>
-                  <div className="text-sm text-gray-600">Total</div>
+                  <div className="text-xs text-gray-600">Total</div>
                 </div>
-                <div className="text-center p-4 bg-gray-100 rounded-lg">
-                  <div className="text-2xl font-bold text-gray-600">
+                <div className="text-center p-2 bg-gray-100 rounded">
+                  <div className="text-lg font-bold text-gray-600">
                     {pendingCount}
                   </div>
-                  <div className="text-sm text-gray-600">Pending</div>
+                  <div className="text-xs text-gray-600">Pending</div>
                 </div>
-                <div className="text-center p-4 bg-blue-50 rounded-lg">
-                  <div className="text-2xl font-bold text-blue-600">
+                <div className="text-center p-2 bg-blue-50 rounded">
+                  <div className="text-lg font-bold text-blue-600">
                     {inProgressCount}
                   </div>
-                  <div className="text-sm text-blue-600">In Progress</div>
+                  <div className="text-xs text-blue-600">In Progress</div>
                 </div>
-                <div className="text-center p-4 bg-green-50 rounded-lg">
-                  <div className="text-2xl font-bold text-green-600">
+                <div className="text-center p-2 bg-green-50 rounded">
+                  <div className="text-lg font-bold text-green-600">
                     {completedCount}
                   </div>
-                  <div className="text-sm text-green-600">Completed</div>
+                  <div className="text-xs text-green-600">Completed</div>
                 </div>
               </div>
             </CardContent>
@@ -514,52 +495,53 @@ export default function SessionProgressPage() {
       {/* Sessions Table */}
       {sessions && sessions.length > 0 && (
         <Card>
-          <CardHeader>
+          <CardHeader className="p-3">
             <div className="flex items-center justify-between">
-              <CardTitle className="flex items-center gap-2">
-                <BookOpen className="h-5 w-5" />
+              <CardTitle className="flex items-center gap-2 text-sm">
+                <BookOpen className="h-4 w-4" />
                 Sessions ({filteredSessions.length})
               </CardTitle>
               
               {/* Search Input */}
-              <div className="relative w-64">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+              <div className="relative w-48">
+                <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-400 h-3 w-3" />
                 <Input
-                  placeholder="Search sessions..."
+                  placeholder="Search..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10"
+                  className="pl-7 h-7 text-xs"
                 />
               </div>
             </div>
           </CardHeader>
-          <CardContent>
+          <CardContent className="p-3">
             <Table>
               <TableHeader>
-                <TableRow>
-                  <TableHead className="w-[50px]">#</TableHead>
-                  <TableHead>Session</TableHead>
-                  <TableHead>Description</TableHead>
-                  <TableHead className="w-[200px]">Status</TableHead>
+                <TableRow className="h-8">
+                  <TableHead className="w-[30px] text-xs">#</TableHead>
+                  <TableHead className="text-xs">Session</TableHead>
+                  <TableHead className="text-xs">Description</TableHead>
+                  <TableHead className="min-w-[160px] text-xs">Status</TableHead>
+                  <TableHead className="text-xs min-w-[320px]">Notes</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {filteredSessions.map((session, index) => {
                   const isUpdating = updating === session.sessionId;
                   const currentStatus = session.status || "Pending";
+                  const draft = notesDrafts[session.sessionId] ?? "";
+                  const isSavingNotes = savingNotesFor === session.sessionId;
+                  const notesDirty = isNotesDirty(session.sessionId);
 
                   return (
-                    <TableRow key={session.sessionId}>
-                      <TableCell className="font-medium">{index + 1}</TableCell>
+                    <TableRow key={session.sessionId} className="h-10">
+                      <TableCell className="font-medium text-xs">{index + 1}</TableCell>
                       <TableCell className="font-medium">
                         <div>
-                          <div className="font-semibold">{session.displayName}</div>
-                          <div className="text-sm text-gray-500">
-                            {session.sessionName}
-                          </div>
+                          <div className="font-semibold text-sm">{session.displayName}</div>
                         </div>
                       </TableCell>
-                      <TableCell className="text-gray-600">
+                      <TableCell className="text-gray-600 text-xs">
                         {session.description || "No description available"}
                       </TableCell>
                       <TableCell>
@@ -570,7 +552,7 @@ export default function SessionProgressPage() {
                           }
                           disabled={isUpdating}
                         >
-                          <SelectTrigger className="w-full">
+                          <SelectTrigger className="w-full h-8">
                             <SelectValue placeholder="Pending" />
                           </SelectTrigger>
                           <SelectContent>
@@ -584,6 +566,37 @@ export default function SessionProgressPage() {
                         {isUpdating && (
                           <Loader2 className="h-4 w-4 animate-spin text-gray-500 mt-1" />
                         )}
+                      </TableCell>
+                      <TableCell>
+                        <div className="space-y-2">
+                          <Textarea
+                            value={draft}
+                            onChange={(e) =>
+                              setNotesDrafts((prev) => ({ ...prev, [session.sessionId]: e.target.value }))
+                            }
+                            placeholder="Add notes for this session..."
+                            className="min-h-[48px] text-xs"
+                          />
+                          {notesDirty && (
+                            <div className="flex justify-end">
+                              <Button
+                                size="sm"
+                                variant="secondary"
+                                onClick={() => handleSaveNotes(session.sessionId)}
+                                disabled={isSavingNotes || !selectedSchoolId || !selectedGrade || !selectedSection}
+                                className="h-7 py-0 text-xs"
+                              >
+                                {isSavingNotes ? (
+                                  <span className="inline-flex items-center gap-2">
+                                    <Loader2 className="h-4 w-4 animate-spin" /> Saving
+                                  </span>
+                                ) : (
+                                  "Save Notes"
+                                )}
+                              </Button>
+                            </div>
+                          )}
+                        </div>
                       </TableCell>
                     </TableRow>
                   );

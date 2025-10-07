@@ -39,6 +39,7 @@ export default function SessionProgressViewer({
 }: SessionProgressViewerProps) {
   const [loading, setLoading] = useState(false);
   const [sessions, setSessions] = useState<SessionProgress[]>([]);
+  const [expandedNotes, setExpandedNotes] = useState<Record<string, boolean>>({});
   const [availableSchools, setAvailableSchools] = useState<School[]>([]);
   const [availableMentors, setAvailableMentors] = useState<Mentor[]>([]);
   const [selectedMentorId, setSelectedMentorId] = useState<string>("");
@@ -525,11 +526,15 @@ export default function SessionProgressViewer({
                   <TableHead className="text-xs">Session</TableHead>
                   <TableHead className="text-xs">Description</TableHead>
                   <TableHead className="w-[120px] text-xs">Status</TableHead>
+                  <TableHead className="text-xs w-[260px]">Notes</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {filteredSessions.map((session, index) => {
                   const currentStatus = session.status || "Pending";
+                  const note = (session.notes || "").trim();
+                  const isLongNote = note.length > 120 || note.split("\n").length > 2;
+                  const isExpanded = !!expandedNotes[session.sessionId];
 
                   return (
                     <TableRow key={session.sessionId} className="h-10">
@@ -564,6 +569,31 @@ export default function SessionProgressViewer({
                             {currentStatus}
                           </span>
                         </div>
+                      </TableCell>
+                      <TableCell className="text-gray-700 text-xs">
+                        {note.length > 0 ? (
+                          <div className="max-w-xs whitespace-pre-wrap break-words">
+                            <div className={!isExpanded ? "max-h-10 overflow-hidden" : undefined}>
+                              {note}
+                            </div>
+                            {isLongNote && (
+                              <button
+                                type="button"
+                                className="mt-1 text-blue-600 hover:underline text-[11px]"
+                                onClick={() =>
+                                  setExpandedNotes((prev) => ({
+                                    ...prev,
+                                    [session.sessionId]: !isExpanded,
+                                  }))
+                                }
+                              >
+                                {isExpanded ? "Show less" : "Show more"}
+                              </button>
+                            )}
+                          </div>
+                        ) : (
+                          <span className="text-gray-400 italic">No notes</span>
+                        )}
                       </TableCell>
                     </TableRow>
                   );
