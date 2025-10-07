@@ -107,11 +107,11 @@ const MessageList: React.FC<MessageListProps> = ({
                           : "bg-accent"
                       )}
                     >
-                      {!isCurrentUser && (
+                      {/* {!isCurrentUser && (
                         <p className="text-xs font-medium mb-1">
                           {message.sender.name}
                         </p>
-                      )}
+                      )} */}
                       <p className="text-sm whitespace-pre-wrap break-words">
                         {message.content}
                       </p>

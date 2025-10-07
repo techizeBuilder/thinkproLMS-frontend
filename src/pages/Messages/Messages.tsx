@@ -317,12 +317,12 @@ const Messages: React.FC = () => {
                     currentUserId={currentUserId}
                     isLoading={isLoadingMessages}
                   />
-                  {isTyping && (
-                    <div className="px-4 py-2 text-sm text-muted-foreground italic">
-                      {selectedConversation.participant.name} is typing...
-                    </div>
-                  )}
                 </div>
+                {isTyping && (
+                  <p className="px-4 py-2 text-sm text-muted-foreground italic bg-background border-t relative z-10">
+                    {selectedConversation.participant.name} is typing...
+                  </p>
+                )}
                 <MessageInput 
                   onSendMessage={handleSendMessage}
                   onTyping={handleTyping}
