@@ -117,7 +117,7 @@ export default function EditMentorPage() {
     try {
       await axiosInstance.put(`/mentors/${id}`, formData);
       toast.success("Mentor updated successfully");
-      navigate("/superadmin/mentors");
+      navigate("/leadmentor/mentors");
     } catch (error: any) {
       console.error("Error updating mentor:", error);
       toast.error(error.response?.data?.message || "Failed to update mentor");
@@ -140,7 +140,7 @@ export default function EditMentorPage() {
       <div className="flex items-center gap-4">
         <Button
           variant="ghost"
-          onClick={() => navigate("/superadmin/mentors")}
+          onClick={() => navigate("/leadmentor/mentors")}
           className="p-2"
         >
           <ArrowLeft className="h-4 w-4" />
@@ -264,7 +264,7 @@ export default function EditMentorPage() {
           <Button
             type="button"
             variant="outline"
-            onClick={() => navigate("/superadmin/mentors")}
+            onClick={() => navigate("/leadmentor/mentors")}
           >
             Cancel
           </Button>

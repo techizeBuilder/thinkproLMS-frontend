@@ -43,6 +43,7 @@ import LeadMentorEditLeadMentorPage from "../pages/Dashboard/LeadMentor/LeadMent
 // LeadMentor Mentor & Student Management
 import MentorsPage from "../pages/Dashboard/LeadMentor/Mentors";
 import CreateMentorPage from "../pages/Dashboard/LeadMentor/Mentors/Create";
+import EditMentorPage from "../pages/Dashboard/LeadMentor/Mentors/Edit";
 import StudentsPage from "../pages/Dashboard/LeadMentor/Students";
 import CreateStudentPage from "../pages/Dashboard/LeadMentor/Students/Create";
 import EditStudentPage from "../pages/Dashboard/LeadMentor/Students/Edit";
@@ -380,6 +381,7 @@ export default function AppRouter() {
           {/* Mentor Management */}
           <Route path="mentors" element={<MentorsPage />} />
           <Route path="mentors/create" element={<CreateMentorPage />} />
+          <Route path="mentors/:id/edit" element={<EditMentorPage />} />
           
           {/* Student Management */}
           <Route path="students" element={<StudentsPage />} />

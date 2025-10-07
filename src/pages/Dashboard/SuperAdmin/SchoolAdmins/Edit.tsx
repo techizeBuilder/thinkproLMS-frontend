@@ -8,6 +8,8 @@ import { ArrowLeft } from "lucide-react";
 import { schoolAdminService, type SchoolAdmin, type UpdateSchoolAdminData } from "@/api/schoolAdminService";
 import { schoolService, type School } from "@/api/schoolService";
 import { MultiSelect } from "@/components/ui/multi-select";
+import { PhoneInput } from "@/components/ui/phone-input";
+import { isValidPhoneNumber } from "@/utils/validation";
 import { toast } from "sonner";
 
 export default function EditSchoolAdminPage() {
@@ -86,6 +88,12 @@ export default function EditSchoolAdminPage() {
     e.preventDefault();
     if (!id) return;
     
+    // Validate phone number before submission
+    if (formData.phoneNumber && !isValidPhoneNumber(formData.phoneNumber)) {
+      toast.error("Please enter a valid phone number");
+      return;
+    }
+    
     setLoading(true);
 
     try {
@@ -94,6 +102,8 @@ export default function EditSchoolAdminPage() {
       if (response.success) {
         toast.success(response.message || "School admin updated successfully");
         navigate(`${basePath}/school-admins`);
+      } else {
+        toast.error(response.message || "Failed to update school admin");
       }
     } catch (error: any) {
       toast.error(error.response?.data?.message || "Failed to update school admin");
@@ -143,18 +153,12 @@ export default function EditSchoolAdminPage() {
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="space-y-2">
-              <Label htmlFor="phoneNumber">Phone Number *</Label>
-              <Input
-                id="phoneNumber"
-                name="phoneNumber"
-                type="tel"
-                value={formData.phoneNumber}
-                onChange={handleInputChange}
-                placeholder="Enter phone number"
-                required
-              />
-            </div>
+            <PhoneInput
+              label="Phone Number"
+              value={formData.phoneNumber}
+              onChange={(value) => setFormData(prev => ({ ...prev, phoneNumber: value }))}
+              required
+            />
 
             <div className="space-y-2">
               <Label htmlFor="assignedSchools">Assign to Schools *</Label>

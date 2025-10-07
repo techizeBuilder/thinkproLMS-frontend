@@ -57,7 +57,7 @@ export default function EditStudentPage() {
       setStudent(studentData);
       setFormData({
         name: studentData.user.name,
-        grade: studentData.grade,
+        grade: `Grade ${studentData.grade}`, // Convert numeric grade to "Grade X" format
         section: studentData.section || "",
         parentEmail: studentData.parentEmail || "",
         parentPhoneNumber: studentData.parentPhoneNumber || "",
@@ -80,7 +80,13 @@ export default function EditStudentPage() {
     setLoading(true);
 
     try {
-      await axiosInstance.put(`/students/${id}`, formData);
+      // Convert "Grade X" format back to numeric value for backend
+      const submitData = {
+        ...formData,
+        grade: parseInt(formData.grade.replace('Grade ', '')), // Convert "Grade 5" to 5
+      };
+      
+      await axiosInstance.put(`/students/${id}`, submitData);
       navigate(studentsPath);
     } catch (error: any) {
       console.error("Error updating student:", error);
