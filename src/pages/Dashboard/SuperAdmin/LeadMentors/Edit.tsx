@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { ArrowLeft, Globe, Shield } from "lucide-react";
@@ -48,7 +47,7 @@ export default function EditLeadMentorPage() {
         const mentor = response.data;
         setLeadMentor(mentor);
         setFormData({
-          phoneNumber: mentor.phoneNumber,
+          phoneNumber: mentor.phoneNumber || "",
           assignedSchools: mentor.assignedSchools.map(s => s._id),
           hasAccessToAllSchools: mentor.hasAccessToAllSchools,
           permissions: mentor.permissions || [],
@@ -186,7 +185,7 @@ export default function EditLeadMentorPage() {
           <form onSubmit={handleSubmit} className="space-y-6">
             <PhoneInput
               label="Phone Number"
-              value={formData.phoneNumber}
+              value={formData.phoneNumber || ""}
               onChange={(value) => setFormData(prev => ({ ...prev, phoneNumber: value }))}
               required
             />
