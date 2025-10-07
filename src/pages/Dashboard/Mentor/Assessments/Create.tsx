@@ -283,6 +283,9 @@ export default function CreateAssessmentPage() {
     });
   };
 
+  // Convert a local datetime-local string to a UTC ISO string
+  const toUtcIsoString = (localDateTime: string) => new Date(localDateTime).toISOString();
+
   const handleSaveDraft = async () => {
     if (!validateForm()) return;
 
@@ -293,6 +296,8 @@ export default function CreateAssessmentPage() {
       
       const assessmentData = {
         ...formData,
+        startDate: toUtcIsoString(formData.startDate),
+        endDate: toUtcIsoString(formData.endDate),
         grade: gradeNumber, // Send numeric grade instead of string
         questions: selectedQuestions.map(q => ({
           questionId: q._id,
@@ -324,6 +329,8 @@ export default function CreateAssessmentPage() {
       
       const assessmentData = {
         ...formData,
+        startDate: toUtcIsoString(formData.startDate),
+        endDate: toUtcIsoString(formData.endDate),
         grade: gradeNumber, // Send numeric grade instead of string
         questions: selectedQuestions.map(q => ({
           questionId: q._id,
