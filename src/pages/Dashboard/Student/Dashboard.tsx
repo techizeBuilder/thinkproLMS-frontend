@@ -5,11 +5,52 @@ import {
   CardHeader, 
   CardTitle 
 } from "@/components/ui/card"
-import { BookOpen, Clock, Award, TrendingUp, ClipboardList } from "lucide-react"
+import { BookOpen, FileText, Award, MessageSquare, Bell, Calendar } from "lucide-react"
 import { Link } from "react-router-dom"
 import { Button } from "@/components/ui/button"
+import { useState, useEffect } from "react"
+import { resourceService } from "@/api/resourceService"
+import { studentAssessmentService } from "@/api/assessmentService"
+import { certificateService } from "@/api/certificateService"
+import { getConversations } from "@/api/messageService"
 
 export default function StudentDashboard() {
+  const [stats, setStats] = useState({
+    resources: 0,
+    assessments: 0,
+    certificates: 0,
+    messages: 0
+  });
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchDashboardData();
+  }, []);
+
+  const fetchDashboardData = async () => {
+    try {
+      const [resourcesRes, assessmentsRes, certificatesRes, conversationsRes] = await Promise.allSettled([
+        resourceService.getByCategory("student", { limit: 1 }),
+        studentAssessmentService.getAvailableAssessments(),
+        certificateService.getStudentCertificates(),
+        getConversations()
+      ]);
+
+      setStats({
+        resources: resourcesRes.status === 'fulfilled' ? resourcesRes.value.pagination?.total || 0 : 0,
+        assessments: assessmentsRes.status === 'fulfilled' ? 
+          (assessmentsRes.value.data?.filter((assessment: any) => assessment.assessmentStatus === "available") || []).length : 0,
+        certificates: certificatesRes.status === 'fulfilled' ? certificatesRes.value.data?.length || 0 : 0,
+        messages: conversationsRes.status === 'fulfilled' ? 
+          conversationsRes.value.conversations?.reduce((total, conv) => total + conv.unreadCount, 0) || 0 : 0
+      });
+    } catch (error) {
+      console.error("Error fetching dashboard data:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="p-6 space-y-6">
       {/* Dashboard Stats */}
@@ -17,14 +58,16 @@ export default function StudentDashboard() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
-              Enrolled Courses
+              Available Resources
             </CardTitle>
             <BookOpen className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">0</div>
+            <div className="text-2xl font-bold">
+              {loading ? "..." : stats.resources}
+            </div>
             <p className="text-xs text-muted-foreground">
-              Active courses
+              Learning materials
             </p>
           </CardContent>
         </Card>
@@ -32,14 +75,16 @@ export default function StudentDashboard() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
-              Study Time
+              Available Assessments
             </CardTitle>
-            <Clock className="h-4 w-4 text-muted-foreground" />
+            <FileText className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">0h</div>
+            <div className="text-2xl font-bold">
+              {loading ? "..." : stats.assessments}
+            </div>
             <p className="text-xs text-muted-foreground">
-              This week
+              Ready to start now
             </p>
           </CardContent>
         </Card>
@@ -47,14 +92,16 @@ export default function StudentDashboard() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
-              Achievements
+              Certificates
             </CardTitle>
             <Award className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">0</div>
+            <div className="text-2xl font-bold">
+              {loading ? "..." : stats.certificates}
+            </div>
             <p className="text-xs text-muted-foreground">
-              Badges earned
+              Earned certificates
             </p>
           </CardContent>
         </Card>
@@ -62,25 +109,27 @@ export default function StudentDashboard() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
-              Progress
+              Messages
             </CardTitle>
-            <TrendingUp className="h-4 w-4 text-muted-foreground" />
+            <MessageSquare className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">0%</div>
+            <div className="text-2xl font-bold">
+              {loading ? "..." : stats.messages}
+            </div>
             <p className="text-xs text-muted-foreground">
-              Overall completion
+              Unread messages
             </p>
           </CardContent>
         </Card>
       </div>
 
       {/* Quick Actions */}
-      <div className="grid gap-4 md:grid-cols-2">
+      <div className="grid gap-4 md:grid-cols-3">
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <ClipboardList className="h-5 w-5" />
+              <FileText className="h-5 w-5" />
               Assessments
             </CardTitle>
             <CardDescription>
@@ -119,22 +168,65 @@ export default function StudentDashboard() {
             </Button>
           </CardContent>
         </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Bell className="h-5 w-5" />
+              Notifications
+            </CardTitle>
+            <CardDescription>
+              Stay updated with your latest notifications
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Button asChild className="w-full">
+              <Link to="/student/notifications">
+                View Notifications
+              </Link>
+            </Button>
+          </CardContent>
+        </Card>
       </div>
 
-      {/* Recent Activity */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Recent Activity</CardTitle>
-          <CardDescription>
-            Your latest learning activities and progress
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="text-center py-8 text-muted-foreground">
-            No recent activity to display
-          </div>
-        </CardContent>
-      </Card>
+      {/* Recent Activity & Messages */}
+      <div className="grid gap-4 md:grid-cols-2">
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Calendar className="h-5 w-5" />
+              Recent Activity
+            </CardTitle>
+            <CardDescription>
+              Your latest learning activities and progress
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="text-center py-8 text-muted-foreground">
+              No recent activity to display
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <MessageSquare className="h-5 w-5" />
+              Messages
+            </CardTitle>
+            <CardDescription>
+              Communicate with your mentor and peers
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Button asChild className="w-full">
+              <Link to="/student/messages">
+                Open Messages
+              </Link>
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   )
 }

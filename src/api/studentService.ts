@@ -9,6 +9,7 @@ export interface Student {
     isVerified: boolean;
     createdAt: string;
   };
+  studentId: string;
   rollNumber: string;
   grade: string;
   section: string;

@@ -1,12 +1,33 @@
 import ProfileCard from '@/components/Profile/ProfileCard';
 import { BookOpen, Award, FileText, BarChart3, Users, Target } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { studentService } from '@/api/studentService';
+import type { Student } from '@/api/studentService';
 
 export default function StudentProfile() {
+  const [student, setStudent] = useState<Student | null>(null);
+
+  useEffect(() => {
+    fetchStudentProfile();
+  }, []);
+
+  const fetchStudentProfile = async () => {
+    try {
+      const response = await studentService.getMyProfile();
+      if (response.success) {
+        setStudent(response.data);
+      }
+    } catch (error) {
+      console.error("Error fetching student profile:", error);
+    }
+  };
 
   return (
     <div className="container mx-auto p-6">
       <div className="mb-6">
-        <h1 className="text-3xl font-bold">Profile</h1>
+        <h1 className="text-3xl font-bold">
+          Profile {student?.rollNumber && `(${student.rollNumber})`}
+        </h1>
         <p className="text-muted-foreground">View your student account and academic progress</p>
       </div>
 
