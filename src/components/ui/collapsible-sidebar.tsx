@@ -10,6 +10,8 @@ import { NavLink, useLocation } from "react-router-dom"
 interface SidebarContextType {
   isCollapsed: boolean
   toggle: () => void
+  isMobile: boolean
+  isMobileOpen: boolean
 }
 
 const SidebarContext = React.createContext<SidebarContextType | undefined>(undefined)
@@ -33,10 +35,15 @@ export function SidebarProvider({
 }: SidebarProviderProps) {
   const [isCollapsed, setIsCollapsed] = React.useState(defaultCollapsed)
   const [isMobile, setIsMobile] = React.useState(false)
+  const [isMobileOpen, setIsMobileOpen] = React.useState(false)
 
   const toggle = React.useCallback(() => {
-    setIsCollapsed(prev => !prev)
-  }, [])
+    if (isMobile) {
+      setIsMobileOpen(prev => !prev)
+    } else {
+      setIsCollapsed(prev => !prev)
+    }
+  }, [isMobile])
 
   // Handle responsive behavior
   React.useEffect(() => {
@@ -44,15 +51,15 @@ export function SidebarProvider({
       const mobile = window.innerWidth < 768
       setIsMobile(mobile)
       // Auto-collapse on mobile
-      if (mobile && !isCollapsed) {
-        setIsCollapsed(true)
+      if (mobile) {
+        setIsMobileOpen(false)
       }
     }
 
     checkScreenSize()
     window.addEventListener('resize', checkScreenSize)
     return () => window.removeEventListener('resize', checkScreenSize)
-  }, [isCollapsed])
+  }, [])
 
   // Save sidebar state to localStorage (only for desktop)
   React.useEffect(() => {
@@ -70,8 +77,27 @@ export function SidebarProvider({
     }
   }, [isCollapsed, isMobile])
 
+  // Close mobile sidebar when clicking outside
+  React.useEffect(() => {
+    if (isMobile && isMobileOpen) {
+      const handleClickOutside = (event: MouseEvent) => {
+        const target = event.target as Element
+        if (!target.closest('[data-sidebar]') && !target.closest('[data-sidebar-toggle]')) {
+          setIsMobileOpen(false)
+        }
+      }
+      document.addEventListener('mousedown', handleClickOutside)
+      return () => document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [isMobile, isMobileOpen])
+
   return (
-    <SidebarContext.Provider value={{ isCollapsed, toggle }}>
+    <SidebarContext.Provider value={{ 
+      isCollapsed: isMobile ? false : isCollapsed, 
+      toggle,
+      isMobile,
+      isMobileOpen 
+    }}>
       {children}
     </SidebarContext.Provider>
   )
@@ -82,20 +108,36 @@ interface SidebarProps extends React.HTMLAttributes<HTMLDivElement> {
 }
 
 export function Sidebar({ children, className, ...props }: SidebarProps) {
-  const { isCollapsed } = useSidebar()
+  const { isCollapsed, isMobile, isMobileOpen } = useSidebar()
 
   return (
-    <div
-      className={cn(
-        "relative flex h-screen flex-col border-r bg-background transition-all duration-300 ease-in-out",
-        "md:relative md:translate-x-0", // Desktop behavior
-        isCollapsed ? "w-16" : "w-64",
-        className
+    <>
+      {/* Mobile overlay */}
+      {isMobile && isMobileOpen && (
+        <div className="fixed inset-0 z-40 bg-black/50 md:hidden" />
       )}
-      {...props}
-    >
-      {children}
-    </div>
+      
+      <div
+        data-sidebar
+        className={cn(
+          "relative flex h-screen flex-col border-r bg-background transition-all duration-300 ease-in-out",
+          // Desktop behavior
+          "md:relative md:translate-x-0",
+          // Mobile behavior
+          isMobile && "fixed left-0 top-0 z-50 transform",
+          isMobile && !isMobileOpen && "-translate-x-full",
+          isMobile && isMobileOpen && "translate-x-0",
+          // Desktop width
+          !isMobile && (isCollapsed ? "w-16" : "w-64"),
+          // Mobile width
+          isMobile && "w-64",
+          className
+        )}
+        {...props}
+      >
+        {children}
+      </div>
+    </>
   )
 }
 
@@ -146,26 +188,35 @@ export function SidebarContent({
 interface SidebarToggleProps extends React.ComponentProps<typeof Button> {}
 
 export function SidebarToggle({ className, ...props }: SidebarToggleProps) {
-  const { isCollapsed, toggle } = useSidebar()
+  const { isCollapsed, toggle, isMobile, isMobileOpen } = useSidebar()
 
   return (
     <Button
       variant="ghost"
       size="icon"
       onClick={toggle}
+      data-sidebar-toggle
       className={cn(
         "h-8 w-8 rounded-md",
         className
       )}
       {...props}
     >
-      {isCollapsed ? (
+      {isMobile ? (
+        // Mobile: show hamburger menu icon
+        <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+        </svg>
+      ) : isCollapsed ? (
         <PanelLeftOpen className="h-4 w-4" />
       ) : (
         <PanelLeftClose className="h-4 w-4" />
       )}
       <span className="sr-only">
-        {isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+        {isMobile 
+          ? (isMobileOpen ? "Close sidebar" : "Open sidebar")
+          : (isCollapsed ? "Expand sidebar" : "Collapse sidebar")
+        }
       </span>
     </Button>
   )

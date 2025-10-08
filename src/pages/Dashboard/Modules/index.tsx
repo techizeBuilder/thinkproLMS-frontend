@@ -112,37 +112,6 @@ export default function Modules() {
         )}
       </div>
 
-      {/* Stats */}
-      <div className="grid gap-4 md:grid-cols-2">
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">
-                  Total Modules
-                </p>
-                <p className="text-2xl font-bold">{modules.length}</p>
-              </div>
-              <FolderOpen className="h-8 w-8 text-muted-foreground" />
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">
-                  Filtered Results
-                </p>
-                <p className="text-2xl font-bold">{filteredModules.length}</p>
-              </div>
-              <Calendar className="h-8 w-8 text-muted-foreground" />
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
       {/* Search */}
       <div className="flex flex-col sm:flex-row gap-4">
         <div className="flex-1">

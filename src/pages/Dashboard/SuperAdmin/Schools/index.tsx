@@ -6,19 +6,9 @@ import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Plus, Edit, Trash2, MapPin, Building, Power, PowerOff } from "lucide-react";
+import { Plus, MapPin, Building } from "lucide-react";
+import { MobileActions } from "@/components/ui/mobile-actions";
 import { schoolService, type School } from "@/api/schoolService";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
 
 export default function SchoolsPage() {
@@ -117,15 +107,15 @@ export default function SchoolsPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-bold">Schools</h1>
-          <p className="text-gray-600">
+          <h1 className="text-2xl md:text-3xl font-bold">Schools</h1>
+          <p className="text-gray-600 text-sm md:text-base">
             Manage all schools in the system ({schools.length} {schools.length === 1 ? 'school' : 'schools'})
           </p>
         </div>
-        <Link to="/superadmin/schools/create">
-          <Button>
+        <Link to="/superadmin/schools/create" className="w-full sm:w-auto">
+          <Button className="w-full sm:w-auto">
             <Plus className="mr-2 h-4 w-4" />
             Add School
           </Button>
@@ -138,7 +128,7 @@ export default function SchoolsPage() {
           <CardTitle>Filters</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             <div className="space-y-2">
               <Label htmlFor="state-filter">State</Label>
               <Select value={selectedState} onValueChange={setSelectedState}>
@@ -218,23 +208,24 @@ export default function SchoolsPage() {
       ) : (
         <Card>
           <CardContent className="p-0">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>School Name</TableHead>
-                  <TableHead>Board</TableHead>
-                  <TableHead>Location</TableHead>
-                  <TableHead>Address</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Branch</TableHead>
-                  <TableHead>Affiliation</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="sticky left-0 bg-background z-10 min-w-[200px]">School Name</TableHead>
+                    <TableHead className="min-w-[100px]">Board</TableHead>
+                    <TableHead className="min-w-[150px]">Location</TableHead>
+                    <TableHead className="min-w-[200px]">Address</TableHead>
+                    <TableHead className="min-w-[100px]">Status</TableHead>
+                    <TableHead className="min-w-[120px]">Branch</TableHead>
+                    <TableHead className="min-w-[150px]">Affiliation</TableHead>
+                    <TableHead className="text-right min-w-[120px]">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
                 {schools.map((school) => (
                   <TableRow key={school._id} className={!school.isActive ? 'opacity-75' : ''}>
-                    <TableCell className="font-medium">
+                    <TableCell className="font-medium sticky left-0 bg-background z-10 min-w-[200px]">
                       {school.name}
                     </TableCell>
                     <TableCell>
@@ -277,59 +268,20 @@ export default function SchoolsPage() {
                       )}
                     </TableCell>
                     <TableCell className="text-right">
-                      <div className="flex justify-end gap-2">
-                        <Button
-                          variant="outline"
-                          size="icon"
-                          onClick={() => handleToggleStatus(school._id, school.name, school.isActive)}
-                          disabled={toggleLoading === school._id}
-                          className={school.isActive ? "text-orange-600 hover:text-orange-700" : "text-green-600 hover:text-green-700"}
-                          title={school.isActive ? "Deactivate school" : "Activate school"}
-                        >
-                          {toggleLoading === school._id ? (
-                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current"></div>
-                          ) : school.isActive ? (
-                            <PowerOff className="h-4 w-4" />
-                          ) : (
-                            <Power className="h-4 w-4" />
-                          )}
-                        </Button>
-                        <Link to={`/superadmin/schools/${school._id}/edit`}>
-                          <Button variant="outline" size="icon">
-                            <Edit className="h-4 w-4" />
-                          </Button>
-                        </Link>
-                        <AlertDialog>
-                          <AlertDialogTrigger asChild>
-                            <Button variant="outline" size="icon" className="text-red-600 hover:text-red-700">
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          </AlertDialogTrigger>
-                          <AlertDialogContent>
-                            <AlertDialogHeader>
-                              <AlertDialogTitle>Delete School</AlertDialogTitle>
-                              <AlertDialogDescription>
-                                Are you sure you want to delete "{school.name}"? This action cannot be undone.
-                              </AlertDialogDescription>
-                            </AlertDialogHeader>
-                            <AlertDialogFooter>
-                              <AlertDialogCancel>Cancel</AlertDialogCancel>
-                              <AlertDialogAction
-                                onClick={() => handleDelete(school._id, school.name)}
-                                disabled={deleteLoading === school._id}
-                                className="bg-red-600 hover:bg-red-700"
-                              >
-                                {deleteLoading === school._id ? "Deleting..." : "Delete"}
-                              </AlertDialogAction>
-                            </AlertDialogFooter>
-                          </AlertDialogContent>
-                        </AlertDialog>
-                      </div>
+                      <MobileActions
+                        editUrl={`/superadmin/schools/${school._id}/edit`}
+                        onToggleStatus={() => handleToggleStatus(school._id, school.name, school.isActive)}
+                        onDelete={() => handleDelete(school._id, school.name)}
+                        isActive={school.isActive}
+                        deleteLoading={deleteLoading === school._id}
+                        toggleLoading={toggleLoading === school._id}
+                      />
                     </TableCell>
                   </TableRow>
                 ))}
               </TableBody>
             </Table>
+            </div>
           </CardContent>
         </Card>
       )}

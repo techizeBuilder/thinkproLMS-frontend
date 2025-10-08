@@ -54,14 +54,14 @@ const CreateSuperAdminPage = () => {
           </Link>
         </Button>
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Create SuperAdmin</h1>
-          <p className="text-muted-foreground">
+          <h1 className="text-2xl md:text-3xl font-bold tracking-tight">Create SuperAdmin</h1>
+          <p className="text-muted-foreground text-sm md:text-base">
             Add a new superadmin to the system
           </p>
         </div>
       </div>
 
-      <div className="max-w-2xl w-full mx-auto">
+      <div className="max-w-2xl w-full mx-auto px-4 md:px-0">
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -85,6 +85,7 @@ const CreateSuperAdminPage = () => {
                   value={formData.name}
                   onChange={handleChange}
                   disabled={isLoading}
+                  className="h-11 text-base"
                 />
               </div>
 
@@ -99,22 +100,24 @@ const CreateSuperAdminPage = () => {
                   value={formData.email}
                   onChange={handleChange}
                   disabled={isLoading}
+                  className="h-11 text-base"
                 />
                 <p className="text-sm text-muted-foreground">
                   A setup invitation will be sent to this email address
                 </p>
               </div>
 
-              <div className="flex justify-end gap-4 pt-4">
+              <div className="flex flex-col sm:flex-row justify-end gap-4 pt-4">
                 <Button
                   type="button"
                   variant="outline"
                   onClick={() => navigate("/superadmin/admins")}
                   disabled={isLoading}
+                  className="h-11 w-full sm:w-auto"
                 >
                   Cancel
                 </Button>
-                <Button type="submit" disabled={isLoading}>
+                <Button type="submit" disabled={isLoading} className="h-11 w-full sm:w-auto">
                   {isLoading ? (
                     <>
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />

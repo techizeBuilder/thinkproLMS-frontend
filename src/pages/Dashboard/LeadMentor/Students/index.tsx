@@ -7,20 +7,18 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import {
   Plus,
   Search,
-  Edit,
-  Trash2,
   Download,
   Upload,
   GraduationCap,
   Eye,
   ArrowUp,
-  KeyRound,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import axiosInstance from "@/api/axiosInstance";
 import { useStudentsPath } from "@/utils/navigation";
 import { ResetPasswordDialog } from "@/components/ResetPasswordDialog";
 import ProfilePictureDisplay from "@/components/ProfilePictureDisplay";
+import { MobileActions } from "@/components/ui/mobile-actions";
 
 interface School {
   _id: string;
@@ -217,14 +215,17 @@ export default function StudentsPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex justify-between items-center">
+      <div className="space-y-4">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Students</h1>
-          <p className="text-gray-600">Manage student accounts and records</p>
+          <h1 className="text-2xl md:text-3xl font-bold text-gray-900">Students</h1>
+          <p className="text-gray-600 text-sm md:text-base">Manage student accounts and records</p>
         </div>
-        <div className="flex gap-2">
+        
+        {/* Action Buttons */}
+        <div className="flex flex-wrap gap-2">
           <Button
             variant="outline"
+            size="sm"
             onClick={() => navigate(`${studentsPath}/promote`)}
             className="flex items-center gap-2"
           >
@@ -233,6 +234,7 @@ export default function StudentsPage() {
           </Button>
           <Button
             variant="outline"
+            size="sm"
             onClick={() => navigate(`${studentsPath}/bulk-upload`)}
             className="flex items-center gap-2"
           >
@@ -241,6 +243,7 @@ export default function StudentsPage() {
           </Button>
           <Button
             variant="outline"
+            size="sm"
             onClick={() => handleDownload("excel")}
             className="flex items-center gap-2"
           >
@@ -248,6 +251,7 @@ export default function StudentsPage() {
             Download List
           </Button>
           <Button
+            size="sm"
             onClick={() => navigate(`${studentsPath}/create`)}
             className="flex items-center gap-2"
           >
@@ -255,22 +259,40 @@ export default function StudentsPage() {
             Add Student
           </Button>
         </div>
+
+        {/* Summary Stats - moved below buttons */}
+        <div className="flex flex-wrap gap-4 text-sm">
+          <div className="flex items-center gap-2">
+            <span className="text-gray-600">Total:</span>
+            <span className="font-semibold text-blue-600">{students.length}</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="text-gray-600">Verified:</span>
+            <span className="font-semibold text-green-600">{students.filter((s) => s.user.isVerified).length}</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="text-gray-600">Pending:</span>
+            <span className="font-semibold text-orange-600">{students.filter((s) => !s.user.isVerified).length}</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="text-gray-600">Schools:</span>
+            <span className="font-semibold text-purple-600">{new Set(students.map((s) => s.school._id)).size}</span>
+          </div>
+        </div>
       </div>
 
       {/* Filters */}
       <Card>
         <CardContent className="p-4">
-          <div className="flex gap-4">
-            <div className="flex-1">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-                <Input
-                  placeholder="Search students by name, email, student ID..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10"
-                />
-              </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+              <Input
+                placeholder="Search students by name, email, student ID..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10"
+              />
             </div>
             <select
               value={selectedSchool}
@@ -302,43 +324,46 @@ export default function StudentsPage() {
 
       {/* Students Table */}
       <Card>
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Student</TableHead>
-              <TableHead>Student ID</TableHead>
-              <TableHead>Email</TableHead>
-              <TableHead>Grade</TableHead>
-              <TableHead>School</TableHead>
-              <TableHead>Parent Info</TableHead>
-              <TableHead>Password</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
+        <CardContent className="p-0">
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="sticky left-0 bg-background z-10 min-w-[200px]">Student</TableHead>
+                  <TableHead className="min-w-[120px]">Student ID</TableHead>
+                  <TableHead className="min-w-[180px]">Email</TableHead>
+                  <TableHead className="min-w-[100px]">Grade</TableHead>
+                  <TableHead className="min-w-[200px]">School</TableHead>
+                  <TableHead className="min-w-[150px]">Parent Info</TableHead>
+                  <TableHead className="min-w-[120px]">Password</TableHead>
+                  <TableHead className="text-right min-w-[120px]">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
             {filteredStudents.map((student) => (
               <TableRow key={student._id}>
-                <TableCell className="font-medium">
+                <TableCell className="font-medium sticky left-0 bg-background z-10 min-w-[200px]">
                   <div className="flex items-center gap-3">
-                    <div className="w-8 h-8">
+                    <div className="w-8 h-8 flex-shrink-0">
                       <ProfilePictureDisplay
                         profilePicture={student.user.profilePicture}
                         name={student.user.name}
                         size="sm"
                       />
                     </div>
-                    <div>
-                      <div className="font-medium">{student.user.name}</div>
-                      <div className="flex gap-2 mt-1">
+                    <div className="min-w-0 flex-1">
+                      <div className="font-medium truncate">{student.user.name}</div>
+                      <div className="flex gap-1 mt-1 flex-wrap">
                         <Badge
                           variant={
                             student.user.isVerified ? "default" : "secondary"
                           }
+                          className="text-xs truncate max-w-[80px]"
                         >
                           {student.user.isVerified ? "Verified" : "Pending"}
                         </Badge>
                         {!student.hasCustomCredentials && (
-                          <Badge variant="outline" className="text-xs">System Generated</Badge>
+                          <Badge variant="outline" className="text-xs truncate max-w-[100px]">System Generated</Badge>
                         )}
                       </div>
                     </div>
@@ -396,44 +421,24 @@ export default function StudentsPage() {
                   )}
                 </TableCell>
                 <TableCell className="text-right">
-                  <div className="flex gap-2 justify-end">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() =>
-                        setResetPasswordUser({
-                          id: student.user._id,
-                          name: student.user.name,
-                          email: student.user.email,
-                        })
-                      }
-                      title="Reset Password"
-                    >
-                      <KeyRound className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() =>
-                        navigate(`${studentsPath}/${student._id}/edit`)
-                      }
-                    >
-                      <Edit className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleDelete(student._id)}
-                      className="text-red-600 hover:text-red-700"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
+                  <MobileActions
+                    editUrl={`${studentsPath}/${student._id}/edit`}
+                    onResetPassword={() =>
+                      setResetPasswordUser({
+                        id: student.user._id,
+                        name: student.user.name,
+                        email: student.user.email,
+                      })
+                    }
+                    onDelete={() => handleDelete(student._id)}
+                  />
                 </TableCell>
               </TableRow>
             ))}
-          </TableBody>
-        </Table>
+              </TableBody>
+            </Table>
+          </div>
+        </CardContent>
       </Card>
 
       {filteredStudents.length === 0 && (
@@ -443,42 +448,6 @@ export default function StudentsPage() {
           </CardContent>
         </Card>
       )}
-
-      {/* Summary Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card>
-          <CardContent className="p-4 text-center">
-            <div className="text-2xl font-bold text-blue-600">
-              {students.length}
-            </div>
-            <div className="text-sm text-gray-600">Total Students</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-4 text-center">
-            <div className="text-2xl font-bold text-green-600">
-              {students.filter((s) => s.user.isVerified).length}
-            </div>
-            <div className="text-sm text-gray-600">Verified</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-4 text-center">
-            <div className="text-2xl font-bold text-orange-600">
-              {students.filter((s) => !s.user.isVerified).length}
-            </div>
-            <div className="text-sm text-gray-600">Pending</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-4 text-center">
-            <div className="text-2xl font-bold text-purple-600">
-              {new Set(students.map((s) => s.school._id)).size}
-            </div>
-            <div className="text-sm text-gray-600">Schools</div>
-          </CardContent>
-        </Card>
-      </div>
 
       {/* Reset Password Dialog */}
       {resetPasswordUser && (

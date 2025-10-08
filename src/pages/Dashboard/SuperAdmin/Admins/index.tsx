@@ -16,21 +16,11 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 import axiosInstance from "@/api/axiosInstance";
 import { toast } from "sonner";
-import { Plus, Trash2, Shield, Users, Loader2 } from "lucide-react";
+import { Plus, Shield, Users, Loader2 } from "lucide-react";
+import { MobileActions } from "@/components/ui/mobile-actions";
 
 interface SuperAdmin {
   _id: string;
@@ -95,14 +85,14 @@ const SuperAdminsPage = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">SuperAdmins</h1>
-          <p className="text-muted-foreground">
+          <h1 className="text-2xl md:text-3xl font-bold tracking-tight">SuperAdmins</h1>
+          <p className="text-muted-foreground text-sm md:text-base">
             Manage system superadmins and their permissions
           </p>
         </div>
-        <Button asChild>
+        <Button asChild className="w-full sm:w-auto">
           <Link to="/superadmin/admins/create">
             <Plus className="mr-2 h-4 w-4" />
             Add SuperAdmin
@@ -120,9 +110,9 @@ const SuperAdminsPage = () => {
             A list of all superadmins in the system. System superadmin cannot be deleted.
           </CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="p-0">
           {superAdmins.length === 0 ? (
-            <div className="text-center py-12">
+            <div className="text-center py-12 px-6">
               <Users className="mx-auto h-12 w-12 text-muted-foreground" />
               <h3 className="mt-4 text-lg font-semibold">No superadmins found</h3>
               <p className="text-muted-foreground">
@@ -136,20 +126,21 @@ const SuperAdminsPage = () => {
               </Button>
             </div>
           ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Name</TableHead>
-                  <TableHead>Email</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Created</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="sticky left-0 bg-background z-10 min-w-[150px]">Name</TableHead>
+                    <TableHead className="min-w-[200px]">Email</TableHead>
+                    <TableHead className="min-w-[120px]">Status</TableHead>
+                    <TableHead className="min-w-[100px]">Created</TableHead>
+                    <TableHead className="text-right min-w-[120px]">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
                 {superAdmins.map((superAdmin) => (
                   <TableRow key={superAdmin._id}>
-                    <TableCell className="font-medium">
+                    <TableCell className="font-medium sticky left-0 bg-background z-10 min-w-[150px]">
                       <div className="flex items-center gap-2">
                         {superAdmin.name}
                         {superAdmin.isSystemAdmin && (
@@ -174,51 +165,17 @@ const SuperAdminsPage = () => {
                       {formatDate(superAdmin.createdAt)}
                     </TableCell>
                     <TableCell className="text-right">
-                      {!superAdmin.isSystemAdmin ? (
-                        <AlertDialog>
-                          <AlertDialogTrigger asChild>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              className="text-destructive hover:text-destructive hover:bg-destructive/10"
-                              disabled={deleteLoading === superAdmin._id}
-                            >
-                              {deleteLoading === superAdmin._id ? (
-                                <Loader2 className="h-4 w-4 animate-spin" />
-                              ) : (
-                                <Trash2 className="h-4 w-4" />
-                              )}
-                            </Button>
-                          </AlertDialogTrigger>
-                          <AlertDialogContent>
-                            <AlertDialogHeader>
-                              <AlertDialogTitle>Delete SuperAdmin</AlertDialogTitle>
-                              <AlertDialogDescription>
-                                Are you sure you want to delete <strong>{superAdmin.name}</strong>? 
-                                This action cannot be undone and will permanently remove their access to the system.
-                              </AlertDialogDescription>
-                            </AlertDialogHeader>
-                            <AlertDialogFooter>
-                              <AlertDialogCancel>Cancel</AlertDialogCancel>
-                              <AlertDialogAction
-                                onClick={() => handleDelete(superAdmin._id, superAdmin.name)}
-                                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                              >
-                                Delete
-                              </AlertDialogAction>
-                            </AlertDialogFooter>
-                          </AlertDialogContent>
-                        </AlertDialog>
-                      ) : (
-                        <Badge variant="outline" className="text-muted-foreground">
-                          Protected
-                        </Badge>
-                      )}
+                      <MobileActions
+                        onDelete={!superAdmin.isSystemAdmin ? () => handleDelete(superAdmin._id, superAdmin.name) : undefined}
+                        isSystemAdmin={superAdmin.isSystemAdmin}
+                        deleteLoading={deleteLoading === superAdmin._id}
+                      />
                     </TableCell>
                   </TableRow>
                 ))}
               </TableBody>
             </Table>
+            </div>
           )}
         </CardContent>
       </Card>

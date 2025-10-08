@@ -1,22 +1,12 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Plus, Edit, Trash2, Mail, Phone, CheckCircle, KeyRound } from "lucide-react";
+import { Plus, Mail, Phone, CheckCircle } from "lucide-react";
+import { MobileActions } from "@/components/ui/mobile-actions";
 import { schoolAdminService, type SchoolAdmin } from "@/api/schoolAdminService";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
 import { ResetPasswordDialog } from "@/components/ResetPasswordDialog";
 
@@ -77,13 +67,13 @@ export default function SchoolAdminsPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-bold">School Admins</h1>
-          <p className="text-gray-600">Manage school administrators</p>
+          <h1 className="text-2xl md:text-3xl font-bold">School Admins</h1>
+          <p className="text-gray-600 text-sm md:text-base">Manage school administrators</p>
         </div>
-        <Link to={`${basePath}/school-admins/create`}>
-          <Button>
+        <Link to={`${basePath}/school-admins/create`} className="w-full sm:w-auto">
+          <Button className="w-full sm:w-auto">
             <Plus className="mr-2 h-4 w-4" />
             Add School Admin
           </Button>
@@ -108,22 +98,24 @@ export default function SchoolAdminsPage() {
         </Card>
       ) : (
         <Card>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Name</TableHead>
-                <TableHead>Email</TableHead>
-                <TableHead>Phone</TableHead>
-                <TableHead>Schools</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Created</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
+          <CardContent className="p-0">
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="sticky left-0 bg-background z-10 min-w-[150px]">Name</TableHead>
+                    <TableHead className="min-w-[200px]">Email</TableHead>
+                    <TableHead className="min-w-[120px]">Phone</TableHead>
+                    <TableHead className="min-w-[150px]">Schools</TableHead>
+                    <TableHead className="min-w-[120px]">Status</TableHead>
+                    <TableHead className="min-w-[100px]">Created</TableHead>
+                    <TableHead className="text-right min-w-[120px]">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
               {schoolAdmins.map((admin) => (
                 <TableRow key={admin._id}>
-                  <TableCell className="font-medium">{admin.user.name}</TableCell>
+                  <TableCell className="font-medium sticky left-0 bg-background z-10 min-w-[150px]">{admin.user.name}</TableCell>
                   <TableCell>
                     <div className="flex items-center text-sm">
                       <Mail className="mr-2 h-4 w-4 text-gray-500" />
@@ -169,57 +161,25 @@ export default function SchoolAdminsPage() {
                     {new Date(admin.createdAt).toLocaleDateString()}
                   </TableCell>
                   <TableCell className="text-right">
-                    <div className="flex gap-2 justify-end">
-                      <Button
-                        variant="outline"
-                        size="icon"
-                        onClick={() =>
-                          setResetPasswordUser({
-                            id: admin.user._id,
-                            name: admin.user.name,
-                            email: admin.user.email,
-                          })
-                        }
-                        title="Reset Password"
-                      >
-                        <KeyRound className="h-4 w-4" />
-                      </Button>
-                      <Link to={`${basePath}/school-admins/${admin._id}/edit`}>
-                        <Button variant="outline" size="icon">
-                          <Edit className="h-4 w-4" />
-                        </Button>
-                      </Link>
-                      <AlertDialog>
-                        <AlertDialogTrigger asChild>
-                          <Button variant="outline" size="icon" className="text-red-600 hover:text-red-700">
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </AlertDialogTrigger>
-                        <AlertDialogContent>
-                          <AlertDialogHeader>
-                            <AlertDialogTitle>Delete School Admin</AlertDialogTitle>
-                            <AlertDialogDescription>
-                              Are you sure you want to delete "{admin.user.name}"? This action cannot be undone.
-                            </AlertDialogDescription>
-                          </AlertDialogHeader>
-                          <AlertDialogFooter>
-                            <AlertDialogCancel>Cancel</AlertDialogCancel>
-                            <AlertDialogAction
-                              onClick={() => handleDelete(admin._id, admin.user.name)}
-                              disabled={deleteLoading === admin._id}
-                              className="bg-red-600 hover:bg-red-700"
-                            >
-                              {deleteLoading === admin._id ? "Deleting..." : "Delete"}
-                            </AlertDialogAction>
-                          </AlertDialogFooter>
-                        </AlertDialogContent>
-                      </AlertDialog>
-                    </div>
+                    <MobileActions
+                      editUrl={`${basePath}/school-admins/${admin._id}/edit`}
+                      onResetPassword={() =>
+                        setResetPasswordUser({
+                          id: admin.user._id,
+                          name: admin.user.name,
+                          email: admin.user.email,
+                        })
+                      }
+                      onDelete={() => handleDelete(admin._id, admin.user.name)}
+                      deleteLoading={deleteLoading === admin._id}
+                    />
                   </TableCell>
                 </TableRow>
               ))}
-            </TableBody>
-          </Table>
+              </TableBody>
+            </Table>
+            </div>
+          </CardContent>
         </Card>
       )}
 
