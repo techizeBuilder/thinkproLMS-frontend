@@ -311,7 +311,6 @@ export default function StudentsPage() {
               <TableHead>Grade</TableHead>
               <TableHead>School</TableHead>
               <TableHead>Parent Info</TableHead>
-              <TableHead>Status</TableHead>
               <TableHead>Password</TableHead>
               <TableHead className="text-right">Actions</TableHead>
             </TableRow>
@@ -377,20 +376,6 @@ export default function StudentsPage() {
                   ) : (
                     <span className="text-gray-400 text-sm">No parent info</span>
                   )}
-                </TableCell>
-                <TableCell>
-                  <div className="flex flex-col gap-1">
-                    <Badge
-                      variant={
-                        student.user.isVerified ? "default" : "secondary"
-                      }
-                    >
-                      {student.user.isVerified ? "Verified" : "Pending"}
-                    </Badge>
-                    {!student.hasCustomCredentials && (
-                      <Badge variant="outline" className="text-xs">System Generated</Badge>
-                    )}
-                  </div>
                 </TableCell>
                 <TableCell>
                   {showPassword[student._id] ? (
