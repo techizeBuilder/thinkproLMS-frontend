@@ -1,83 +1,80 @@
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { 
   Video, 
   FileText, 
-  Download, 
   ExternalLink,
   BookOpen,
-  Play
+  Play,
+  Loader2
 } from "lucide-react";
+import { resourceService, type Resource } from "@/api/resourceService";
+import { getFileTypeBadgeColor, formatFileSize } from "@/utils/resourceUtils";
+import { toast } from "sonner";
 
 export default function GuestResources() {
-  const resources = [
-    {
-      id: 1,
-      title: "Platform Overview Video",
-      type: "video",
-      description: "Comprehensive introduction to ThinkPro LMS features and capabilities.",
-      duration: "5:30",
-      icon: Video,
-      color: "blue"
-    },
-    {
-      id: 2,
-      title: "Feature Guide PDF",
-      type: "pdf",
-      description: "Detailed guide covering all platform features and functionalities.",
-      size: "2.4 MB",
-      icon: FileText,
-      color: "red"
-    },
-    {
-      id: 3,
-      title: "Success Stories",
-      type: "link",
-      description: "Read testimonials from schools and students using our platform.",
-      icon: ExternalLink,
-      color: "purple"
-    },
-    {
-      id: 4,
-      title: "Getting Started Guide",
-      type: "pdf",
-      description: "Step-by-step guide to get started with ThinkPro LMS.",
-      size: "1.8 MB",
-      icon: BookOpen,
-      color: "green"
-    },
-    {
-      id: 5,
-      title: "Demo Walkthrough",
-      type: "video",
-      description: "Watch a complete walkthrough of the platform in action.",
-      duration: "12:45",
-      icon: Play,
-      color: "indigo"
-    },
-    {
-      id: 6,
-      title: "Pricing Information",
-      type: "pdf",
-      description: "Detailed pricing plans and subscription options.",
-      size: "1.2 MB",
-      icon: FileText,
-      color: "orange"
-    }
-  ];
+  const navigate = useNavigate();
+  const [resources, setResources] = useState<Resource[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const getColorClasses = (color: string) => {
-    const colorMap: { [key: string]: string } = {
-      blue: "text-blue-600 bg-blue-100",
-      red: "text-red-600 bg-red-100",
-      purple: "text-purple-600 bg-purple-100",
-      green: "text-green-600 bg-green-100",
-      indigo: "text-indigo-600 bg-indigo-100",
-      orange: "text-orange-600 bg-orange-100"
+  useEffect(() => {
+    const fetchResources = async () => {
+      try {
+        setIsLoading(true);
+        const response = await resourceService.getByCategory("guest");
+        setResources(response.data);
+      } catch (error) {
+        console.error("Error fetching guest resources:", error);
+        setError("Failed to load resources");
+        toast.error("Failed to load resources");
+      } finally {
+        setIsLoading(false);
+      }
     };
-    return colorMap[color] || "text-gray-600 bg-gray-100";
+
+    fetchResources();
+  }, []);
+
+  const handleResourceClick = (resource: Resource) => {
+    if (resource.type === "video") {
+      navigate(`/guest/resource/${resource._id}/view`);
+    } else {
+      // For documents, open in new tab
+      const displayUrl = resourceService.getResourceUrl(resource);
+      window.open(displayUrl, '_blank');
+    }
   };
+
+
+  if (isLoading) {
+    return (
+      <div className="p-6">
+        <div className="flex items-center justify-center h-64">
+          <div className="text-center">
+            <Loader2 className="h-8 w-8 animate-spin mx-auto mb-2 text-green-600" />
+            <p className="text-gray-600">Loading resources...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="p-6">
+        <div className="text-center">
+          <p className="text-red-600 mb-4">{error}</p>
+          <Button onClick={() => window.location.reload()}>
+            Try Again
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="p-6">
@@ -88,61 +85,69 @@ export default function GuestResources() {
         </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {resources.map((resource) => {
-          const Icon = resource.icon;
-          const colorClasses = getColorClasses(resource.color);
-          
-          return (
-            <Card key={resource.id} className="shadow-md hover:shadow-lg transition-shadow">
-              <CardHeader className="pb-3">
-                <div className="flex items-center gap-3">
-                  <div className={`p-2 rounded-lg ${colorClasses}`}>
-                    <Icon className="h-6 w-6" />
+      {resources.length === 0 ? (
+        <div className="text-center py-12">
+          <BookOpen className="h-12 w-12 mx-auto mb-4 text-gray-400" />
+          <h3 className="text-lg font-semibold text-gray-900 mb-2">No Resources Available</h3>
+          <p className="text-gray-600">Check back later for new resources.</p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {resources.map((resource) => {
+            const Icon = resource.type === "video" ? Video : FileText;
+            const colorClasses = getFileTypeBadgeColor(resource);
+            
+            return (
+              <Card key={resource._id} className="shadow-md hover:shadow-lg transition-shadow cursor-pointer" onClick={() => handleResourceClick(resource)}>
+                <CardHeader className="pb-3">
+                  <div className="flex items-center gap-3">
+                    <div className={`p-2 rounded-lg ${colorClasses}`}>
+                      <Icon className="h-6 w-6" />
+                    </div>
+                    <div className="flex-1">
+                      <CardTitle className="text-lg font-semibold text-gray-900">
+                        {resource.title}
+                      </CardTitle>
+                      <Badge variant="secondary" className="mt-1">
+                        {resource.type.toUpperCase()}
+                      </Badge>
+                    </div>
                   </div>
-                  <div className="flex-1">
-                    <CardTitle className="text-lg font-semibold text-gray-900">
-                      {resource.title}
-                    </CardTitle>
-                    <Badge variant="secondary" className="mt-1">
-                      {resource.type.toUpperCase()}
-                    </Badge>
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <p className="text-gray-600 text-sm mb-4">
-                  {resource.description}
-                </p>
-                
-                <div className="flex items-center justify-between">
-                  <div className="text-xs text-gray-500">
-                    {resource.type === "video" && resource.duration && (
-                      <span>Duration: {resource.duration}</span>
-                    )}
-                    {resource.type === "pdf" && resource.size && (
-                      <span>Size: {resource.size}</span>
-                    )}
-                    {resource.type === "link" && (
-                      <span>External Link</span>
-                    )}
-                  </div>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-gray-600 text-sm mb-4">
+                    {resource.description || "No description available"}
+                  </p>
                   
-                  <Button 
-                    size="sm" 
-                    className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white"
-                  >
-                    {resource.type === "video" && <Play className="h-4 w-4 mr-1" />}
-                    {resource.type === "pdf" && <Download className="h-4 w-4 mr-1" />}
-                    {resource.type === "link" && <ExternalLink className="h-4 w-4 mr-1" />}
-                    {resource.type === "video" ? "Watch" : resource.type === "pdf" ? "Download" : "Open"}
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          );
-        })}
-      </div>
+                  <div className="flex items-center justify-between">
+                    <div className="text-xs text-gray-500">
+                      {resource.content.fileSize && (
+                        <span>Size: {formatFileSize(resource.content.fileSize)}</span>
+                      )}
+                      {resource.viewCount > 0 && (
+                        <span className="ml-2">{resource.viewCount} views</span>
+                      )}
+                    </div>
+                    
+                    <Button 
+                      size="sm" 
+                      className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleResourceClick(resource);
+                      }}
+                    >
+                      {resource.type === "video" && <Play className="h-4 w-4 mr-1" />}
+                      {resource.type === "document" && <ExternalLink className="h-4 w-4 mr-1" />}
+                      {resource.type === "video" ? "Watch" : "Open"}
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            );
+          })}
+        </div>
+      )}
 
       {/* Coming Soon Section */}
       <Card className="mt-8 bg-gradient-to-r from-green-50 to-emerald-50 border-green-200">

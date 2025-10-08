@@ -113,6 +113,7 @@ import Messages from "../pages/Messages/Messages";
 import GuestLayout from "../components/Guest/GuestLayout";
 import GuestHome from "../pages/Guest/GuestHome";
 import GuestResources from "../pages/Guest/GuestResources";
+import GuestResourceView from "../pages/Guest/GuestResourceView";
 import GuestQuizzes from "../pages/Guest/GuestQuizzes";
 import GuestClasses from "../pages/Guest/GuestClasses";
 import GuestPremium from "../pages/Guest/GuestPremium";
@@ -571,6 +572,7 @@ export default function AppRouter() {
           <Route index element={<GuestHome />} />
           <Route path="profile" element={<GuestProfile />} />
           <Route path="resources" element={<GuestResources />} />
+          <Route path="resource/:id/view" element={<GuestResourceView />} />
           <Route path="quizzes" element={<GuestQuizzes />} />
           <Route path="classes" element={<GuestClasses />} />
           <Route path="premium" element={<GuestPremium />} />

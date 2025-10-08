@@ -60,11 +60,20 @@ export const getVideoIframeUrl = (resource: ApiResource): string => {
 
   const url = resource.content.url;
 
-  // Handle YouTube URLs
-  if (url.includes("youtube.com/watch") || url.includes("youtu.be/")) {
-    const videoId = url.includes("youtu.be/")
+  // Handle YouTube URLs along with Shorts
+  if (
+    url.includes("youtube.com/watch") ||
+    url.includes("youtu.be/") ||
+    url.includes("youtube.com/shorts")
+  ) {
+    let videoId = url.includes("youtu.be/")
       ? url.split("youtu.be/")[1].split("?")[0]
-      : url.split("v=")[1].split("&")[0];
+      : "";
+    if (url.includes("youtube.com/shorts")) {
+      videoId = url.split("youtube.com/shorts/")[1].split("?")[0];
+    } else {
+      videoId = url.split("v=")[1].split("&")[0];
+    }
     return `https://www.youtube.com/embed/${videoId}`;
   }
 
