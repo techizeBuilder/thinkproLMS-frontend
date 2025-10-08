@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import {
   Plus,
   Search,
@@ -299,113 +300,156 @@ export default function StudentsPage() {
         </CardContent>
       </Card>
 
-      {/* Students Grid */}
-      <div className="grid gap-4">
-        {filteredStudents.map((student) => (
-          <Card key={student._id} className="hover:shadow-md transition-shadow">
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12">
-                    <ProfilePictureDisplay
-                      profilePicture={student.user.profilePicture}
-                      name={student.user.name}
-                      size="md"
-                    />
+      {/* Students Table */}
+      <Card>
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Student</TableHead>
+              <TableHead>Student ID</TableHead>
+              <TableHead>Email</TableHead>
+              <TableHead>Grade</TableHead>
+              <TableHead>School</TableHead>
+              <TableHead>Parent Info</TableHead>
+              <TableHead>Status</TableHead>
+              <TableHead>Password</TableHead>
+              <TableHead className="text-right">Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {filteredStudents.map((student) => (
+              <TableRow key={student._id}>
+                <TableCell className="font-medium">
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8">
+                      <ProfilePictureDisplay
+                        profilePicture={student.user.profilePicture}
+                        name={student.user.name}
+                        size="sm"
+                      />
+                    </div>
+                    <div>
+                      <div className="font-medium">{student.user.name}</div>
+                      <div className="flex gap-2 mt-1">
+                        <Badge
+                          variant={
+                            student.user.isVerified ? "default" : "secondary"
+                          }
+                        >
+                          {student.user.isVerified ? "Verified" : "Pending"}
+                        </Badge>
+                        {!student.hasCustomCredentials && (
+                          <Badge variant="outline" className="text-xs">System Generated</Badge>
+                        )}
+                      </div>
+                    </div>
                   </div>
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2">
-                      <h3 className="font-semibold text-lg">
-                        {student.user.name}
-                      </h3>
-                      <Badge
-                        variant={
-                          student.user.isVerified ? "default" : "secondary"
-                        }
-                      >
-                        {student.user.isVerified ? "Verified" : "Pending"}
-                      </Badge>
-                      {!student.hasCustomCredentials && (
-                        <Badge variant="outline">System Generated</Badge>
+                </TableCell>
+                <TableCell>
+                  <span className="font-mono text-sm">{student.studentId}</span>
+                </TableCell>
+                <TableCell>
+                  <span className="text-sm">{student.user.email}</span>
+                </TableCell>
+                <TableCell>
+                  <div className="flex items-center gap-1 text-sm">
+                    <GraduationCap className="h-4 w-4" />
+                    {student.grade}
+                  </div>
+                </TableCell>
+                <TableCell>
+                  <div className="text-sm">
+                    <div className="font-medium">{student.school.name}</div>
+                    <div className="text-gray-500">
+                      {student.school.city}, {student.school.state}
+                    </div>
+                    <div className="text-xs text-gray-400">{student.school.board}</div>
+                  </div>
+                </TableCell>
+                <TableCell>
+                  {(student.parentEmail || student.parentPhoneNumber) ? (
+                    <div className="text-sm">
+                      <div>{student.parentEmail}</div>
+                      {student.parentPhoneNumber && (
+                        <div className="text-gray-500">{student.parentPhoneNumber}</div>
                       )}
                     </div>
-                    <div className="flex items-center gap-4 text-sm text-gray-600 mt-1">
-                      <span className="font-mono">{student.studentId}</span>
-                      <span>{student.user.email}</span>
-                      <div className="flex items-center gap-1">
-                        <GraduationCap className="h-4 w-4" />
-                        {student.grade}
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-4 text-sm text-gray-500 mt-1">
-                      <span>{student.school.name}</span>
-                      <span>
-                        {student.school.city}, {student.school.state}
-                      </span>
-                      <span>{student.school.board}</span>
-                    </div>
-                    {(student.parentEmail || student.parentPhoneNumber) && (
-                      <div className="text-sm text-gray-500 mt-1">
-                        Parent: {student.parentEmail}{" "}
-                        {student.parentPhoneNumber &&
-                          `• ${student.parentPhoneNumber}`}
-                      </div>
-                    )}
-                    {showPassword[student._id] && (
-                      <div className="text-sm text-green-600 mt-2 font-mono bg-green-50 p-2 rounded border">
-                        Password: {showPassword[student._id]}
-                      </div>
+                  ) : (
+                    <span className="text-gray-400 text-sm">No parent info</span>
+                  )}
+                </TableCell>
+                <TableCell>
+                  <div className="flex flex-col gap-1">
+                    <Badge
+                      variant={
+                        student.user.isVerified ? "default" : "secondary"
+                      }
+                    >
+                      {student.user.isVerified ? "Verified" : "Pending"}
+                    </Badge>
+                    {!student.hasCustomCredentials && (
+                      <Badge variant="outline" className="text-xs">System Generated</Badge>
                     )}
                   </div>
-                </div>
-                <div className="flex gap-2">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => handleShowPassword(student._id)}
-                    disabled={loadingPassword[student._id]}
-                    className="text-blue-600 hover:text-blue-700"
-                    title="Show password"
-                  >
-                    <Eye className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() =>
-                      setResetPasswordUser({
-                        id: student.user._id,
-                        name: student.user.name,
-                        email: student.user.email,
-                      })
-                    }
-                    title="Reset Password"
-                  >
-                    <KeyRound className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() =>
-                      navigate(`${studentsPath}/${student._id}/edit`)
-                    }
-                  >
-                    <Edit className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => handleDelete(student._id)}
-                    className="text-red-600 hover:text-red-700"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+                </TableCell>
+                <TableCell>
+                  {showPassword[student._id] ? (
+                    <div className="text-sm text-green-600 font-mono bg-green-50 p-2 rounded border">
+                      {showPassword[student._id]}
+                    </div>
+                  ) : (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleShowPassword(student._id)}
+                      disabled={loadingPassword[student._id]}
+                      className="text-blue-600 hover:text-blue-700"
+                      title="Show password"
+                    >
+                      <Eye className="h-4 w-4" />
+                    </Button>
+                  )}
+                </TableCell>
+                <TableCell className="text-right">
+                  <div className="flex gap-2 justify-end">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() =>
+                        setResetPasswordUser({
+                          id: student.user._id,
+                          name: student.user.name,
+                          email: student.user.email,
+                        })
+                      }
+                      title="Reset Password"
+                    >
+                      <KeyRound className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() =>
+                        navigate(`${studentsPath}/${student._id}/edit`)
+                      }
+                    >
+                      <Edit className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleDelete(student._id)}
+                      className="text-red-600 hover:text-red-700"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </Card>
 
       {filteredStudents.length === 0 && (
         <Card>
