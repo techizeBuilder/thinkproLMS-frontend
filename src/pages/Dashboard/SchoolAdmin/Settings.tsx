@@ -115,25 +115,23 @@ export default function SchoolAdminSettingsPage() {
         </CardHeader>
         <CardContent>
           <div className="space-y-3">
-            {schoolAdmin?.assignedSchools?.length === 0 ? (
+            {!schoolAdmin?.assignedSchool ? (
               <p className="text-muted-foreground text-center py-4">
-                No schools assigned to your account.
+                No school assigned to your account.
               </p>
             ) : (
-              schoolAdmin?.assignedSchools?.map((school: any) => (
-                <div key={school._id} className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
-                  <div className="flex items-center space-x-3">
-                    <MapPin className="h-4 w-4 text-muted-foreground" />
-                    <div>
-                      <div className="font-medium">{school.name}</div>
-                      <div className="text-sm text-muted-foreground">
-                        {school.city}, {school.state}
-                      </div>
+              <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
+                <div className="flex items-center space-x-3">
+                  <MapPin className="h-4 w-4 text-muted-foreground" />
+                  <div>
+                    <div className="font-medium">{schoolAdmin.assignedSchool.name}</div>
+                    <div className="text-sm text-muted-foreground">
+                      {schoolAdmin.assignedSchool.city}, {schoolAdmin.assignedSchool.state}
                     </div>
                   </div>
-                  <Badge variant="default">Active</Badge>
                 </div>
-              ))
+                <Badge variant="default">Active</Badge>
+              </div>
             )}
           </div>
         </CardContent>

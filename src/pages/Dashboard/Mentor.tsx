@@ -37,13 +37,12 @@ interface Mentor {
     isVerified: boolean;
     createdAt: string;
   };
-  assignedSchools: School[];
+  assignedSchool: School;
   isActive: boolean;
 }
 
 export default function Mentor() {
   const [mentor, setMentor] = useState<Mentor | null>(null);
-  const [selectedSchool, setSelectedSchool] = useState("all");
   const [studentCount, setStudentCount] = useState(0);
   const [loading, setLoading] = useState(true);
 
@@ -52,10 +51,10 @@ export default function Mentor() {
   }, []);
 
   useEffect(() => {
-    if (mentor && mentor.assignedSchools.length > 0) {
+    if (mentor && mentor.assignedSchool) {
       fetchStudentCount();
     }
-  }, [mentor, selectedSchool]);
+  }, [mentor]);
 
   const fetchMentorProfile = async () => {
     try {
@@ -71,31 +70,19 @@ export default function Mentor() {
   };
 
   const fetchStudentCount = async () => {
-    if (!mentor || mentor.assignedSchools.length === 0) {
+    if (!mentor || !mentor.assignedSchool) {
       setStudentCount(0);
       return;
     }
 
     try {
-      let totalStudents = 0;
-
-      if (selectedSchool === "all") {
-        // Count students from all assigned schools
-        for (const school of mentor.assignedSchools) {
-          const response = await studentService.getAll({ schoolId: school._id });
-          if (response.success) {
-            totalStudents += response.data.length;
-          }
-        }
+      // Count students from assigned school
+      const response = await studentService.getAll({ schoolId: mentor.assignedSchool._id });
+      if (response.success) {
+        setStudentCount(response.data.length);
       } else {
-        // Count students from selected school
-        const response = await studentService.getAll({ schoolId: selectedSchool });
-        if (response.success) {
-          totalStudents = response.data.length;
-        }
+        setStudentCount(0);
       }
-
-      setStudentCount(totalStudents);
     } catch (error) {
       console.error("Error fetching student count:", error);
       setStudentCount(0);
@@ -145,36 +132,8 @@ export default function Mentor() {
           </header>
           <main className="flex-1 overflow-auto">
             <div className="p-6 space-y-6">
-              {/* School Selection */}
-              {mentor && mentor.assignedSchools.length > 0 && (
-                <Card>
-                  <CardHeader>
-                    <CardTitle>School Selection</CardTitle>
-                    <CardDescription>
-                      Select a school to view specific statistics
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <Select value={selectedSchool} onValueChange={setSelectedSchool}>
-                      <SelectTrigger className="w-full max-w-md">
-                        <SelectValue placeholder="Select School" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="all">All Assigned Schools</SelectItem>
-                        {mentor.assignedSchools.map((school) => (
-                          <SelectItem key={school._id} value={school._id}>
-                            {school.name}
-                            {school.branchName && ` - ${school.branchName}`}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </CardContent>
-                </Card>
-              )}
-
               {/* Dashboard Stats */}
-              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                 <Card>
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                     <CardTitle className="text-sm font-medium">
@@ -185,26 +144,7 @@ export default function Mentor() {
                   <CardContent>
                     <div className="text-2xl font-bold">{studentCount}</div>
                     <p className="text-xs text-muted-foreground">
-                      {selectedSchool === "all" 
-                        ? "Total students across all schools" 
-                        : "Students in selected school"}
-                    </p>
-                  </CardContent>
-                </Card>
-                
-                <Card>
-                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium">
-                      Assigned Schools
-                    </CardTitle>
-                    <GraduationCap className="h-4 w-4 text-muted-foreground" />
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-2xl font-bold">
-                      {mentor ? mentor.assignedSchools.length : 0}
-                    </div>
-                    <p className="text-xs text-muted-foreground">
-                      Schools under your guidance
+                      Students in assigned school
                     </p>
                   </CardContent>
                 </Card>

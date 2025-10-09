@@ -29,7 +29,7 @@ interface Mentor {
   salutation: string;
   address: string;
   phoneNumber: string;
-  assignedSchools: School[];
+  assignedSchool: School;
   isActive: boolean;
 }
 
@@ -85,7 +85,7 @@ export default function MentorsPage() {
 
     if (selectedSchool) {
       filtered = filtered.filter((mentor) =>
-        mentor.assignedSchools.some((school) => school._id === selectedSchool)
+        mentor.assignedSchool._id === selectedSchool
       );
     }
 
@@ -214,19 +214,12 @@ export default function MentorsPage() {
               {/* Assigned Schools */}
               <div className="pt-2 border-t">
                 <p className="text-xs font-medium text-gray-500 mb-2">
-                  Assigned Schools ({mentor.assignedSchools.length})
+                  Assigned School
                 </p>
                 <div className="flex flex-wrap gap-1">
-                  {mentor.assignedSchools.slice(0, 2).map((school) => (
-                    <Badge key={school._id} variant="outline" className="text-xs">
-                      {school.name}
-                    </Badge>
-                  ))}
-                  {mentor.assignedSchools.length > 2 && (
-                    <Badge variant="outline" className="text-xs">
-                      +{mentor.assignedSchools.length - 2} more
-                    </Badge>
-                  )}
+                  <Badge variant="outline" className="text-xs">
+                    {mentor.assignedSchool.name}
+                  </Badge>
                 </div>
               </div>
             </CardContent>

@@ -1,21 +1,14 @@
 import { useState, useEffect } from "react";
-import { 
-  Card, 
-  CardContent, 
-  CardDescription, 
-  CardHeader, 
-  CardTitle 
-} from "@/components/ui/card"
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
-import { Users, BookOpen, MessageSquare, GraduationCap } from "lucide-react"
-import { mentorService } from "@/api/mentorService"
-import { studentService } from "@/api/studentService"
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Users, BookOpen, MessageSquare, GraduationCap } from "lucide-react";
+import { mentorService } from "@/api/mentorService";
+import { studentService } from "@/api/studentService";
 
 interface School {
   _id: string;
@@ -35,13 +28,12 @@ interface Mentor {
     isVerified: boolean;
     createdAt: string;
   };
-  assignedSchools: School[];
+  assignedSchool: School;
   isActive: boolean;
 }
 
 export default function MentorDashboard() {
   const [mentor, setMentor] = useState<Mentor | null>(null);
-  const [selectedSchool, setSelectedSchool] = useState("all");
   const [studentCount, setStudentCount] = useState(0);
   const [loading, setLoading] = useState(true);
 
@@ -50,10 +42,10 @@ export default function MentorDashboard() {
   }, []);
 
   useEffect(() => {
-    if (mentor && mentor.assignedSchools.length > 0) {
+    if (mentor && mentor.assignedSchool) {
       fetchStudentCount();
     }
-  }, [mentor, selectedSchool]);
+  }, [mentor]);
 
   const fetchMentorProfile = async () => {
     try {
@@ -69,31 +61,21 @@ export default function MentorDashboard() {
   };
 
   const fetchStudentCount = async () => {
-    if (!mentor || mentor.assignedSchools.length === 0) {
+    if (!mentor || !mentor.assignedSchool) {
       setStudentCount(0);
       return;
     }
 
     try {
-      let totalStudents = 0;
-
-      if (selectedSchool === "all") {
-        // Count students from all assigned schools
-        for (const school of mentor.assignedSchools) {
-          const response = await studentService.getAll({ schoolId: school._id });
-          if (response.success) {
-            totalStudents += response.data.length;
-          }
-        }
+      // Count students from assigned school
+      const response = await studentService.getAll({
+        schoolId: mentor.assignedSchool._id,
+      });
+      if (response.success) {
+        setStudentCount(response.data.length);
       } else {
-        // Count students from selected school
-        const response = await studentService.getAll({ schoolId: selectedSchool });
-        if (response.success) {
-          totalStudents = response.data.length;
-        }
+        setStudentCount(0);
       }
-
-      setStudentCount(totalStudents);
     } catch (error) {
       console.error("Error fetching student count:", error);
       setStudentCount(0);
@@ -114,29 +96,29 @@ export default function MentorDashboard() {
   return (
     <div className="p-6 space-y-6">
       {/* School Selection */}
-      {mentor && mentor.assignedSchools.length > 0 && (
+      {mentor && mentor.assignedSchool && (
         <Card>
           <CardHeader>
-            <CardTitle>School Selection</CardTitle>
-            <CardDescription>
-              Select a school to view specific statistics
-            </CardDescription>
+            <CardTitle>School Information</CardTitle>
+            <CardDescription>Your assigned school details</CardDescription>
           </CardHeader>
           <CardContent>
-            <Select value={selectedSchool} onValueChange={setSelectedSchool}>
-              <SelectTrigger className="w-full max-w-md">
-                <SelectValue placeholder="Select School" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Assigned Schools</SelectItem>
-                {mentor.assignedSchools.map((school) => (
-                  <SelectItem key={school._id} value={school._id}>
-                    {school.name}
-                    {school.branchName && ` - ${school.branchName}`}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <div className="space-y-2">
+              <div className="text-lg font-semibold">
+                {mentor.assignedSchool.name}
+                {mentor.assignedSchool.branchName &&
+                  ` - ${mentor.assignedSchool.branchName}`}
+              </div>
+              <div className="text-sm text-muted-foreground">
+                {mentor.assignedSchool.city}, {mentor.assignedSchool.state}
+              </div>
+              {mentor.assignedSchool.boards &&
+                mentor.assignedSchool.boards.length > 0 && (
+                  <div className="text-sm text-muted-foreground">
+                    Boards: {mentor.assignedSchool.boards.join(", ")}
+                  </div>
+                )}
+            </div>
           </CardContent>
         </Card>
       )}
@@ -145,65 +127,25 @@ export default function MentorDashboard() {
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              My Students
-            </CardTitle>
+            <CardTitle className="text-sm font-medium">My Students</CardTitle>
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{studentCount}</div>
             <p className="text-xs text-muted-foreground">
-              {selectedSchool === "all" 
-                ? "Total students across all schools" 
-                : "Students in selected school"}
+              Students in your assigned school
             </p>
           </CardContent>
         </Card>
-        
+
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Assigned Schools
-            </CardTitle>
-            <GraduationCap className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {mentor ? mentor.assignedSchools.length : 0}
-            </div>
-            <p className="text-xs text-muted-foreground">
-              Schools under your guidance
-            </p>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Courses Taught
-            </CardTitle>
-            <BookOpen className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">0</div>
-            <p className="text-xs text-muted-foreground">
-              Active courses
-            </p>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Messages
-            </CardTitle>
+            <CardTitle className="text-sm font-medium">Messages</CardTitle>
             <MessageSquare className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">0</div>
-            <p className="text-xs text-muted-foreground">
-              Unread messages
-            </p>
+            <p className="text-xs text-muted-foreground">Unread messages</p>
           </CardContent>
         </Card>
       </div>
@@ -213,9 +155,7 @@ export default function MentorDashboard() {
         <Card>
           <CardHeader>
             <CardTitle>Recent Messages</CardTitle>
-            <CardDescription>
-              Latest student communications
-            </CardDescription>
+            <CardDescription>Latest student communications</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="text-center py-8 text-muted-foreground">
@@ -227,9 +167,7 @@ export default function MentorDashboard() {
         <Card>
           <CardHeader>
             <CardTitle>Student Progress</CardTitle>
-            <CardDescription>
-              Overview of student performance
-            </CardDescription>
+            <CardDescription>Overview of student performance</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="text-center py-8 text-muted-foreground">

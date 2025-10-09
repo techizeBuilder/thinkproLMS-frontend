@@ -62,7 +62,7 @@ interface Mentor {
     isVerified: boolean;
     createdAt: string;
   };
-  assignedSchools: School[];
+  assignedSchool: School;
   isActive: boolean;
 }
 
@@ -72,7 +72,6 @@ export default function MentorStudentsPage() {
   const [mentor, setMentor] = useState<Mentor | null>(null);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedSchool, setSelectedSchool] = useState("all");
   const [selectedGrade, setSelectedGrade] = useState("all");
 
   const grades = [
@@ -93,14 +92,14 @@ export default function MentorStudentsPage() {
   }, []);
 
   useEffect(() => {
-    if (mentor && mentor.assignedSchools.length > 0) {
+    if (mentor && mentor.assignedSchool) {
       fetchStudents();
     }
   }, [mentor]);
 
   useEffect(() => {
     filterStudents();
-  }, [students, searchTerm, selectedSchool, selectedGrade]);
+  }, [students, searchTerm, selectedGrade]);
 
   const fetchMentorProfile = async () => {
     try {
@@ -116,24 +115,18 @@ export default function MentorStudentsPage() {
   };
 
   const fetchStudents = async () => {
-    if (!mentor || mentor.assignedSchools.length === 0) {
+    if (!mentor || !mentor.assignedSchool) {
       setLoading(false);
       return;
     }
 
     try {
-      // Fetch students from all assigned schools
-      const schoolIds = mentor.assignedSchools.map((school) => school._id);
-      const allStudents: Student[] = [];
-
-      for (const schoolId of schoolIds) {
-        const response = await studentService.getAll({ schoolId });
-        if (response.success) {
-          allStudents.push(...response.data);
-        }
+      // Fetch students from assigned school
+      const schoolId = mentor.assignedSchool._id;
+      const response = await studentService.getAll({ schoolId });
+      if (response.success) {
+        setStudents(response.data);
       }
-
-      setStudents(allStudents);
     } catch (error) {
       console.error("Error fetching students:", error);
     } finally {
@@ -151,13 +144,6 @@ export default function MentorStudentsPage() {
           student.user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
           student.user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
           student.rollNumber.toLowerCase().includes(searchTerm.toLowerCase())
-      );
-    }
-
-    // Filter by school
-    if (selectedSchool !== "all") {
-      filtered = filtered.filter(
-        (student) => student.school._id === selectedSchool
       );
     }
 
@@ -190,11 +176,11 @@ export default function MentorStudentsPage() {
     );
   }
 
-  if (mentor.assignedSchools.length === 0) {
+  if (!mentor.assignedSchool) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
-          <p className="text-muted-foreground">No schools assigned to you</p>
+          <p className="text-muted-foreground">No school assigned to you</p>
         </div>
       </div>
     );
@@ -226,21 +212,6 @@ export default function MentorStudentsPage() {
           </div>
         </div>
 
-        <Select value={selectedSchool} onValueChange={setSelectedSchool}>
-          <SelectTrigger className="w-full sm:w-[200px]">
-            <SelectValue placeholder="Select School" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Schools</SelectItem>
-            {mentor.assignedSchools.map((school) => (
-              <SelectItem key={school._id} value={school._id}>
-                {school.name}
-                {school.branchName && ` - ${school.branchName}`}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-
         <Select value={selectedGrade} onValueChange={setSelectedGrade}>
           <SelectTrigger className="w-full sm:w-[150px]">
             <SelectValue placeholder="Select Grade" />
@@ -257,7 +228,7 @@ export default function MentorStudentsPage() {
       </div>
 
       {/* Stats */}
-      <div className="grid gap-4 md:grid-cols-3">
+      <div className="grid gap-4 md:grid-cols-2">
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
@@ -280,22 +251,6 @@ export default function MentorStudentsPage() {
                   Filtered Results
                 </p>
                 <p className="text-2xl font-bold">{filteredStudents.length}</p>
-              </div>
-              <GraduationCap className="h-8 w-8 text-muted-foreground" />
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">
-                  Assigned Schools
-                </p>
-                <p className="text-2xl font-bold">
-                  {mentor.assignedSchools.length}
-                </p>
               </div>
               <GraduationCap className="h-8 w-8 text-muted-foreground" />
             </div>

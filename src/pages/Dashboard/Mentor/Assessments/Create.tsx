@@ -104,20 +104,20 @@ export default function CreateAssessmentPage() {
         try {
           const response = await mentorService.getMyProfile();
           if (response.success) {
-            // Convert assigned schools to the format expected by the form
-            const assignedSchools: School[] = response.data.assignedSchools.map(school => ({
-              _id: school._id,
-              name: school.name,
+            // Convert assigned school to the format expected by the form
+            const assignedSchool: School = {
+              _id: response.data.assignedSchool._id,
+              name: response.data.assignedSchool.name,
               address: "", // Not available in mentor profile
-              city: school.city,
-              state: school.state,
-              boards: school.boards || [],
-              branchName: school.branchName || "",
+              city: response.data.assignedSchool.city,
+              state: response.data.assignedSchool.state,
+              boards: response.data.assignedSchool.boards || [],
+              branchName: response.data.assignedSchool.branchName || "",
               isActive: true, // Assume active since they're assigned
               createdAt: new Date().toISOString(),
               updatedAt: new Date().toISOString()
-            }));
-            setSchools(assignedSchools);
+            };
+            setSchools([assignedSchool]);
           }
         } catch (error) {
           console.error("Error loading mentor profile:", error);

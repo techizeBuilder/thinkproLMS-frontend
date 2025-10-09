@@ -99,16 +99,14 @@ export default function SchoolAdminMentorsPage() {
                 </div>
 
                 <div className="space-y-2">
-                  <h4 className="font-medium text-sm">Assigned Schools:</h4>
+                  <h4 className="font-medium text-sm">Assigned School:</h4>
                   <div className="space-y-1">
-                    {mentor.assignedSchools.map((school) => (
-                      <div key={school._id} className="flex items-center space-x-2 text-sm">
-                        <MapPin className="h-3 w-3 text-muted-foreground" />
-                        <span className="bg-muted px-2 py-1 rounded text-xs">
-                          {school.name} - {school.city}
-                        </span>
-                      </div>
-                    ))}
+                    <div className="flex items-center space-x-2 text-sm">
+                      <MapPin className="h-3 w-3 text-muted-foreground" />
+                      <span className="bg-muted px-2 py-1 rounded text-xs">
+                        {mentor.assignedSchool.name} - {mentor.assignedSchool.city}
+                      </span>
+                    </div>
                   </div>
                 </div>
 

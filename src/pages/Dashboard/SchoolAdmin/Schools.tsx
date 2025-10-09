@@ -31,7 +31,7 @@ export default function SchoolAdminSchoolsPage() {
       const response = await schoolAdminService.getMentors(); // Using mentors endpoint to get school admin data
       
       if (response.success) {
-        setSchools(response.data.schoolAdmin.assignedSchools);
+        setSchools(response.data.schoolAdmin.assignedSchool ? [response.data.schoolAdmin.assignedSchool] : []);
         setSchoolAdmin(response.data.schoolAdmin);
       } else {
         toast.error("Failed to load schools");

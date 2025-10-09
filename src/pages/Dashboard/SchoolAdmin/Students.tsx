@@ -31,7 +31,6 @@ export default function SchoolAdminStudentsPage() {
   const [filteredStudents, setFilteredStudents] = useState<Student[]>([]);
   const [schoolAdmin, setSchoolAdmin] = useState<any>(null);
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedSchool, setSelectedSchool] = useState("all");
   const [selectedGrade, setSelectedGrade] = useState("all");
 
   const grades = [
@@ -53,7 +52,7 @@ export default function SchoolAdminStudentsPage() {
 
   useEffect(() => {
     filterStudents();
-  }, [students, searchTerm, selectedSchool, selectedGrade]);
+  }, [students, searchTerm, selectedGrade]);
 
   const loadStudents = async () => {
     try {
@@ -87,13 +86,6 @@ export default function SchoolAdminStudentsPage() {
       );
     }
 
-    // School filter
-    if (selectedSchool !== "all") {
-      filtered = filtered.filter(
-        (student) => student.school._id === selectedSchool
-      );
-    }
-
     // Grade filter
     if (selectedGrade !== "all") {
       filtered = filtered.filter((student) => student.grade === selectedGrade);
@@ -117,7 +109,7 @@ export default function SchoolAdminStudentsPage() {
         <div>
           <h1 className="text-3xl font-bold">Students</h1>
           <p className="text-muted-foreground">
-            View students enrolled in your assigned schools
+            View students enrolled in your assigned school
           </p>
         </div>
       </div>
@@ -136,20 +128,6 @@ export default function SchoolAdminStudentsPage() {
           </div>
         </div>
 
-        <Select value={selectedSchool} onValueChange={setSelectedSchool}>
-          <SelectTrigger className="w-full sm:w-[200px]">
-            <SelectValue placeholder="Select School" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Schools</SelectItem>
-            {schoolAdmin?.assignedSchools?.map((school: any) => (
-              <SelectItem key={school._id} value={school._id}>
-                {school.name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-
         <Select value={selectedGrade} onValueChange={setSelectedGrade}>
           <SelectTrigger className="w-full sm:w-[150px]">
             <SelectValue placeholder="Select Grade" />
@@ -166,7 +144,7 @@ export default function SchoolAdminStudentsPage() {
       </div>
 
       {/* Stats */}
-      <div className="grid gap-4 md:grid-cols-3">
+      <div className="grid gap-4 md:grid-cols-2">
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
@@ -194,20 +172,6 @@ export default function SchoolAdminStudentsPage() {
             </div>
           </CardContent>
         </Card>
-
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">
-                  Assigned Schools
-                </p>
-                <p className="text-2xl font-bold">{schoolAdmin?.assignedSchools?.length || 0}</p>
-              </div>
-              <GraduationCap className="h-8 w-8 text-muted-foreground" />
-            </div>
-          </CardContent>
-        </Card>
       </div>
 
       {/* Students Table */}
@@ -219,7 +183,7 @@ export default function SchoolAdminStudentsPage() {
               <h3 className="text-lg font-semibold mb-2">No students found</h3>
               <p className="text-muted-foreground">
                 {students.length === 0
-                  ? "No students are enrolled in your assigned schools yet."
+                  ? "No students are enrolled in your assigned school yet."
                   : "No students match your current filters."}
               </p>
             </div>

@@ -18,7 +18,6 @@ import { toast } from "sonner";
 interface DashboardStats {
   totalMentors: number;
   totalStudents: number;
-  totalSchools: number;
   averageProgress: number;
 }
 
@@ -27,7 +26,6 @@ export default function SchoolAdminDashboard() {
   const [stats, setStats] = useState<DashboardStats>({
     totalMentors: 0,
     totalStudents: 0,
-    totalSchools: 0,
     averageProgress: 0
   });
   const [schoolAdmin, setSchoolAdmin] = useState<any>(null);
@@ -72,7 +70,6 @@ export default function SchoolAdminDashboard() {
       // Calculate stats
       const totalMentors = mentorsRes.success ? mentorsRes.data.mentors.length : 0;
       const totalStudents = studentsRes.success ? studentsRes.data.students.length : 0;
-      const totalSchools = schoolAdmin?.assignedSchool ? 1 : 0;
       
       // Calculate average progress
       let totalProgress = 0;
@@ -90,7 +87,6 @@ export default function SchoolAdminDashboard() {
       setStats({
         totalMentors,
         totalStudents,
-        totalSchools,
         averageProgress: Math.round(averageProgress)
       });
 
@@ -151,20 +147,7 @@ export default function SchoolAdminDashboard() {
           <CardContent>
             <div className="text-2xl font-bold">{stats.totalStudents}</div>
             <p className="text-xs text-muted-foreground">
-              Enrolled in assigned schools
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Assigned School</CardTitle>
-            <SchoolIcon className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.totalSchools}</div>
-            <p className="text-xs text-muted-foreground">
-              Under your management
+              Enrolled in assigned school
             </p>
           </CardContent>
         </Card>
