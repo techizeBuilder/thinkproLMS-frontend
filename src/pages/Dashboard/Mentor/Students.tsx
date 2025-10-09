@@ -17,7 +17,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Search, User, GraduationCap } from "lucide-react";
+import { Search, User, GraduationCap, MapPin } from "lucide-react";
 import { studentService } from "@/api/studentService";
 import { mentorService } from "@/api/mentorService";
 import ProfilePictureDisplay from "@/components/ProfilePictureDisplay";
@@ -29,6 +29,15 @@ interface School {
   state: string;
   boards: string[];
   branchName?: string;
+  serviceDetails?: {
+    serviceType?: string;
+    mentors?: string[];
+    subjects?: string[];
+    grades?: Array<{
+      grade: number;
+      sections: string[];
+    }>;
+  };
 }
 
 interface Student {
@@ -42,7 +51,8 @@ interface Student {
     profilePicture?: string | null;
   };
   studentId: string;
-  grade: string;
+  grade: number;
+  section: string;
   school: School;
   addedBy: {
     _id: string;
@@ -73,19 +83,9 @@ export default function MentorStudentsPage() {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedGrade, setSelectedGrade] = useState("all");
-
-  const grades = [
-    "Grade 1",
-    "Grade 2",
-    "Grade 3",
-    "Grade 4",
-    "Grade 5",
-    "Grade 6",
-    "Grade 7",
-    "Grade 8",
-    "Grade 9",
-    "Grade 10",
-  ];
+  const [selectedSection, setSelectedSection] = useState("all");
+  const [availableGrades, setAvailableGrades] = useState<string[]>([]);
+  const [availableSections, setAvailableSections] = useState<string[]>([]);
 
   useEffect(() => {
     fetchMentorProfile();
@@ -99,7 +99,25 @@ export default function MentorStudentsPage() {
 
   useEffect(() => {
     filterStudents();
-  }, [students, searchTerm, selectedGrade]);
+  }, [students, searchTerm, selectedGrade, selectedSection]);
+
+  useEffect(() => {
+    // Extract grades and sections from school service details
+    if (mentor?.assignedSchool?.serviceDetails?.grades) {
+      const gradesFromService = mentor.assignedSchool.serviceDetails.grades;
+      
+      // Extract unique grades
+      const grades = gradesFromService.map(g => `Grade ${g.grade}`).sort();
+      setAvailableGrades(grades);
+      
+      // Extract all unique sections from all grades
+      const allSections = new Set<string>();
+      gradesFromService.forEach(g => {
+        g.sections?.forEach(section => allSections.add(section));
+      });
+      setAvailableSections(Array.from(allSections).sort());
+    }
+  }, [mentor]);
 
   const fetchMentorProfile = async () => {
     try {
@@ -149,7 +167,14 @@ export default function MentorStudentsPage() {
 
     // Filter by grade
     if (selectedGrade !== "all") {
-      filtered = filtered.filter((student) => student.grade === selectedGrade);
+      // Extract number from "Grade X" format
+      const gradeNumber = parseInt(selectedGrade.replace("Grade ", ""));
+      filtered = filtered.filter((student) => student.grade === gradeNumber);
+    }
+
+    // Filter by section
+    if (selectedSection !== "all") {
+      filtered = filtered.filter((student) => student.section === selectedSection);
     }
 
     setFilteredStudents(filtered);
@@ -193,10 +218,34 @@ export default function MentorStudentsPage() {
         <div>
           <h1 className="text-3xl font-bold">My Students</h1>
           <p className="text-muted-foreground">
-            View students from your assigned schools
+            View students from your assigned school
           </p>
         </div>
       </div>
+
+      {/* School Info Banner */}
+      <Card className="bg-primary/5 border-primary/20">
+        <CardContent className="p-4">
+          <div className="flex items-center gap-3">
+            <div className="flex-1">
+              <div className="flex items-center gap-2">
+                <MapPin className="h-5 w-5 text-primary" />
+                <div>
+                  <h3 className="font-semibold text-lg">{mentor.assignedSchool.name}</h3>
+                  {mentor.assignedSchool.branchName && (
+                    <p className="text-sm text-muted-foreground">
+                      {mentor.assignedSchool.branchName}
+                    </p>
+                  )}
+                  <p className="text-sm text-muted-foreground">
+                    {mentor.assignedSchool.city}, {mentor.assignedSchool.state}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Filters */}
       <div className="flex flex-col sm:flex-row gap-4">
@@ -218,9 +267,23 @@ export default function MentorStudentsPage() {
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All Grades</SelectItem>
-            {grades.map((grade) => (
+            {availableGrades.map((grade) => (
               <SelectItem key={grade} value={grade}>
                 {grade}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+
+        <Select value={selectedSection} onValueChange={setSelectedSection}>
+          <SelectTrigger className="w-full sm:w-[150px]">
+            <SelectValue placeholder="Select Section" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Sections</SelectItem>
+            {availableSections.map((section) => (
+              <SelectItem key={section} value={section}>
+                {section}
               </SelectItem>
             ))}
           </SelectContent>
@@ -278,8 +341,7 @@ export default function MentorStudentsPage() {
                   <TableHead>Student Name</TableHead>
                   <TableHead>Student ID</TableHead>
                   <TableHead>Email</TableHead>
-                  <TableHead>Grade</TableHead>
-                  <TableHead>School</TableHead>
+                  <TableHead>Grade - Section</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead>Added Date</TableHead>
                 </TableRow>
@@ -308,20 +370,9 @@ export default function MentorStudentsPage() {
                     <TableCell>
                       <div className="flex items-center gap-1">
                         <GraduationCap className="h-4 w-4 text-muted-foreground" />
-                        <span className="text-sm">{student.grade}</span>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="text-sm">
-                        <div className="font-medium">{student.school.name}</div>
-                        {student.school.branchName && (
-                          <div className="text-muted-foreground">
-                            {student.school.branchName}
-                          </div>
-                        )}
-                        <div className="text-muted-foreground">
-                          {student.school.city}, {student.school.state}
-                        </div>
+                        <span className="text-sm font-medium">
+                          Grade {student.grade} - {student.section || 'No Section'}
+                        </span>
                       </div>
                     </TableCell>
                     <TableCell>

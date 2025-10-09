@@ -41,7 +41,8 @@ interface Student {
   };
   school: School;
   studentId: string;
-  grade: string;
+  grade: number;
+  section: string;
   parentEmail?: string;
   parentPhoneNumber?: string;
   hasCustomCredentials: boolean;
@@ -137,7 +138,9 @@ export default function StudentsPage() {
     }
 
     if (selectedGrade) {
-      filtered = filtered.filter((student) => student.grade === selectedGrade);
+      // Extract number from "Grade X" format
+      const gradeNumber = parseInt(selectedGrade.replace("Grade ", ""));
+      filtered = filtered.filter((student) => student.grade === gradeNumber);
     }
 
     setFilteredStudents(filtered);
@@ -332,7 +335,7 @@ export default function StudentsPage() {
                   <TableHead className="sticky left-0 bg-background z-10 min-w-[200px]">Student</TableHead>
                   <TableHead className="min-w-[120px]">Student ID</TableHead>
                   <TableHead className="min-w-[180px]">Email</TableHead>
-                  <TableHead className="min-w-[100px]">Grade</TableHead>
+                  <TableHead className="min-w-[140px]">Grade - Section</TableHead>
                   <TableHead className="min-w-[200px]">School</TableHead>
                   <TableHead className="min-w-[150px]">Parent Info</TableHead>
                   <TableHead className="min-w-[120px]">Password</TableHead>
@@ -375,7 +378,9 @@ export default function StudentsPage() {
                 <TableCell>
                   <div className="flex items-center gap-1 text-sm">
                     <GraduationCap className="h-4 w-4" />
-                    {student.grade}
+                    <span className="font-medium">
+                      Grade {student.grade} - {student.section || 'No Section'}
+                    </span>
                   </div>
                 </TableCell>
                 <TableCell>

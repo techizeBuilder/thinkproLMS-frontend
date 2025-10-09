@@ -27,6 +27,7 @@ export interface CreateSchoolAdminData {
 }
 
 export interface UpdateSchoolAdminData {
+  name?: string;
   phoneNumber?: string;
   assignedSchool?: string;
   isActive?: boolean;
@@ -57,7 +58,7 @@ export interface Student {
   };
   school: School;
   studentId: string;
-  grade: string;
+  grade: number;
   section: string;
   parentEmail?: string;
   parentPhoneNumber?: string;

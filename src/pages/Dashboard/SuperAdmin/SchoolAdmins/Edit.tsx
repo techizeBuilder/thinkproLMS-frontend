@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { ArrowLeft } from "lucide-react";
@@ -23,6 +24,7 @@ export default function EditSchoolAdminPage() {
   const [schools, setSchools] = useState<School[]>([]);
   const [schoolsLoading, setSchoolsLoading] = useState(true);
   const [formData, setFormData] = useState<UpdateSchoolAdminData>({
+    name: "",
     phoneNumber: "",
     assignedSchool: "",
     isActive: true,
@@ -44,6 +46,7 @@ export default function EditSchoolAdminPage() {
         if (admin) {
           setSchoolAdmin(admin);
           setFormData({
+            name: admin.user.name || "",
             phoneNumber: admin.phoneNumber || "",
             assignedSchool: admin.assignedSchool._id,
             isActive: admin.isActive,
@@ -151,6 +154,18 @@ export default function EditSchoolAdminPage() {
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-6">
+            <div className="space-y-2">
+              <Label htmlFor="name">Name *</Label>
+              <Input
+                id="name"
+                name="name"
+                value={formData.name || ""}
+                onChange={handleInputChange}
+                placeholder="Enter admin name"
+                required
+              />
+            </div>
+
             <PhoneInput
               label="Phone Number"
               value={formData.phoneNumber || ""}

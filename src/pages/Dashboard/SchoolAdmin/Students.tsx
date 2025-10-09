@@ -88,7 +88,9 @@ export default function SchoolAdminStudentsPage() {
 
     // Grade filter
     if (selectedGrade !== "all") {
-      filtered = filtered.filter((student) => student.grade === selectedGrade);
+      // Extract number from "Grade X" format
+      const gradeNumber = parseInt(selectedGrade.replace("Grade ", ""));
+      filtered = filtered.filter((student) => student.grade === gradeNumber);
     }
 
     setFilteredStudents(filtered);
@@ -194,8 +196,7 @@ export default function SchoolAdminStudentsPage() {
                   <TableHead>Student Name</TableHead>
                   <TableHead>Student ID</TableHead>
                   <TableHead>Email</TableHead>
-                  <TableHead>Grade</TableHead>
-                  <TableHead>Section</TableHead>
+                  <TableHead>Grade - Section</TableHead>
                   <TableHead>School</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead>Enrolled Date</TableHead>
@@ -221,11 +222,10 @@ export default function SchoolAdminStudentsPage() {
                     <TableCell>
                       <div className="flex items-center gap-1">
                         <GraduationCap className="h-4 w-4 text-muted-foreground" />
-                        <span className="text-sm">{student.grade}</span>
+                        <span className="text-sm font-medium">
+                          Grade {student.grade} - {student.section || 'No Section'}
+                        </span>
                       </div>
-                    </TableCell>
-                    <TableCell>
-                      <span className="text-sm">{student.section}</span>
                     </TableCell>
                     <TableCell>
                       <div className="text-sm">

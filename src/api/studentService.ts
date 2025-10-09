@@ -11,7 +11,7 @@ export interface Student {
   };
   studentId: string;
   rollNumber: string;
-  grade: string;
+  grade: number;
   section: string;
   school: {
     _id: string;

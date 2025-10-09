@@ -1,11 +1,13 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Search, Edit, Trash2, Mail, Phone, MapPin } from "lucide-react";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Plus, Search, Edit, Trash2, Mail, Phone, MapPin, KeyRound } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import axiosInstance from "@/api/axiosInstance";
+import { ResetPasswordDialog } from "@/components/ResetPasswordDialog";
 import ProfilePictureDisplay from "@/components/ProfilePictureDisplay";
 
 interface School {
@@ -40,6 +42,11 @@ export default function MentorsPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedSchool, setSelectedSchool] = useState("");
   const [schools, setSchools] = useState<School[]>([]);
+  const [resetPasswordUser, setResetPasswordUser] = useState<{
+    id: string;
+    name: string;
+    email: string;
+  } | null>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -155,77 +162,113 @@ export default function MentorsPage() {
         </CardContent>
       </Card>
 
-      {/* Mentors Grid */}
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        {filteredMentors.map((mentor) => (
-          <Card key={mentor._id} className="hover:shadow-lg transition-shadow">
-            <CardHeader className="pb-3">
-              <div className="flex justify-between items-start">
-                <div className="flex items-center gap-3">
-                  <ProfilePictureDisplay
-                    profilePicture={mentor.user.profilePicture}
-                    name={mentor.user.name}
-                    size="md"
-                  />
-                  <div>
-                    <CardTitle className="text-lg">
-                      {mentor.salutation} {mentor.user.name}
-                    </CardTitle>
-                    <div className="flex items-center gap-2 mt-1">
-                      <Badge variant={mentor.user.isVerified ? "default" : "secondary"}>
-                        {mentor.user.isVerified ? "Verified" : "Pending"}
-                      </Badge>
+      {/* Mentors Table */}
+      <Card>
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Name</TableHead>
+              <TableHead>Email</TableHead>
+              <TableHead>Phone</TableHead>
+              <TableHead>Address</TableHead>
+              <TableHead>School</TableHead>
+              <TableHead>Status</TableHead>
+              <TableHead className="text-right">Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {filteredMentors.map((mentor) => (
+              <TableRow key={mentor._id}>
+                <TableCell className="font-medium">
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8">
+                      <ProfilePictureDisplay
+                        profilePicture={mentor.user.profilePicture}
+                        name={mentor.user.name}
+                        size="sm"
+                      />
+                    </div>
+                    <div>
+                      <div className="font-medium">
+                        {mentor.salutation} {mentor.user.name}
+                      </div>
                     </div>
                   </div>
-                </div>
-                <div className="flex gap-2">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => navigate(`/leadmentor/mentors/${mentor._id}/edit`)}
+                </TableCell>
+                <TableCell>
+                  <div className="flex items-center text-sm">
+                    <Mail className="mr-2 h-4 w-4 text-gray-500" />
+                    {mentor.user.email}
+                  </div>
+                </TableCell>
+                <TableCell>
+                  <div className="flex items-center text-sm">
+                    <Phone className="mr-2 h-4 w-4 text-gray-500" />
+                    {mentor.phoneNumber}
+                  </div>
+                </TableCell>
+                <TableCell>
+                  <div className="flex items-start text-sm">
+                    <MapPin className="mr-2 h-4 w-4 mt-0.5 text-gray-500" />
+                    <span className="line-clamp-2">{mentor.address}</span>
+                  </div>
+                </TableCell>
+                <TableCell>
+                  <div className="text-sm">
+                    <Badge variant="outline" className="text-xs">
+                      {mentor.assignedSchool.name}
+                    </Badge>
+                  </div>
+                </TableCell>
+                <TableCell>
+                  <Badge
+                    variant={
+                      mentor.user.isVerified ? "default" : "secondary"
+                    }
                   >
-                    <Edit className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => handleDelete(mentor._id)}
-                    className="text-red-600 hover:text-red-700"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <div className="flex items-center gap-2 text-sm text-gray-600">
-                <Mail className="h-4 w-4" />
-                {mentor.user.email}
-              </div>
-              <div className="flex items-center gap-2 text-sm text-gray-600">
-                <Phone className="h-4 w-4" />
-                {mentor.phoneNumber}
-              </div>
-              <div className="flex items-start gap-2 text-sm text-gray-600">
-                <MapPin className="h-4 w-4 mt-0.5" />
-                <span className="flex-1">{mentor.address}</span>
-              </div>
-              
-              {/* Assigned Schools */}
-              <div className="pt-2 border-t">
-                <p className="text-xs font-medium text-gray-500 mb-2">
-                  Assigned School
-                </p>
-                <div className="flex flex-wrap gap-1">
-                  <Badge variant="outline" className="text-xs">
-                    {mentor.assignedSchool.name}
+                    {mentor.user.isVerified ? "Verified" : "Pending"}
                   </Badge>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+                </TableCell>
+                <TableCell className="text-right">
+                  <div className="flex gap-2 justify-end">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() =>
+                        setResetPasswordUser({
+                          id: mentor.user._id,
+                          name: mentor.user.name,
+                          email: mentor.user.email,
+                        })
+                      }
+                      title="Reset Password"
+                    >
+                      <KeyRound className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() =>
+                        navigate(`/leadmentor/mentors/${mentor._id}/edit`)
+                      }
+                    >
+                      <Edit className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleDelete(mentor._id)}
+                      className="text-red-600 hover:text-red-700"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </Card>
 
       {filteredMentors.length === 0 && (
         <Card>
@@ -233,6 +276,17 @@ export default function MentorsPage() {
             <p className="text-gray-500">No mentors found</p>
           </CardContent>
         </Card>
+      )}
+
+      {/* Reset Password Dialog */}
+      {resetPasswordUser && (
+        <ResetPasswordDialog
+          open={!!resetPasswordUser}
+          onOpenChange={(open) => !open && setResetPasswordUser(null)}
+          userId={resetPasswordUser.id}
+          userName={resetPasswordUser.name}
+          userEmail={resetPasswordUser.email}
+        />
       )}
     </div>
   );
