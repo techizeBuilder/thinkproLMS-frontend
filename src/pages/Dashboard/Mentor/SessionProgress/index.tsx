@@ -10,7 +10,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Loader2, BookOpen, Search } from "lucide-react";
+import { Loader2, BookOpen, Search, MapPin } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import {
@@ -134,11 +134,12 @@ export default function SessionProgressPage() {
         });
 
         // Get session progress from the API
-        const progressData = await sessionProgressService.getMentorSessionProgress(
-          schoolId,
-          section,
-          grade
-        );
+        const progressData =
+          await sessionProgressService.getMentorSessionProgress(
+            schoolId,
+            section,
+            grade
+          );
 
         console.log("Session progress data:", progressData);
 
@@ -193,11 +194,15 @@ export default function SessionProgressPage() {
         status: session.status || "Pending",
         notes,
       });
-      setSessions((prev) => prev.map((s) => (s.sessionId === sessionId ? { ...s, notes } : s)));
+      setSessions((prev) =>
+        prev.map((s) => (s.sessionId === sessionId ? { ...s, notes } : s))
+      );
       toast.success("Notes saved");
     } catch (error: any) {
       const errorMessage =
-        error?.response?.data?.message || error?.message || "Failed to save notes";
+        error?.response?.data?.message ||
+        error?.message ||
+        "Failed to save notes";
       toast.error(errorMessage);
     } finally {
       setSavingNotesFor(null);
@@ -232,16 +237,20 @@ export default function SessionProgressPage() {
 
     try {
       // Find the session to get its module ID
-      const session = sessions.find(s => s.sessionId === sessionId);
+      const session = sessions.find((s) => s.sessionId === sessionId);
       if (!session) {
         throw new Error("Session not found");
       }
 
       // Update local state immediately
-      setSessions(prev => 
-        prev.map(s => 
-          s.sessionId === sessionId 
-            ? { ...s, status: newStatus as "Pending" | "In Progress" | "Completed", isCompleted: newStatus === "Completed" }
+      setSessions((prev) =>
+        prev.map((s) =>
+          s.sessionId === sessionId
+            ? {
+                ...s,
+                status: newStatus as "Pending" | "In Progress" | "Completed",
+                isCompleted: newStatus === "Completed",
+              }
             : s
         )
       );
@@ -268,7 +277,6 @@ export default function SessionProgressPage() {
 
       console.log("Session status update response:", response);
       toast.success(`Session status updated to ${newStatus}`);
-
     } catch (error: any) {
       console.error("Error updating session status:", error);
 
@@ -280,9 +288,9 @@ export default function SessionProgressPage() {
       toast.error(errorMessage);
 
       // Revert the status change on error
-      setSessions(prev => 
-        prev.map(s => 
-          s.sessionId === sessionId 
+      setSessions((prev) =>
+        prev.map((s) =>
+          s.sessionId === sessionId
             ? { ...s, status: s.status, isCompleted: s.isCompleted }
             : s
         )
@@ -293,10 +301,12 @@ export default function SessionProgressPage() {
   };
 
   // Filter sessions based on search term
-  const filteredSessions = sessions.filter(session =>
-    session.sessionName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    session.displayName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (session.description && session.description.toLowerCase().includes(searchTerm.toLowerCase()))
+  const filteredSessions = sessions.filter(
+    (session) =>
+      session.sessionName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      session.displayName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (session.description &&
+        session.description.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
   // Calculate session status counts
@@ -330,85 +340,91 @@ export default function SessionProgressPage() {
         </div>
       </div>
 
-      {/* Filters */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-        {/* School Display */}
-        <div>
-          <Label className="text-xs font-medium">
-            School
-          </Label>
-          <div className="w-full h-8 px-3 py-1 border rounded-md bg-muted/50 flex items-center text-sm">
+      {/* School + Filters in one row - Compact layout */}
+      <div className="flex flex-wrap items-center gap-3">
+        {/* Filters on the left */}
+        <div className="flex gap-2 items-center justify-between w-full">
+          {/* School info on the right - simplified */}
+          <div className="flex items-center gap-2 text-xs sm:text-sm text-muted-foreground">
+            <MapPin className="h-3 w-3 sm:h-4 sm:w-4 text-primary" />
             {availableSchools.length > 0 ? (
-              <span>{availableSchools[0].name} - {availableSchools[0].city}, {availableSchools[0].state}</span>
+              <span className="font-medium text-foreground">
+                {availableSchools[0].name}
+              </span>
             ) : (
               <span className="text-muted-foreground">No school assigned</span>
             )}
           </div>
-        </div>
 
-        {/* Grade Selection */}
-        <div>
-          <Label htmlFor="grade-select" className="text-xs font-medium">
-            Grade
-          </Label>
-          <Select
-            value={selectedGrade}
-            onValueChange={(value) => {
-              setSelectedGrade(value);
-            }}
-          >
-            <SelectTrigger className="w-full h-8">
-              <SelectValue placeholder="Select grade" />
-            </SelectTrigger>
-            <SelectContent>
-              {hasServiceDetails
-                ? availableGrades.map((gradeData) => (
-                    <SelectItem key={gradeData.grade} value={gradeData.grade.toString()}>
-                      {gradeData.grade}
-                    </SelectItem>
-                  ))
-                : [
-                    "Grade 1",
-                    "Grade 2",
-                    "Grade 3",
-                    "Grade 4",
-                    "Grade 5",
-                    "Grade 6",
-                    "Grade 7",
-                    "Grade 8",
-                    "Grade 9",
-                    "Grade 10",
-                  ].map((grade) => (
-                    <SelectItem key={grade} value={grade}>
-                      {grade}
+          <div className="flex gap-2 items-center">
+            {/* Grade Selection */}
+            <div className="min-w-[120px] sm:min-w-[140px]">
+              <Label htmlFor="grade-select" className="text-xs font-medium">
+                Grade
+              </Label>
+              <Select
+                value={selectedGrade}
+                onValueChange={(value) => {
+                  setSelectedGrade(value);
+                }}
+              >
+                <SelectTrigger className="w-full h-7 sm:h-8">
+                  <SelectValue placeholder="Select grade" />
+                </SelectTrigger>
+                <SelectContent>
+                  {hasServiceDetails
+                    ? availableGrades.map((gradeData) => (
+                        <SelectItem
+                          key={gradeData.grade}
+                          value={gradeData.grade.toString()}
+                        >
+                          {gradeData.grade}
+                        </SelectItem>
+                      ))
+                    : [
+                        "Grade 1",
+                        "Grade 2",
+                        "Grade 3",
+                        "Grade 4",
+                        "Grade 5",
+                        "Grade 6",
+                        "Grade 7",
+                        "Grade 8",
+                        "Grade 9",
+                        "Grade 10",
+                      ].map((grade) => (
+                        <SelectItem key={grade} value={grade}>
+                          {grade}
+                        </SelectItem>
+                      ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Section Selection */}
+            <div className="min-w-[120px] sm:min-w-[140px]">
+              <Label htmlFor="section-select" className="text-xs font-medium">
+                Section
+              </Label>
+              <Select
+                value={selectedSection}
+                onValueChange={(value) => {
+                  setSelectedSection(value);
+                }}
+              >
+                <SelectTrigger className="w-full h-7 sm:h-8">
+                  <SelectValue placeholder="Select section" />
+                </SelectTrigger>
+                <SelectContent>
+                  {availableSections.map((section) => (
+                    <SelectItem key={section} value={section}>
+                      {section}
                     </SelectItem>
                   ))}
-            </SelectContent>
-          </Select>
-        </div>
-
-        {/* Section Selection */}
-        <div>
-          <Label htmlFor="section-select" className="text-xs font-medium">
-            Section
-          </Label>
-          <Select
-            value={selectedSection}
-            onValueChange={(value) => {
-              setSelectedSection(value);
-            }}
-          >
-            <SelectTrigger className="w-full h-8">
-              <SelectValue placeholder="Select section" />
-            </SelectTrigger>
-            <SelectContent>
-              {availableSections.map((section) => (
-                <SelectItem key={section} value={section}>
-                  {section}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -422,17 +438,14 @@ export default function SessionProgressPage() {
       )}
 
       {/* Show loading state when sessions are being loaded */}
-      {selectedSchoolId &&
-        selectedGrade &&
-        selectedSection &&
-        loading && (
-          <Alert>
-            <AlertDescription className="flex items-center gap-2">
-              <Loader2 className="h-4 w-4 animate-spin" />
-              Loading sessions for the selected criteria...
-            </AlertDescription>
-          </Alert>
-        )}
+      {selectedSchoolId && selectedGrade && selectedSection && loading && (
+        <Alert>
+          <AlertDescription className="flex items-center gap-2">
+            <Loader2 className="h-4 w-4 animate-spin" />
+            Loading sessions for the selected criteria...
+          </AlertDescription>
+        </Alert>
+      )}
 
       {/* Show message when no data is available */}
       {selectedSchoolId &&
@@ -442,49 +455,53 @@ export default function SessionProgressPage() {
         !loading && (
           <Alert>
             <AlertDescription>
-              No sessions found for the selected Grade ({selectedGrade}) and Section
-              ({selectedSection}) combination. Please try selecting different criteria or contact your administrator if sessions should
-              be available.
+              No sessions found for the selected Grade ({selectedGrade}) and
+              Section ({selectedSection}) combination. Please try selecting
+              different criteria or contact your administrator if sessions
+              should be available.
             </AlertDescription>
           </Alert>
         )}
 
-      {/* Session Summary Report */}
+      {/* Session Summary Report - Single row with horizontal scroll */}
       {selectedSchoolId &&
         selectedGrade &&
         selectedSection &&
         sessions &&
         sessions.length > 0 && (
-          <Card>
-            <CardContent className="p-3">
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                <div className="text-center p-2 bg-gray-50 rounded">
+          <div className="space-y-2">
+            <h3 className="text-sm font-medium text-gray-700">
+              Session Summary
+            </h3>
+            <div className="overflow-x-auto">
+              <div className="flex gap-3 min-w-max items-center justify-center">
+                <div className="flex-shrink-0 text-center p-3 bg-gray-50 rounded min-w-[100px]">
                   <div className="text-lg font-bold text-gray-700">
                     {totalSessions}
                   </div>
                   <div className="text-xs text-gray-600">Total</div>
                 </div>
-                <div className="text-center p-2 bg-gray-100 rounded">
+                <div className="flex-shrink-0 text-center p-3 bg-gray-100 rounded min-w-[100px]">
                   <div className="text-lg font-bold text-gray-600">
                     {pendingCount}
                   </div>
                   <div className="text-xs text-gray-600">Pending</div>
                 </div>
-                <div className="text-center p-2 bg-blue-50 rounded">
+                <div className="flex-shrink-0 text-center p-3 bg-blue-50 rounded min-w-[100px]">
                   <div className="text-lg font-bold text-blue-600">
                     {inProgressCount}
                   </div>
                   <div className="text-xs text-blue-600">In Progress</div>
                 </div>
-                <div className="text-center p-2 bg-green-50 rounded">
+                <div className="flex-shrink-0 text-center p-3 bg-green-50 rounded min-w-[100px]">
                   <div className="text-lg font-bold text-green-600">
                     {completedCount}
                   </div>
                   <div className="text-xs text-green-600">Completed</div>
                 </div>
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
         )}
 
       {/* Sessions Table */}
@@ -496,7 +513,7 @@ export default function SessionProgressPage() {
                 <BookOpen className="h-4 w-4" />
                 Sessions ({filteredSessions.length})
               </CardTitle>
-              
+
               {/* Search Input */}
               <div className="relative w-48">
                 <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-400 h-3 w-3" />
@@ -516,7 +533,9 @@ export default function SessionProgressPage() {
                   <TableHead className="w-[30px] text-xs">#</TableHead>
                   <TableHead className="text-xs">Session</TableHead>
                   <TableHead className="text-xs">Description</TableHead>
-                  <TableHead className="min-w-[160px] text-xs">Status</TableHead>
+                  <TableHead className="min-w-[160px] text-xs">
+                    Status
+                  </TableHead>
                   <TableHead className="text-xs min-w-[320px]">Notes</TableHead>
                 </TableRow>
               </TableHeader>
@@ -530,14 +549,20 @@ export default function SessionProgressPage() {
 
                   return (
                     <TableRow key={session.sessionId} className="h-10">
-                      <TableCell className="font-medium text-xs">{index + 1}</TableCell>
+                      <TableCell className="font-medium text-xs">
+                        {index + 1}
+                      </TableCell>
                       <TableCell className="font-medium">
                         <div>
-                          <div className="font-semibold text-sm">{session.displayName}</div>
+                          <div className="font-semibold text-xs sm:text-sm">
+                            {session.displayName}
+                          </div>
                         </div>
                       </TableCell>
                       <TableCell className="text-gray-600 text-xs">
-                        {session.description || "No description available"}
+                        <div className="line-clamp-2">
+                          {session.description || "No description available"}
+                        </div>
                       </TableCell>
                       <TableCell>
                         <Select
@@ -547,7 +572,7 @@ export default function SessionProgressPage() {
                           }
                           disabled={isUpdating}
                         >
-                          <SelectTrigger className="w-full h-8">
+                          <SelectTrigger className="w-full h-7 sm:h-8">
                             <SelectValue placeholder="Pending" />
                           </SelectTrigger>
                           <SelectContent>
@@ -559,7 +584,7 @@ export default function SessionProgressPage() {
                           </SelectContent>
                         </Select>
                         {isUpdating && (
-                          <Loader2 className="h-4 w-4 animate-spin text-gray-500 mt-1" />
+                          <Loader2 className="h-3 w-3 sm:h-4 sm:w-4 animate-spin text-gray-500 mt-1" />
                         )}
                       </TableCell>
                       <TableCell>
@@ -567,23 +592,36 @@ export default function SessionProgressPage() {
                           <Textarea
                             value={draft}
                             onChange={(e) =>
-                              setNotesDrafts((prev) => ({ ...prev, [session.sessionId]: e.target.value }))
+                              setNotesDrafts((prev) => ({
+                                ...prev,
+                                [session.sessionId]: e.target.value,
+                              }))
                             }
                             placeholder="Add notes for this session..."
-                            className="min-h-[48px] text-xs"
+                            className="min-h-[40px] sm:min-h-[48px] text-xs"
                           />
                           {notesDirty && (
                             <div className="flex justify-end">
                               <Button
                                 size="sm"
                                 variant="secondary"
-                                onClick={() => handleSaveNotes(session.sessionId)}
-                                disabled={isSavingNotes || !selectedSchoolId || !selectedGrade || !selectedSection}
-                                className="h-7 py-0 text-xs"
+                                onClick={() =>
+                                  handleSaveNotes(session.sessionId)
+                                }
+                                disabled={
+                                  isSavingNotes ||
+                                  !selectedSchoolId ||
+                                  !selectedGrade ||
+                                  !selectedSection
+                                }
+                                className="h-6 sm:h-7 py-0 text-xs"
                               >
                                 {isSavingNotes ? (
-                                  <span className="inline-flex items-center gap-2">
-                                    <Loader2 className="h-4 w-4 animate-spin" /> Saving
+                                  <span className="inline-flex items-center gap-1 sm:gap-2">
+                                    <Loader2 className="h-3 w-3 sm:h-4 sm:w-4 animate-spin" />
+                                    <span className="hidden sm:inline">
+                                      Saving
+                                    </span>
                                   </span>
                                 ) : (
                                   "Save Notes"

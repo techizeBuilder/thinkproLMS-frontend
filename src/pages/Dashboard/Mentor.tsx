@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { MentorSidebar } from "@/components/ui/mentor-sidebar"
-import { SidebarProvider } from "@/components/ui/collapsible-sidebar"
+import { SidebarProvider, useSidebar } from "@/components/ui/collapsible-sidebar"
 import { 
   Card, 
   CardContent, 
@@ -41,7 +41,8 @@ interface Mentor {
   isActive: boolean;
 }
 
-export default function Mentor() {
+function MentorContent() {
+  const { toggle, isMobile } = useSidebar();
   const [mentor, setMentor] = useState<Mentor | null>(null);
   const [studentCount, setStudentCount] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -91,129 +92,158 @@ export default function Mentor() {
 
   if (loading) {
     return (
-      <SidebarProvider defaultCollapsed={false}>
-        <div className="flex h-screen bg-background">
-          <MentorSidebar />
-          <div className="flex-1 flex flex-col overflow-hidden">
-            <header className="h-16 border-b bg-background px-6 flex items-center justify-between">
-              <div>
-                <h1 className="text-2xl font-semibold">Mentor Dashboard</h1>
-                <p className="text-sm text-muted-foreground">
-                  Guide and support your students' learning journey
-                </p>
-              </div>
-            </header>
-            <main className="flex-1 overflow-auto">
-              <div className="flex items-center justify-center min-h-[400px]">
-                <div className="text-center">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
-                  <p className="mt-2 text-muted-foreground">Loading dashboard...</p>
-                </div>
-              </div>
-            </main>
+      <div className="flex-1 flex flex-col overflow-hidden">
+        <header className="h-16 border-b bg-background px-4 md:px-6 flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            {/* Mobile menu button */}
+            {isMobile && (
+              <button
+                onClick={toggle}
+                className="p-2 rounded-md hover:bg-accent md:hidden"
+                aria-label="Open menu"
+              >
+                <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
+              </button>
+            )}
+            <div className="flex-1 min-w-0">
+              <h1 className="text-xl md:text-2xl font-semibold truncate">Mentor Dashboard</h1>
+              <p className="text-sm text-muted-foreground hidden sm:block">
+                Guide and support your students' learning journey
+              </p>
+            </div>
           </div>
-        </div>
-      </SidebarProvider>
+        </header>
+        <main className="flex-1 overflow-auto">
+          <div className="flex items-center justify-center min-h-[400px]">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
+              <p className="mt-2 text-muted-foreground">Loading dashboard...</p>
+            </div>
+          </div>
+        </main>
+      </div>
     );
   }
 
   return (
+    <div className="flex-1 flex flex-col overflow-hidden">
+      <header className="h-16 border-b bg-background px-4 md:px-6 flex items-center justify-between">
+        <div className="flex items-center gap-4">
+          {/* Mobile menu button */}
+          {isMobile && (
+            <button
+              onClick={toggle}
+              className="p-2 rounded-md hover:bg-accent md:hidden"
+              aria-label="Open menu"
+            >
+              <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            </button>
+          )}
+          <div className="flex-1 min-w-0">
+            <h1 className="text-xl md:text-2xl font-semibold truncate">Mentor Dashboard</h1>
+            <p className="text-sm text-muted-foreground hidden sm:block">
+              Guide and support your students' learning journey
+            </p>
+          </div>
+        </div>
+      </header>
+      <main className="flex-1 overflow-auto">
+        <div className="p-4 md:p-6 space-y-4 md:space-y-6">
+          {/* Dashboard Stats */}
+          <div className="grid gap-3 md:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">
+                  My Students
+                </CardTitle>
+                <Users className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-xl md:text-2xl font-bold">{studentCount}</div>
+                <p className="text-xs text-muted-foreground">
+                  Students in assigned school
+                </p>
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">
+                  Courses Taught
+                </CardTitle>
+                <BookOpen className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-xl md:text-2xl font-bold">0</div>
+                <p className="text-xs text-muted-foreground">
+                  Active courses
+                </p>
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">
+                  Messages
+                </CardTitle>
+                <MessageSquare className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-xl md:text-2xl font-bold">0</div>
+                <p className="text-xs text-muted-foreground">
+                  Unread messages
+                </p>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Recent Activity */}
+          <div className="grid gap-3 md:gap-4 grid-cols-1 md:grid-cols-2">
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg md:text-xl">Recent Messages</CardTitle>
+                <CardDescription className="text-xs md:text-sm">
+                  Latest student communications
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="text-center py-6 md:py-8 text-muted-foreground text-sm">
+                  No recent messages
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg md:text-xl">Student Progress</CardTitle>
+                <CardDescription className="text-xs md:text-sm">
+                  Overview of student performance
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="text-center py-6 md:py-8 text-muted-foreground text-sm">
+                  No student data available
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </main>
+    </div>
+  );
+}
+
+export default function Mentor() {
+  return (
     <SidebarProvider defaultCollapsed={false}>
       <div className="flex h-screen bg-background">
         <MentorSidebar />
-        <div className="flex-1 flex flex-col overflow-hidden">
-          <header className="h-16 border-b bg-background px-6 flex items-center justify-between">
-            <div>
-              <h1 className="text-2xl font-semibold">Mentor Dashboard</h1>
-              <p className="text-sm text-muted-foreground">
-                Guide and support your students' learning journey
-              </p>
-            </div>
-          </header>
-          <main className="flex-1 overflow-auto">
-            <div className="p-6 space-y-6">
-              {/* Dashboard Stats */}
-              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                <Card>
-                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium">
-                      My Students
-                    </CardTitle>
-                    <Users className="h-4 w-4 text-muted-foreground" />
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-2xl font-bold">{studentCount}</div>
-                    <p className="text-xs text-muted-foreground">
-                      Students in assigned school
-                    </p>
-                  </CardContent>
-                </Card>
-                
-                <Card>
-                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium">
-                      Courses Taught
-                    </CardTitle>
-                    <BookOpen className="h-4 w-4 text-muted-foreground" />
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-2xl font-bold">0</div>
-                    <p className="text-xs text-muted-foreground">
-                      Active courses
-                    </p>
-                  </CardContent>
-                </Card>
-                
-                <Card>
-                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium">
-                      Messages
-                    </CardTitle>
-                    <MessageSquare className="h-4 w-4 text-muted-foreground" />
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-2xl font-bold">0</div>
-                    <p className="text-xs text-muted-foreground">
-                      Unread messages
-                    </p>
-                  </CardContent>
-                </Card>
-              </div>
-
-              {/* Recent Activity */}
-              <div className="grid gap-4 md:grid-cols-2">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Recent Messages</CardTitle>
-                    <CardDescription>
-                      Latest student communications
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-center py-8 text-muted-foreground">
-                      No recent messages
-                    </div>
-                  </CardContent>
-                </Card>
-
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Student Progress</CardTitle>
-                    <CardDescription>
-                      Overview of student performance
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-center py-8 text-muted-foreground">
-                      No student data available
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
-            </div>
-          </main>
-        </div>
+        <MentorContent />
       </div>
     </SidebarProvider>
-  )
+  );
 }

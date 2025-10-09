@@ -103,57 +103,58 @@ export default function AssessmentResultsPage() {
   }
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
-      <div className="flex items-center gap-4">
-        <Button variant="outline" onClick={() => navigate("/student/assessments")}>
+    <div className="container mx-auto p-4 sm:p-6 space-y-4 sm:space-y-6">
+      <div className="space-y-4">
+        <Button variant="outline" onClick={() => navigate("/student/assessments")} className="w-full sm:w-auto">
           <ArrowLeft className="h-4 w-4 mr-2" />
           Back to Assessments
         </Button>
         <div>
-          <h1 className="text-3xl font-bold">Assessment Results</h1>
-          <p className="text-gray-600">View your assessment performance and progress</p>
+          <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold">Assessment Results</h1>
+          <p className="text-sm sm:text-base text-gray-600">View your assessment performance and progress</p>
         </div>
       </div>
 
       {/* Recent Result (if available) */}
       {recentResult && (
         <Card className="border-green-200 bg-green-50">
-          <CardHeader>
-            <CardTitle className="flex items-center text-green-800">
-              <Trophy className="h-5 w-5 mr-2" />
+          <CardHeader className="pb-3">
+            <CardTitle className="flex items-center text-green-800 text-lg sm:text-xl">
+              <Trophy className="h-4 w-4 sm:h-5 sm:w-5 mr-2" />
               Latest Assessment Result
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <CardContent className="space-y-3 sm:space-y-4 p-3 sm:p-6">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
               <div className="text-center">
-                <div className="text-3xl font-bold text-green-600">
+                <div className="text-2xl sm:text-3xl font-bold text-green-600">
                   {recentResult.percentage.toFixed(1)}%
                 </div>
-                <p className="text-sm text-gray-600">Score</p>
+                <p className="text-xs sm:text-sm text-gray-600">Score</p>
               </div>
               <div className="text-center">
-                <Badge className={`text-lg px-3 py-1 ${getGradeColor(recentResult.grade)}`}>
+                <Badge className={`text-sm sm:text-lg px-2 sm:px-3 py-1 ${getGradeColor(recentResult.grade)}`}>
                   {recentResult.grade}
                 </Badge>
-                <p className="text-sm text-gray-600 mt-1">Grade</p>
+                <p className="text-xs sm:text-sm text-gray-600 mt-1">Grade</p>
               </div>
               <div className="text-center">
-                <div className="text-3xl font-bold text-green-600">
+                <div className="text-2xl sm:text-3xl font-bold text-green-600">
                   {recentResult.obtainedMarks}/{recentResult.totalMarks}
                 </div>
-                <p className="text-sm text-gray-600">Marks</p>
+                <p className="text-xs sm:text-sm text-gray-600">Marks</p>
               </div>
             </div>
             <div className="text-center">
-              <p className="text-green-700 font-medium">
+              <p className="text-green-700 font-medium text-sm sm:text-base">
                 {getPerformanceMessage(recentResult.percentage)}
               </p>
             </div>
-            <div className="text-center mt-4">
+            <div className="text-center mt-3 sm:mt-4">
               <Button 
                 variant="outline"
                 onClick={() => navigate(`/student/assessments/results/${recentResult._id}`)}
+                className="w-full sm:w-auto text-sm"
               >
                 <Eye className="h-4 w-4 mr-2" />
                 View Detailed Results
@@ -166,78 +167,78 @@ export default function AssessmentResultsPage() {
       {/* All Results */}
       {results.length === 0 ? (
         <Card>
-          <CardContent className="text-center py-12">
-            <BookOpen className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-lg font-semibold mb-2">No results found</h3>
-            <p className="text-gray-600 mb-4">
+          <CardContent className="text-center py-8 sm:py-12 p-4 sm:p-6">
+            <BookOpen className="h-8 w-8 sm:h-12 sm:w-12 text-gray-400 mx-auto mb-3 sm:mb-4" />
+            <h3 className="text-base sm:text-lg font-semibold mb-2">No results found</h3>
+            <p className="text-sm sm:text-base text-gray-600 mb-3 sm:mb-4">
               You haven't completed any assessments yet.
             </p>
-            <Button onClick={() => navigate("/student/assessments")}>
+            <Button onClick={() => navigate("/student/assessments")} className="text-sm">
               View Available Assessments
             </Button>
           </CardContent>
         </Card>
       ) : (
-        <div className="space-y-4">
-          <h2 className="text-xl font-semibold">All Results</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="space-y-3 sm:space-y-4">
+          <h2 className="text-lg sm:text-xl font-semibold">All Results</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 lg:gap-6">
             {results.map((result) => {
               const assessment = result.assessment as any;
               return (
                 <Card key={result._id} className="hover:shadow-lg transition-shadow">
-                  <CardHeader>
+                  <CardHeader className="pb-3 p-3 sm:p-6">
                     <div className="flex items-start justify-between">
-                      <CardTitle className="text-lg line-clamp-2">
+                      <CardTitle className="text-sm sm:text-base line-clamp-2">
                         {assessment?.title || "Assessment"}
                       </CardTitle>
-                      <Badge className={getGradeColor(result.grade)}>
+                      <Badge className={`text-xs sm:text-sm ${getGradeColor(result.grade)}`}>
                         {result.grade}
                       </Badge>
                     </div>
-                    <div className="flex items-center gap-2 text-sm text-gray-600">
-                      <BookOpen className="h-4 w-4" />
-                      <span>{assessment?.grade} - {assessment?.subject}</span>
+                    <div className="flex items-center gap-2 text-xs sm:text-sm text-gray-600">
+                      <BookOpen className="h-3 w-3 sm:h-4 sm:w-4" />
+                      <span>{assessment?.grade} - {assessment?.subject || 'General'}</span>
                     </div>
                   </CardHeader>
-                  <CardContent className="space-y-4">
+                  <CardContent className="space-y-3 sm:space-y-4 p-3 sm:p-6 pt-0">
                     {/* Score Display */}
                     <div className="text-center">
-                      <div className="text-2xl font-bold text-blue-600">
+                      <div className="text-xl sm:text-2xl font-bold text-blue-600">
                         {result.percentage.toFixed(1)}%
                       </div>
-                      <div className="text-sm text-gray-600">
+                      <div className="text-xs sm:text-sm text-gray-600">
                         {result.totalMarksObtained}/{assessment?.totalMarks || 0} marks
                       </div>
                     </div>
 
                     {/* Progress Bar */}
-                    <div className="space-y-2">
-                      <div className="flex justify-between text-sm">
+                    <div className="space-y-1 sm:space-y-2">
+                      <div className="flex justify-between text-xs sm:text-sm">
                         <span>Performance</span>
                         <span>{result.percentage.toFixed(1)}%</span>
                       </div>
-                      <Progress value={result.percentage} className="h-2" />
+                      <Progress value={result.percentage} className="h-1.5 sm:h-2" />
                     </div>
 
                     {/* Assessment Details */}
-                    <div className="space-y-2 text-sm">
+                    <div className="space-y-1 sm:space-y-2 text-xs sm:text-sm">
                       <div className="flex items-center gap-2">
-                        <Calendar className="h-4 w-4 text-gray-500" />
+                        <Calendar className="h-3 w-3 sm:h-4 sm:w-4 text-gray-500" />
                         <span>Completed: {formatDate(result.submittedAt)}</span>
                       </div>
                       <div className="flex items-center gap-2">
-                        <Clock className="h-4 w-4 text-gray-500" />
-                        <span>Time taken: {formatTime(result.timeSpent)}</span>
+                        <Clock className="h-3 w-3 sm:h-4 sm:w-4 text-gray-500" />
+                        <span>Time: {formatTime(result.timeSpent)}</span>
                       </div>
                       <div className="flex items-center gap-2">
-                        <CheckCircle className="h-4 w-4 text-gray-500" />
+                        <CheckCircle className="h-3 w-3 sm:h-4 sm:w-4 text-gray-500" />
                         <span>Status: {result.status}</span>
                       </div>
                     </div>
 
                     {/* Performance Message */}
-                    <div className="bg-gray-50 p-3 rounded-lg">
-                      <p className="text-sm text-gray-700">
+                    <div className="bg-gray-50 p-2 sm:p-3 rounded-lg">
+                      <p className="text-xs sm:text-sm text-gray-700">
                         {getPerformanceMessage(result.percentage)}
                       </p>
                     </div>
@@ -245,10 +246,10 @@ export default function AssessmentResultsPage() {
                     {/* View Details Button */}
                     <Button 
                       variant="outline" 
-                      className="w-full"
+                      className="w-full text-xs sm:text-sm"
                       onClick={() => navigate(`/student/assessments/results/${result._id}`)}
                     >
-                      <Eye className="h-4 w-4 mr-2" />
+                      <Eye className="h-3 w-3 sm:h-4 sm:w-4 mr-2" />
                       View Detailed Results
                     </Button>
                   </CardContent>

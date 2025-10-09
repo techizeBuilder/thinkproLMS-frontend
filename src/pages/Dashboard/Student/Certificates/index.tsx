@@ -166,63 +166,6 @@ export default function StudentCertificatesPage() {
         </p>
       </div>
 
-      {/* Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center gap-2">
-              <Award className="h-8 w-8 text-primary" />
-              <div>
-                <div className="text-2xl font-bold">{certificates.length}</div>
-                <div className="text-sm text-muted-foreground">Total Certificates</div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center gap-2">
-              <CheckCircle className="h-8 w-8 text-green-500" />
-              <div>
-                <div className="text-2xl font-bold">
-                  {certificates.filter(c => c.status === 'downloaded').length}
-                </div>
-                <div className="text-sm text-muted-foreground">Downloaded</div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center gap-2">
-              <FileText className="h-8 w-8 text-blue-500" />
-              <div>
-                <div className="text-2xl font-bold">
-                  {certificates.filter(c => c.status === 'generated' || c.status === 'sent').length}
-                </div>
-                <div className="text-sm text-muted-foreground">Ready</div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center gap-2">
-              <Clock className="h-8 w-8 text-yellow-500" />
-              <div>
-                <div className="text-2xl font-bold">
-                  {certificates.filter(c => c.status === 'pending').length}
-                </div>
-                <div className="text-sm text-muted-foreground">Pending</div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
       {/* Certificates List */}
       {certificates.length === 0 ? (
         <Card>

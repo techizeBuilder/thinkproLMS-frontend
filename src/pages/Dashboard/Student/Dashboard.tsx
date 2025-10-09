@@ -52,21 +52,21 @@ export default function StudentDashboard() {
   };
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-4 md:p-6 space-y-6">
       {/* Dashboard Stats */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-3 sm:gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
+            <CardTitle className="text-xs sm:text-sm font-medium">
               Available Resources
             </CardTitle>
             <BookOpen className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">
+            <div className="text-xl sm:text-2xl font-bold">
               {loading ? "..." : stats.resources}
             </div>
-            <p className="text-xs text-muted-foreground">
+            <p className="text-[11px] sm:text-xs text-muted-foreground">
               Learning materials
             </p>
           </CardContent>
@@ -74,16 +74,16 @@ export default function StudentDashboard() {
         
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
+            <CardTitle className="text-xs sm:text-sm font-medium">
               Available Assessments
             </CardTitle>
             <FileText className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">
+            <div className="text-xl sm:text-2xl font-bold">
               {loading ? "..." : stats.assessments}
             </div>
-            <p className="text-xs text-muted-foreground">
+            <p className="text-[11px] sm:text-xs text-muted-foreground">
               Ready to start now
             </p>
           </CardContent>
@@ -91,16 +91,16 @@ export default function StudentDashboard() {
         
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
+            <CardTitle className="text-xs sm:text-sm font-medium">
               Certificates
             </CardTitle>
             <Award className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">
+            <div className="text-xl sm:text-2xl font-bold">
               {loading ? "..." : stats.certificates}
             </div>
-            <p className="text-xs text-muted-foreground">
+            <p className="text-[11px] sm:text-xs text-muted-foreground">
               Earned certificates
             </p>
           </CardContent>
@@ -108,16 +108,16 @@ export default function StudentDashboard() {
         
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
+            <CardTitle className="text-xs sm:text-sm font-medium">
               Messages
             </CardTitle>
             <MessageSquare className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">
+            <div className="text-xl sm:text-2xl font-bold">
               {loading ? "..." : stats.messages}
             </div>
-            <p className="text-xs text-muted-foreground">
+            <p className="text-[11px] sm:text-xs text-muted-foreground">
               Unread messages
             </p>
           </CardContent>
@@ -125,10 +125,10 @@ export default function StudentDashboard() {
       </div>
 
       {/* Quick Actions */}
-      <div className="grid gap-4 md:grid-cols-3">
+      <div className="grid gap-3 sm:gap-4 md:grid-cols-3">
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
+            <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
               <FileText className="h-5 w-5" />
               Assessments
             </CardTitle>
@@ -137,12 +137,12 @@ export default function StudentDashboard() {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-2">
-            <Button asChild className="w-full">
+            <Button asChild className="w-full h-9 sm:h-10 text-sm sm:text-base">
               <Link to="/student/assessments">
                 View Available Assessments
               </Link>
             </Button>
-            <Button asChild variant="outline" className="w-full">
+            <Button asChild variant="outline" className="w-full h-9 sm:h-10 text-sm sm:text-base">
               <Link to="/student/assessments/results">
                 View Results
               </Link>
@@ -152,7 +152,7 @@ export default function StudentDashboard() {
 
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
+            <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
               <BookOpen className="h-5 w-5" />
               Resources
             </CardTitle>
@@ -161,7 +161,7 @@ export default function StudentDashboard() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <Button asChild className="w-full">
+            <Button asChild className="w-full h-9 sm:h-10 text-sm sm:text-base">
               <Link to="/student/resources">
                 Browse Resources
               </Link>
@@ -171,7 +171,7 @@ export default function StudentDashboard() {
 
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
+            <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
               <Bell className="h-5 w-5" />
               Notifications
             </CardTitle>
@@ -180,7 +180,7 @@ export default function StudentDashboard() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <Button asChild className="w-full">
+            <Button asChild className="w-full h-9 sm:h-10 text-sm sm:text-base">
               <Link to="/student/notifications">
                 View Notifications
               </Link>
@@ -190,10 +190,10 @@ export default function StudentDashboard() {
       </div>
 
       {/* Recent Activity & Messages */}
-      <div className="grid gap-4 md:grid-cols-2">
+      <div className="grid gap-3 sm:gap-4 md:grid-cols-2">
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
+            <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
               <Calendar className="h-5 w-5" />
               Recent Activity
             </CardTitle>
@@ -202,7 +202,7 @@ export default function StudentDashboard() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="text-center py-8 text-muted-foreground">
+            <div className="text-center py-8 text-muted-foreground text-sm">
               No recent activity to display
             </div>
           </CardContent>
@@ -210,7 +210,7 @@ export default function StudentDashboard() {
 
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
+            <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
               <MessageSquare className="h-5 w-5" />
               Messages
             </CardTitle>
@@ -219,7 +219,7 @@ export default function StudentDashboard() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <Button asChild className="w-full">
+            <Button asChild className="w-full h-9 sm:h-10 text-sm sm:text-base">
               <Link to="/student/messages">
                 Open Messages
               </Link>

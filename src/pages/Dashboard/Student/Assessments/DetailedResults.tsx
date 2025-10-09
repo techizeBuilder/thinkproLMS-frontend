@@ -147,72 +147,72 @@ export default function DetailedAssessmentResultsPage() {
   const correctAnswers = getCorrectAnswers();
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
-      <div className="flex items-center gap-4">
-        <Button variant="outline" onClick={() => navigate("/student/assessments/results")}>
+    <div className="container mx-auto p-4 sm:p-6 space-y-4 sm:space-y-6">
+      <div className="space-y-4">
+        <Button variant="outline" onClick={() => navigate("/student/assessments/results")} className="w-full sm:w-auto">
           <ArrowLeft className="h-4 w-4 mr-2" />
           Back to Results
         </Button>
         <div>
-          <h1 className="text-3xl font-bold">Assessment Results</h1>
-          <p className="text-gray-600">Detailed review of your performance</p>
+          <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold">Assessment Results</h1>
+          <p className="text-sm sm:text-base text-gray-600">Detailed review of your performance</p>
         </div>
       </div>
 
       {/* Assessment Overview */}
       <Card className="border-blue-200 bg-blue-50">
-        <CardHeader>
-          <CardTitle className="flex items-center text-blue-800">
-            <Trophy className="h-5 w-5 mr-2" />
+        <CardHeader className="pb-3 p-3 sm:p-6">
+          <CardTitle className="flex items-center text-blue-800 text-base sm:text-lg">
+            <Trophy className="h-4 w-4 sm:h-5 sm:w-5 mr-2" />
             {result.assessment.title}
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <CardContent className="space-y-3 sm:space-y-4 p-3 sm:p-6 pt-0">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
             <div className="text-center">
-              <div className="text-3xl font-bold text-blue-600">
+              <div className="text-xl sm:text-2xl lg:text-3xl font-bold text-blue-600">
                 {result.percentage.toFixed(1)}%
               </div>
-              <p className="text-sm text-gray-600">Score</p>
+              <p className="text-xs sm:text-sm text-gray-600">Score</p>
             </div>
             <div className="text-center">
-              <Badge className={`text-lg px-3 py-1 ${getGradeColor(result.grade)}`}>
+              <Badge className={`text-sm sm:text-lg px-2 sm:px-3 py-1 ${getGradeColor(result.grade)}`}>
                 {result.grade}
               </Badge>
-              <p className="text-sm text-gray-600 mt-1">Grade</p>
+              <p className="text-xs sm:text-sm text-gray-600 mt-1">Grade</p>
             </div>
             <div className="text-center">
-              <div className="text-3xl font-bold text-blue-600">
+              <div className="text-xl sm:text-2xl lg:text-3xl font-bold text-blue-600">
                 {result.totalMarksObtained}/{result.assessment.totalMarks}
               </div>
-              <p className="text-sm text-gray-600">Marks</p>
+              <p className="text-xs sm:text-sm text-gray-600">Marks</p>
             </div>
             <div className="text-center">
-              <div className="text-3xl font-bold text-blue-600">
+              <div className="text-lg sm:text-xl lg:text-2xl font-bold text-blue-600">
                 {formatTime(result.timeSpent)}
               </div>
-              <p className="text-sm text-gray-600">Time Spent</p>
+              <p className="text-xs sm:text-sm text-gray-600">Time Spent</p>
             </div>
           </div>
           
           <div className="text-center">
-            <p className="text-blue-700 font-medium">
+            <p className="text-blue-700 font-medium text-sm sm:text-base">
               {getPerformanceMessage(result.percentage)}
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
-            <div className="text-center p-3 bg-green-100 rounded-lg">
-              <div className="text-2xl font-bold text-green-600">{correctAnswers.length}</div>
-              <p className="text-sm text-green-700">Correct Answers</p>
+          <div className="flex justify-center items-center gap-4 sm:gap-6 mt-3 sm:mt-4">
+            <div className="text-center p-2 sm:p-3 bg-green-100 rounded-lg">
+              <div className="text-lg sm:text-xl lg:text-2xl font-bold text-green-600">{correctAnswers.length}</div>
+              <p className="text-xs sm:text-sm text-green-700">Correct</p>
             </div>
-            <div className="text-center p-3 bg-red-100 rounded-lg">
-              <div className="text-2xl font-bold text-red-600">{wrongAnswers.length}</div>
-              <p className="text-sm text-red-700">Incorrect Answers</p>
+            <div className="text-center p-2 sm:p-3 bg-red-100 rounded-lg">
+              <div className="text-lg sm:text-xl lg:text-2xl font-bold text-red-600">{wrongAnswers.length}</div>
+              <p className="text-xs sm:text-sm text-red-700">Incorrect</p>
             </div>
-            <div className="text-center p-3 bg-blue-100 rounded-lg">
-              <div className="text-2xl font-bold text-blue-600">{result.assessment.questions.length}</div>
-              <p className="text-sm text-blue-700">Total Questions</p>
+            <div className="text-center p-2 sm:p-3 bg-blue-100 rounded-lg">
+              <div className="text-lg sm:text-xl lg:text-2xl font-bold text-blue-600">{result.assessment.questions.length}</div>
+              <p className="text-xs sm:text-sm text-blue-700">Total</p>
             </div>
           </div>
         </CardContent>
@@ -221,39 +221,39 @@ export default function DetailedAssessmentResultsPage() {
       {/* Wrong Answers with Explanations */}
       {wrongAnswers.length > 0 && (
         <Card className="border-red-200">
-          <CardHeader>
-            <CardTitle className="flex items-center text-red-800">
-              <XCircle className="h-5 w-5 mr-2" />
+          <CardHeader className="pb-3 p-3 sm:p-6">
+            <CardTitle className="flex items-center text-red-800 text-base sm:text-lg">
+              <XCircle className="h-4 w-4 sm:h-5 sm:w-5 mr-2" />
               Incorrect Answers & Explanations
             </CardTitle>
-            <p className="text-sm text-gray-600">
+            <p className="text-xs sm:text-sm text-gray-600">
               Review the questions you answered incorrectly and learn from the explanations.
             </p>
           </CardHeader>
-          <CardContent className="space-y-6">
+          <CardContent className="space-y-3 sm:space-y-4 p-3 sm:p-6 pt-0">
             {wrongAnswers.map((question: any, index) => (
-              <div key={String(question.questionId) || index} className="border border-red-200 rounded-lg p-4 bg-red-50">
-                <div className="flex items-start justify-between mb-3">
-                  <div className="flex items-center gap-2">
-                    <Badge variant="outline" className="text-red-600 border-red-300">
-                      Question {result.assessment.questions.findIndex(q => q.questionId === question.questionId) + 1}
+              <div key={String(question.questionId) || index} className="border border-red-200 rounded-lg p-3 sm:p-4 bg-red-50">
+                <div className="flex items-start justify-between mb-2 sm:mb-3">
+                  <div className="flex items-center gap-1 sm:gap-2 flex-wrap">
+                    <Badge variant="outline" className="text-red-600 border-red-300 text-xs">
+                      Q{result.assessment.questions.findIndex(q => q.questionId === question.questionId) + 1}
                     </Badge>
-                    <Badge className={getDifficultyColor(question.difficulty)}>
+                    <Badge className={`text-xs ${getDifficultyColor(question.difficulty)}`}>
                       {question.difficulty}
                     </Badge>
-                    <Badge variant="outline" className="text-red-600 border-red-300">
-                      {question.marks} marks
+                    <Badge variant="outline" className="text-red-600 border-red-300 text-xs">
+                      {question.marks}m
                     </Badge>
                   </div>
-                  <div className="text-sm text-red-600 font-medium">
-                    {question.studentAnswer?.marksObtained || 0}/{question.marks} marks
+                  <div className="text-xs sm:text-sm text-red-600 font-medium">
+                    {question.studentAnswer?.marksObtained || 0}/{question.marks}
                   </div>
                 </div>
 
-                <div className="mb-4">
-                  <h4 className="font-semibold text-gray-800 mb-2">{question.questionText}</h4>
+                <div className="mb-3 sm:mb-4">
+                  <h4 className="font-semibold text-gray-800 mb-2 text-sm sm:text-base">{question.questionText}</h4>
                   
-                  <div className="space-y-2">
+                  <div className="space-y-1 sm:space-y-2">
                     {question.answerChoices.map((choice: any, choiceIndex: number) => {
                       const isSelected = question.studentAnswer?.selectedAnswers.includes(choiceIndex);
                       const isCorrect = question.correctAnswers.includes(choiceIndex);
@@ -261,7 +261,7 @@ export default function DetailedAssessmentResultsPage() {
                       return (
                         <div
                           key={choiceIndex}
-                          className={`p-3 rounded-lg border-2 ${
+                          className={`p-2 sm:p-3 rounded-lg border-2 ${
                             isCorrect
                               ? "border-green-500 bg-green-50"
                               : isSelected
@@ -271,25 +271,25 @@ export default function DetailedAssessmentResultsPage() {
                         >
                           <div className="flex items-center gap-2">
                             {isCorrect ? (
-                              <CheckCircle className="h-4 w-4 text-green-600" />
+                              <CheckCircle className="h-3 w-3 sm:h-4 sm:w-4 text-green-600" />
                             ) : isSelected ? (
-                              <XCircle className="h-4 w-4 text-red-600" />
+                              <XCircle className="h-3 w-3 sm:h-4 sm:w-4 text-red-600" />
                             ) : (
-                              <div className="h-4 w-4 rounded-full border-2 border-gray-300" />
+                              <div className="h-3 w-3 sm:h-4 sm:w-4 rounded-full border-2 border-gray-300" />
                             )}
-                            <span className={`font-medium ${
+                            <span className={`font-medium text-xs sm:text-sm ${
                               isCorrect ? "text-green-800" : isSelected ? "text-red-800" : "text-gray-700"
                             }`}>
                               {String.fromCharCode(65 + choiceIndex)}. {choice.text}
                             </span>
                             {isCorrect && (
                               <Badge className="bg-green-100 text-green-800 text-xs">
-                                Correct Answer
+                                Correct
                               </Badge>
                             )}
                             {isSelected && !isCorrect && (
                               <Badge className="bg-red-100 text-red-800 text-xs">
-                                Your Answer
+                                Yours
                               </Badge>
                             )}
                           </div>
@@ -300,19 +300,19 @@ export default function DetailedAssessmentResultsPage() {
                 </div>
 
                 {question.explanation && (
-                  <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                    <div className="flex items-center gap-2 mb-2">
-                      <Lightbulb className="h-4 w-4 text-blue-600" />
-                      <h5 className="font-semibold text-blue-800">Explanation</h5>
+                  <div className="mt-3 sm:mt-4 p-2 sm:p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                    <div className="flex items-center gap-2 mb-1 sm:mb-2">
+                      <Lightbulb className="h-3 w-3 sm:h-4 sm:w-4 text-blue-600" />
+                      <h5 className="font-semibold text-blue-800 text-xs sm:text-sm">Explanation</h5>
                     </div>
-                    <p className="text-blue-700 text-sm leading-relaxed">
+                    <p className="text-blue-700 text-xs sm:text-sm leading-relaxed">
                       {question.explanation}
                     </p>
                   </div>
                 )}
 
-                <div className="mt-3 text-xs text-gray-500">
-                  Time spent: {formatTime(question.studentAnswer?.timeSpent || 0)}
+                <div className="mt-2 sm:mt-3 text-xs text-gray-500">
+                  Time: {formatTime(question.studentAnswer?.timeSpent || 0)}
                 </div>
               </div>
             ))}
@@ -323,34 +323,34 @@ export default function DetailedAssessmentResultsPage() {
       {/* Correct Answers Summary */}
       {correctAnswers.length > 0 && (
         <Card className="border-green-200">
-          <CardHeader>
-            <CardTitle className="flex items-center text-green-800">
-              <CheckCircle className="h-5 w-5 mr-2" />
+          <CardHeader className="pb-3 p-3 sm:p-6">
+            <CardTitle className="flex items-center text-green-800 text-base sm:text-lg">
+              <CheckCircle className="h-4 w-4 sm:h-5 sm:w-5 mr-2" />
               Correct Answers ({correctAnswers.length})
             </CardTitle>
-            <p className="text-sm text-gray-600">
+            <p className="text-xs sm:text-sm text-gray-600">
               Questions you answered correctly.
             </p>
           </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+          <CardContent className="p-3 sm:p-6 pt-0">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-3">
               {correctAnswers.map((question: any, index) => {
                 const questionNumber = result.assessment.questions.findIndex(q => q.questionId === question.questionId) + 1;
                 return (
-                  <div key={String(question.questionId) || index} className="p-3 bg-green-50 border border-green-200 rounded-lg">
-                    <div className="flex items-center justify-between mb-2">
-                      <Badge className="bg-green-100 text-green-800">
-                        Question {questionNumber}
+                  <div key={String(question.questionId) || index} className="p-2 sm:p-3 bg-green-50 border border-green-200 rounded-lg">
+                    <div className="flex items-center justify-between mb-1 sm:mb-2">
+                      <Badge className="bg-green-100 text-green-800 text-xs">
+                        Q{questionNumber}
                       </Badge>
-                      <Badge className={getDifficultyColor(question.difficulty)}>
+                      <Badge className={`text-xs ${getDifficultyColor(question.difficulty)}`}>
                         {question.difficulty}
                       </Badge>
                     </div>
-                    <p className="text-sm text-gray-700 mb-2 line-clamp-2">
+                    <p className="text-xs sm:text-sm text-gray-700 mb-1 sm:mb-2 line-clamp-2">
                       {question.questionText}
                     </p>
                     <div className="text-xs text-green-600 font-medium">
-                      {question.studentAnswer?.marksObtained || 0}/{question.marks} marks
+                      {question.studentAnswer?.marksObtained || 0}/{question.marks}m
                     </div>
                   </div>
                 );
@@ -362,29 +362,29 @@ export default function DetailedAssessmentResultsPage() {
 
       {/* Assessment Details */}
       <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center">
-            <BookOpen className="h-5 w-5 mr-2" />
+        <CardHeader className="pb-3 p-3 sm:p-6">
+          <CardTitle className="flex items-center text-base sm:text-lg">
+            <BookOpen className="h-4 w-4 sm:h-5 sm:w-5 mr-2" />
             Assessment Details
           </CardTitle>
         </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <CardContent className="p-3 sm:p-6 pt-0">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
             <div>
-              <h4 className="font-semibold mb-2">Grade</h4>
-              <p className="text-gray-600">Grade {result.assessment.grade}</p>
+              <h4 className="font-semibold mb-1 sm:mb-2 text-sm sm:text-base">Grade</h4>
+              <p className="text-gray-600 text-xs sm:text-sm">Grade {result.assessment.grade}</p>
             </div>
             <div>
-              <h4 className="font-semibold mb-2">Submitted On</h4>
-              <p className="text-gray-600">
+              <h4 className="font-semibold mb-1 sm:mb-2 text-sm sm:text-base">Submitted On</h4>
+              <p className="text-gray-600 text-xs sm:text-sm">
                 {new Date(result.submittedAt).toLocaleDateString()} at{" "}
                 {new Date(result.submittedAt).toLocaleTimeString()}
               </p>
             </div>
             <div>
-              <h4 className="font-semibold mb-2">Duration</h4>
-              <p className="text-gray-600">
-                {result.assessment.duration} minutes (Time spent: {formatTime(result.timeSpent)})
+              <h4 className="font-semibold mb-1 sm:mb-2 text-sm sm:text-base">Duration</h4>
+              <p className="text-gray-600 text-xs sm:text-sm">
+                {result.assessment.duration} min (Spent: {formatTime(result.timeSpent)})
               </p>
             </div>
           </div>

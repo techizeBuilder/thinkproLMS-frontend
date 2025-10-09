@@ -180,57 +180,57 @@ const MentorQuestionBankPage: React.FC = () => {
   };
 
   return (
-    <div className="p-6 space-y-6">
-      <div className="flex justify-between items-center">
+    <div className="p-3 sm:p-4 md:p-6 space-y-3 sm:space-y-4 md:space-y-6">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 sm:gap-3">
         <div>
-          <h1 className="text-3xl font-bold">Question Bank</h1>
-          <p className="text-gray-600">
-            View and recommend questions for the question bank
+          <h1 className="text-xl sm:text-2xl md:text-3xl font-bold">Question Bank</h1>
+          <p className="text-xs sm:text-sm md:text-base text-gray-600">
+            View and recommend questions
           </p>
         </div>
         <div className="flex gap-2">
           <Button
             variant="outline"
             onClick={() => setShowRecommendForm(true)}
-            className="flex items-center gap-2"
+            className="flex items-center gap-1 md:gap-2 text-xs sm:text-sm h-8 sm:h-9"
           >
-            <Plus className="h-4 w-4" />
-            Recommend Question
+            <Plus className="h-3 w-3 sm:h-4 sm:w-4" />
+            Recommend
           </Button>
         </div>
       </div>
 
-      {/* Filters */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Filters</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-            <div>
-              <label className="text-sm font-medium">Search</label>
+      {/* Filters - Outside card for minimal padding */}
+      <div className="space-y-2">
+        <h3 className="text-sm font-medium text-gray-700">Filters</h3>
+        <div className="overflow-x-auto">
+          <div className="flex gap-3 min-w-max pb-2">
+            <div className="flex-shrink-0 w-48 sm:w-56">
+              <label className="text-xs font-medium">Search</label>
               <Input
-                placeholder="Search questions..."
+                placeholder="Search..."
                 value={filters.search || ""}
                 onChange={(e) => handleFilterChange("search", e.target.value)}
-                className="mt-1"
+                className="mt-1 text-xs sm:text-sm h-8 sm:h-9"
               />
             </div>
-            <div>
-              <label className="text-sm font-medium">Session</label>
+            <div className="flex-shrink-0 w-48 sm:w-56">
+              <label className="text-xs font-medium">Session</label>
               <Popover open={sessionSelectOpen} onOpenChange={setSessionSelectOpen}>
                 <PopoverTrigger asChild>
                   <Button
                     variant="outline"
                     role="combobox"
                     aria-expanded={sessionSelectOpen}
-                    className="w-full justify-between mt-1"
+                    className="w-full justify-between mt-1 text-xs sm:text-sm h-8 sm:h-9"
                   >
-                    {filters.session
-                      ? sessions.find((session) => session._id === filters.session)?.displayName ||
-                        `${sessions.find((session) => session._id === filters.session)?.grade}.${sessions.find((session) => session._id === filters.session)?.sessionNumber?.toString().padStart(2, '0')} ${sessions.find((session) => session._id === filters.session)?.name}`
-                      : "All Sessions"}
-                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                    <span className="truncate">
+                      {filters.session
+                        ? sessions.find((session) => session._id === filters.session)?.displayName ||
+                          `${sessions.find((session) => session._id === filters.session)?.grade}.${sessions.find((session) => session._id === filters.session)?.sessionNumber?.toString().padStart(2, '0')} ${sessions.find((session) => session._id === filters.session)?.name}`
+                        : "All Sessions"}
+                    </span>
+                    <ChevronsUpDown className="ml-2 h-3 w-3 sm:h-4 sm:w-4 shrink-0 opacity-50" />
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-full p-0">
@@ -268,10 +268,10 @@ const MentorQuestionBankPage: React.FC = () => {
                               }`}
                             />
                             <div className="flex flex-col">
-                              <span className="font-medium">
+                              <span className="font-medium text-sm">
                                 {session.displayName || `${session.grade}.${session.sessionNumber?.toString().padStart(2, '0')} ${session.name}`}
                               </span>
-                              <span className="text-sm text-gray-500">{session.module.name}</span>
+                              <span className="text-xs text-gray-500">{session.module.name}</span>
                             </div>
                           </CommandItem>
                         ))}
@@ -281,15 +281,15 @@ const MentorQuestionBankPage: React.FC = () => {
                 </PopoverContent>
               </Popover>
             </div>
-            <div>
-              <label className="text-sm font-medium">Difficulty</label>
+            <div className="flex-shrink-0 w-32 sm:w-36">
+              <label className="text-xs font-medium">Difficulty</label>
               <Select
                 value={filters.difficulty || "all"}
                 onValueChange={(value) =>
                   handleFilterChange("difficulty", value)
                 }
               >
-                <SelectTrigger className="mt-1">
+                <SelectTrigger className="mt-1 text-xs sm:text-sm h-8 sm:h-9">
                   <SelectValue placeholder="All Difficulties" />
                 </SelectTrigger>
                 <SelectContent>
@@ -302,15 +302,15 @@ const MentorQuestionBankPage: React.FC = () => {
                 </SelectContent>
               </Select>
             </div>
-            <div>
-              <label className="text-sm font-medium">Answer Type</label>
+            <div className="flex-shrink-0 w-32 sm:w-36">
+              <label className="text-xs font-medium">Answer Type</label>
               <Select
                 value={filters.answerType || "all"}
                 onValueChange={(value) =>
                   handleFilterChange("answerType", value)
                 }
               >
-                <SelectTrigger className="mt-1">
+                <SelectTrigger className="mt-1 text-xs sm:text-sm h-8 sm:h-9">
                   <SelectValue placeholder="All Types" />
                 </SelectTrigger>
                 <SelectContent>
@@ -324,116 +324,130 @@ const MentorQuestionBankPage: React.FC = () => {
               </Select>
             </div>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
-      {/* Questions Table */}
+      {/* Questions Table - Responsive with horizontal scroll */}
       <Card>
-        <CardHeader>
-          <CardTitle>Questions ({pagination.total})</CardTitle>
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base sm:text-lg md:text-xl">Questions ({pagination.total})</CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="pt-0">
           {loading ? (
-            <div className="text-center py-8">Loading questions...</div>
+            <div className="text-center py-6 md:py-8 text-xs sm:text-sm">Loading questions...</div>
           ) : error ? (
-            <div className="text-center py-8">
-              <div className="text-red-600 mb-4">Error: {error}</div>
-              <Button onClick={fetchQuestions} variant="outline">
+            <div className="text-center py-6 md:py-8">
+              <div className="text-red-600 mb-3 md:mb-4 text-xs sm:text-sm">Error: {error}</div>
+              <Button onClick={fetchQuestions} variant="outline" className="text-xs sm:text-sm">
                 Retry
               </Button>
             </div>
           ) : questions.length === 0 ? (
-            <div className="text-center py-8 text-gray-500">
+            <div className="text-center py-6 md:py-8 text-gray-500 text-xs sm:text-sm">
               No questions found
             </div>
           ) : (
-            <div className="space-y-4">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Order</TableHead>
-                    <TableHead>Question</TableHead>
-                    <TableHead>Session</TableHead>
-                    <TableHead>Type</TableHead>
-                    <TableHead>Difficulty</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {questions.map((question) => (
-                    <TableRow key={question._id}>
-                      <TableCell>
-                        <span className="font-medium">{question.order}</span>
-                      </TableCell>
-                      <TableCell className="max-w-xs">
-                        <div className="truncate" title={question.questionText}>
-                          {question.questionText}
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <div className="text-sm">
-                          <div className="font-medium">
-                            {question.session?.displayName || `${question.session?.grade}.${question.session?.sessionNumber?.toString().padStart(2, '0')} ${question.session?.name}`}
-                          </div>
-                          <div className="text-gray-500">
-                            {question.session?.module?.name}
-                          </div>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        {getAnswerTypeLabel(question.answerType)}
-                      </TableCell>
-                      <TableCell>
-                        <Badge
-                          className={getDifficultyColor(question.difficulty)}
-                        >
-                          {question.difficulty}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        {question.approvedBy ? (
-                          <Badge className="bg-green-100 text-green-800">
-                            <CheckCircle className="h-3 w-3 mr-1" />
-                            Approved
-                          </Badge>
-                        ) : (
-                          <Badge className="bg-yellow-100 text-yellow-800">
-                            <XCircle className="h-3 w-3 mr-1" />
-                            Pending
-                          </Badge>
-                        )}
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-2">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleViewQuestion(question)}
-                            className="flex items-center gap-1"
-                          >
-                            <Eye className="h-4 w-4" />
-                            View
-                          </Button>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+            <div className="space-y-2 sm:space-y-3">
+              <div className="overflow-x-auto -mx-2 sm:mx-0">
+                <div className="min-w-full px-2 sm:px-0">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead className="text-xs sm:text-sm min-w-[200px] sm:min-w-[250px]">Question</TableHead>
+                        <TableHead className="text-xs sm:text-sm hidden sm:table-cell min-w-[120px]">Session</TableHead>
+                        <TableHead className="text-xs sm:text-sm hidden md:table-cell min-w-[80px]">Difficulty</TableHead>
+                        <TableHead className="text-xs sm:text-sm hidden lg:table-cell min-w-[100px]">Status</TableHead>
+                        <TableHead className="text-xs sm:text-sm min-w-[80px]">Actions</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {questions.map((question) => (
+                        <TableRow key={question._id}>
+                          <TableCell className="min-w-[200px] sm:min-w-[250px]">
+                            <div className="space-y-1">
+                              <div className="text-xs sm:text-sm line-clamp-2" title={question.questionText}>
+                                {question.questionText}
+                              </div>
+                              <div className="flex gap-1 flex-wrap sm:hidden">
+                                <Badge className={`${getDifficultyColor(question.difficulty)} text-[10px] px-1 py-0`}>
+                                  {question.difficulty}
+                                </Badge>
+                                {question.approvedBy ? (
+                                  <Badge className="bg-green-100 text-green-800 text-[10px] px-1 py-0">
+                                    Approved
+                                  </Badge>
+                                ) : (
+                                  <Badge className="bg-yellow-100 text-yellow-800 text-[10px] px-1 py-0">
+                                    Pending
+                                  </Badge>
+                                )}
+                              </div>
+                              <div className="text-xs text-gray-500 sm:hidden">
+                                {question.session?.displayName || `${question.session?.grade}.${question.session?.sessionNumber?.toString().padStart(2, '0')}`}
+                              </div>
+                            </div>
+                          </TableCell>
+                          <TableCell className="hidden sm:table-cell min-w-[120px]">
+                            <div className="text-xs sm:text-sm">
+                              <div className="font-medium truncate">
+                                {question.session?.displayName || `${question.session?.grade}.${question.session?.sessionNumber?.toString().padStart(2, '0')}`}
+                              </div>
+                              <div className="text-gray-500 truncate text-xs">
+                                {question.session?.module?.name}
+                              </div>
+                            </div>
+                          </TableCell>
+                          <TableCell className="hidden md:table-cell min-w-[80px]">
+                            <Badge
+                              className={`${getDifficultyColor(question.difficulty)} text-xs`}
+                            >
+                              {question.difficulty}
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="hidden lg:table-cell min-w-[100px]">
+                            {question.approvedBy ? (
+                              <Badge className="bg-green-100 text-green-800 text-xs">
+                                <CheckCircle className="h-3 w-3 mr-1" />
+                                Approved
+                              </Badge>
+                            ) : (
+                              <Badge className="bg-yellow-100 text-yellow-800 text-xs">
+                                <XCircle className="h-3 w-3 mr-1" />
+                                Pending
+                              </Badge>
+                            )}
+                          </TableCell>
+                          <TableCell className="min-w-[80px]">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleViewQuestion(question)}
+                              className="flex items-center gap-1 text-xs sm:text-sm h-6 sm:h-7 md:h-8 px-1 sm:px-2 md:px-3"
+                            >
+                              <Eye className="h-3 w-3 sm:h-4 sm:w-4" />
+                              <span className="hidden sm:inline">View</span>
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              </div>
 
               {/* Pagination */}
               {pagination.pages > 1 && (
-                <div className="flex justify-center items-center gap-2 mt-4">
+                <div className="flex justify-center items-center gap-1 sm:gap-2 mt-2 sm:mt-3">
                   <Button
                     variant="outline"
                     size="sm"
                     onClick={() => handlePageChange(pagination.current - 1)}
                     disabled={pagination.current === 1}
+                    className="text-xs sm:text-sm h-7 sm:h-8 px-2 sm:px-3"
                   >
                     Previous
                   </Button>
-                  <span className="text-sm">
+                  <span className="text-xs sm:text-sm px-2">
                     Page {pagination.current} of {pagination.pages}
                   </span>
                   <Button
@@ -441,6 +455,7 @@ const MentorQuestionBankPage: React.FC = () => {
                     size="sm"
                     onClick={() => handlePageChange(pagination.current + 1)}
                     disabled={pagination.current === pagination.pages}
+                    className="text-xs sm:text-sm h-7 sm:h-8 px-2 sm:px-3"
                   >
                     Next
                   </Button>

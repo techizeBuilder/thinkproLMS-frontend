@@ -111,13 +111,15 @@ export default function CreateAssessmentPage() {
               address: "", // Not available in mentor profile
               city: response.data.assignedSchool.city,
               state: response.data.assignedSchool.state,
-              boards: response.data.assignedSchool.boards || [],
+              boards: (response.data.assignedSchool.boards || []) as ("ICSE" | "CBSE" | "State" | "Other")[],
               branchName: response.data.assignedSchool.branchName || "",
               isActive: true, // Assume active since they're assigned
               createdAt: new Date().toISOString(),
               updatedAt: new Date().toISOString()
             };
             setSchools([assignedSchool]);
+            // Automatically set the school for mentors
+            setFormData(prev => ({ ...prev, school: assignedSchool._id }));
           }
         } catch (error) {
           console.error("Error loading mentor profile:", error);
@@ -363,8 +365,8 @@ export default function CreateAssessmentPage() {
       return false;
     }
 
-    // For SuperAdmin/LeadMentor/Mentor, school is required
-    if ((user?.role === "superadmin" || user?.role === "leadmentor" || user?.role === "mentor") && !formData.school) {
+    // For SuperAdmin/LeadMentor, school is required
+    if ((user?.role === "superadmin" || user?.role === "leadmentor") && !formData.school) {
       toast.error("Please select a school");
       return false;
     }
@@ -399,21 +401,21 @@ export default function CreateAssessmentPage() {
   const totalMarks = selectedQuestions.reduce((sum, q) => sum + q.marks, 0);
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="container mx-auto p-4 sm:p-6 space-y-4 sm:space-y-6">
+      <div className="space-y-4">
         <div>
-          <h1 className="text-3xl font-bold">Create Assessment</h1>
-          <p className="text-gray-600">Create a new assessment for your students</p>
+          <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold">Create Assessment</h1>
+          <p className="text-sm sm:text-base text-gray-600">Create a new assessment for your students</p>
         </div>
-        <div className="flex gap-2">
-          <Button variant="outline" onClick={() => navigate("/mentor/assessments")}>
+        <div className="flex flex-row gap-2 items-center justify-end">
+          <Button variant="outline" onClick={() => navigate("/mentor/assessments")} className="w-max">  
             Cancel
           </Button>
-          <Button variant="outline" onClick={handleSaveDraft} disabled={loading}>
+          <Button variant="outline" onClick={handleSaveDraft} disabled={loading} className="w-max">
             <Save className="h-4 w-4 mr-2" />
             Save Draft
           </Button>
-          <Button onClick={handlePublish} disabled={loading}>
+          <Button onClick={handlePublish} disabled={loading} className="w-max">
             <Send className="h-4 w-4 mr-2" />
             Publish
           </Button>
@@ -421,18 +423,18 @@ export default function CreateAssessmentPage() {
       </div>
 
       {/* Progress Steps */}
-      <div className="flex items-center space-x-4">
+      <div className="flex items-center space-x-2 sm:space-x-4 overflow-x-auto">
         {[1, 2, 3].map((stepNumber) => (
-          <div key={stepNumber} className="flex items-center">
-            <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
+          <div key={stepNumber} className="flex items-center flex-shrink-0">
+            <div className={`w-6 h-6 sm:w-8 sm:h-8 rounded-full flex items-center justify-center text-xs sm:text-sm ${
               step >= stepNumber ? "bg-blue-600 text-white" : "bg-gray-200 text-gray-600"
             }`}>
               {stepNumber}
             </div>
-            <span className={`ml-2 ${step >= stepNumber ? "text-blue-600" : "text-gray-600"}`}>
+            <span className={`ml-1 sm:ml-2 text-xs sm:text-sm ${step >= stepNumber ? "text-blue-600" : "text-gray-600"}`}>
               {stepNumber === 1 ? "Basic Info" : stepNumber === 2 ? "Questions" : "Preview"}
             </span>
-            {stepNumber < 3 && <div className="w-8 h-px bg-gray-300 ml-4" />}
+            {stepNumber < 3 && <div className="w-4 sm:w-8 h-px bg-gray-300 ml-2 sm:ml-4" />}
           </div>
         ))}
       </div>
@@ -446,8 +448,8 @@ export default function CreateAssessmentPage() {
               Basic Information
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <CardContent className="space-y-4 sm:space-y-6">
+            <div className="space-y-4 sm:space-y-6">
               <div className="space-y-2">
                 <Label htmlFor="title">Assessment Title *</Label>
                 <Input
@@ -458,8 +460,8 @@ export default function CreateAssessmentPage() {
                 />
               </div>
 
-              {/* School selection for SuperAdmin/LeadMentor/Mentor */}
-              {(user?.role === "superadmin" || user?.role === "leadmentor" || user?.role === "mentor") && (
+              {/* School selection for SuperAdmin/LeadMentor only - removed for mentors */}
+              {(user?.role === "superadmin" || user?.role === "leadmentor") && (
                 <div className="space-y-2">
                   <Label htmlFor="school">School *</Label>
                   <Select value={formData.school} onValueChange={(value) => handleInputChange("school", value)}>
@@ -472,65 +474,65 @@ export default function CreateAssessmentPage() {
                       ))}
                     </SelectContent>
                   </Select>
-                  {user?.role === "mentor" && schools.length === 0 && (
-                    <p className="text-sm text-gray-500">No schools assigned to you. Please contact your administrator.</p>
-                  )}
                 </div>
               )}
 
-              <div className="space-y-2">
-                <Label htmlFor="grade">Grade *</Label>
-                <Select value={formData.grade} onValueChange={(value) => handleInputChange("grade", value)}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select grade" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {hasServiceDetails ? (
-                      availableGrades.map(gradeData => (
-                        <SelectItem key={gradeData.grade} value={gradeData.grade.toString()}>{gradeData.grade}</SelectItem>
-                      ))
-                    ) : (
-                      ["Grade 1", "Grade 2", "Grade 3", "Grade 4", "Grade 5", 
-                       "Grade 6", "Grade 7", "Grade 8", "Grade 9", "Grade 10"].map(grade => (
-                        <SelectItem key={grade} value={grade}>{grade}</SelectItem>
-                      ))
-                    )}
-                  </SelectContent>
-                </Select>
-                {hasServiceDetails && availableGrades.length === 0 && formData.school && (
-                  <p className="text-sm text-gray-500">No grades available for this school. Please configure service details first.</p>
-                )}
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="sections">Sections *</Label>
+              {/* Grade and Sections in single row for smaller screens */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  {availableSections.map(section => (
-                    <div key={section} className="flex items-center space-x-2">
-                      <input
-                        type="checkbox"
-                        id={`section-${section}`}
-                        checked={formData.sections.includes(section)}
-                        onChange={() => handleSectionToggle(section)}
-                        className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                      />
-                      <label htmlFor={`section-${section}`} className="text-sm font-medium text-gray-700">
-                        {section}
-                      </label>
-                    </div>
-                  ))}
+                  <Label htmlFor="grade">Grade *</Label>
+                  <Select value={formData.grade} onValueChange={(value) => handleInputChange("grade", value)}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select grade" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {hasServiceDetails ? (
+                        availableGrades.map(gradeData => (
+                          <SelectItem key={gradeData.grade} value={gradeData.grade.toString()}>{gradeData.grade}</SelectItem>
+                        ))
+                      ) : (
+                        ["Grade 1", "Grade 2", "Grade 3", "Grade 4", "Grade 5", 
+                         "Grade 6", "Grade 7", "Grade 8", "Grade 9", "Grade 10"].map(grade => (
+                          <SelectItem key={grade} value={grade}>{grade}</SelectItem>
+                        ))
+                      )}
+                    </SelectContent>
+                  </Select>
+                  {hasServiceDetails && availableGrades.length === 0 && formData.school && (
+                    <p className="text-xs sm:text-sm text-gray-500">No grades available for this school. Please configure service details first.</p>
+                  )}
                 </div>
-                {hasServiceDetails && availableSections.length === 0 && formData.grade && (
-                  <p className="text-sm text-gray-500">No sections available for {formData.grade}. Please configure service details first.</p>
-                )}
-                {!hasServiceDetails && formData.school && (
-                  <p className="text-sm text-gray-500">Service details not configured for this school. Please contact administrator.</p>
-                )}
-                {formData.sections.length > 0 && (
-                  <div className="mt-2">
-                    <p className="text-sm text-gray-600">Selected sections: {formData.sections.join(", ")}</p>
+
+                <div className="space-y-2">
+                  <Label htmlFor="sections">Sections *</Label>
+                  <div className="space-y-1 sm:space-y-2">
+                    {availableSections.map(section => (
+                      <div key={section} className="flex items-center space-x-2">
+                        <input
+                          type="checkbox"
+                          id={`section-${section}`}
+                          checked={formData.sections.includes(section)}
+                          onChange={() => handleSectionToggle(section)}
+                          className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                        />
+                        <label htmlFor={`section-${section}`} className="text-xs sm:text-sm font-medium text-gray-700">
+                          {section}
+                        </label>
+                      </div>
+                    ))}
                   </div>
-                )}
+                  {hasServiceDetails && availableSections.length === 0 && formData.grade && (
+                    <p className="text-xs sm:text-sm text-gray-500">No sections available for {formData.grade}. Please configure service details first.</p>
+                  )}
+                  {!hasServiceDetails && formData.school && (
+                    <p className="text-xs sm:text-sm text-gray-500">Service details not configured for this school. Please contact administrator.</p>
+                  )}
+                  {formData.sections.length > 0 && (
+                    <div className="mt-1">
+                      <p className="text-xs sm:text-sm text-gray-600">Selected: {formData.sections.join(", ")}</p>
+                    </div>
+                  )}
+                </div>
               </div>
 
               {/* Session selection removed as per new requirement */}
@@ -543,45 +545,56 @@ export default function CreateAssessmentPage() {
                 value={formData.instructions}
                 onChange={(e) => handleInputChange("instructions", e.target.value)}
                 placeholder="Enter instructions for students"
-                rows={4}
+                rows={3}
+                className="text-sm"
               />
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {/* Start and End dates in single row for smaller screens */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="startDate">Start Date *</Label>
+                <Label htmlFor="startDate" className="text-sm">Start Date *</Label>
                 <Input
                   id="startDate"
                   type="datetime-local"
                   value={formData.startDate}
                   onChange={(e) => handleInputChange("startDate", e.target.value)}
+                  className="text-sm"
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="endDate">End Date *</Label>
+                <Label htmlFor="endDate" className="text-sm">End Date *</Label>
                 <Input
                   id="endDate"
                   type="datetime-local"
                   value={formData.endDate}
                   onChange={(e) => handleInputChange("endDate", e.target.value)}
+                  className="text-sm"
                 />
               </div>
+            </div>
 
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="duration">Duration (minutes) *</Label>
+                <Label htmlFor="duration" className="text-sm">Duration (minutes) *</Label>
                 <Input
                   id="duration"
                   type="number"
                   value={formData.duration}
                   onChange={(e) => handleInputChange("duration", parseInt(e.target.value))}
                   min="1"
+                  className="text-sm"
                 />
               </div>
             </div>
 
             <div className="flex justify-end">
-              <Button onClick={() => setStep(2)} disabled={!formData.grade || formData.sections.length === 0 || ((user?.role === "superadmin" || user?.role === "leadmentor" || user?.role === "mentor") && !formData.school)}>
+              <Button 
+                onClick={() => setStep(2)} 
+                disabled={!formData.grade || formData.sections.length === 0 || ((user?.role === "superadmin" || user?.role === "leadmentor") && !formData.school)}
+                className="w-full sm:w-auto text-sm"
+              >
                 Next: Select Questions
               </Button>
             </div>
@@ -591,12 +604,12 @@ export default function CreateAssessmentPage() {
 
       {/* Step 2: Question Selection */}
       {step === 2 && (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
           {/* Available Questions */}
           <Card>
-            <CardHeader>
-              <CardTitle>Available Questions</CardTitle>
-              <div className="flex gap-2">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-lg sm:text-xl">Available Questions</CardTitle>
+              <div className="flex flex-col sm:flex-row gap-2">
                 <div className="flex-1">
                   <div className="relative">
                     <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
@@ -604,14 +617,14 @@ export default function CreateAssessmentPage() {
                       placeholder="Search questions..."
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
-                      className="pl-10"
+                      className="pl-10 text-sm"
                     />
                   </div>
                 </div>
                 <Select value={questionFilters.difficulty} onValueChange={(value) => 
                   setQuestionFilters(prev => ({ ...prev, difficulty: value }))
                 }>
-                  <SelectTrigger className="w-32">
+                  <SelectTrigger className="w-full sm:w-32 text-sm">
                     <SelectValue placeholder="Difficulty" />
                   </SelectTrigger>
                   <SelectContent>
@@ -623,30 +636,31 @@ export default function CreateAssessmentPage() {
                 </Select>
               </div>
             </CardHeader>
-            <CardContent>
-              <div className="space-y-3 max-h-96 overflow-y-auto">
+            <CardContent className="p-3 sm:p-6">
+              <div className="space-y-2 sm:space-y-3 max-h-80 sm:max-h-96 overflow-y-auto">
                 {filteredQuestions.map(question => (
-                  <div key={question._id} className="border rounded-lg p-3">
+                  <div key={question._id} className="border rounded-lg p-2 sm:p-3">
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-2">
+                        <div className="flex items-center gap-1 sm:gap-2 mb-1 sm:mb-2">
                           <Checkbox
                             checked={selectedQuestions.some(q => q._id === question._id)}
                             onCheckedChange={() => handleQuestionSelect(question)}
+                            className="h-4 w-4"
                           />
-                          <Badge variant="outline">{question.difficulty}</Badge>
-                          <span className="text-sm text-gray-500">{question.session?.displayName || question.session?.name}</span>
+                          <Badge variant="outline" className="text-xs">{question.difficulty}</Badge>
+                          <span className="text-xs sm:text-sm text-gray-500">{question.session?.displayName || question.session?.name}</span>
                         </div>
-                        <p className="text-sm">{question.questionText}</p>
+                        <p className="text-xs sm:text-sm">{question.questionText}</p>
                       </div>
                     </div>
                   </div>
                 ))}
                 {filteredQuestions.length === 0 && availableQuestions.length > 0 && (
-                  <p className="text-center text-gray-500 py-4">No questions match your search criteria</p>
+                  <p className="text-center text-gray-500 py-4 text-sm">No questions match your search criteria</p>
                 )}
                 {availableQuestions.length === 0 && (
-                  <p className="text-center text-gray-500 py-4">No questions available</p>
+                  <p className="text-center text-gray-500 py-4 text-sm">No questions available</p>
                 )}
               </div>
             </CardContent>
@@ -654,47 +668,48 @@ export default function CreateAssessmentPage() {
 
           {/* Selected Questions */}
           <Card>
-            <CardHeader>
-              <CardTitle>Selected Questions ({selectedQuestions.length})</CardTitle>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-lg sm:text-xl">Selected Questions ({selectedQuestions.length})</CardTitle>
             </CardHeader>
-            <CardContent>
-              <div className="space-y-3 max-h-96 overflow-y-auto">
+            <CardContent className="p-3 sm:p-6">
+              <div className="space-y-2 sm:space-y-3 max-h-80 sm:max-h-96 overflow-y-auto">
                 {selectedQuestions.map((question) => (
-                  <div key={question._id} className="border rounded-lg p-3">
-                    <div className="flex items-start justify-between mb-2">
-                      <div className="flex items-center gap-2">
-                        <span className="text-sm font-medium">Q{question.order}</span>
-                        <Badge variant="outline">{question.difficulty}</Badge>
+                  <div key={question._id} className="border rounded-lg p-2 sm:p-3">
+                    <div className="flex items-start justify-between mb-1 sm:mb-2">
+                      <div className="flex items-center gap-1 sm:gap-2">
+                        <span className="text-xs sm:text-sm font-medium">Q{question.order}</span>
+                        <Badge variant="outline" className="text-xs">{question.difficulty}</Badge>
                       </div>
                       <Button
                         variant="ghost"
                         size="sm"
                         onClick={() => removeQuestion(question._id)}
+                        className="h-6 w-6 p-0"
                       >
-                        <Trash2 className="h-4 w-4" />
+                        <Trash2 className="h-3 w-3 sm:h-4 sm:w-4" />
                       </Button>
                     </div>
-                    <p className="text-sm mb-2">{question.questionText}</p>
-                    <div className="flex items-center gap-2">
+                    <p className="text-xs sm:text-sm mb-1 sm:mb-2">{question.questionText}</p>
+                    <div className="flex items-center gap-1 sm:gap-2">
                       <Label htmlFor={`marks-${question._id}`} className="text-xs">Marks:</Label>
                       <Input
                         id={`marks-${question._id}`}
                         type="number"
                         value={question.marks}
                         onChange={(e) => handleQuestionMarksChange(question._id, parseInt(e.target.value))}
-                        className="w-16 h-8"
+                        className="w-12 sm:w-16 h-6 sm:h-8 text-xs"
                         min="1"
                       />
                     </div>
                   </div>
                 ))}
                 {selectedQuestions.length === 0 && (
-                  <p className="text-center text-gray-500 py-4">No questions selected</p>
+                  <p className="text-center text-gray-500 py-4 text-sm">No questions selected</p>
                 )}
               </div>
               {selectedQuestions.length > 0 && (
-                <div className="mt-4 p-3 bg-gray-50 rounded-lg">
-                  <p className="text-sm font-medium">Total Marks: {totalMarks}</p>
+                <div className="mt-3 sm:mt-4 p-2 sm:p-3 bg-gray-50 rounded-lg">
+                  <p className="text-xs sm:text-sm font-medium">Total Marks: {totalMarks}</p>
                 </div>
               )}
             </CardContent>
@@ -705,19 +720,19 @@ export default function CreateAssessmentPage() {
       {/* Step 3: Preview */}
       {step === 3 && (
         <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center">
-              <Eye className="h-5 w-5 mr-2" />
+          <CardHeader className="pb-3">
+            <CardTitle className="flex items-center text-lg sm:text-xl">
+              <Eye className="h-4 w-4 sm:h-5 sm:w-5 mr-2" />
               Assessment Preview
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <CardContent className="space-y-4 sm:space-y-6 p-3 sm:p-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
               <div>
-                <h3 className="font-semibold mb-2">Basic Information</h3>
-                <div className="space-y-2 text-sm">
+                <h3 className="font-semibold mb-2 text-sm sm:text-base">Basic Information</h3>
+                <div className="space-y-1 sm:space-y-2 text-xs sm:text-sm">
                   <p><strong>Title:</strong> {formData.title}</p>
-                  {(user?.role === "superadmin" || user?.role === "leadmentor" || user?.role === "mentor") && (
+                  {(user?.role === "superadmin" || user?.role === "leadmentor") && (
                     <p><strong>School:</strong> {schools.find(s => s._id === formData.school)?.name || "Not selected"}</p>
                   )}
                   <p><strong>Grade:</strong> {formData.grade}</p>
@@ -729,8 +744,8 @@ export default function CreateAssessmentPage() {
                 </div>
               </div>
               <div>
-                <h3 className="font-semibold mb-2">Schedule</h3>
-                <div className="space-y-2 text-sm">
+                <h3 className="font-semibold mb-2 text-sm sm:text-base">Schedule</h3>
+                <div className="space-y-1 sm:space-y-2 text-xs sm:text-sm">
                   <p><strong>Start Date:</strong> {new Date(formData.startDate).toLocaleString()}</p>
                   <p><strong>End Date:</strong> {new Date(formData.endDate).toLocaleString()}</p>
                 </div>
@@ -738,20 +753,20 @@ export default function CreateAssessmentPage() {
             </div>
 
             <div>
-              <h3 className="font-semibold mb-2">Instructions</h3>
-              <p className="text-sm bg-gray-50 p-3 rounded-lg">{formData.instructions}</p>
+              <h3 className="font-semibold mb-2 text-sm sm:text-base">Instructions</h3>
+              <p className="text-xs sm:text-sm bg-gray-50 p-2 sm:p-3 rounded-lg">{formData.instructions}</p>
             </div>
 
             <div>
-              <h3 className="font-semibold mb-2">Questions ({selectedQuestions.length})</h3>
-              <div className="space-y-3">
+              <h3 className="font-semibold mb-2 text-sm sm:text-base">Questions ({selectedQuestions.length})</h3>
+              <div className="space-y-2 sm:space-y-3">
                 {selectedQuestions.map((question, index) => (
-                  <div key={question._id} className="border rounded-lg p-3">
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="font-medium">Question {index + 1}</span>
-                      <Badge variant="outline">{question.marks} marks</Badge>
+                  <div key={question._id} className="border rounded-lg p-2 sm:p-3">
+                    <div className="flex items-center justify-between mb-1 sm:mb-2">
+                      <span className="font-medium text-xs sm:text-sm">Question {index + 1}</span>
+                      <Badge variant="outline" className="text-xs">{question.marks} marks</Badge>
                     </div>
-                    <p className="text-sm">{question.questionText}</p>
+                    <p className="text-xs sm:text-sm">{question.questionText}</p>
                   </div>
                 ))}
               </div>
@@ -762,12 +777,12 @@ export default function CreateAssessmentPage() {
 
       {/* Navigation */}
       {step > 1 && (
-        <div className="flex justify-between">
-          <Button variant="outline" onClick={() => setStep(step - 1)}>
+        <div className="flex flex-col sm:flex-row justify-between gap-2 sm:gap-0">
+          <Button variant="outline" onClick={() => setStep(step - 1)} className="w-full sm:w-auto text-sm">
             Previous
           </Button>
           {step < 3 && (
-            <Button onClick={() => setStep(step + 1)} disabled={selectedQuestions.length === 0}>
+            <Button onClick={() => setStep(step + 1)} disabled={selectedQuestions.length === 0} className="w-full sm:w-auto text-sm">
               Next
             </Button>
           )}

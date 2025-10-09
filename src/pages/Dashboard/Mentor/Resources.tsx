@@ -2,8 +2,14 @@ import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Input } from '@/components/ui/input';
+import { 
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { 
   FileText, 
   Video, 
@@ -113,150 +119,100 @@ export default function MentorResourcesPage() {
   };
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
+    <div className="container mx-auto p-4 md:p-6 space-y-4 md:space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Learning Resources</h1>
-          <p className="text-muted-foreground">
-            Access educational materials for students and mentors (Read-only access)
+          <h1 className="text-2xl md:text-3xl font-bold">Learning Resources</h1>
+          <p className="text-sm md:text-base text-muted-foreground">
+            Access educational materials (Read-only)
           </p>
         </div>
       </div>
 
       {/* Search Bar */}
       <div className="flex items-center space-x-2">
-        <div className="relative flex-1 max-w-sm">
+        <div className="relative flex-1 max-w-md">
           <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
           <Input
             placeholder="Search resources..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-8"
+            className="pl-8 text-sm"
           />
         </div>
       </div>
 
-      <Tabs value={`${selectedUserType}-${selectedBucket}`} onValueChange={(value) => {
-        const [userType, bucket] = value.split('-') as ['student' | 'mentor', 'documents' | 'videos'];
-        setSelectedUserType(userType);
-        setSelectedBucket(bucket);
-      }}>
-        <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="student-documents" className="flex items-center gap-2">
-            <GraduationCap className="h-4 w-4" />
-            Student Documents
-          </TabsTrigger>
-          <TabsTrigger value="student-videos" className="flex items-center gap-2">
-            <Video className="h-4 w-4" />
-            Student Videos
-          </TabsTrigger>
-          <TabsTrigger value="mentor-documents" className="flex items-center gap-2">
-            <Users className="h-4 w-4" />
-            Mentor Documents
-          </TabsTrigger>
-          <TabsTrigger value="mentor-videos" className="flex items-center gap-2">
-            <Video className="h-4 w-4" />
-            Mentor Videos
-          </TabsTrigger>
-        </TabsList>
+      {/* Filters (dropdowns like superadmin/resources) */}
+      <div className="flex flex-wrap items-center gap-2">
+        <Select value={selectedUserType} onValueChange={(v: UserType) => setSelectedUserType(v)}>
+          <SelectTrigger className="w-[160px] text-sm">
+            <SelectValue placeholder="Audience" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="student">
+              <div className="flex items-center gap-2"><GraduationCap className="h-4 w-4" /> Student</div>
+            </SelectItem>
+            <SelectItem value="mentor">
+              <div className="flex items-center gap-2"><Users className="h-4 w-4" /> Mentor</div>
+            </SelectItem>
+          </SelectContent>
+        </Select>
 
-        <TabsContent value="student-documents" className="space-y-4">
-          <div className="flex items-center gap-2">
-            <FolderOpen className="h-5 w-5" />
-            <h2 className="text-xl font-semibold">Student Documents</h2>
-            <Badge variant="outline">{pagination.total} resources</Badge>
-          </div>
-          
-          {loading ? (
-            <div className="flex items-center justify-center py-8">
-              <Loader2 className="h-6 w-6 animate-spin" />
-              <span className="ml-2">Loading resources...</span>
-            </div>
+        <Select value={selectedBucket} onValueChange={(v: BucketType) => setSelectedBucket(v)}>
+          <SelectTrigger className="w-[160px] text-sm">
+            <SelectValue placeholder="Type" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="documents">
+              <div className="flex items-center gap-2"><FileText className="h-4 w-4" /> Documents</div>
+            </SelectItem>
+            <SelectItem value="videos">
+              <div className="flex items-center gap-2"><Video className="h-4 w-4" /> Videos</div>
+            </SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
+      {/* Content */}
+      <div className="space-y-3 md:space-y-4">
+        <div className="flex items-center gap-2">
+          {(selectedBucket === 'videos') ? (
+            <Video className="h-4 w-4 md:h-5 md:w-5" />
           ) : (
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-              {resources.map((resource) => (
-                <Card key={resource._id} className="hover:shadow-md transition-shadow">
-                <CardHeader className="pb-3">
-                  <div className="flex items-start justify-between">
-                    <div className="flex items-center gap-2">
-                      {getResourceIcon(resource.type)}
-                      <CardTitle className="text-lg">{resource.title}</CardTitle>
-                    </div>
-                    {getFileTypeBadge(resource)}
-                  </div>
-                  {resource.description && (
-                    <CardDescription>{resource.description}</CardDescription>
-                  )}
-                </CardHeader>
-                <CardContent className="pt-0">
-                  <div className="flex items-center justify-between">
-                    <div className="flex flex-wrap gap-1">
-                      {resource.tags?.map((tag) => (
-                        <Badge key={tag} variant="secondary" className="text-xs">
-                          {tag}
-                        </Badge>
-                      ))}
-                    </div>
-                    <div className="flex gap-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleViewResource(resource)}
-                      >
-                        <Eye className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleDownloadResource(resource)}
-                      >
-                        <Download className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </div>
-                  <div className="text-xs text-muted-foreground mt-2">
-                    Uploaded by {resource.uploadedBy?.name || 'Unknown'} • {new Date(resource.createdAt).toLocaleDateString()}
-                  </div>
-                </CardContent>
-              </Card>
-              ))}
-            </div>
+            <FolderOpen className="h-4 w-4 md:h-5 md:w-5" />
           )}
-        </TabsContent>
+          <h2 className="text-lg md:text-xl font-semibold">
+            {selectedUserType === 'student' ? 'Student' : 'Mentor'} {selectedBucket === 'videos' ? 'Videos' : 'Documents'}
+          </h2>
+          <Badge variant="outline" className="text-xs">{pagination.total}</Badge>
+        </div>
 
-        <TabsContent value="student-videos" className="space-y-4">
-          <div className="flex items-center gap-2">
-            <Video className="h-5 w-5" />
-            <h2 className="text-xl font-semibold">Student Videos</h2>
-            <Badge variant="outline">{pagination.total} resources</Badge>
+        {loading ? (
+          <div className="flex items-center justify-center py-8">
+            <Loader2 className="h-5 w-5 md:h-6 md:w-6 animate-spin" />
+            <span className="ml-2 text-sm md:text-base">Loading...</span>
           </div>
-          
-          {loading ? (
-            <div className="flex items-center justify-center py-8">
-              <Loader2 className="h-6 w-6 animate-spin" />
-              <span className="ml-2">Loading resources...</span>
-            </div>
-          ) : (
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-              {resources.map((resource) => (
-                <Card key={resource._id} className="hover:shadow-md transition-shadow">
-                <CardHeader className="pb-3">
-                  <div className="flex items-start justify-between">
-                    <div className="flex items-center gap-2">
+        ) : (
+          <div className="grid gap-3 md:gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+            {resources.map((resource) => (
+              <Card key={resource._id} className="hover:shadow-md transition-shadow">
+                <CardHeader className="pb-2 md:pb-3">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex items-center gap-2 min-w-0">
                       {getResourceIcon(resource.type)}
-                      <CardTitle className="text-lg">{resource.title}</CardTitle>
+                      <CardTitle className="text-sm md:text-lg truncate">{resource.title}</CardTitle>
                     </div>
                     {getFileTypeBadge(resource)}
                   </div>
                   {resource.description && (
-                    <CardDescription>{resource.description}</CardDescription>
+                    <CardDescription className="text-xs md:text-sm line-clamp-2">{resource.description}</CardDescription>
                   )}
                 </CardHeader>
                 <CardContent className="pt-0">
-                  <div className="flex items-center justify-between">
+                  <div className="flex flex-col gap-2">
                     <div className="flex flex-wrap gap-1">
-                      {resource.tags?.map((tag) => (
-                        <Badge key={tag} variant="secondary" className="text-xs">
+                      {resource.tags?.slice(0, 3).map((tag) => (
+                        <Badge key={tag} variant="secondary" className="text-[10px] md:text-xs">
                           {tag}
                         </Badge>
                       ))}
@@ -266,162 +222,42 @@ export default function MentorResourcesPage() {
                         variant="outline"
                         size="sm"
                         onClick={() => handleViewResource(resource)}
+                        className="flex-1 text-xs md:text-sm"
                       >
-                        <Eye className="h-4 w-4" />
+                        <Eye className="h-3 w-3 md:h-4 md:w-4 mr-1" />
+                        View
                       </Button>
                       <Button
                         variant="outline"
                         size="sm"
                         onClick={() => {
-                          const url = getResourceDisplayUrl(resource);
-                          window.open(url, '_blank');
+                          if (resource.type === 'video') {
+                            const url = getResourceDisplayUrl(resource);
+                            window.open(url, '_blank');
+                          } else {
+                            handleDownloadResource(resource);
+                          }
                         }}
+                        className="flex-1 text-xs md:text-sm"
                       >
-                        <ExternalLink className="h-4 w-4" />
+                        {(resource.type === 'video') ? (
+                          <ExternalLink className="h-3 w-3 md:h-4 md:w-4 mr-1" />
+                        ) : (
+                          <Download className="h-3 w-3 md:h-4 md:w-4 mr-1" />
+                        )}
+                        {(resource.type === 'video') ? 'Open' : 'Download'}
                       </Button>
                     </div>
                   </div>
-                  <div className="text-xs text-muted-foreground mt-2">
-                    Uploaded by {resource.uploadedBy?.name || 'Unknown'} • {new Date(resource.createdAt).toLocaleDateString()}
+                  <div className="text-[10px] md:text-xs text-muted-foreground mt-2 truncate">
+                    By {resource.uploadedBy?.name || 'Unknown'} • {new Date(resource.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                   </div>
                 </CardContent>
               </Card>
-              ))}
-            </div>
-          )}
-        </TabsContent>
-
-        <TabsContent value="mentor-documents" className="space-y-4">
-          <div className="flex items-center gap-2">
-            <FolderOpen className="h-5 w-5" />
-            <h2 className="text-xl font-semibold">Mentor Documents</h2>
-            <Badge variant="outline">{pagination.total} resources</Badge>
+            ))}
           </div>
-          
-          {loading ? (
-            <div className="flex items-center justify-center py-8">
-              <Loader2 className="h-6 w-6 animate-spin" />
-              <span className="ml-2">Loading resources...</span>
-            </div>
-          ) : (
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-              {resources.map((resource) => (
-                <Card key={resource._id} className="hover:shadow-md transition-shadow">
-                <CardHeader className="pb-3">
-                  <div className="flex items-start justify-between">
-                    <div className="flex items-center gap-2">
-                      {getResourceIcon(resource.type)}
-                      <CardTitle className="text-lg">{resource.title}</CardTitle>
-                    </div>
-                    {getFileTypeBadge(resource)}
-                  </div>
-                  {resource.description && (
-                    <CardDescription>{resource.description}</CardDescription>
-                  )}
-                </CardHeader>
-                <CardContent className="pt-0">
-                  <div className="flex items-center justify-between">
-                    <div className="flex flex-wrap gap-1">
-                      {resource.tags?.map((tag) => (
-                        <Badge key={tag} variant="secondary" className="text-xs">
-                          {tag}
-                        </Badge>
-                      ))}
-                    </div>
-                    <div className="flex gap-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleViewResource(resource)}
-                      >
-                        <Eye className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleDownloadResource(resource)}
-                      >
-                        <Download className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </div>
-                  <div className="text-xs text-muted-foreground mt-2">
-                    Uploaded by {resource.uploadedBy?.name || 'Unknown'} • {new Date(resource.createdAt).toLocaleDateString()}
-                  </div>
-                </CardContent>
-              </Card>
-              ))}
-            </div>
-          )}
-        </TabsContent>
-
-        <TabsContent value="mentor-videos" className="space-y-4">
-          <div className="flex items-center gap-2">
-            <Video className="h-5 w-5" />
-            <h2 className="text-xl font-semibold">Mentor Videos</h2>
-            <Badge variant="outline">{pagination.total} resources</Badge>
-          </div>
-          
-          {loading ? (
-            <div className="flex items-center justify-center py-8">
-              <Loader2 className="h-6 w-6 animate-spin" />
-              <span className="ml-2">Loading resources...</span>
-            </div>
-          ) : (
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-              {resources.map((resource) => (
-                <Card key={resource._id} className="hover:shadow-md transition-shadow">
-                <CardHeader className="pb-3">
-                  <div className="flex items-start justify-between">
-                    <div className="flex items-center gap-2">
-                      {getResourceIcon(resource.type)}
-                      <CardTitle className="text-lg">{resource.title}</CardTitle>
-                    </div>
-                    {getFileTypeBadge(resource)}
-                  </div>
-                  {resource.description && (
-                    <CardDescription>{resource.description}</CardDescription>
-                  )}
-                </CardHeader>
-                <CardContent className="pt-0">
-                  <div className="flex items-center justify-between">
-                    <div className="flex flex-wrap gap-1">
-                      {resource.tags?.map((tag) => (
-                        <Badge key={tag} variant="secondary" className="text-xs">
-                          {tag}
-                        </Badge>
-                      ))}
-                    </div>
-                    <div className="flex gap-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleViewResource(resource)}
-                      >
-                        <Eye className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => {
-                          const url = getResourceDisplayUrl(resource);
-                          window.open(url, '_blank');
-                        }}
-                      >
-                        <ExternalLink className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </div>
-                  <div className="text-xs text-muted-foreground mt-2">
-                    Uploaded by {resource.uploadedBy?.name || 'Unknown'} • {new Date(resource.createdAt).toLocaleDateString()}
-                  </div>
-                </CardContent>
-              </Card>
-              ))}
-            </div>
-          )}
-        </TabsContent>
-      </Tabs>
+        )}
+      </div>
     </div>
   );
 }

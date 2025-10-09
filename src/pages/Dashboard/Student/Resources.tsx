@@ -95,7 +95,7 @@ export default function StudentResourcesPage() {
 
   if (loading) {
     return (
-      <div className="container mx-auto p-6 space-y-6">
+      <div className="container mx-auto p-4 md:p-6 space-y-6">
         <div className="flex items-center justify-center h-64">
           <div className="text-center">
             <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
@@ -107,18 +107,18 @@ export default function StudentResourcesPage() {
   }
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
+    <div className="container mx-auto p-4 md:p-6 space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Learning Resources</h1>
-          <p className="text-muted-foreground">
+          <h1 className="text-2xl md:text-3xl font-bold">Learning Resources</h1>
+          <p className="text-sm md:text-base text-muted-foreground">
             Access your educational materials and videos
           </p>
         </div>
       </div>
 
       <Tabs value={selectedBucket} onValueChange={(value: string) => setSelectedBucket(value as 'documents' | 'videos')}>
-        <TabsList className="grid w-full grid-cols-2">
+        <TabsList className="grid w-full grid-cols-2 text-xs md:text-sm">
           <TabsTrigger value="documents" className="flex items-center gap-2">
             <FileText className="h-4 w-4" />
             Documents ({documentResources.length})
@@ -132,7 +132,7 @@ export default function StudentResourcesPage() {
         <TabsContent value="documents" className="space-y-4">
           <div className="flex items-center gap-2">
             <FolderOpen className="h-5 w-5" />
-            <h2 className="text-xl font-semibold">Study Documents</h2>
+            <h2 className="text-lg md:text-xl font-semibold">Study Documents</h2>
             <Badge variant="outline">{documentResources.length} resources</Badge>
           </div>
           
@@ -148,12 +148,12 @@ export default function StudentResourcesPage() {
                     <div className="flex items-start justify-between">
                       <div className="flex items-center gap-2">
                         {getResourceIcon(resource.type)}
-                        <CardTitle className="text-lg">{resource.title}</CardTitle>
+                        <CardTitle className="text-base md:text-lg">{resource.title}</CardTitle>
                       </div>
                       {getFileTypeBadge(resource)}
                     </div>
                     {resource.description && (
-                      <CardDescription>{resource.description}</CardDescription>
+                      <CardDescription className="text-sm md:text-base">{resource.description}</CardDescription>
                     )}
                   </CardHeader>
                   <CardContent className="pt-0">
@@ -182,7 +182,7 @@ export default function StudentResourcesPage() {
                         </Button>
                       </div>
                     </div>
-                    <div className="text-xs text-muted-foreground mt-2">
+                    <div className="text-[11px] md:text-xs text-muted-foreground mt-2">
                       Uploaded by {resource.uploadedBy?.name || 'Unknown'} • {new Date(resource.createdAt).toLocaleDateString()}
                     </div>
                   </CardContent>
@@ -195,7 +195,7 @@ export default function StudentResourcesPage() {
         <TabsContent value="videos" className="space-y-4">
           <div className="flex items-center gap-2">
             <Video className="h-5 w-5" />
-            <h2 className="text-xl font-semibold">Educational Videos</h2>
+            <h2 className="text-lg md:text-xl font-semibold">Educational Videos</h2>
             <Badge variant="outline">{videoResources.length} resources</Badge>
           </div>
           
@@ -211,12 +211,12 @@ export default function StudentResourcesPage() {
                     <div className="flex items-start justify-between">
                       <div className="flex items-center gap-2">
                         {getResourceIcon(resource.type)}
-                        <CardTitle className="text-lg">{resource.title}</CardTitle>
+                        <CardTitle className="text-base md:text-lg">{resource.title}</CardTitle>
                       </div>
                       {getFileTypeBadge(resource)}
                     </div>
                     {resource.description && (
-                      <CardDescription>{resource.description}</CardDescription>
+                      <CardDescription className="text-sm md:text-base">{resource.description}</CardDescription>
                     )}
                   </CardHeader>
                   <CardContent className="pt-0">
@@ -245,7 +245,7 @@ export default function StudentResourcesPage() {
                         </Button>
                       </div>
                     </div>
-                    <div className="text-xs text-muted-foreground mt-2">
+                    <div className="text-[11px] md:text-xs text-muted-foreground mt-2">
                       Uploaded by {resource.uploadedBy?.name || 'Unknown'} • {new Date(resource.createdAt).toLocaleDateString()}
                     </div>
                   </CardContent>

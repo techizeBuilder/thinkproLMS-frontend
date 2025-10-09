@@ -150,11 +150,11 @@ export default function MentorAssessmentsPage() {
 
   if (loading) {
     return (
-      <div className="container mx-auto p-6">
+      <div className="container mx-auto p-4 md:p-6">
         <div className="flex items-center justify-center h-64">
           <div className="text-center">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
-            <p>Loading assessments...</p>
+            <p className="text-sm md:text-base">Loading assessments...</p>
           </div>
         </div>
       </div>
@@ -162,22 +162,22 @@ export default function MentorAssessmentsPage() {
   }
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="container mx-auto p-4 md:p-6 space-y-4 md:space-y-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 md:gap-4">
         <div>
-          <h1 className="text-3xl font-bold">Assessments</h1>
-          <p className="text-gray-600">Manage your assessments and track student progress</p>
+          <h1 className="text-2xl md:text-3xl font-bold">Assessments</h1>
+          <p className="text-sm md:text-base text-gray-600">Manage assessments and track student progress</p>
         </div>
-        <Button onClick={() => navigate("/mentor/assessments/create")}>
-          <Plus className="h-4 w-4 mr-2" />
-          Create Assessment
+        <Button onClick={() => navigate("/mentor/assessments/create")} className="text-xs md:text-sm">
+          <Plus className="h-3 w-3 md:h-4 md:w-4 mr-1 md:mr-2" />
+          Create
         </Button>
       </div>
 
       {/* Filters */}
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-3 md:gap-4">
         <Select value={statusFilter} onValueChange={setStatusFilter}>
-          <SelectTrigger className="w-48">
+          <SelectTrigger className="w-full sm:w-48 text-sm">
             <SelectValue placeholder="Filter by status" />
           </SelectTrigger>
           <SelectContent>
@@ -193,17 +193,17 @@ export default function MentorAssessmentsPage() {
       {/* Assessments Table */}
       {assessments.length === 0 ? (
         <Card>
-          <CardContent className="text-center py-12">
-            <BookOpen className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-lg font-semibold mb-2">No assessments found</h3>
-            <p className="text-gray-600 mb-4">
+          <CardContent className="text-center py-8 md:py-12">
+            <BookOpen className="h-10 w-10 md:h-12 md:w-12 text-gray-400 mx-auto mb-3 md:mb-4" />
+            <h3 className="text-base md:text-lg font-semibold mb-2">No assessments found</h3>
+            <p className="text-sm md:text-base text-gray-600 mb-3 md:mb-4">
               {statusFilter === "all" 
-                ? "Create your first assessment to get started"
-                : `No assessments with status "${statusFilter}" found`
+                ? "Create your first assessment"
+                : `No "${statusFilter}" assessments`
               }
             </p>
-            <Button onClick={() => navigate("/mentor/assessments/create")}>
-              <Plus className="h-4 w-4 mr-2" />
+            <Button onClick={() => navigate("/mentor/assessments/create")} className="text-xs md:text-sm">
+              <Plus className="h-3 w-3 md:h-4 md:w-4 mr-1 md:mr-2" />
               Create Assessment
             </Button>
           </CardContent>
@@ -215,96 +215,79 @@ export default function MentorAssessmentsPage() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Title</TableHead>
-                    <TableHead>Grade & Sections</TableHead>
-                    <TableHead>Session</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Duration</TableHead>
-                    <TableHead>Date Range</TableHead>
-                    <TableHead>Attempts</TableHead>
-                    <TableHead>Avg Score</TableHead>
-                    <TableHead>Created By</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
+                    <TableHead className="text-xs md:text-sm">Title</TableHead>
+                    <TableHead className="text-xs md:text-sm hidden md:table-cell">Grade & Sections</TableHead>
+                    <TableHead className="text-xs md:text-sm hidden lg:table-cell">Status</TableHead>
+                    <TableHead className="text-xs md:text-sm hidden lg:table-cell">Duration</TableHead>
+                    <TableHead className="text-xs md:text-sm hidden xl:table-cell">Date Range</TableHead>
+                    <TableHead className="text-xs md:text-sm hidden xl:table-cell">Attempts</TableHead>
+                    <TableHead className="text-xs md:text-sm">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {assessments.map((assessment) => (
                     <TableRow key={assessment._id} className="hover:bg-gray-50">
-                      <TableCell className="font-medium max-w-xs">
+                      <TableCell className="font-medium max-w-[200px]">
                         <div className="flex flex-col gap-1">
-                          <span className="line-clamp-1">{assessment.title}</span>
+                          <span className="text-xs md:text-sm line-clamp-1">{assessment.title}</span>
                           <div className="flex gap-1 flex-wrap">
                             {isAssessmentActive(assessment) && (
-                              <Badge variant="default" className="bg-green-100 text-green-800 text-xs">
+                              <Badge variant="default" className="bg-green-100 text-green-800 text-[10px]">
                                 Active
                               </Badge>
                             )}
                             {isAssessmentUpcoming(assessment) && (
-                              <Badge variant="outline" className="border-blue-300 text-blue-700 text-xs">
+                              <Badge variant="outline" className="border-blue-300 text-blue-700 text-[10px]">
                                 Upcoming
                               </Badge>
                             )}
                             {isAssessmentExpired(assessment) && (
-                              <Badge variant="outline" className="border-gray-300 text-gray-700 text-xs">
+                              <Badge variant="outline" className="border-gray-300 text-gray-700 text-[10px]">
                                 Expired
                               </Badge>
                             )}
                           </div>
+                          <div className="md:hidden text-[10px] text-gray-600">
+                            Grade {assessment.grade} • {assessment.sections.join(", ") || "All"}
+                          </div>
                         </div>
                       </TableCell>
-                      <TableCell>
-                        <div className="text-sm">
+                      <TableCell className="hidden md:table-cell">
+                        <div className="text-xs md:text-sm">
                           <div className="font-medium">Grade {assessment.grade}</div>
                           <div className="text-gray-600">
                             {assessment.sections.length > 0 
-                              ? `Sections: ${assessment.sections.join(", ")}`
-                              : "No sections"
+                              ? `${assessment.sections.join(", ")}`
+                              : "All sections"
                             }
                           </div>
                         </div>
                       </TableCell>
-                      <TableCell>
-                        <div className="text-sm">
-                          <div className="font-medium">
-                            Grade {assessment.grade}
-                          </div>
-                        </div>
-                      </TableCell>
-                      <TableCell>
+                      <TableCell className="hidden lg:table-cell">
                         {getStatusBadge(assessment.status)}
                       </TableCell>
-                      <TableCell className="text-sm">
+                      <TableCell className="text-xs md:text-sm hidden lg:table-cell">
                         {assessment.duration} min
                       </TableCell>
-                      <TableCell className="text-sm">
+                      <TableCell className="text-xs md:text-sm hidden xl:table-cell">
                         <div className="flex flex-col gap-1">
                           <div>{formatDate(assessment.startDate)}</div>
                           <div className="text-gray-600">{formatDate(assessment.endDate)}</div>
                         </div>
                       </TableCell>
-                      <TableCell className="text-center">
+                      <TableCell className="text-center text-xs md:text-sm hidden xl:table-cell">
                         {assessment.totalAttempts}
                       </TableCell>
-                      <TableCell className="text-center">
-                        {assessment.totalAttempts > 0 
-                          ? assessment.averageScore.toFixed(1) 
-                          : "-"}
-                      </TableCell>
                       <TableCell>
-                        <div className="text-sm">
-                          <div className="font-medium">{assessment.createdBy.name}</div>
-                          <div className="text-gray-600 capitalize">({assessment.createdBy.role})</div>
-                        </div>
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <div className="flex items-center justify-end gap-1">
+                        <div className="flex items-center justify-end gap-0.5 md:gap-1">
                           <Button
                             variant="ghost"
                             size="sm"
                             onClick={() => navigate(`/mentor/assessments/${assessment._id}`)}
                             title="View"
+                            className="h-7 w-7 md:h-8 md:w-8 p-0"
                           >
-                            <Eye className="h-4 w-4" />
+                            <Eye className="h-3 w-3 md:h-4 md:w-4" />
                           </Button>
                           
                           {assessment.status === "draft" && (
@@ -314,17 +297,18 @@ export default function MentorAssessmentsPage() {
                                 size="sm"
                                 onClick={() => navigate(`/mentor/assessments/${assessment._id}/edit`)}
                                 title="Edit"
+                                className="h-7 w-7 md:h-8 md:w-8 p-0"
                               >
-                                <Edit className="h-4 w-4" />
+                                <Edit className="h-3 w-3 md:h-4 md:w-4" />
                               </Button>
                               <Button
                                 variant="ghost"
                                 size="sm"
                                 onClick={() => handlePublishAssessment(assessment._id)}
                                 title="Publish"
-                                className="text-blue-600 hover:text-blue-700"
+                                className="text-blue-600 hover:text-blue-700 h-7 w-7 md:h-8 md:w-8 p-0"
                               >
-                                <Send className="h-4 w-4" />
+                                <Send className="h-3 w-3 md:h-4 md:w-4" />
                               </Button>
                             </>
                           )}
@@ -334,10 +318,10 @@ export default function MentorAssessmentsPage() {
                               variant="ghost"
                               size="sm"
                               onClick={() => handleCancelAssessment(assessment._id)}
-                              title="Cancel Assessment"
-                              className="text-orange-600 hover:text-orange-700"
+                              title="Cancel"
+                              className="text-orange-600 hover:text-orange-700 h-7 w-7 md:h-8 md:w-8 p-0"
                             >
-                              <XCircle className="h-4 w-4" />
+                              <XCircle className="h-3 w-3 md:h-4 md:w-4" />
                             </Button>
                           )}
                           
@@ -347,8 +331,9 @@ export default function MentorAssessmentsPage() {
                               size="sm"
                               onClick={() => navigate(`/mentor/assessments/${assessment._id}/analytics`)}
                               title="Analytics"
+                              className="h-7 w-7 md:h-8 md:w-8 p-0"
                             >
-                              <BarChart3 className="h-4 w-4" />
+                              <BarChart3 className="h-3 w-3 md:h-4 md:w-4" />
                             </Button>
                           )}
                           
@@ -358,9 +343,9 @@ export default function MentorAssessmentsPage() {
                               size="sm"
                               onClick={() => handleDeleteAssessment(assessment._id)}
                               title="Delete"
-                              className="text-red-600 hover:text-red-700"
+                              className="text-red-600 hover:text-red-700 h-7 w-7 md:h-8 md:w-8 p-0"
                             >
-                              <Trash2 className="h-4 w-4" />
+                              <Trash2 className="h-3 w-3 md:h-4 md:w-4" />
                             </Button>
                           )}
                         </div>

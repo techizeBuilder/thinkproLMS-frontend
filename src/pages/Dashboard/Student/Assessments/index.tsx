@@ -130,7 +130,7 @@ export default function StudentAssessmentsPage() {
 
   if (loading) {
     return (
-      <div className="container mx-auto p-6">
+      <div className="container mx-auto p-4 md:p-6">
         <div className="flex items-center justify-center h-64">
           <div className="text-center">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
@@ -142,14 +142,15 @@ export default function StudentAssessmentsPage() {
   }
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="container mx-auto p-4 md:p-6 space-y-6">
+      <div className="flex items-center justify-between gap-2">
         <div>
-          <h1 className="text-3xl font-bold">My Assessments</h1>
-          <p className="text-gray-600">Take your assigned assessments</p>
+          <h1 className="text-2xl md:text-3xl font-bold">My Assessments</h1>
+          <p className="text-sm md:text-base text-gray-600">Take your assigned assessments</p>
         </div>
         <Button 
-          variant="outline" 
+          variant="outline"
+          className="h-9 sm:h-10 text-sm sm:text-base"
           onClick={() => navigate("/student/assessments/results")}
         >
           <Eye className="h-4 w-4 mr-2" />
@@ -168,12 +169,12 @@ export default function StudentAssessmentsPage() {
           </CardContent>
         </Card>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
           {assessments.map((assessment) => (
             <Card key={assessment._id} className="hover:shadow-lg transition-shadow">
               <CardHeader>
                 <div className="flex items-start justify-between">
-                  <CardTitle className="text-lg line-clamp-2">{assessment.title}</CardTitle>
+                  <CardTitle className="text-base md:text-lg line-clamp-2">{assessment.title}</CardTitle>
                   {getStatusBadge(assessment)}
                 </div>
                 <div className="flex items-center gap-2 text-sm text-gray-600">
@@ -204,7 +205,7 @@ export default function StudentAssessmentsPage() {
 
                 {/* Instructions Preview */}
                 <div className="bg-gray-50 p-3 rounded-lg">
-                  <p className="text-sm text-gray-700 line-clamp-3">
+                  <p className="text-sm md:text-base text-gray-700 line-clamp-3">
                     {assessment.instructions}
                   </p>
                 </div>
@@ -213,7 +214,7 @@ export default function StudentAssessmentsPage() {
                 <div className="pt-2">
                   {assessment.assessmentStatus === "available" ? (
                     <Button 
-                      className="w-full" 
+                      className="w-full h-9 sm:h-10 text-sm sm:text-base" 
                       onClick={() => handleStartAssessment(assessment)}
                     >
                       <Play className="h-4 w-4 mr-2" />
@@ -222,7 +223,7 @@ export default function StudentAssessmentsPage() {
                   ) : assessment.assessmentStatus === "completed" ? (
                     <Button 
                       variant="outline" 
-                      className="w-full" 
+                      className="w-full h-9 sm:h-10 text-sm sm:text-base" 
                       disabled
                     >
                       <CheckCircle className="h-4 w-4 mr-2" />
@@ -230,7 +231,7 @@ export default function StudentAssessmentsPage() {
                     </Button>
                   ) : assessment.assessmentStatus === "in_progress" ? (
                     <Button 
-                      className="w-full" 
+                      className="w-full h-9 sm:h-10 text-sm sm:text-base" 
                       onClick={() => handleStartAssessment(assessment)}
                     >
                       <Play className="h-4 w-4 mr-2" />
@@ -239,7 +240,7 @@ export default function StudentAssessmentsPage() {
                   ) : assessment.assessmentStatus === "upcoming" ? (
                     <Button 
                       variant="outline" 
-                      className="w-full" 
+                      className="w-full h-9 sm:h-10 text-sm sm:text-base" 
                       disabled
                     >
                       <Clock className="h-4 w-4 mr-2" />
@@ -248,7 +249,7 @@ export default function StudentAssessmentsPage() {
                   ) : assessment.assessmentStatus === "expired" ? (
                     <Button 
                       variant="outline" 
-                      className="w-full" 
+                      className="w-full h-9 sm:h-10 text-sm sm:text-base" 
                       disabled
                     >
                       <AlertCircle className="h-4 w-4 mr-2" />
@@ -257,7 +258,7 @@ export default function StudentAssessmentsPage() {
                   ) : (
                     <Button 
                       variant="outline" 
-                      className="w-full" 
+                      className="w-full h-9 sm:h-10 text-sm sm:text-base" 
                       disabled
                     >
                       <AlertCircle className="h-4 w-4 mr-2" />
@@ -276,11 +277,11 @@ export default function StudentAssessmentsPage() {
         <Dialog open={showStartModal} onOpenChange={setShowStartModal}>
           <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
-              <DialogTitle className="flex items-center gap-2 text-2xl">
+              <DialogTitle className="flex items-center gap-2 text-xl md:text-2xl">
                 <FileText className="h-6 w-6 text-blue-600" />
                 Ready to Start Assessment?
               </DialogTitle>
-              <DialogDescription className="text-base">
+              <DialogDescription className="text-sm md:text-base">
                 Please review the assessment details below before starting. Once you begin, the timer will start and cannot be paused.
               </DialogDescription>
             </DialogHeader>
@@ -288,11 +289,11 @@ export default function StudentAssessmentsPage() {
             <div className="space-y-4">
               {/* Assessment Details */}
               <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
-                <h3 className="font-semibold text-lg text-blue-900 mb-3">
+                <h3 className="font-semibold text-base md:text-lg text-blue-900 mb-3">
                   {selectedAssessment.title}
                 </h3>
                 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-3">
                   <div className="flex items-center gap-2">
                     <BookOpen className="h-4 w-4 text-blue-600" />
                     <span className="text-sm">
@@ -338,7 +339,7 @@ export default function StudentAssessmentsPage() {
               {selectedAssessment.instructions && (
                 <div className="bg-gray-50 p-4 rounded-lg">
                   <h4 className="font-semibold mb-2">Instructions:</h4>
-                  <p className="text-sm text-gray-700 whitespace-pre-wrap">
+                  <p className="text-sm md:text-base text-gray-700 whitespace-pre-wrap">
                     {selectedAssessment.instructions}
                   </p>
                 </div>
@@ -350,7 +351,7 @@ export default function StudentAssessmentsPage() {
                   <AlertTriangle className="h-4 w-4" />
                   Important Notes:
                 </h4>
-                <ul className="text-sm text-yellow-700 space-y-1">
+                <ul className="text-sm md:text-base text-yellow-700 space-y-1">
                   <li>• The timer will start immediately when you click "Start Test"</li>
                   <li>• You cannot pause or stop the timer once started</li>
                   <li>• The assessment will auto-submit when time expires</li>
@@ -377,7 +378,8 @@ export default function StudentAssessmentsPage() {
 
             <DialogFooter className="gap-2">
               <Button 
-                variant="outline" 
+                variant="outline"
+                className="h-9 sm:h-10 text-sm sm:text-base"
                 onClick={() => setShowStartModal(false)}
               >
                 <ArrowLeft className="h-4 w-4 mr-2" />
@@ -385,7 +387,7 @@ export default function StudentAssessmentsPage() {
               </Button>
               <Button 
                 onClick={confirmStartAssessment}
-                className="bg-blue-600 hover:bg-blue-700"
+                className="bg-blue-600 hover:bg-blue-700 h-9 sm:h-10 text-sm sm:text-base"
               >
                 <Play className="h-4 w-4 mr-2" />
                 Start Test

@@ -212,58 +212,44 @@ export default function MentorStudentsPage() {
   }
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-4 md:p-6 space-y-4 md:space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">My Students</h1>
-          <p className="text-muted-foreground">
+          <h1 className="text-2xl md:text-3xl font-bold">My Students</h1>
+          <p className="text-sm md:text-base text-muted-foreground">
             View students from your assigned school
           </p>
         </div>
       </div>
 
-      {/* School Info Banner */}
-      <Card className="bg-primary/5 border-primary/20">
-        <CardContent className="p-4">
-          <div className="flex items-center gap-3">
-            <div className="flex-1">
-              <div className="flex items-center gap-2">
-                <MapPin className="h-5 w-5 text-primary" />
-                <div>
-                  <h3 className="font-semibold text-lg">{mentor.assignedSchool.name}</h3>
-                  {mentor.assignedSchool.branchName && (
-                    <p className="text-sm text-muted-foreground">
-                      {mentor.assignedSchool.branchName}
-                    </p>
-                  )}
-                  <p className="text-sm text-muted-foreground">
-                    {mentor.assignedSchool.city}, {mentor.assignedSchool.state}
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+      {/* School Info - inline, no card */}
+      <div className="flex items-center gap-2 text-sm md:text-base text-muted-foreground">
+        <MapPin className="h-4 w-4 md:h-5 md:w-5 text-primary shrink-0" />
+        <span className="font-medium text-foreground">{mentor.assignedSchool.name}</span>
+        {mentor.assignedSchool.branchName && (
+          <span>• {mentor.assignedSchool.branchName}</span>
+        )}
+        <span>• {mentor.assignedSchool.city}, {mentor.assignedSchool.state}</span>
+      </div>
 
       {/* Filters */}
-      <div className="flex flex-col sm:flex-row gap-4">
+      <div className="flex flex-row flex-wrap items-center gap-3 md:gap-4">
         <div className="flex-1">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
             <Input
-              placeholder="Search students by name, email, or roll number..."
+              placeholder="Search students..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10"
+              className="pl-10 text-sm"
             />
           </div>
         </div>
 
         <Select value={selectedGrade} onValueChange={setSelectedGrade}>
-          <SelectTrigger className="w-full sm:w-[150px]">
-            <SelectValue placeholder="Select Grade" />
+          <SelectTrigger className="w-[130px] text-sm">
+            <SelectValue placeholder="Grade" />
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All Grades</SelectItem>
@@ -276,8 +262,8 @@ export default function MentorStudentsPage() {
         </Select>
 
         <Select value={selectedSection} onValueChange={setSelectedSection}>
-          <SelectTrigger className="w-full sm:w-[150px]">
-            <SelectValue placeholder="Select Section" />
+          <SelectTrigger className="w-[130px] text-sm">
+            <SelectValue placeholder="Section" />
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All Sections</SelectItem>
@@ -290,107 +276,86 @@ export default function MentorStudentsPage() {
         </Select>
       </div>
 
-      {/* Stats */}
-      <div className="grid gap-4 md:grid-cols-2">
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">
-                  Total Students
-                </p>
-                <p className="text-2xl font-bold">{students.length}</p>
-              </div>
-              <User className="h-8 w-8 text-muted-foreground" />
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">
-                  Filtered Results
-                </p>
-                <p className="text-2xl font-bold">{filteredStudents.length}</p>
-              </div>
-              <GraduationCap className="h-8 w-8 text-muted-foreground" />
-            </div>
-          </CardContent>
-        </Card>
-      </div>
 
       {/* Students Table */}
       <Card>
         <CardContent className="p-0">
           {filteredStudents.length === 0 ? (
-            <div className="p-8 text-center">
-              <User className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-              <h3 className="text-lg font-semibold mb-2">No students found</h3>
-              <p className="text-muted-foreground">
+            <div className="p-6 md:p-8 text-center">
+              <User className="h-10 w-10 md:h-12 md:w-12 text-muted-foreground mx-auto mb-3 md:mb-4" />
+              <h3 className="text-base md:text-lg font-semibold mb-2">No students found</h3>
+              <p className="text-sm text-muted-foreground">
                 {students.length === 0
                   ? "No students are enrolled in your assigned schools yet."
                   : "No students match your current filters."}
               </p>
             </div>
           ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Student Name</TableHead>
-                  <TableHead>Student ID</TableHead>
-                  <TableHead>Email</TableHead>
-                  <TableHead>Grade - Section</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Added Date</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredStudents.map((student) => (
-                  <TableRow key={student._id} className="hover:bg-muted/50">
-                    <TableCell className="font-medium">
-                      <div className="flex items-center gap-2">
-                        <div className="w-8 h-8">
-                          <ProfilePictureDisplay
-                            profilePicture={student.user.profilePicture}
-                            name={student.user.name}
-                            size="sm"
-                          />
-                        </div>
-                        {student.user.name}
-                      </div>
-                    </TableCell>
-                    <TableCell className="font-mono text-sm">
-                      {student.studentId}
-                    </TableCell>
-                    <TableCell className="text-sm">
-                      {student.user.email}
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-1">
-                        <GraduationCap className="h-4 w-4 text-muted-foreground" />
-                        <span className="text-sm font-medium">
-                          Grade {student.grade} - {student.section || 'No Section'}
-                        </span>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <Badge
-                        variant={
-                          student.user.isVerified ? "default" : "secondary"
-                        }
-                      >
-                        {student.user.isVerified ? "Verified" : "Pending"}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-sm text-muted-foreground">
-                      {new Date(student.user.createdAt).toLocaleDateString()}
-                    </TableCell>
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="text-xs md:text-sm">Student Name</TableHead>
+                    <TableHead className="text-xs md:text-sm hidden md:table-cell">Student ID</TableHead>
+                    <TableHead className="text-xs md:text-sm hidden lg:table-cell">Email</TableHead>
+                    <TableHead className="text-xs md:text-sm">Grade - Section</TableHead>
+                    <TableHead className="text-xs md:text-sm">Status</TableHead>
+                    <TableHead className="text-xs md:text-sm hidden sm:table-cell">Added Date</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                </TableHeader>
+                <TableBody>
+                  {filteredStudents.map((student) => (
+                    <TableRow key={student._id} className="hover:bg-muted/50">
+                      <TableCell className="font-medium">
+                        <div className="flex items-center gap-2">
+                          <div className="w-7 h-7 md:w-8 md:h-8 shrink-0">
+                            <ProfilePictureDisplay
+                              profilePicture={student.user.profilePicture}
+                              name={student.user.name}
+                              size="sm"
+                            />
+                          </div>
+                          <span className="text-xs md:text-sm truncate max-w-[120px] md:max-w-none">
+                            {student.user.name}
+                          </span>
+                        </div>
+                      </TableCell>
+                      <TableCell className="font-mono text-xs md:text-sm hidden md:table-cell">
+                        {student.studentId}
+                      </TableCell>
+                      <TableCell className="text-xs md:text-sm hidden lg:table-cell truncate max-w-[180px]">
+                        {student.user.email}
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-1">
+                          <GraduationCap className="h-3 w-3 md:h-4 md:w-4 text-muted-foreground shrink-0" />
+                          <span className="text-xs md:text-sm font-medium whitespace-nowrap">
+                            {student.grade}-{student.section || 'N/A'}
+                          </span>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <Badge
+                          variant={
+                            student.user.isVerified ? "default" : "secondary"
+                          }
+                          className="text-xs"
+                        >
+                          {student.user.isVerified ? "Verified" : "Pending"}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-xs md:text-sm text-muted-foreground hidden sm:table-cell">
+                        {new Date(student.user.createdAt).toLocaleDateString('en-US', { 
+                          month: 'short', 
+                          day: 'numeric',
+                          year: '2-digit'
+                        })}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
           )}
         </CardContent>
       </Card>

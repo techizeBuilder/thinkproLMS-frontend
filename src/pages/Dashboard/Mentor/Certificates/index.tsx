@@ -215,17 +215,17 @@ export default function CertificatesPage() {
   };
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-4 md:p-6 space-y-4 md:space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
         <div>
-          <h1 className="text-3xl font-bold">Certificates</h1>
-          <p className="text-muted-foreground">
+          <h1 className="text-2xl md:text-3xl font-bold">Certificates</h1>
+          <p className="text-sm md:text-base text-muted-foreground">
             Create and manage course completion certificates
           </p>
         </div>
-        <Button onClick={handleCreateCertificate} className="flex items-center gap-2">
-          <Plus className="h-4 w-4" />
+        <Button onClick={handleCreateCertificate} className="flex items-center gap-1 md:gap-2 text-xs md:text-sm">
+          <Plus className="h-3 w-3 md:h-4 md:w-4" />
           Create Certificate
         </Button>
       </div>
@@ -233,20 +233,20 @@ export default function CertificatesPage() {
       {/* Filters */}
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Filter className="h-5 w-5" />
+          <CardTitle className="flex items-center gap-2 text-lg md:text-xl">
+            <Filter className="h-4 w-4 md:h-5 md:w-5" />
             Filters
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
-            <div className="relative">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3 md:gap-4">
+            <div className="relative lg:col-span-2 xl:col-span-1">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
-                placeholder="Search certificates..."
+                placeholder="Search..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
+                className="pl-10 text-sm"
               />
             </div>
 
