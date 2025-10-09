@@ -362,9 +362,6 @@ export default function StudentsPage() {
                         >
                           {student.user.isVerified ? "Verified" : "Pending"}
                         </Badge>
-                        {!student.hasCustomCredentials && (
-                          <Badge variant="outline" className="text-xs truncate max-w-[100px]">System Generated</Badge>
-                        )}
                       </div>
                     </div>
                   </div>

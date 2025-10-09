@@ -41,7 +41,7 @@ interface Student {
     createdAt: string;
     profilePicture?: string | null;
   };
-  rollNumber: string;
+  studentId: string;
   grade: string;
   school: School;
   addedBy: {
@@ -143,7 +143,7 @@ export default function MentorStudentsPage() {
         (student) =>
           student.user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
           student.user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          student.rollNumber.toLowerCase().includes(searchTerm.toLowerCase())
+          student.studentId.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
 
@@ -276,7 +276,7 @@ export default function MentorStudentsPage() {
               <TableHeader>
                 <TableRow>
                   <TableHead>Student Name</TableHead>
-                  <TableHead>Roll Number</TableHead>
+                  <TableHead>Student ID</TableHead>
                   <TableHead>Email</TableHead>
                   <TableHead>Grade</TableHead>
                   <TableHead>School</TableHead>
@@ -300,7 +300,7 @@ export default function MentorStudentsPage() {
                       </div>
                     </TableCell>
                     <TableCell className="font-mono text-sm">
-                      {student.rollNumber}
+                      {student.studentId}
                     </TableCell>
                     <TableCell className="text-sm">
                       {student.user.email}
