@@ -29,7 +29,7 @@ export interface School {
   _id: string;
   name: string;
   address: string;
-  board: "ICSE" | "CBSE" | "State" | "Other";
+  boards: ("ICSE" | "CBSE" | "State" | "Other")[];
   image?: string;
   logo?: string;
   affiliatedTo?: string;
@@ -48,7 +48,7 @@ export interface School {
 export interface CreateSchoolData {
   name: string;
   address: string;
-  board: "ICSE" | "CBSE" | "State" | "Other";
+  boards: ("ICSE" | "CBSE" | "State" | "Other")[];
   image?: File;
   logo?: File;
   affiliatedTo?: string;
@@ -95,7 +95,7 @@ export const schoolService = {
     // Add all fields to FormData
     formData.append('name', data.name);
     formData.append('address', data.address);
-    formData.append('board', data.board);
+    formData.append('boards', JSON.stringify(data.boards));
     formData.append('state', data.state);
     formData.append('city', data.city);
     
@@ -132,7 +132,7 @@ export const schoolService = {
     // Add all fields to FormData
     if (data.name !== undefined) formData.append('name', data.name);
     if (data.address !== undefined) formData.append('address', data.address);
-    if (data.board !== undefined) formData.append('board', data.board);
+    if (data.boards !== undefined) formData.append('boards', JSON.stringify(data.boards));
     if (data.state !== undefined) formData.append('state', data.state);
     if (data.city !== undefined) formData.append('city', data.city);
     if (data.image !== undefined) formData.append('image', data.image);

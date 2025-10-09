@@ -229,9 +229,17 @@ export default function SchoolsPage() {
                       {school.name}
                     </TableCell>
                     <TableCell>
-                      <Badge className={getBoardColor(school.board)}>
-                        {school.board}
-                      </Badge>
+                      <div className="flex flex-wrap gap-1">
+                        {school.boards && school.boards.length > 0 ? (
+                          school.boards.map((board) => (
+                            <Badge key={board} className={getBoardColor(board)}>
+                              {board}
+                            </Badge>
+                          ))
+                        ) : (
+                          <span className="text-sm text-gray-500">No boards</span>
+                        )}
+                      </div>
                     </TableCell>
                     <TableCell>
                       <div className="flex items-center text-sm">

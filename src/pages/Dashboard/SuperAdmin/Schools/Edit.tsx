@@ -24,7 +24,7 @@ export default function EditSchoolPage() {
   const [formData, setFormData] = useState<UpdateSchoolData>({
     name: "",
     address: "",
-    board: "CBSE",
+    boards: [],
     state: "",
     city: "",
     affiliatedTo: "",
@@ -49,7 +49,7 @@ export default function EditSchoolPage() {
         setFormData({
           name: school.name,
           address: school.address,
-          board: school.board,
+          boards: school.boards || [],
           state: school.state,
           city: school.city,
           affiliatedTo: school.affiliatedTo || "",
@@ -178,21 +178,41 @@ export default function EditSchoolPage() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="board">Board *</Label>
-                <Select 
-                  value={formData.board} 
-                  onValueChange={(value) => setFormData(prev => ({ ...prev, board: value as any }))}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select board" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="CBSE">CBSE</SelectItem>
-                    <SelectItem value="ICSE">ICSE</SelectItem>
-                    <SelectItem value="State">State</SelectItem>
-                    <SelectItem value="Other">Other</SelectItem>
-                  </SelectContent>
-                </Select>
+                <Label>Boards *</Label>
+                <div className="flex flex-wrap items-center gap-4 border border-gray-300 rounded-md p-3">
+                  {["CBSE", "ICSE", "State", "Other"].map((board) => (
+                    <div key={board} className="flex items-center space-x-2">
+                      <input
+                        type="checkbox"
+                        id={`board-${board}`}
+                        checked={formData.boards?.includes(board as any)}
+                        onChange={(e) => {
+                          if (e.target.checked) {
+                            setFormData((prev) => ({
+                              ...prev,
+                              boards: [...(prev.boards || []), board as any],
+                            }));
+                          } else {
+                            setFormData((prev) => ({
+                              ...prev,
+                              boards: (prev.boards || []).filter((b) => b !== board),
+                            }));
+                          }
+                        }}
+                        className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                      />
+                      <label
+                        htmlFor={`board-${board}`}
+                        className="text-sm font-medium leading-none cursor-pointer"
+                      >
+                        {board}
+                      </label>
+                    </div>
+                  ))}
+                </div>
+                <p className="text-xs text-gray-500">
+                  Select at least one board
+                </p>
               </div>
             </div>
 

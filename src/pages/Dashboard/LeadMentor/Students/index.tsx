@@ -25,7 +25,7 @@ interface School {
   name: string;
   city: string;
   state: string;
-  board: string;
+  boards: string[];
   branchName?: string;
 }
 
@@ -387,7 +387,11 @@ export default function StudentsPage() {
                     <div className="text-gray-500">
                       {student.school.city}, {student.school.state}
                     </div>
-                    <div className="text-xs text-gray-400">{student.school.board}</div>
+                    <div className="text-xs text-gray-400">
+                      {student.school.boards && student.school.boards.length > 0 
+                        ? student.school.boards.join(", ") 
+                        : "No boards"}
+                    </div>
                   </div>
                 </TableCell>
                 <TableCell>

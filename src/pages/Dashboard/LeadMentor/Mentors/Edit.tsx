@@ -17,7 +17,7 @@ interface School {
   name: string;
   city: string;
   state: string;
-  board: string;
+  boards: string[];
   branchName?: string;
 }
 
@@ -244,7 +244,8 @@ export default function EditMentorPage() {
                     <div>
                       <p className="font-medium">{school.name}</p>
                       <p className="text-sm text-gray-500">
-                        {school.city}, {school.state} • {school.board}
+                        {school.city}, {school.state}
+                        {school.boards && school.boards.length > 0 && ` • ${school.boards.join(", ")}`}
                         {school.branchName && ` • ${school.branchName}`}
                       </p>
                     </div>

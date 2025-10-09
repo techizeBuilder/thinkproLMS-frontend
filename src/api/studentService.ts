@@ -18,7 +18,7 @@ export interface Student {
     name: string;
     city: string;
     state: string;
-    board: string;
+    boards: string[];
     branchName: string;
   };
   addedBy: {
