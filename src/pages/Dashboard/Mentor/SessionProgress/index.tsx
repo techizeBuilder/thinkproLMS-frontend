@@ -330,25 +330,20 @@ export default function SessionProgressPage() {
         </div>
       </div>
 
-      {/* School Selection and Filters */}
+      {/* Filters */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-        {/* School Selection */}
+        {/* School Display */}
         <div>
-          <Label htmlFor="school-select" className="text-xs font-medium">
+          <Label className="text-xs font-medium">
             School
           </Label>
-          <Select value={selectedSchoolId} onValueChange={setSelectedSchoolId}>
-            <SelectTrigger className="w-full h-8">
-              <SelectValue placeholder="Select a school" />
-            </SelectTrigger>
-            <SelectContent>
-              {availableSchools.map((school) => (
-                <SelectItem key={school._id} value={school._id}>
-                  {school.name} - {school.city}, {school.state}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <div className="w-full h-8 px-3 py-1 border rounded-md bg-muted/50 flex items-center text-sm">
+            {availableSchools.length > 0 ? (
+              <span>{availableSchools[0].name} - {availableSchools[0].city}, {availableSchools[0].state}</span>
+            ) : (
+              <span className="text-muted-foreground">No school assigned</span>
+            )}
+          </div>
         </div>
 
         {/* Grade Selection */}
@@ -421,7 +416,7 @@ export default function SessionProgressPage() {
       {(!selectedSchoolId || !selectedGrade || !selectedSection) && (
         <Alert>
           <AlertDescription>
-            Please select School, Grade, and Section to view session progress.
+            Please select Grade and Section to view session progress.
           </AlertDescription>
         </Alert>
       )}

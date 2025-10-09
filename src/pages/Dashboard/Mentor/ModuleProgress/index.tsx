@@ -464,25 +464,20 @@ export default function ModuleProgressPage() {
         </div>
       </div>
 
-      {/* School Selection and Filters */}
+      {/* Filters */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        {/* School Selection */}
+        {/* School Display */}
         <div>
-          <Label htmlFor="school-select" className="text-sm font-medium">
+          <Label className="text-sm font-medium">
             School
           </Label>
-          <Select value={selectedSchoolId} onValueChange={setSelectedSchoolId}>
-            <SelectTrigger className="w-full">
-              <SelectValue placeholder="Select a school" />
-            </SelectTrigger>
-            <SelectContent>
-              {availableSchools.map((school) => (
-                <SelectItem key={school._id} value={school._id}>
-                  {school.name} - {school.city}, {school.state}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <div className="w-full h-10 px-3 py-2 border rounded-md bg-muted/50 flex items-center text-sm">
+            {availableSchools.length > 0 ? (
+              <span>{availableSchools[0].name} - {availableSchools[0].city}, {availableSchools[0].state}</span>
+            ) : (
+              <span className="text-muted-foreground">No school assigned</span>
+            )}
+          </div>
         </div>
 
         {/* Grade Selection */}
@@ -585,8 +580,7 @@ export default function ModuleProgressPage() {
         !selectedSubjectId) && (
         <Alert>
           <AlertDescription>
-            Please select School, Grade, Section, and Subject to view module
-            progress.
+            Please select Grade, Section, and Subject to view module progress.
           </AlertDescription>
         </Alert>
       )}
