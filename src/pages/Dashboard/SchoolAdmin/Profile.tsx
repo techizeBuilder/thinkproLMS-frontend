@@ -4,10 +4,10 @@ import { School, Users, BarChart3, Settings, BookOpen } from 'lucide-react';
 export default function SchoolAdminProfile() {
 
   return (
-    <div className="container mx-auto p-6">
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold">Profile</h1>
-        <p className="text-muted-foreground">Manage your school admin account and school settings</p>
+    <div className="space-y-4 md:space-y-6">
+      <div className="mb-4 md:mb-6">
+        <h1 className="text-2xl md:text-3xl font-bold">Profile</h1>
+        <p className="text-sm md:text-base text-muted-foreground">Manage your school admin account and school settings</p>
       </div>
 
       <ProfileCard

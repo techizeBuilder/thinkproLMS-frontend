@@ -105,19 +105,19 @@ export default function SchoolAdminStudentsPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 md:space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold">Students</h1>
-          <p className="text-muted-foreground">
+          <h1 className="text-2xl md:text-3xl font-bold">Students</h1>
+          <p className="text-sm md:text-base text-muted-foreground">
             View students enrolled in your assigned school
           </p>
         </div>
       </div>
 
       {/* Filters */}
-      <div className="flex flex-col sm:flex-row gap-4">
+      <div className="flex flex-col sm:flex-row gap-3 md:gap-4">
         <div className="flex-1">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
@@ -125,7 +125,7 @@ export default function SchoolAdminStudentsPage() {
               placeholder="Search students by name, email, or student ID..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10"
+              className="pl-10 text-sm md:text-base"
             />
           </div>
         </div>
@@ -146,31 +146,31 @@ export default function SchoolAdminStudentsPage() {
       </div>
 
       {/* Stats */}
-      <div className="grid gap-4 md:grid-cols-2">
+      <div className="grid gap-3 md:gap-4 sm:grid-cols-2">
         <Card>
-          <CardContent className="p-4">
+          <CardContent className="p-3 md:p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-muted-foreground">
+                <p className="text-xs md:text-sm font-medium text-muted-foreground">
                   Total Students
                 </p>
-                <p className="text-2xl font-bold">{students.length}</p>
+                <p className="text-xl md:text-2xl font-bold">{students.length}</p>
               </div>
-              <User className="h-8 w-8 text-muted-foreground" />
+              <User className="h-6 w-6 md:h-8 md:w-8 text-muted-foreground" />
             </div>
           </CardContent>
         </Card>
 
         <Card>
-          <CardContent className="p-4">
+          <CardContent className="p-3 md:p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-muted-foreground">
+                <p className="text-xs md:text-sm font-medium text-muted-foreground">
                   Filtered Results
                 </p>
-                <p className="text-2xl font-bold">{filteredStudents.length}</p>
+                <p className="text-xl md:text-2xl font-bold">{filteredStudents.length}</p>
               </div>
-              <GraduationCap className="h-8 w-8 text-muted-foreground" />
+              <GraduationCap className="h-6 w-6 md:h-8 md:w-8 text-muted-foreground" />
             </div>
           </CardContent>
         </Card>
@@ -180,17 +180,18 @@ export default function SchoolAdminStudentsPage() {
       <Card>
         <CardContent className="p-0">
           {filteredStudents.length === 0 ? (
-            <div className="p-8 text-center">
-              <User className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-              <h3 className="text-lg font-semibold mb-2">No students found</h3>
-              <p className="text-muted-foreground">
+            <div className="p-6 md:p-8 text-center">
+              <User className="h-10 w-10 md:h-12 md:w-12 text-muted-foreground mx-auto mb-4" />
+              <h3 className="text-base md:text-lg font-semibold mb-2">No students found</h3>
+              <p className="text-sm md:text-base text-muted-foreground">
                 {students.length === 0
                   ? "No students are enrolled in your assigned school yet."
                   : "No students match your current filters."}
               </p>
             </div>
           ) : (
-            <Table>
+            <div className="overflow-x-auto">
+              <Table>
               <TableHeader>
                 <TableRow>
                   <TableHead>Student Name</TableHead>
@@ -250,7 +251,8 @@ export default function SchoolAdminStudentsPage() {
                   </TableRow>
                 ))}
               </TableBody>
-            </Table>
+              </Table>
+            </div>
           )}
         </CardContent>
       </Card>

@@ -107,32 +107,32 @@ export default function SchoolAdminDashboard() {
   }
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
+    <div className="space-y-4 md:space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold">School Admin Dashboard</h1>
-          <p className="text-muted-foreground">
+          <h1 className="text-2xl md:text-3xl font-bold">School Admin Dashboard</h1>
+          <p className="text-sm md:text-base text-muted-foreground">
             Welcome back, {schoolAdmin?.name || "School Admin"}
           </p>
         </div>
         <div className="flex items-center space-x-2">
-          <SchoolIcon className="h-5 w-5 text-primary" />
-          <span className="text-sm text-muted-foreground">
+          <SchoolIcon className="h-4 w-4 md:h-5 md:w-5 text-primary" />
+          <span className="text-xs md:text-sm text-muted-foreground">
             {schoolAdmin?.assignedSchool ? schoolAdmin.assignedSchool.name : "No School Assigned"}
           </span>
         </div>
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Mentors</CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-xs md:text-sm font-medium">Total Mentors</CardTitle>
+            <Users className="h-3 w-3 md:h-4 md:w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.totalMentors}</div>
+            <div className="text-xl md:text-2xl font-bold">{stats.totalMentors}</div>
             <p className="text-xs text-muted-foreground">
               Across all assigned schools
             </p>
@@ -141,11 +141,11 @@ export default function SchoolAdminDashboard() {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Students</CardTitle>
-            <GraduationCap className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-xs md:text-sm font-medium">Total Students</CardTitle>
+            <GraduationCap className="h-3 w-3 md:h-4 md:w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.totalStudents}</div>
+            <div className="text-xl md:text-2xl font-bold">{stats.totalStudents}</div>
             <p className="text-xs text-muted-foreground">
               Enrolled in assigned school
             </p>
@@ -154,11 +154,11 @@ export default function SchoolAdminDashboard() {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Avg. Progress</CardTitle>
-            <TrendingUp className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-xs md:text-sm font-medium">Avg. Progress</CardTitle>
+            <TrendingUp className="h-3 w-3 md:h-4 md:w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.averageProgress}%</div>
+            <div className="text-xl md:text-2xl font-bold">{stats.averageProgress}%</div>
             <p className="text-xs text-muted-foreground">
               Module completion rate
             </p>
@@ -168,11 +168,11 @@ export default function SchoolAdminDashboard() {
 
       {/* Main Content Tabs */}
       <Tabs defaultValue="mentors" className="space-y-4">
-        <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="mentors">School Mentors</TabsTrigger>
-          <TabsTrigger value="students">Students</TabsTrigger>
-          <TabsTrigger value="progress">Module Progress</TabsTrigger>
-          <TabsTrigger value="reports">Assessment Reports</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-2 md:grid-cols-4">
+          <TabsTrigger value="mentors" className="text-xs md:text-sm">School Mentors</TabsTrigger>
+          <TabsTrigger value="students" className="text-xs md:text-sm">Students</TabsTrigger>
+          <TabsTrigger value="progress" className="text-xs md:text-sm">Module Progress</TabsTrigger>
+          <TabsTrigger value="reports" className="text-xs md:text-sm">Assessment Reports</TabsTrigger>
         </TabsList>
 
         <TabsContent value="mentors" className="space-y-4">
@@ -190,7 +190,7 @@ export default function SchoolAdminDashboard() {
                     No mentors found in your assigned schools.
                   </p>
                 ) : (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
                     {mentors.map((mentor) => (
                       <Card key={mentor._id} className="p-4">
                         <div className="space-y-2">
@@ -234,7 +234,7 @@ export default function SchoolAdminDashboard() {
                     No students found in your assigned schools.
                   </p>
                 ) : (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
                     {students.map((student) => (
                       <Card key={student._id} className="p-4">
                         <div className="space-y-2">
@@ -284,7 +284,7 @@ export default function SchoolAdminDashboard() {
                           <span className="text-sm text-muted-foreground">{mentorProgress.mentor.email}</span>
                         </div>
                         
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
                           {mentorProgress.schoolProgress.map((school) => (
                             <Card key={school.school._id} className="p-3 bg-muted/50">
                               <div className="space-y-2">
@@ -338,7 +338,7 @@ export default function SchoolAdminDashboard() {
                         </div>
                         
                         {/* Statistics */}
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
                           <div className="text-center">
                             <div className="text-2xl font-bold">{report.statistics.totalStudents}</div>
                             <div className="text-xs text-muted-foreground">Students</div>

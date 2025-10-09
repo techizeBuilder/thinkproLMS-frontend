@@ -42,11 +42,11 @@ export default function SchoolAdminAssessmentReportsPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 md:space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold">Assessment Reports</h1>
+          <h1 className="text-2xl md:text-3xl font-bold">Assessment Reports</h1>
           <p className="text-muted-foreground">
             View student performance and assessment analytics
           </p>
