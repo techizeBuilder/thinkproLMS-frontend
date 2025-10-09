@@ -8,7 +8,6 @@ import {
   Search,
   BookOpen,
   GraduationCap,
-  Calendar,
 } from "lucide-react";
 import { sessionService, type Session } from "@/api/sessionService";
 import { useAuth } from "@/contexts/AuthContext";
