@@ -216,55 +216,59 @@ export default function StudentsPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 md:space-y-6">
       {/* Header */}
-      <div className="space-y-4">
+      <div className="space-y-3 md:space-y-4">
         <div>
-          <h1 className="text-2xl md:text-3xl font-bold text-gray-900">Students</h1>
-          <p className="text-gray-600 text-sm md:text-base">Manage student accounts and records</p>
+          <h1 className="text-xl md:text-2xl lg:text-3xl font-bold text-gray-900">Students</h1>
+          <p className="text-sm md:text-base text-gray-600">Manage student accounts and records</p>
         </div>
         
         {/* Action Buttons */}
-        <div className="flex flex-wrap gap-2">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 md:flex md:flex-wrap md:gap-2">
           <Button
             variant="outline"
             size="sm"
             onClick={() => navigate(`${studentsPath}/promote`)}
-            className="flex items-center gap-2"
+            className="flex items-center gap-2 text-xs md:text-sm"
           >
-            <ArrowUp className="h-4 w-4" />
-            Promote Grade
+            <ArrowUp className="h-3 w-3 md:h-4 md:w-4" />
+            <span className="hidden sm:inline">Promote Grade</span>
+            <span className="sm:hidden">Promote</span>
           </Button>
           <Button
             variant="outline"
             size="sm"
             onClick={() => navigate(`${studentsPath}/bulk-upload`)}
-            className="flex items-center gap-2"
+            className="flex items-center gap-2 text-xs md:text-sm"
           >
-            <Upload className="h-4 w-4" />
-            Bulk Upload
+            <Upload className="h-3 w-3 md:h-4 md:w-4" />
+            <span className="hidden sm:inline">Bulk Upload</span>
+            <span className="sm:hidden">Upload</span>
           </Button>
           <Button
             variant="outline"
             size="sm"
             onClick={() => handleDownload("excel")}
-            className="flex items-center gap-2"
+            className="flex items-center gap-2 text-xs md:text-sm"
           >
-            <Download className="h-4 w-4" />
-            Download List
+            <Download className="h-3 w-3 md:h-4 md:w-4" />
+            <span className="hidden sm:inline">Download List</span>
+            <span className="sm:hidden">Download</span>
           </Button>
           <Button
             size="sm"
             onClick={() => navigate(`${studentsPath}/create`)}
-            className="flex items-center gap-2"
+            className="flex items-center gap-2 text-xs md:text-sm"
           >
-            <Plus className="h-4 w-4" />
-            Add Student
+            <Plus className="h-3 w-3 md:h-4 md:w-4" />
+            <span className="hidden sm:inline">Add Student</span>
+            <span className="sm:hidden">Add</span>
           </Button>
         </div>
 
-        {/* Summary Stats - moved below buttons */}
-        <div className="flex flex-wrap gap-4 text-sm">
+        {/* Summary Stats */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 md:flex md:flex-wrap md:gap-4 text-xs md:text-sm">
           <div className="flex items-center gap-2">
             <span className="text-gray-600">Total:</span>
             <span className="font-semibold text-blue-600">{students.length}</span>
@@ -286,21 +290,21 @@ export default function StudentsPage() {
 
       {/* Filters */}
       <Card>
-        <CardContent className="p-4">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <CardContent className="p-3 md:p-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
               <Input
                 placeholder="Search students by name, email, student ID..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
+                className="pl-10 text-sm md:text-base"
               />
             </div>
             <select
               value={selectedSchool}
               onChange={(e) => setSelectedSchool(e.target.value)}
-              className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm md:text-base"
             >
               <option value="">All Schools</option>
               {schools.map((school) => (
@@ -312,7 +316,7 @@ export default function StudentsPage() {
             <select
               value={selectedGrade}
               onChange={(e) => setSelectedGrade(e.target.value)}
-              className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm md:text-base"
             >
               <option value="">All Grades</option>
               {grades.map((grade) => (
@@ -325,29 +329,139 @@ export default function StudentsPage() {
         </CardContent>
       </Card>
 
-      {/* Students Table */}
-      <Card>
-        <CardContent className="p-0">
-          <div className="overflow-x-auto">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="sticky left-0 bg-background z-10 min-w-[200px]">Student</TableHead>
-                  <TableHead className="min-w-[120px]">Student ID</TableHead>
-                  <TableHead className="min-w-[180px]">Email</TableHead>
-                  <TableHead className="min-w-[140px]">Grade - Section</TableHead>
-                  <TableHead className="min-w-[200px]">School</TableHead>
-                  <TableHead className="min-w-[150px]">Parent Info</TableHead>
-                  <TableHead className="min-w-[120px]">Password</TableHead>
-                  <TableHead className="text-right min-w-[120px]">Actions</TableHead>
+      {/* Desktop Table View */}
+      <div className="hidden xl:block">
+        <Card>
+          <CardContent className="p-0">
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="sticky left-0 bg-background z-10 min-w-[200px]">Student</TableHead>
+                    <TableHead className="min-w-[120px]">Student ID</TableHead>
+                    <TableHead className="min-w-[180px]">Email</TableHead>
+                    <TableHead className="min-w-[140px]">Grade - Section</TableHead>
+                    <TableHead className="min-w-[200px]">School</TableHead>
+                    <TableHead className="min-w-[150px]">Parent Info</TableHead>
+                    <TableHead className="min-w-[120px]">Password</TableHead>
+                    <TableHead className="text-right min-w-[120px]">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+              {filteredStudents.map((student) => (
+                <TableRow key={student._id}>
+                  <TableCell className="font-medium sticky left-0 bg-background z-10 min-w-[200px]">
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 flex-shrink-0">
+                        <ProfilePictureDisplay
+                          profilePicture={student.user.profilePicture}
+                          name={student.user.name}
+                          size="sm"
+                        />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <div className="font-medium truncate">{student.user.name}</div>
+                        <div className="flex gap-1 mt-1 flex-wrap">
+                          <Badge
+                            variant={
+                              student.user.isVerified ? "default" : "secondary"
+                            }
+                            className="text-xs truncate max-w-[80px]"
+                          >
+                            {student.user.isVerified ? "Verified" : "Pending"}
+                          </Badge>
+                        </div>
+                      </div>
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <span className="font-mono text-sm">{student.studentId}</span>
+                  </TableCell>
+                  <TableCell>
+                    <span className="text-sm">{student.user.email}</span>
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex items-center gap-1 text-sm">
+                      <GraduationCap className="h-4 w-4" />
+                      <span className="font-medium">
+                        Grade {student.grade} - {student.section || 'No Section'}
+                      </span>
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <div className="text-sm">
+                      <div className="font-medium">{student.school.name}</div>
+                      <div className="text-gray-500">
+                        {student.school.city}, {student.school.state}
+                      </div>
+                      <div className="text-xs text-gray-400">
+                        {student.school.boards && student.school.boards.length > 0 
+                          ? student.school.boards.join(", ") 
+                          : "No boards"}
+                      </div>
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    {(student.parentEmail || student.parentPhoneNumber) ? (
+                      <div className="text-sm">
+                        <div>{student.parentEmail}</div>
+                        {student.parentPhoneNumber && (
+                          <div className="text-gray-500">{student.parentPhoneNumber}</div>
+                        )}
+                      </div>
+                    ) : (
+                      <span className="text-gray-400 text-sm">No parent info</span>
+                    )}
+                  </TableCell>
+                  <TableCell>
+                    {showPassword[student._id] ? (
+                      <div className="text-sm text-green-600 font-mono bg-green-50 p-2 rounded border">
+                        {showPassword[student._id]}
+                      </div>
+                    ) : (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleShowPassword(student._id)}
+                        disabled={loadingPassword[student._id]}
+                        className="text-blue-600 hover:text-blue-700"
+                        title="Show password"
+                      >
+                        <Eye className="h-4 w-4" />
+                      </Button>
+                    )}
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <MobileActions
+                      editUrl={`${studentsPath}/${student._id}/edit`}
+                      onResetPassword={() =>
+                        setResetPasswordUser({
+                          id: student.user._id,
+                          name: student.user.name,
+                          email: student.user.email,
+                        })
+                      }
+                      onDelete={() => handleDelete(student._id)}
+                    />
+                  </TableCell>
                 </TableRow>
-              </TableHeader>
-              <TableBody>
-            {filteredStudents.map((student) => (
-              <TableRow key={student._id}>
-                <TableCell className="font-medium sticky left-0 bg-background z-10 min-w-[200px]">
+              ))}
+                </TableBody>
+              </Table>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Mobile/Tablet Card View */}
+      <div className="xl:hidden">
+        <div className="grid gap-4">
+          {filteredStudents.map((student) => (
+            <Card key={student._id}>
+              <CardContent className="p-4">
+                <div className="flex items-start justify-between mb-3">
                   <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 flex-shrink-0">
+                    <div className="w-10 h-10 flex-shrink-0">
                       <ProfilePictureDisplay
                         profilePicture={student.user.profilePicture}
                         name={student.user.name}
@@ -355,78 +469,19 @@ export default function StudentsPage() {
                       />
                     </div>
                     <div className="min-w-0 flex-1">
-                      <div className="font-medium truncate">{student.user.name}</div>
+                      <div className="font-medium text-sm md:text-base truncate">{student.user.name}</div>
                       <div className="flex gap-1 mt-1 flex-wrap">
                         <Badge
                           variant={
                             student.user.isVerified ? "default" : "secondary"
                           }
-                          className="text-xs truncate max-w-[80px]"
+                          className="text-xs"
                         >
                           {student.user.isVerified ? "Verified" : "Pending"}
                         </Badge>
                       </div>
                     </div>
                   </div>
-                </TableCell>
-                <TableCell>
-                  <span className="font-mono text-sm">{student.studentId}</span>
-                </TableCell>
-                <TableCell>
-                  <span className="text-sm">{student.user.email}</span>
-                </TableCell>
-                <TableCell>
-                  <div className="flex items-center gap-1 text-sm">
-                    <GraduationCap className="h-4 w-4" />
-                    <span className="font-medium">
-                      Grade {student.grade} - {student.section || 'No Section'}
-                    </span>
-                  </div>
-                </TableCell>
-                <TableCell>
-                  <div className="text-sm">
-                    <div className="font-medium">{student.school.name}</div>
-                    <div className="text-gray-500">
-                      {student.school.city}, {student.school.state}
-                    </div>
-                    <div className="text-xs text-gray-400">
-                      {student.school.boards && student.school.boards.length > 0 
-                        ? student.school.boards.join(", ") 
-                        : "No boards"}
-                    </div>
-                  </div>
-                </TableCell>
-                <TableCell>
-                  {(student.parentEmail || student.parentPhoneNumber) ? (
-                    <div className="text-sm">
-                      <div>{student.parentEmail}</div>
-                      {student.parentPhoneNumber && (
-                        <div className="text-gray-500">{student.parentPhoneNumber}</div>
-                      )}
-                    </div>
-                  ) : (
-                    <span className="text-gray-400 text-sm">No parent info</span>
-                  )}
-                </TableCell>
-                <TableCell>
-                  {showPassword[student._id] ? (
-                    <div className="text-sm text-green-600 font-mono bg-green-50 p-2 rounded border">
-                      {showPassword[student._id]}
-                    </div>
-                  ) : (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleShowPassword(student._id)}
-                      disabled={loadingPassword[student._id]}
-                      className="text-blue-600 hover:text-blue-700"
-                      title="Show password"
-                    >
-                      <Eye className="h-4 w-4" />
-                    </Button>
-                  )}
-                </TableCell>
-                <TableCell className="text-right">
                   <MobileActions
                     editUrl={`${studentsPath}/${student._id}/edit`}
                     onResetPassword={() =>
@@ -438,19 +493,73 @@ export default function StudentsPage() {
                     }
                     onDelete={() => handleDelete(student._id)}
                   />
-                </TableCell>
-              </TableRow>
-            ))}
-              </TableBody>
-            </Table>
-          </div>
-        </CardContent>
-      </Card>
+                </div>
+                
+                <div className="space-y-2 text-sm">
+                  <div className="flex items-center justify-between">
+                    <span className="text-gray-600">Student ID:</span>
+                    <span className="font-mono text-xs md:text-sm">{student.studentId}</span>
+                  </div>
+                  <div className="flex items-center">
+                    <span className="text-gray-600 w-20">Email:</span>
+                    <span className="truncate">{student.user.email}</span>
+                  </div>
+                  <div className="flex items-center">
+                    <GraduationCap className="h-4 w-4 text-gray-500 mr-2 flex-shrink-0" />
+                    <span className="font-medium">
+                      Grade {student.grade} - {student.section || 'No Section'}
+                    </span>
+                  </div>
+                  <div className="flex items-start">
+                    <span className="text-gray-600 w-20 flex-shrink-0">School:</span>
+                    <div className="min-w-0 flex-1">
+                      <div className="font-medium truncate">{student.school.name}</div>
+                      <div className="text-gray-500 text-xs">
+                        {student.school.city}, {student.school.state}
+                      </div>
+                    </div>
+                  </div>
+                  {(student.parentEmail || student.parentPhoneNumber) && (
+                    <div className="flex items-start">
+                      <span className="text-gray-600 w-20 flex-shrink-0">Parent:</span>
+                      <div className="min-w-0 flex-1">
+                        <div className="truncate">{student.parentEmail}</div>
+                        {student.parentPhoneNumber && (
+                          <div className="text-gray-500 text-xs">{student.parentPhoneNumber}</div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                  <div className="flex items-center justify-between">
+                    <span className="text-gray-600">Password:</span>
+                    {showPassword[student._id] ? (
+                      <div className="text-xs text-green-600 font-mono bg-green-50 p-1 rounded border">
+                        {showPassword[student._id]}
+                      </div>
+                    ) : (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleShowPassword(student._id)}
+                        disabled={loadingPassword[student._id]}
+                        className="text-blue-600 hover:text-blue-700 h-6 px-2"
+                        title="Show password"
+                      >
+                        <Eye className="h-3 w-3" />
+                      </Button>
+                    )}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </div>
 
       {filteredStudents.length === 0 && (
         <Card>
           <CardContent className="text-center py-8">
-            <p className="text-gray-500">No students found</p>
+            <p className="text-gray-500 text-sm md:text-base">No students found</p>
           </CardContent>
         </Card>
       )}

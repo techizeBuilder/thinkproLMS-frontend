@@ -115,26 +115,26 @@ export default function MentorsPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 md:space-y-6">
       {/* Header */}
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">School Mentors</h1>
-          <p className="text-gray-600">Manage mentors assigned to schools</p>
+          <h1 className="text-xl md:text-2xl lg:text-3xl font-bold text-gray-900">School Mentors</h1>
+          <p className="text-sm md:text-base text-gray-600">Manage mentors assigned to schools</p>
         </div>
         <Button 
           onClick={() => navigate("/leadmentor/mentors/create")} 
-          className="flex items-center gap-2"
+          className="flex items-center gap-2 w-full sm:w-auto"
         >
           <Plus className="h-4 w-4" />
-          Add Mentor
+          <span className="text-sm md:text-base">Add Mentor</span>
         </Button>
       </div>
 
       {/* Filters */}
       <Card>
-        <CardContent className="p-4">
-          <div className="flex gap-4">
+        <CardContent className="p-3 md:p-4">
+          <div className="flex flex-col sm:flex-row gap-3 md:gap-4">
             <div className="flex-1">
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
@@ -142,14 +142,14 @@ export default function MentorsPage() {
                   placeholder="Search mentors by name, email, or phone..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10"
+                  className="pl-10 text-sm md:text-base"
                 />
               </div>
             </div>
             <select
               value={selectedSchool}
               onChange={(e) => setSelectedSchool(e.target.value)}
-              className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm md:text-base min-w-0 sm:min-w-[200px]"
             >
               <option value="">All Schools</option>
               {schools.map((school) => (
@@ -162,26 +162,125 @@ export default function MentorsPage() {
         </CardContent>
       </Card>
 
-      {/* Mentors Table */}
-      <Card>
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Name</TableHead>
-              <TableHead>Email</TableHead>
-              <TableHead>Phone</TableHead>
-              <TableHead>Address</TableHead>
-              <TableHead>School</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {filteredMentors.map((mentor) => (
-              <TableRow key={mentor._id}>
-                <TableCell className="font-medium">
+      {/* Desktop Table View */}
+      <div className="hidden lg:block">
+        <Card>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Name</TableHead>
+                <TableHead>Email</TableHead>
+                <TableHead>Phone</TableHead>
+                <TableHead>Address</TableHead>
+                <TableHead>School</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead className="text-right">Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {filteredMentors.map((mentor) => (
+                <TableRow key={mentor._id}>
+                  <TableCell className="font-medium">
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8">
+                        <ProfilePictureDisplay
+                          profilePicture={mentor.user.profilePicture}
+                          name={mentor.user.name}
+                          size="sm"
+                        />
+                      </div>
+                      <div>
+                        <div className="font-medium">
+                          {mentor.salutation} {mentor.user.name}
+                        </div>
+                      </div>
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex items-center text-sm">
+                      <Mail className="mr-2 h-4 w-4 text-gray-500" />
+                      {mentor.user.email}
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex items-center text-sm">
+                      <Phone className="mr-2 h-4 w-4 text-gray-500" />
+                      {mentor.phoneNumber}
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex items-start text-sm">
+                      <MapPin className="mr-2 h-4 w-4 mt-0.5 text-gray-500" />
+                      <span className="line-clamp-2">{mentor.address}</span>
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <div className="text-sm">
+                      <Badge variant="outline" className="text-xs">
+                        {mentor.assignedSchool.name}
+                      </Badge>
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <Badge
+                      variant={
+                        mentor.user.isVerified ? "default" : "secondary"
+                      }
+                    >
+                      {mentor.user.isVerified ? "Verified" : "Pending"}
+                    </Badge>
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <div className="flex gap-2 justify-end">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() =>
+                          setResetPasswordUser({
+                            id: mentor.user._id,
+                            name: mentor.user.name,
+                            email: mentor.user.email,
+                          })
+                        }
+                        title="Reset Password"
+                      >
+                        <KeyRound className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() =>
+                          navigate(`/leadmentor/mentors/${mentor._id}/edit`)
+                        }
+                      >
+                        <Edit className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleDelete(mentor._id)}
+                        className="text-red-600 hover:text-red-700"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </Card>
+      </div>
+
+      {/* Mobile/Tablet Card View */}
+      <div className="lg:hidden">
+        <div className="grid gap-4">
+          {filteredMentors.map((mentor) => (
+            <Card key={mentor._id}>
+              <CardContent className="p-4">
+                <div className="flex items-start justify-between mb-3">
                   <div className="flex items-center gap-3">
-                    <div className="w-8 h-8">
+                    <div className="w-10 h-10">
                       <ProfilePictureDisplay
                         profilePicture={mentor.user.profilePicture}
                         name={mentor.user.name}
@@ -189,48 +288,20 @@ export default function MentorsPage() {
                       />
                     </div>
                     <div>
-                      <div className="font-medium">
+                      <div className="font-medium text-sm md:text-base">
                         {mentor.salutation} {mentor.user.name}
                       </div>
+                      <Badge
+                        variant={
+                          mentor.user.isVerified ? "default" : "secondary"
+                        }
+                        className="text-xs mt-1"
+                      >
+                        {mentor.user.isVerified ? "Verified" : "Pending"}
+                      </Badge>
                     </div>
                   </div>
-                </TableCell>
-                <TableCell>
-                  <div className="flex items-center text-sm">
-                    <Mail className="mr-2 h-4 w-4 text-gray-500" />
-                    {mentor.user.email}
-                  </div>
-                </TableCell>
-                <TableCell>
-                  <div className="flex items-center text-sm">
-                    <Phone className="mr-2 h-4 w-4 text-gray-500" />
-                    {mentor.phoneNumber}
-                  </div>
-                </TableCell>
-                <TableCell>
-                  <div className="flex items-start text-sm">
-                    <MapPin className="mr-2 h-4 w-4 mt-0.5 text-gray-500" />
-                    <span className="line-clamp-2">{mentor.address}</span>
-                  </div>
-                </TableCell>
-                <TableCell>
-                  <div className="text-sm">
-                    <Badge variant="outline" className="text-xs">
-                      {mentor.assignedSchool.name}
-                    </Badge>
-                  </div>
-                </TableCell>
-                <TableCell>
-                  <Badge
-                    variant={
-                      mentor.user.isVerified ? "default" : "secondary"
-                    }
-                  >
-                    {mentor.user.isVerified ? "Verified" : "Pending"}
-                  </Badge>
-                </TableCell>
-                <TableCell className="text-right">
-                  <div className="flex gap-2 justify-end">
+                  <div className="flex gap-1">
                     <Button
                       variant="ghost"
                       size="sm"
@@ -242,6 +313,7 @@ export default function MentorsPage() {
                         })
                       }
                       title="Reset Password"
+                      className="h-8 w-8 p-0"
                     >
                       <KeyRound className="h-4 w-4" />
                     </Button>
@@ -251,6 +323,7 @@ export default function MentorsPage() {
                       onClick={() =>
                         navigate(`/leadmentor/mentors/${mentor._id}/edit`)
                       }
+                      className="h-8 w-8 p-0"
                     >
                       <Edit className="h-4 w-4" />
                     </Button>
@@ -258,22 +331,42 @@ export default function MentorsPage() {
                       variant="ghost"
                       size="sm"
                       onClick={() => handleDelete(mentor._id)}
-                      className="text-red-600 hover:text-red-700"
+                      className="h-8 w-8 p-0 text-red-600 hover:text-red-700"
                     >
                       <Trash2 className="h-4 w-4" />
                     </Button>
                   </div>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </Card>
+                </div>
+                
+                <div className="space-y-2 text-sm">
+                  <div className="flex items-center">
+                    <Mail className="mr-2 h-4 w-4 text-gray-500 flex-shrink-0" />
+                    <span className="truncate">{mentor.user.email}</span>
+                  </div>
+                  <div className="flex items-center">
+                    <Phone className="mr-2 h-4 w-4 text-gray-500 flex-shrink-0" />
+                    <span>{mentor.phoneNumber}</span>
+                  </div>
+                  <div className="flex items-start">
+                    <MapPin className="mr-2 h-4 w-4 mt-0.5 text-gray-500 flex-shrink-0" />
+                    <span className="line-clamp-2">{mentor.address}</span>
+                  </div>
+                  <div className="pt-2">
+                    <Badge variant="outline" className="text-xs">
+                      {mentor.assignedSchool.name}
+                    </Badge>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </div>
 
       {filteredMentors.length === 0 && (
         <Card>
           <CardContent className="text-center py-8">
-            <p className="text-gray-500">No mentors found</p>
+            <p className="text-gray-500 text-sm md:text-base">No mentors found</p>
           </CardContent>
         </Card>
       )}

@@ -241,37 +241,40 @@ const QuestionBankPage: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
+    <div className="space-y-4 md:space-y-6">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-bold">Question Bank</h1>
-          <p className="text-gray-600">
+          <h1 className="text-xl md:text-2xl lg:text-3xl font-bold">Question Bank</h1>
+          <p className="text-sm md:text-base text-gray-600">
             Manage assessment questions for all schools
           </p>
         </div>
-        <div className="flex gap-2">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 md:flex md:gap-2">
           <Button
             variant="outline"
             onClick={() => setShowRecommendations(true)}
-            className="flex items-center gap-2"
+            className="flex items-center gap-2 text-xs md:text-sm"
           >
-            <Eye className="h-4 w-4" />
-            View Recommendations
+            <Eye className="h-3 w-3 md:h-4 md:w-4" />
+            <span className="hidden sm:inline">View Recommendations</span>
+            <span className="sm:hidden">Recommendations</span>
           </Button>
           <Button
             variant="outline"
             onClick={() => setShowBulkUpload(true)}
-            className="flex items-center gap-2"
+            className="flex items-center gap-2 text-xs md:text-sm"
           >
-            <Upload className="h-4 w-4" />
-            Bulk Upload
+            <Upload className="h-3 w-3 md:h-4 md:w-4" />
+            <span className="hidden sm:inline">Bulk Upload</span>
+            <span className="sm:hidden">Upload</span>
           </Button>
           <Button
             onClick={() => setShowCreateForm(true)}
-            className="flex items-center gap-2"
+            className="flex items-center gap-2 text-xs md:text-sm"
           >
-            <Plus className="h-4 w-4" />
-            Add Question
+            <Plus className="h-3 w-3 md:h-4 md:w-4" />
+            <span className="hidden sm:inline">Add Question</span>
+            <span className="sm:hidden">Add</span>
           </Button>
         </div>
       </div>
@@ -279,34 +282,34 @@ const QuestionBankPage: React.FC = () => {
       {/* Filters */}
       <Card>
         <CardHeader>
-          <CardTitle>Filters</CardTitle>
+          <CardTitle className="text-base md:text-lg">Filters</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3 md:gap-4">
             <div>
-              <label className="text-sm font-medium">Search</label>
+              <label className="text-xs md:text-sm font-medium">Search</label>
               <Input
                 placeholder="Search questions..."
                 value={filters.search || ""}
                 onChange={(e) => handleFilterChange("search", e.target.value)}
-                className="mt-1"
+                className="mt-1 text-sm md:text-base"
               />
             </div>
             <div>
-              <label className="text-sm font-medium">Session</label>
+              <label className="text-xs md:text-sm font-medium">Session</label>
               <Popover open={sessionSelectOpen} onOpenChange={setSessionSelectOpen}>
                 <PopoverTrigger asChild>
                   <Button
                     variant="outline"
                     role="combobox"
                     aria-expanded={sessionSelectOpen}
-                    className="w-full justify-between mt-1"
+                    className="w-full justify-between mt-1 text-xs md:text-sm"
                   >
                     {filters.session
                       ? sessions.find((session) => session._id === filters.session)?.displayName ||
                         `${sessions.find((session) => session._id === filters.session)?.grade}.${sessions.find((session) => session._id === filters.session)?.sessionNumber?.toString().padStart(2, '0')} ${sessions.find((session) => session._id === filters.session)?.name}`
                       : "All Sessions"}
-                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                    <ChevronsUpDown className="ml-2 h-3 w-3 md:h-4 md:w-4 shrink-0 opacity-50" />
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-full p-0">
@@ -358,14 +361,14 @@ const QuestionBankPage: React.FC = () => {
               </Popover>
             </div>
             <div>
-              <label className="text-sm font-medium">Difficulty</label>
+              <label className="text-xs md:text-sm font-medium">Difficulty</label>
               <Select
                 value={filters.difficulty || "all"}
                 onValueChange={(value) =>
                   handleFilterChange("difficulty", value)
                 }
               >
-                <SelectTrigger className="mt-1">
+                <SelectTrigger className="mt-1 text-xs md:text-sm">
                   <SelectValue placeholder="All Difficulties" />
                 </SelectTrigger>
                 <SelectContent>
@@ -379,14 +382,14 @@ const QuestionBankPage: React.FC = () => {
               </Select>
             </div>
             <div>
-              <label className="text-sm font-medium">Answer Type</label>
+              <label className="text-xs md:text-sm font-medium">Answer Type</label>
               <Select
                 value={filters.answerType || "all"}
                 onValueChange={(value) =>
                   handleFilterChange("answerType", value)
                 }
               >
-                <SelectTrigger className="mt-1">
+                <SelectTrigger className="mt-1 text-xs md:text-sm">
                   <SelectValue placeholder="All Types" />
                 </SelectTrigger>
                 <SelectContent>
@@ -403,28 +406,29 @@ const QuestionBankPage: React.FC = () => {
         </CardContent>
       </Card>
 
-      {/* Questions Table */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Questions ({pagination.total})</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {loading ? (
-            <div className="text-center py-8">Loading questions...</div>
-          ) : error ? (
-            <div className="text-center py-8">
-              <div className="text-red-600 mb-4">Error: {error}</div>
-              <Button onClick={fetchQuestions} variant="outline">
-                Retry
-              </Button>
-            </div>
-          ) : questions.length === 0 ? (
-            <div className="text-center py-8 text-gray-500">
-              No questions found
-            </div>
-          ) : (
-            <div className="space-y-4">
-              <Table>
+      {/* Desktop Table View */}
+      <div className="hidden xl:block">
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base md:text-lg">Questions ({pagination.total})</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {loading ? (
+              <div className="text-center py-8 text-sm md:text-base">Loading questions...</div>
+            ) : error ? (
+              <div className="text-center py-8">
+                <div className="text-red-600 mb-4 text-sm md:text-base">Error: {error}</div>
+                <Button onClick={fetchQuestions} variant="outline" className="text-xs md:text-sm">
+                  Retry
+                </Button>
+              </div>
+            ) : questions.length === 0 ? (
+              <div className="text-center py-8 text-gray-500 text-sm md:text-base">
+                No questions found
+              </div>
+            ) : (
+              <div className="space-y-4">
+                <Table>
                 <TableHeader>
                   <TableRow>
                     <TableHead>Order</TableHead>
@@ -582,6 +586,184 @@ const QuestionBankPage: React.FC = () => {
           )}
         </CardContent>
       </Card>
+      </div>
+
+      {/* Mobile/Tablet Card View */}
+      <div className="xl:hidden">
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base md:text-lg">Questions ({pagination.total})</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {loading ? (
+              <div className="text-center py-8 text-sm md:text-base">Loading questions...</div>
+            ) : error ? (
+              <div className="text-center py-8">
+                <div className="text-red-600 mb-4 text-sm md:text-base">Error: {error}</div>
+                <Button onClick={fetchQuestions} variant="outline" className="text-xs md:text-sm">
+                  Retry
+                </Button>
+              </div>
+            ) : questions.length === 0 ? (
+              <div className="text-center py-8 text-gray-500 text-sm md:text-base">
+                No questions found
+              </div>
+            ) : (
+              <div className="grid gap-4">
+                {questions.map((question, index) => (
+                  <Card key={question._id}>
+                    <CardContent className="p-4">
+                      <div className="flex items-start justify-between mb-3">
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs font-medium bg-gray-100 px-2 py-1 rounded">
+                            #{question.order}
+                          </span>
+                          <Badge
+                            className={`${getDifficultyColor(question.difficulty)} text-xs`}
+                          >
+                            {question.difficulty}
+                          </Badge>
+                          {question.approvedBy ? (
+                            <Badge className="bg-green-100 text-green-800 text-xs">
+                              <CheckCircle className="h-3 w-3 mr-1" />
+                              Approved
+                            </Badge>
+                          ) : (
+                            <Badge className="bg-yellow-100 text-yellow-800 text-xs">
+                              <XCircle className="h-3 w-3 mr-1" />
+                              Pending
+                            </Badge>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => {
+                              setSelectedQuestion(question);
+                              setShowEditForm(true);
+                            }}
+                            className="h-6 w-6 p-0"
+                          >
+                            <Edit className="h-3 w-3" />
+                          </Button>
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="h-6 w-6 p-0 text-red-600 hover:text-red-700"
+                              >
+                                <Trash2 className="h-3 w-3" />
+                              </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>
+                                  Delete Question
+                                </AlertDialogTitle>
+                                <AlertDialogDescription>
+                                  Are you sure you want to delete this question?
+                                  This action cannot be undone.
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                <AlertDialogAction
+                                  onClick={() =>
+                                    handleDeleteQuestion(question._id)
+                                  }
+                                  className="bg-red-600 hover:bg-red-700"
+                                >
+                                  Delete
+                                </AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
+                        </div>
+                      </div>
+                      
+                      <div className="space-y-2 text-sm">
+                        <div>
+                          <div className="font-medium text-sm md:text-base line-clamp-3">
+                            {question.questionText}
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <span className="text-gray-600 text-xs">Session:</span>
+                          <div className="text-right">
+                            <div className="font-medium text-xs md:text-sm">
+                              {question.session?.displayName || `${question.session?.grade}.${question.session?.sessionNumber?.toString().padStart(2, '0')} ${question.session?.name}`}
+                            </div>
+                            <div className="text-gray-500 text-xs">
+                              {question.session?.module?.name}
+                            </div>
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <span className="text-gray-600 text-xs">Type:</span>
+                          <span className="text-xs md:text-sm">{getAnswerTypeLabel(question.answerType)}</span>
+                        </div>
+                        <div className="flex items-center gap-1 pt-2">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() =>
+                              handleReorderQuestion(question._id, "up")
+                            }
+                            disabled={index === 0}
+                            className="h-6 w-6 p-0"
+                          >
+                            <ArrowUp className="h-3 w-3" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() =>
+                              handleReorderQuestion(question._id, "down")
+                            }
+                            disabled={index === questions.length - 1}
+                            className="h-6 w-6 p-0"
+                          >
+                            <ArrowDown className="h-3 w-3" />
+                          </Button>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+                
+                {/* Pagination */}
+                {pagination.pages > 1 && (
+                  <div className="flex justify-center items-center gap-2 mt-4">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handlePageChange(pagination.current - 1)}
+                      disabled={pagination.current === 1}
+                      className="text-xs md:text-sm"
+                    >
+                      Previous
+                    </Button>
+                    <span className="text-xs md:text-sm">
+                      Page {pagination.current} of {pagination.pages}
+                    </span>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handlePageChange(pagination.current + 1)}
+                      disabled={pagination.current === pagination.pages}
+                      className="text-xs md:text-sm"
+                    >
+                      Next
+                    </Button>
+                  </div>
+                )}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
 
       {/* Modals */}
       <CreateQuestionForm

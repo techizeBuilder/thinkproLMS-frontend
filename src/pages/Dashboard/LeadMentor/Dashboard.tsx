@@ -93,23 +93,23 @@ export default function LeadMentorDashboard() {
   ];
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 md:space-y-6">
       <div>
-        <h1 className="text-3xl font-bold">Lead Mentor Dashboard</h1>
-        <p className="text-gray-600">Manage school administrators and lead mentors</p>
+        <h1 className="text-xl md:text-2xl lg:text-3xl font-bold">Lead Mentor Dashboard</h1>
+        <p className="text-sm md:text-base text-gray-600">Manage school administrators and lead mentors</p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 md:gap-6">
         {statCards.map((card) => (
           <Card key={card.title}>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">{card.title}</CardTitle>
-              <div className={`p-2 rounded-full ${card.bgColor}`}>
-                <card.icon className={`h-4 w-4 ${card.color}`} />
+              <CardTitle className="text-xs md:text-sm font-medium">{card.title}</CardTitle>
+              <div className={`p-1.5 md:p-2 rounded-full ${card.bgColor}`}>
+                <card.icon className={`h-3 w-3 md:h-4 md:w-4 ${card.color}`} />
               </div>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">
+              <div className="text-lg md:text-xl lg:text-2xl font-bold">
                 {loading ? "..." : card.value}
               </div>
             </CardContent>
@@ -117,26 +117,26 @@ export default function LeadMentorDashboard() {
         ))}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
         <Card>
           <CardHeader>
-            <CardTitle>Quick Actions</CardTitle>
+            <CardTitle className="text-base md:text-lg">Quick Actions</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
             <div className="grid grid-cols-1 gap-2">
               <a 
                 href="/leadmentor/school-admins/create" 
-                className="flex items-center p-3 bg-green-50 hover:bg-green-100 rounded-lg transition-colors"
+                className="flex items-center p-2 md:p-3 bg-green-50 hover:bg-green-100 rounded-lg transition-colors"
               >
-                <UserCheck className="h-5 w-5 text-green-600 mr-3" />
-                <span className="font-medium">Invite School Admin</span>
+                <UserCheck className="h-4 w-4 md:h-5 md:w-5 text-green-600 mr-2 md:mr-3" />
+                <span className="text-sm md:text-base font-medium">Invite School Admin</span>
               </a>
               <a 
                 href="/leadmentor/lead-mentors/create" 
-                className="flex items-center p-3 bg-yellow-50 hover:bg-yellow-100 rounded-lg transition-colors"
+                className="flex items-center p-2 md:p-3 bg-yellow-50 hover:bg-yellow-100 rounded-lg transition-colors"
               >
-                <Crown className="h-5 w-5 text-yellow-600 mr-3" />
-                <span className="font-medium">Invite Lead Mentor</span>
+                <Crown className="h-4 w-4 md:h-5 md:w-5 text-yellow-600 mr-2 md:mr-3" />
+                <span className="text-sm md:text-base font-medium">Invite Lead Mentor</span>
               </a>
             </div>
           </CardContent>
@@ -144,28 +144,28 @@ export default function LeadMentorDashboard() {
 
         <Card>
           <CardHeader>
-            <CardTitle>Management Overview</CardTitle>
+            <CardTitle className="text-base md:text-lg">Management Overview</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-4">
+            <div className="space-y-3 md:space-y-4">
               <div className="flex justify-between items-center">
-                <span className="text-sm text-gray-600">Lead Mentors</span>
-                <span className="font-medium">{stats.leadMentors}</span>
+                <span className="text-xs md:text-sm text-gray-600">Lead Mentors</span>
+                <span className="text-sm md:text-base font-medium">{stats.leadMentors}</span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-sm text-gray-600">School Mentors</span>
-                <span className="font-medium">{stats.schoolMentors}</span>
+                <span className="text-xs md:text-sm text-gray-600">School Mentors</span>
+                <span className="text-sm md:text-base font-medium">{stats.schoolMentors}</span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-sm text-gray-600">School Administrators</span>
-                <span className="font-medium">{stats.schoolAdmins}</span>
+                <span className="text-xs md:text-sm text-gray-600">School Administrators</span>
+                <span className="text-sm md:text-base font-medium">{stats.schoolAdmins}</span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-sm text-gray-600">Students</span>
-                <span className="font-medium">{stats.students}</span>
+                <span className="text-xs md:text-sm text-gray-600">Students</span>
+                <span className="text-sm md:text-base font-medium">{stats.students}</span>
               </div>
-              <div className="border-t pt-4">
-                <div className="flex justify-between items-center font-semibold">
+              <div className="border-t pt-3 md:pt-4">
+                <div className="flex justify-between items-center font-semibold text-sm md:text-base">
                   <span>Total Managed Users</span>
                   <span>{stats.totalUsers}</span>
                 </div>
