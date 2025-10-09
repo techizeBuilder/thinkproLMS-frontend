@@ -99,13 +99,14 @@ const ConversationList: React.FC<ConversationListProps> = ({
                 key={conversation._id}
                 onClick={() => onSelectConversation(conversation._id)}
                 className={cn(
-                  "p-2 rounded-lg cursor-pointer transition-colors border",
+                  "p-3 rounded-lg cursor-pointer transition-colors border touch-manipulation",
+                  "min-h-[60px] flex items-center", // Better touch targets
                   selectedConversationId === conversation._id
                     ? "bg-primary/10 border-primary"
-                    : "hover:bg-accent border-transparent"
+                    : "hover:bg-accent border-transparent active:bg-accent/80"
                 )}
               >
-                <div className="flex items-start justify-between gap-2">
+                <div className="flex items-center justify-between gap-2 w-full">
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-1">
                       <h4 className="font-medium text-sm truncate">

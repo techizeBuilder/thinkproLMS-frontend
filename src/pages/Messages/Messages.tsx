@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { MessageSquare, Wifi, WifiOff } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { MessageSquare, Wifi, WifiOff, Menu, ArrowLeft } from "lucide-react";
 import ConversationList from "@/components/Messages/ConversationList";
 import MessageList from "@/components/Messages/MessageList";
 import MessageInput from "@/components/Messages/MessageInput";
@@ -25,6 +26,7 @@ const Messages: React.FC = () => {
   const [currentUserId, setCurrentUserId] = useState<string>("");
   const [isTyping, setIsTyping] = useState(false);
   const [typingTimeout, setTypingTimeout] = useState<NodeJS.Timeout | null>(null);
+  const [showConversationsList, setShowConversationsList] = useState(true);
 
   const { 
     socket, 
@@ -48,6 +50,26 @@ const Messages: React.FC = () => {
 
     loadConversations();
   }, []);
+
+  // Handle window resize to adjust mobile layout
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth >= 768) {
+        // Desktop: always show conversations list
+        setShowConversationsList(true);
+      } else {
+        // Mobile: show conversations list only if no conversation is selected
+        if (!selectedConversationId) {
+          setShowConversationsList(true);
+        }
+      }
+    };
+
+    window.addEventListener('resize', handleResize);
+    handleResize(); // Call once on mount
+
+    return () => window.removeEventListener('resize', handleResize);
+  }, [selectedConversationId]);
 
   useEffect(() => {
     if (selectedConversationId) {
@@ -224,10 +246,33 @@ const Messages: React.FC = () => {
       
       // Select the conversation
       setSelectedConversationId(response.conversation._id);
+      
+      // On mobile, hide conversations list when a conversation is selected
+      if (window.innerWidth < 768) {
+        setShowConversationsList(false);
+      }
     } catch (error: any) {
       console.error("Error creating conversation:", error);
       toast.error(error.response?.data?.message || "Failed to create conversation");
     }
+  };
+
+  const handleSelectConversation = (conversationId: string) => {
+    setSelectedConversationId(conversationId);
+    
+    // On mobile, hide conversations list when a conversation is selected
+    if (window.innerWidth < 768) {
+      setShowConversationsList(false);
+    }
+  };
+
+  const handleBackToConversations = () => {
+    setShowConversationsList(true);
+    setSelectedConversationId(null);
+  };
+
+  const toggleConversationsList = () => {
+    setShowConversationsList(!showConversationsList);
   };
 
   const selectedConversation = conversations.find(
@@ -245,9 +290,21 @@ const Messages: React.FC = () => {
     : false;
 
   return (
-    <div className="container mx-auto p-3 max-w-7xl">
+    <div className="container mx-auto p-3 max-w-7xl h-[calc(100vh-80px)]">
+      {/* Header */}
       <div className="mb-3 flex items-center justify-between">
-        <h1 className="text-2xl font-bold">Messages</h1>
+        <div className="flex items-center gap-2">
+          {/* Mobile menu button - only visible on small screens */}
+          <Button
+            variant="outline"
+            size="sm"
+            className="md:hidden"
+            onClick={toggleConversationsList}
+          >
+            <Menu className="h-4 w-4" />
+          </Button>
+          <h1 className="text-2xl font-bold">Messages</h1>
+        </div>
         <div className="flex items-center gap-2">
           {isConnected ? (
             <Badge variant="outline" className="gap-1">
@@ -269,85 +326,119 @@ const Messages: React.FC = () => {
         </div>
       </div>
 
-      <div className="grid grid-cols-12 gap-3 h-[calc(100vh-140px)]">
-        {/* Conversations List */}
-        <Card className="col-span-12 md:col-span-4 flex flex-col h-full">
-          <CardHeader className="border-b py-3">
-            <CardTitle className="text-lg">Conversations</CardTitle>
-          </CardHeader>
-          <CardContent className="flex-1 p-0 overflow-hidden">
-            <ConversationList
-              conversations={conversations}
-              selectedConversationId={selectedConversationId}
-              onSelectConversation={setSelectedConversationId}
-              isLoading={isLoadingConversations}
-            />
-          </CardContent>
-        </Card>
+      <div className="flex h-full gap-3 relative">
+        {/* Mobile overlay backdrop */}
+        {showConversationsList && (
+          <div 
+            className="md:hidden fixed inset-0 bg-black/50 z-40"
+            onClick={() => setShowConversationsList(false)}
+          />
+        )}
 
-        {/* Messages Area */}
-        <Card className="col-span-12 md:col-span-8 flex flex-col h-full">
-          {selectedConversation ? (
-            <>
-              <CardHeader className="border-b py-3">
-                <div className="flex items-center justify-between">
-                  <div>
+        {/* Conversations List - Desktop: always visible, Mobile: conditional with overlay */}
+        <div className={`${showConversationsList ? 'block' : 'hidden'} md:block w-full md:w-1/3 relative z-50 md:z-auto`}>
+          <Card className="flex flex-col h-full">
+            <CardHeader className="border-b py-3">
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-lg">Conversations</CardTitle>
+                {/* Mobile close button */}
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="md:hidden"
+                  onClick={() => setShowConversationsList(false)}
+                >
+                  <ArrowLeft className="h-4 w-4" />
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent className="flex-1 p-0 overflow-hidden">
+              <ConversationList
+                conversations={conversations}
+                selectedConversationId={selectedConversationId}
+                onSelectConversation={handleSelectConversation}
+                isLoading={isLoadingConversations}
+              />
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Messages Area - Desktop: 2/3 width, Mobile: full width */}
+        <div className={`${!showConversationsList ? 'block' : 'hidden'} md:block w-full md:w-2/3`}>
+          <Card className="flex flex-col h-full">
+            {selectedConversation ? (
+              <>
+                <CardHeader className="border-b py-3">
+                  <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <CardTitle className="text-lg">{selectedConversation.participant.name}</CardTitle>
-                      <Badge variant="secondary" className="text-xs">
-                        {selectedConversation.participant.role}
-                      </Badge>
-                      {isParticipantOnline && (
-                        <Badge variant="outline" className="gap-1 text-xs">
-                          <div className="h-2 w-2 rounded-full bg-green-500" />
-                          Online
-                        </Badge>
-                      )}
-                    </div>
-                    <div className="flex flex-col gap-0.5">
-                      <p className="text-xs text-muted-foreground">
-                        {selectedConversation.participant.email}
-                      </p>
-                      {selectedConversation.participant.school && (
-                        <p className="text-xs text-muted-foreground">
-                          🏫 {selectedConversation.participant.school.name} - {selectedConversation.participant.school.city}, {selectedConversation.participant.school.state}
-                        </p>
-                      )}
+                      {/* Mobile back button */}
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="md:hidden"
+                        onClick={handleBackToConversations}
+                      >
+                        <ArrowLeft className="h-4 w-4" />
+                      </Button>
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <CardTitle className="text-lg">{selectedConversation.participant.name}</CardTitle>
+                          <Badge variant="secondary" className="text-xs">
+                            {selectedConversation.participant.role}
+                          </Badge>
+                          {isParticipantOnline && (
+                            <Badge variant="outline" className="gap-1 text-xs">
+                              <div className="h-2 w-2 rounded-full bg-green-500" />
+                              Online
+                            </Badge>
+                          )}
+                        </div>
+                        <div className="flex flex-col gap-0.5">
+                          <p className="text-xs text-muted-foreground">
+                            {selectedConversation.participant.email}
+                          </p>
+                          {selectedConversation.participant.school && (
+                            <p className="text-xs text-muted-foreground">
+                              🏫 {selectedConversation.participant.school.name} - {selectedConversation.participant.school.city}, {selectedConversation.participant.school.state}
+                            </p>
+                          )}
+                        </div>
+                      </div>
                     </div>
                   </div>
-                </div>
-              </CardHeader>
-              <CardContent className="flex-1 p-0 overflow-hidden flex flex-col">
-                <div className="flex-1 overflow-hidden">
-                  <MessageList
-                    messages={messages}
-                    currentUserId={currentUserId}
-                    isLoading={isLoadingMessages}
+                </CardHeader>
+                <CardContent className="flex-1 p-0 overflow-hidden flex flex-col">
+                  <div className="flex-1 overflow-hidden">
+                    <MessageList
+                      messages={messages}
+                      currentUserId={currentUserId}
+                      isLoading={isLoadingMessages}
+                    />
+                  </div>
+                  {isTyping && (
+                    <p className="px-4 py-2 text-sm text-muted-foreground italic bg-background border-t relative z-10">
+                      {selectedConversation.participant.name} is typing...
+                    </p>
+                  )}
+                  <MessageInput 
+                    onSendMessage={handleSendMessage}
+                    onTyping={handleTyping}
                   />
-                </div>
-                {isTyping && (
-                  <p className="px-4 py-2 text-sm text-muted-foreground italic bg-background border-t relative z-10">
-                    {selectedConversation.participant.name} is typing...
+                </CardContent>
+              </>
+            ) : (
+              <CardContent className="flex-1 flex items-center justify-center">
+                <div className="text-center">
+                  <MessageSquare className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                  <p className="text-lg font-medium mb-2">Select a conversation</p>
+                  <p className="text-sm text-muted-foreground">
+                    Choose a conversation from the list or start a new one
                   </p>
-                )}
-                <MessageInput 
-                  onSendMessage={handleSendMessage}
-                  onTyping={handleTyping}
-                />
+                </div>
               </CardContent>
-            </>
-          ) : (
-            <CardContent className="flex-1 flex items-center justify-center">
-              <div className="text-center">
-                <MessageSquare className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                <p className="text-lg font-medium mb-2">Select a conversation</p>
-                <p className="text-sm text-muted-foreground">
-                  Choose a conversation from the list or start a new one
-                </p>
-              </div>
-            </CardContent>
-          )}
-        </Card>
+            )}
+          </Card>
+        </div>
       </div>
     </div>
   );

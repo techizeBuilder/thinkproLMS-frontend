@@ -253,15 +253,8 @@ const NewMessageDialog: React.FC<NewMessageDialogProps> = ({ onSelectUser }) => 
 
   const hasActiveFilters = selectedSchool !== "all" || searchQuery !== "";
 
-  // Calculate visible tabs for grid layout
-  const visibleTabs = ["mentor", "student", "schooladmin", "leadmentor", "superadmin"].filter(isTabVisible);
-  const gridColsClass = {
-    1: "grid-cols-1",
-    2: "grid-cols-2",
-    3: "grid-cols-3",
-    4: "grid-cols-4",
-    5: "grid-cols-5",
-  }[visibleTabs.length] || "grid-cols-5";
+  // Calculate visible tabs for scrollable layout
+  // const visibleTabs = ["mentor", "student", "schooladmin", "leadmentor", "superadmin"].filter(isTabVisible);
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -271,62 +264,67 @@ const NewMessageDialog: React.FC<NewMessageDialogProps> = ({ onSelectUser }) => 
           New Message
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-3xl max-h-[85vh]">
-        <DialogHeader>
-          <DialogTitle>Start New Conversation</DialogTitle>
-          <DialogDescription>
+      <DialogContent className="max-w-4xl h-[95vh] w-[95vw] sm:w-[90vw] md:w-[80vw] lg:w-[70vw] xl:w-[60vw] p-4 sm:p-6 flex flex-col">
+        <DialogHeader className="mb-4 sm:mb-6">
+          <DialogTitle className="text-lg sm:text-xl">Start New Conversation</DialogTitle>
+          <DialogDescription className="text-sm">
             Select a role and find a user to start messaging with
           </DialogDescription>
         </DialogHeader>
 
-        <Tabs value={selectedRole} onValueChange={setSelectedRole} className="w-full">
-          <TabsList className={cn("grid w-full mb-4", gridColsClass)}>
+        <Tabs value={selectedRole} onValueChange={setSelectedRole} className="w-full flex-1 flex flex-col">
+          <TabsList className="flex w-full mb-4 gap-1 overflow-x-auto scrollbar-hide">
             {isTabVisible("mentor") && (
-              <TabsTrigger value="mentor" className="flex items-center gap-2">
+              <TabsTrigger value="mentor" className="flex items-center justify-center gap-1 sm:gap-2 text-xs sm:text-sm min-h-[48px] touch-manipulation px-3 sm:px-4 whitespace-nowrap flex-shrink-0 min-w-[120px]">
                 {getRoleIcon("mentor")}
-                <span className="hidden sm:inline">School Mentor</span>
+                <span className="hidden md:inline">School Mentor</span>
+                <span className="hidden sm:inline md:hidden">Mentor</span>
                 <span className="sm:hidden">Mentor</span>
-                <Badge variant="secondary" className="ml-1 h-5 min-w-[20px] px-1.5">
+                <Badge variant="secondary" className="ml-1 h-4 min-w-[16px] px-1 text-xs">
                   {getRoleCount("mentor")}
                 </Badge>
               </TabsTrigger>
             )}
             {isTabVisible("student") && (
-              <TabsTrigger value="student" className="flex items-center gap-2">
+              <TabsTrigger value="student" className="flex items-center justify-center gap-1 sm:gap-2 text-xs sm:text-sm min-h-[48px] touch-manipulation px-3 sm:px-4 whitespace-nowrap flex-shrink-0 min-w-[120px]">
                 {getRoleIcon("student")}
-                <span className="hidden sm:inline">Student</span>
+                <span className="hidden md:inline">Student</span>
+                <span className="hidden sm:inline md:hidden">Student</span>
                 <span className="sm:hidden">Student</span>
-                <Badge variant="secondary" className="ml-1 h-5 min-w-[20px] px-1.5">
+                <Badge variant="secondary" className="ml-1 h-4 min-w-[16px] px-1 text-xs">
                   {getRoleCount("student")}
                 </Badge>
               </TabsTrigger>
             )}
             {isTabVisible("schooladmin") && (
-              <TabsTrigger value="schooladmin" className="flex items-center gap-2">
+              <TabsTrigger value="schooladmin" className="flex items-center justify-center gap-1 sm:gap-2 text-xs sm:text-sm min-h-[48px] touch-manipulation px-3 sm:px-4 whitespace-nowrap flex-shrink-0 min-w-[120px]">
                 {getRoleIcon("schooladmin")}
-                <span className="hidden sm:inline">School Admin</span>
+                <span className="hidden md:inline">School Admin</span>
+                <span className="hidden sm:inline md:hidden">Admin</span>
                 <span className="sm:hidden">Admin</span>
-                <Badge variant="secondary" className="ml-1 h-5 min-w-[20px] px-1.5">
+                <Badge variant="secondary" className="ml-1 h-4 min-w-[16px] px-1 text-xs">
                   {getRoleCount("schooladmin")}
                 </Badge>
               </TabsTrigger>
             )}
             {isTabVisible("leadmentor") && (
-              <TabsTrigger value="leadmentor" className="flex items-center gap-2">
+              <TabsTrigger value="leadmentor" className="flex items-center justify-center gap-1 sm:gap-2 text-xs sm:text-sm min-h-[48px] touch-manipulation px-3 sm:px-4 whitespace-nowrap flex-shrink-0 min-w-[120px]">
                 {getRoleIcon("leadmentor")}
-                <span className="hidden sm:inline">Lead Mentor</span>
+                <span className="hidden md:inline">Lead Mentor</span>
+                <span className="hidden sm:inline md:hidden">Lead</span>
                 <span className="sm:hidden">Lead</span>
-                <Badge variant="secondary" className="ml-1 h-5 min-w-[20px] px-1.5">
+                <Badge variant="secondary" className="ml-1 h-4 min-w-[16px] px-1 text-xs">
                   {getRoleCount("leadmentor")}
                 </Badge>
               </TabsTrigger>
             )}
             {isTabVisible("superadmin") && (
-              <TabsTrigger value="superadmin" className="flex items-center gap-2">
+              <TabsTrigger value="superadmin" className="flex items-center justify-center gap-1 sm:gap-2 text-xs sm:text-sm min-h-[48px] touch-manipulation px-3 sm:px-4 whitespace-nowrap flex-shrink-0 min-w-[120px]">
                 {getRoleIcon("superadmin")}
-                <span className="hidden sm:inline">Super Admin</span>
+                <span className="hidden md:inline">Super Admin</span>
+                <span className="hidden sm:inline md:hidden">Super</span>
                 <span className="sm:hidden">Super</span>
-                <Badge variant="secondary" className="ml-1 h-5 min-w-[20px] px-1.5">
+                <Badge variant="secondary" className="ml-1 h-4 min-w-[16px] px-1 text-xs">
                   {getRoleCount("superadmin")}
                 </Badge>
               </TabsTrigger>
@@ -335,18 +333,18 @@ const NewMessageDialog: React.FC<NewMessageDialogProps> = ({ onSelectUser }) => 
 
           {/* Filters Section */}
           <div className="space-y-3 mb-4">
-            <div className="flex items-start gap-3 flex-wrap">
+            <div className="flex flex-col sm:flex-row items-start gap-3">
               {/* School filter - only show if role is not superadmin and logged-in user is not student/mentor */}
               {selectedRole !== "superadmin" && 
                currentUser && 
                currentUser.role !== "student" && 
                currentUser.role !== "mentor" && (
-                <div className="flex-1 min-w-[200px]">
+                <div className="w-full sm:flex-1 sm:min-w-[200px]">
                   <label className="text-xs font-medium text-muted-foreground mb-1.5 block">
                     Filter by School
                   </label>
                   <Select value={selectedSchool} onValueChange={setSelectedSchool}>
-                    <SelectTrigger>
+                    <SelectTrigger className="h-10">
                       <SelectValue placeholder="All Schools" />
                     </SelectTrigger>
                     <SelectContent>
@@ -363,7 +361,7 @@ const NewMessageDialog: React.FC<NewMessageDialogProps> = ({ onSelectUser }) => 
 
               {/* Search */}
               <div className={cn(
-                "flex-1 min-w-[200px]", 
+                "w-full sm:flex-1 sm:min-w-[200px]", 
                 (selectedRole === "superadmin" || 
                  !currentUser || 
                  currentUser.role === "student" || 
@@ -379,13 +377,13 @@ const NewMessageDialog: React.FC<NewMessageDialogProps> = ({ onSelectUser }) => 
                     placeholder="Search by name, email, or school..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="pl-9"
+                    className="pl-9 h-10"
                   />
                 </div>
               </div>
 
               {hasActiveFilters && (
-                <div className="flex items-end">
+                <div className="flex items-end w-full sm:w-auto">
                   <Button
                     variant="outline"
                     size="sm"
@@ -393,7 +391,7 @@ const NewMessageDialog: React.FC<NewMessageDialogProps> = ({ onSelectUser }) => 
                       setSelectedSchool("all");
                       setSearchQuery("");
                     }}
-                    className="h-10"
+                    className="h-10 w-full sm:w-auto"
                   >
                     <X className="h-4 w-4 mr-1" />
                     Clear
@@ -417,8 +415,8 @@ const NewMessageDialog: React.FC<NewMessageDialogProps> = ({ onSelectUser }) => 
           </div>
 
           {/* User List */}
-          <TabsContent value={selectedRole} className="mt-0">
-            <ScrollArea className="h-[400px] pr-4">
+          <TabsContent value={selectedRole} className="mt-0 flex-1 flex flex-col">
+            <ScrollArea className="flex-1 pr-4">
               {isLoading ? (
                 <div className="flex items-center justify-center h-40">
                   <p className="text-sm text-muted-foreground">Loading users...</p>
@@ -437,9 +435,9 @@ const NewMessageDialog: React.FC<NewMessageDialogProps> = ({ onSelectUser }) => 
                     <div
                       key={user._id}
                       onClick={() => handleSelectUser(user._id)}
-                      className="p-3 rounded-lg border cursor-pointer hover:bg-accent transition-colors"
+                      className="p-3 rounded-lg border cursor-pointer hover:bg-accent transition-colors touch-manipulation min-h-[60px] flex items-center active:bg-accent/80"
                     >
-                      <div className="flex items-start justify-between gap-3">
+                      <div className="flex items-center justify-between gap-3 w-full">
                         <div className="flex-1 min-w-0">
                           <h4 className="font-medium text-sm truncate">
                             {user.name}
