@@ -159,10 +159,13 @@ export default function SessionProgressViewer({
       const response = await mentorService.getById(mentorId);
       if (response.success) {
         const mentor = response.data;
-        setAvailableSchools(mentor.assignedSchools);
-        // Auto-select first school when mentor changes
-        if (mentor.assignedSchools.length > 0) {
-          setSelectedSchoolId(mentor.assignedSchools[0]._id);
+        // Mentors now have a single assignedSchool instead of an array
+        if (mentor.assignedSchool) {
+          setAvailableSchools([mentor.assignedSchool]);
+          setSelectedSchoolId(mentor.assignedSchool._id);
+        } else {
+          setAvailableSchools([]);
+          setSelectedSchoolId("");
         }
       }
     } catch (error) {
@@ -340,9 +343,9 @@ export default function SessionProgressViewer({
           <div className="w-full h-8 px-3 py-1 border rounded-md bg-muted/50 flex items-center text-sm">
             {loadingSchools ? (
               <span className="text-muted-foreground">Loading...</span>
-            ) : availableSchools.length > 0 && selectedSchoolId ? (
+            ) : availableSchools && availableSchools.length > 0 && selectedSchoolId ? (
               <span>{availableSchools.find(s => s._id === selectedSchoolId)?.name || 'Unknown School'} - {availableSchools.find(s => s._id === selectedSchoolId)?.city}, {availableSchools.find(s => s._id === selectedSchoolId)?.state}</span>
-            ) : availableSchools.length > 0 ? (
+            ) : availableSchools && availableSchools.length > 0 ? (
               <span>{availableSchools[0].name} - {availableSchools[0].city}, {availableSchools[0].state}</span>
             ) : (
               <span className="text-muted-foreground">No school assigned</span>
