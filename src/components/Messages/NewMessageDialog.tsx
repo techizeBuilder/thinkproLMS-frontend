@@ -11,12 +11,28 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
-import { MessageSquarePlus, Search } from "lucide-react";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { MessageSquarePlus, Search, X, Users, Shield, GraduationCap, BookOpen, User as UserIcon } from "lucide-react";
 import { getAvailableUsers, type User } from "@/api/messageService";
+import { schoolService } from "@/api/schoolService";
 import { cn } from "@/lib/utils";
 
 interface NewMessageDialogProps {
   onSelectUser: (userId: string) => void;
+}
+
+interface School {
+  _id: string;
+  name: string;
+  city: string;
+  state: string;
 }
 
 const NewMessageDialog: React.FC<NewMessageDialogProps> = ({ onSelectUser }) => {
@@ -25,34 +41,58 @@ const NewMessageDialog: React.FC<NewMessageDialogProps> = ({ onSelectUser }) => 
   const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [schools, setSchools] = useState<School[]>([]);
+  const [selectedRole, setSelectedRole] = useState<string>("mentor");
+  const [selectedSchool, setSelectedSchool] = useState<string>("all");
+  const [currentUser, setCurrentUser] = useState<{
+    role: string;
+    schoolId?: string;
+  } | null>(null);
+
+  useEffect(() => {
+    // Load current user info
+    const user = localStorage.getItem("user");
+    if (user) {
+      const userData = JSON.parse(user);
+      setCurrentUser({
+        role: userData.role,
+        schoolId: userData.school?._id || userData.school,
+      });
+      
+      // Set default tab based on user role
+      if (userData.role === "student") {
+        setSelectedRole("mentor");
+      } else if (userData.role === "mentor") {
+        setSelectedRole("student");
+      } else {
+        setSelectedRole("mentor");
+      }
+    }
+  }, []);
 
   useEffect(() => {
     if (open) {
       loadUsers();
+      loadSchools();
     }
   }, [open]);
 
   useEffect(() => {
-    if (searchQuery.trim() === "") {
-      setFilteredUsers(users);
-    } else {
-      const query = searchQuery.toLowerCase();
-      setFilteredUsers(
-        users.filter(
-          (user) =>
-            user.name.toLowerCase().includes(query) ||
-            user.email.toLowerCase().includes(query)
-        )
-      );
+    applyFilters();
+  }, [searchQuery, users, selectedRole, selectedSchool, currentUser]);
+
+  // Reset school filter when superadmin role is selected
+  useEffect(() => {
+    if (selectedRole === "superadmin") {
+      setSelectedSchool("all");
     }
-  }, [searchQuery, users]);
+  }, [selectedRole]);
 
   const loadUsers = async () => {
     try {
       setIsLoading(true);
       const response = await getAvailableUsers();
       setUsers(response.users);
-      setFilteredUsers(response.users);
     } catch (error) {
       console.error("Error loading users:", error);
     } finally {
@@ -60,10 +100,121 @@ const NewMessageDialog: React.FC<NewMessageDialogProps> = ({ onSelectUser }) => 
     }
   };
 
+  const loadSchools = async () => {
+    try {
+      const response = await schoolService.getAllSchools();
+      setSchools(response);
+    } catch (error) {
+      console.error("Error loading schools:", error);
+    }
+  };
+
+  const applyFilters = () => {
+    let filtered = [...users];
+
+    // Filter by role (always applied since we're using tabs)
+    filtered = filtered.filter((user) => user.role === selectedRole);
+
+    // Role-based restrictions for students and mentors
+    if (currentUser) {
+      // If logged-in user is a student, only show mentors from their school
+      if (currentUser.role === "student" && selectedRole === "mentor" && currentUser.schoolId) {
+        filtered = filtered.filter((user) => user.school?._id === currentUser.schoolId);
+      }
+      
+      // If logged-in user is a school mentor, only show students from their school
+      if (currentUser.role === "mentor" && selectedRole === "student" && currentUser.schoolId) {
+        filtered = filtered.filter((user) => user.school?._id === currentUser.schoolId);
+      }
+    }
+
+    // Filter by school (only if role is not superadmin and user is not restricted by their role)
+    if (selectedSchool !== "all" && selectedRole !== "superadmin") {
+      // Don't apply school filter if current user is student or mentor (they're already restricted)
+      if (currentUser && (currentUser.role === "student" || currentUser.role === "mentor")) {
+        // Already filtered above, don't apply additional filter
+      } else {
+        filtered = filtered.filter((user) => user.school?._id === selectedSchool);
+      }
+    }
+
+    // Filter by search query
+    if (searchQuery.trim() !== "") {
+      const query = searchQuery.toLowerCase();
+      filtered = filtered.filter(
+        (user) =>
+          user.name.toLowerCase().includes(query) ||
+          user.email.toLowerCase().includes(query) ||
+          user.school?.name.toLowerCase().includes(query)
+      );
+    }
+
+    setFilteredUsers(filtered);
+  };
+
+  const resetFilters = () => {
+    // Set default role based on current user
+    if (currentUser) {
+      if (currentUser.role === "student") {
+        setSelectedRole("mentor");
+      } else if (currentUser.role === "mentor") {
+        setSelectedRole("student");
+      } else {
+        setSelectedRole("mentor");
+      }
+    } else {
+      setSelectedRole("mentor");
+    }
+    setSelectedSchool("all");
+    setSearchQuery("");
+  };
+
   const handleSelectUser = (userId: string) => {
     onSelectUser(userId);
     setOpen(false);
-    setSearchQuery("");
+    resetFilters();
+  };
+
+  const getRoleIcon = (role: string) => {
+    switch (role) {
+      case "superadmin":
+        return <Shield className="h-4 w-4" />;
+      case "leadmentor":
+        return <Users className="h-4 w-4" />;
+      case "schooladmin":
+        return <BookOpen className="h-4 w-4" />;
+      case "mentor":
+        return <GraduationCap className="h-4 w-4" />;
+      case "student":
+        return <UserIcon className="h-4 w-4" />;
+      default:
+        return <UserIcon className="h-4 w-4" />;
+    }
+  };
+
+  const getRoleCount = (role: string) => {
+    return users.filter((user) => user.role === role).length;
+  };
+
+  const isTabVisible = (role: string) => {
+    if (!currentUser) return true;
+    
+    // Students can only see mentor tab
+    if (currentUser.role === "student") {
+      return role === "mentor";
+    }
+    
+    // School mentors can see all tabs
+    if (currentUser.role === "mentor") {
+      return true;
+    }
+    
+    // For other roles (superadmin, leadmentor, schooladmin), hide student tab
+    if (role === "student") {
+      return currentUser.role === "mentor";
+    }
+    
+    return true;
   };
 
   const getRoleColor = (role: string) => {
@@ -100,6 +251,18 @@ const NewMessageDialog: React.FC<NewMessageDialogProps> = ({ onSelectUser }) => 
     }
   };
 
+  const hasActiveFilters = selectedSchool !== "all" || searchQuery !== "";
+
+  // Calculate visible tabs for grid layout
+  const visibleTabs = ["mentor", "student", "schooladmin", "leadmentor", "superadmin"].filter(isTabVisible);
+  const gridColsClass = {
+    1: "grid-cols-1",
+    2: "grid-cols-2",
+    3: "grid-cols-3",
+    4: "grid-cols-4",
+    5: "grid-cols-5",
+  }[visibleTabs.length] || "grid-cols-5";
+
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
@@ -108,65 +271,202 @@ const NewMessageDialog: React.FC<NewMessageDialogProps> = ({ onSelectUser }) => 
           New Message
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-md">
+      <DialogContent className="max-w-3xl max-h-[85vh]">
         <DialogHeader>
           <DialogTitle>Start New Conversation</DialogTitle>
           <DialogDescription>
-            Select a user to start messaging with
+            Select a role and find a user to start messaging with
           </DialogDescription>
         </DialogHeader>
-        <div className="space-y-4">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
-              type="text"
-              placeholder="Search by name or email..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-9"
-            />
-          </div>
-          <ScrollArea className="h-[400px]">
-            {isLoading ? (
-              <div className="flex items-center justify-center h-40">
-                <p className="text-sm text-muted-foreground">Loading users...</p>
-              </div>
-            ) : filteredUsers.length === 0 ? (
-              <div className="flex items-center justify-center h-40">
-                <p className="text-sm text-muted-foreground">
-                  {searchQuery ? "No users found" : "No users available"}
-                </p>
-              </div>
-            ) : (
-              <div className="space-y-2 pr-4">
-                {filteredUsers.map((user) => (
-                  <div
-                    key={user._id}
-                    onClick={() => handleSelectUser(user._id)}
-                    className="p-3 rounded-lg border cursor-pointer hover:bg-accent transition-colors"
-                  >
-                    <div className="flex items-center justify-between gap-2">
-                      <div className="flex-1 min-w-0">
-                        <h4 className="font-medium text-sm truncate">
-                          {user.name}
-                        </h4>
-                        <p className="text-xs text-muted-foreground truncate">
-                          {user.email}
-                        </p>
-                      </div>
-                      <Badge
-                        variant="secondary"
-                        className={cn("text-xs", getRoleColor(user.role))}
-                      >
-                        {getRoleLabel(user.role)}
-                      </Badge>
-                    </div>
-                  </div>
-                ))}
-              </div>
+
+        <Tabs value={selectedRole} onValueChange={setSelectedRole} className="w-full">
+          <TabsList className={cn("grid w-full mb-4", gridColsClass)}>
+            {isTabVisible("mentor") && (
+              <TabsTrigger value="mentor" className="flex items-center gap-2">
+                {getRoleIcon("mentor")}
+                <span className="hidden sm:inline">School Mentor</span>
+                <span className="sm:hidden">Mentor</span>
+                <Badge variant="secondary" className="ml-1 h-5 min-w-[20px] px-1.5">
+                  {getRoleCount("mentor")}
+                </Badge>
+              </TabsTrigger>
             )}
-          </ScrollArea>
-        </div>
+            {isTabVisible("student") && (
+              <TabsTrigger value="student" className="flex items-center gap-2">
+                {getRoleIcon("student")}
+                <span className="hidden sm:inline">Student</span>
+                <span className="sm:hidden">Student</span>
+                <Badge variant="secondary" className="ml-1 h-5 min-w-[20px] px-1.5">
+                  {getRoleCount("student")}
+                </Badge>
+              </TabsTrigger>
+            )}
+            {isTabVisible("schooladmin") && (
+              <TabsTrigger value="schooladmin" className="flex items-center gap-2">
+                {getRoleIcon("schooladmin")}
+                <span className="hidden sm:inline">School Admin</span>
+                <span className="sm:hidden">Admin</span>
+                <Badge variant="secondary" className="ml-1 h-5 min-w-[20px] px-1.5">
+                  {getRoleCount("schooladmin")}
+                </Badge>
+              </TabsTrigger>
+            )}
+            {isTabVisible("leadmentor") && (
+              <TabsTrigger value="leadmentor" className="flex items-center gap-2">
+                {getRoleIcon("leadmentor")}
+                <span className="hidden sm:inline">Lead Mentor</span>
+                <span className="sm:hidden">Lead</span>
+                <Badge variant="secondary" className="ml-1 h-5 min-w-[20px] px-1.5">
+                  {getRoleCount("leadmentor")}
+                </Badge>
+              </TabsTrigger>
+            )}
+            {isTabVisible("superadmin") && (
+              <TabsTrigger value="superadmin" className="flex items-center gap-2">
+                {getRoleIcon("superadmin")}
+                <span className="hidden sm:inline">Super Admin</span>
+                <span className="sm:hidden">Super</span>
+                <Badge variant="secondary" className="ml-1 h-5 min-w-[20px] px-1.5">
+                  {getRoleCount("superadmin")}
+                </Badge>
+              </TabsTrigger>
+            )}
+          </TabsList>
+
+          {/* Filters Section */}
+          <div className="space-y-3 mb-4">
+            <div className="flex items-start gap-3 flex-wrap">
+              {/* School filter - only show if role is not superadmin and logged-in user is not student/mentor */}
+              {selectedRole !== "superadmin" && 
+               currentUser && 
+               currentUser.role !== "student" && 
+               currentUser.role !== "mentor" && (
+                <div className="flex-1 min-w-[200px]">
+                  <label className="text-xs font-medium text-muted-foreground mb-1.5 block">
+                    Filter by School
+                  </label>
+                  <Select value={selectedSchool} onValueChange={setSelectedSchool}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="All Schools" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Schools</SelectItem>
+                      {schools.map((school) => (
+                        <SelectItem key={school._id} value={school._id}>
+                          {school.name} ({school.city})
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
+
+              {/* Search */}
+              <div className={cn(
+                "flex-1 min-w-[200px]", 
+                (selectedRole === "superadmin" || 
+                 !currentUser || 
+                 currentUser.role === "student" || 
+                 currentUser.role === "mentor") && "w-full"
+              )}>
+                <label className="text-xs font-medium text-muted-foreground mb-1.5 block">
+                  Search
+                </label>
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    type="text"
+                    placeholder="Search by name, email, or school..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="pl-9"
+                  />
+                </div>
+              </div>
+
+              {hasActiveFilters && (
+                <div className="flex items-end">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      setSelectedSchool("all");
+                      setSearchQuery("");
+                    }}
+                    className="h-10"
+                  >
+                    <X className="h-4 w-4 mr-1" />
+                    Clear
+                  </Button>
+                </div>
+              )}
+            </div>
+
+            {/* Results count and info */}
+            <div className="flex items-center justify-between text-sm px-1">
+              <p className="text-muted-foreground">
+                {filteredUsers.length} {getRoleLabel(selectedRole).toLowerCase()}
+                {filteredUsers.length !== 1 ? "s" : ""} found
+              </p>
+              {currentUser && (currentUser.role === "student" || currentUser.role === "mentor") && (
+                <p className="text-xs text-muted-foreground italic">
+                  Showing users from your school only
+                </p>
+              )}
+            </div>
+          </div>
+
+          {/* User List */}
+          <TabsContent value={selectedRole} className="mt-0">
+            <ScrollArea className="h-[400px] pr-4">
+              {isLoading ? (
+                <div className="flex items-center justify-center h-40">
+                  <p className="text-sm text-muted-foreground">Loading users...</p>
+                </div>
+              ) : filteredUsers.length === 0 ? (
+                <div className="flex items-center justify-center h-40">
+                  <p className="text-sm text-muted-foreground">
+                    {hasActiveFilters 
+                      ? `No ${getRoleLabel(selectedRole).toLowerCase()}s match your filters` 
+                      : `No ${getRoleLabel(selectedRole).toLowerCase()}s available`}
+                  </p>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  {filteredUsers.map((user) => (
+                    <div
+                      key={user._id}
+                      onClick={() => handleSelectUser(user._id)}
+                      className="p-3 rounded-lg border cursor-pointer hover:bg-accent transition-colors"
+                    >
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="flex-1 min-w-0">
+                          <h4 className="font-medium text-sm truncate">
+                            {user.name}
+                          </h4>
+                          <p className="text-xs text-muted-foreground truncate">
+                            {user.email}
+                          </p>
+                          {user.school && (
+                            <p className="text-xs text-muted-foreground truncate mt-0.5">
+                              {user.school.name} • {user.school.city}
+                            </p>
+                          )}
+                        </div>
+                        <Badge
+                          variant="secondary"
+                          className={cn("text-xs shrink-0", getRoleColor(user.role))}
+                        >
+                          {getRoleLabel(user.role)}
+                        </Badge>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </ScrollArea>
+          </TabsContent>
+        </Tabs>
       </DialogContent>
     </Dialog>
   );
