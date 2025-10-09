@@ -5,6 +5,12 @@ export interface User {
   name: string;
   email: string;
   role: string;
+  school?: {
+    _id: string;
+    name: string;
+    city: string;
+    state: string;
+  };
 }
 
 export interface Message {

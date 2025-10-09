@@ -304,9 +304,16 @@ const Messages: React.FC = () => {
                         </Badge>
                       )}
                     </div>
-                    <p className="text-xs text-muted-foreground">
-                      {selectedConversation.participant.email}
-                    </p>
+                    <div className="flex flex-col gap-0.5">
+                      <p className="text-xs text-muted-foreground">
+                        {selectedConversation.participant.email}
+                      </p>
+                      {selectedConversation.participant.school && (
+                        <p className="text-xs text-muted-foreground">
+                          🏫 {selectedConversation.participant.school.name} - {selectedConversation.participant.school.city}, {selectedConversation.participant.school.state}
+                        </p>
+                      )}
+                    </div>
                   </div>
                 </div>
               </CardHeader>
