@@ -64,15 +64,15 @@ function MentorLayoutContent() {
           )}
           <div className="flex-1 min-w-0">
             {loading ? (
-              <h1 className="text-xl md:text-2xl font-semibold truncate">Loading...</h1>
+              <h1 className="text-base md:text-xl font-semibold truncate">Loading...</h1>
             ) : mentor ? (
-              <h1 className="text-xl md:text-2xl font-semibold truncate">
+              <h1 className="text-base md:text-xl font-semibold truncate">
                 {mentor.user.name} - {mentor.assignedSchool.name}
               </h1>
             ) : (
-              <h1 className="text-xl md:text-2xl font-semibold truncate">School Mentor Portal</h1>
+              <h1 className="text-base md:text-xl font-semibold truncate">School Mentor Portal</h1>
             )}
-            <p className="text-sm text-muted-foreground hidden sm:block">
+            <p className="text-xs md:text-sm text-muted-foreground hidden sm:block">
               Guide and support your students' learning journey
             </p>
           </div>
