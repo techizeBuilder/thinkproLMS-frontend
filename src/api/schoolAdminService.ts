@@ -12,7 +12,7 @@ export interface User {
 export interface SchoolAdmin {
   _id: string;
   user: User;
-  assignedSchools: School[];
+  assignedSchool: School;
   phoneNumber: string;
   isActive: boolean;
   createdAt: string;
@@ -23,12 +23,12 @@ export interface CreateSchoolAdminData {
   name: string;
   email: string;
   phoneNumber: string;
-  assignedSchools: string[];
+  assignedSchool: string;
 }
 
 export interface UpdateSchoolAdminData {
   phoneNumber?: string;
-  assignedSchools?: string[];
+  assignedSchool?: string;
   isActive?: boolean;
 }
 
@@ -41,7 +41,7 @@ export interface Mentor {
     isVerified: boolean;
   };
   phoneNumber: string;
-  assignedSchools: School[];
+  assignedSchool: School;
   isActive: boolean;
   createdAt: string;
   updatedAt: string;

@@ -8,7 +8,6 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { ArrowLeft } from "lucide-react";
 import { schoolAdminService, type CreateSchoolAdminData } from "@/api/schoolAdminService";
 import { schoolService, type School } from "@/api/schoolService";
-import { MultiSelect } from "@/components/ui/multi-select";
 import { toast } from "sonner";
 import { isValidPhoneNumber, getPhoneNumberError } from "@/utils/validation";
 
@@ -26,7 +25,7 @@ export default function CreateSchoolAdminPage() {
     name: "",
     email: "",
     phoneNumber: "",
-    assignedSchools: [],
+    assignedSchool: "",
   });
   const [creationMethod, setCreationMethod] = useState<"invite" | "credentials">("invite");
   const [password, setPassword] = useState("");
@@ -164,23 +163,28 @@ export default function CreateSchoolAdminPage() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="assignedSchools">Assign to Schools *</Label>
+              <Label htmlFor="assignedSchool">Assign to School *</Label>
               {schoolsLoading ? (
                 <div className="text-sm text-gray-500">Loading schools...</div>
               ) : (
-                <MultiSelect
-                  options={schools.map((school) => ({
-                    value: school._id,
-                    label: `${school.name} - ${school.city}, ${school.state}`,
-                  }))}
-                  selected={formData.assignedSchools}
-                  onChange={(selected) => setFormData(prev => ({ ...prev, assignedSchools: selected }))}
-                  placeholder="Select schools to assign..."
-                  className="w-full"
-                />
+                <select
+                  id="assignedSchool"
+                  name="assignedSchool"
+                  value={formData.assignedSchool}
+                  onChange={handleInputChange}
+                  required
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="">Select a school</option>
+                  {schools.map((school) => (
+                    <option key={school._id} value={school._id}>
+                      {school.name} - {school.city}, {school.state}
+                    </option>
+                  ))}
+                </select>
               )}
               <p className="text-xs text-gray-500">
-                Select one or more schools to assign to this admin
+                Select one school to assign to this admin
               </p>
             </div>
 

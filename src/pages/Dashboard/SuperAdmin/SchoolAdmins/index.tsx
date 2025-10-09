@@ -106,7 +106,7 @@ export default function SchoolAdminsPage() {
                     <TableHead className="sticky left-0 bg-background z-10 min-w-[150px]">Name</TableHead>
                     <TableHead className="min-w-[200px]">Email</TableHead>
                     <TableHead className="min-w-[120px]">Phone</TableHead>
-                    <TableHead className="min-w-[150px]">Schools</TableHead>
+                    <TableHead className="min-w-[150px]">School</TableHead>
                     <TableHead className="min-w-[120px]">Status</TableHead>
                     <TableHead className="min-w-[100px]">Created</TableHead>
                     <TableHead className="text-right min-w-[120px]">Actions</TableHead>
@@ -129,22 +129,10 @@ export default function SchoolAdminsPage() {
                     </div>
                   </TableCell>
                   <TableCell>
-                    {admin.assignedSchools.length === 0 ? (
-                      <span className="text-gray-400">No schools assigned</span>
-                    ) : admin.assignedSchools.length === 1 ? (
-                      <span className="text-sm">{admin.assignedSchools[0].name}</span>
+                    {admin.assignedSchool ? (
+                      <span className="text-sm">{admin.assignedSchool.name}</span>
                     ) : (
-                      <span className="text-sm">
-                        {admin.assignedSchools.length} schools
-                        <div className="text-xs text-gray-500 mt-1">
-                          {admin.assignedSchools.slice(0, 2).map((school) => (
-                            <div key={school._id}>• {school.name}</div>
-                          ))}
-                          {admin.assignedSchools.length > 2 && (
-                            <div>+{admin.assignedSchools.length - 2} more</div>
-                          )}
-                        </div>
-                      </span>
+                      <span className="text-gray-400">No school assigned</span>
                     )}
                   </TableCell>
                   <TableCell>

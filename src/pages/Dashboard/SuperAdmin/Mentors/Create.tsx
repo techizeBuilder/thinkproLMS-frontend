@@ -5,7 +5,6 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Checkbox } from "@/components/ui/checkbox";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { ArrowLeft, Plus } from "lucide-react";
 import axiosInstance from "@/api/axiosInstance";
@@ -32,7 +31,7 @@ export default function CreateMentorPage() {
     address: "",
     email: "",
     phoneNumber: "",
-    schoolIds: [] as string[],
+    schoolId: "",
   });
   const [creationMethod, setCreationMethod] = useState<"invite" | "credentials">("invite");
   const [password, setPassword] = useState("");
@@ -57,14 +56,6 @@ export default function CreateMentorPage() {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleSchoolToggle = (schoolId: string, checked: boolean) => {
-    setFormData(prev => ({
-      ...prev,
-      schoolIds: checked
-        ? [...prev.schoolIds, schoolId]
-        : prev.schoolIds.filter(id => id !== schoolId)
-    }));
-  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -241,35 +232,32 @@ export default function CreateMentorPage() {
           <CardHeader>
             <CardTitle>School Assignment</CardTitle>
             <p className="text-sm text-gray-600">
-              Select one or more schools to assign to this mentor
+              Select one school to assign to this mentor
             </p>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-64 overflow-y-auto">
-              {schools.map((school) => (
-                <div key={school._id} className="flex items-center space-x-2 p-3 border rounded-lg">
-                  <Checkbox
-                    id={school._id}
-                    checked={formData.schoolIds.includes(school._id)}
-                    onCheckedChange={(checked) => 
-                      handleSchoolToggle(school._id, checked as boolean)
-                    }
-                  />
-                  <Label htmlFor={school._id} className="flex-1 cursor-pointer">
-                    <div>
-                      <p className="font-medium">{school.name}</p>
-                      <p className="text-sm text-gray-500">
-                        {school.city}, {school.state} • {school.board}
-                        {school.branchName && ` • ${school.branchName}`}
-                      </p>
-                    </div>
-                  </Label>
-                </div>
-              ))}
+            <div className="space-y-2">
+              <Label htmlFor="schoolId">School *</Label>
+              <select
+                id="schoolId"
+                name="schoolId"
+                value={formData.schoolId}
+                onChange={handleInputChange}
+                required
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="">Select a school</option>
+                {schools.map((school) => (
+                  <option key={school._id} value={school._id}>
+                    {school.name} - {school.city}, {school.state} • {school.board}
+                    {school.branchName && ` • ${school.branchName}`}
+                  </option>
+                ))}
+              </select>
             </div>
-            {formData.schoolIds.length === 0 && (
+            {!formData.schoolId && (
               <p className="text-red-500 text-sm mt-2">
-                Please select at least one school
+                Please select a school
               </p>
             )}
           </CardContent>
@@ -302,7 +290,7 @@ export default function CreateMentorPage() {
           </Button>
           <Button
             type="submit"
-            disabled={loading || formData.schoolIds.length === 0 || (creationMethod === "credentials" && !password)}
+            disabled={loading || !formData.schoolId || (creationMethod === "credentials" && !password)}
             className="flex items-center gap-2"
           >
             {loading ? (

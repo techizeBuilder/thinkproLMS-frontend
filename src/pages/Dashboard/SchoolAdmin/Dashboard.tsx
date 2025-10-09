@@ -72,7 +72,7 @@ export default function SchoolAdminDashboard() {
       // Calculate stats
       const totalMentors = mentorsRes.success ? mentorsRes.data.mentors.length : 0;
       const totalStudents = studentsRes.success ? studentsRes.data.students.length : 0;
-      const totalSchools = schoolAdmin?.assignedSchools?.length || 0;
+      const totalSchools = schoolAdmin?.assignedSchool ? 1 : 0;
       
       // Calculate average progress
       let totalProgress = 0;
@@ -123,7 +123,7 @@ export default function SchoolAdminDashboard() {
         <div className="flex items-center space-x-2">
           <SchoolIcon className="h-5 w-5 text-primary" />
           <span className="text-sm text-muted-foreground">
-            {schoolAdmin?.assignedSchools?.length || 0} School(s) Assigned
+            {schoolAdmin?.assignedSchool ? schoolAdmin.assignedSchool.name : "No School Assigned"}
           </span>
         </div>
       </div>
@@ -158,7 +158,7 @@ export default function SchoolAdminDashboard() {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Assigned Schools</CardTitle>
+            <CardTitle className="text-sm font-medium">Assigned School</CardTitle>
             <SchoolIcon className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -219,13 +219,11 @@ export default function SchoolAdminDashboard() {
                           </div>
                           <p className="text-sm text-muted-foreground">{mentor.user.email}</p>
                           <div className="text-sm">
-                            <span className="font-medium">Assigned Schools:</span>
-                            <div className="mt-1 space-y-1">
-                              {mentor.assignedSchools.map((school) => (
-                                <div key={school._id} className="text-xs bg-muted px-2 py-1 rounded">
-                                  {school.name} - {school.city}
-                                </div>
-                              ))}
+                            <span className="font-medium">Assigned School:</span>
+                            <div className="mt-1">
+                              <div className="text-xs bg-muted px-2 py-1 rounded">
+                                {mentor.assignedSchool.name} - {mentor.assignedSchool.city}
+                              </div>
                             </div>
                           </div>
                         </div>
