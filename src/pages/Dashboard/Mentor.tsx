@@ -8,14 +8,7 @@ import {
   CardHeader, 
   CardTitle 
 } from "@/components/ui/card"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
-import { Users, BookOpen, MessageSquare, GraduationCap } from "lucide-react"
+import { Users, BookOpen, MessageSquare } from "lucide-react"
 import { mentorService } from "@/api/mentorService"
 import { studentService } from "@/api/studentService"
 

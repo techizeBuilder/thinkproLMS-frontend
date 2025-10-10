@@ -29,7 +29,6 @@ export default function SchoolAdminStudentsPage() {
   const [loading, setLoading] = useState(true);
   const [students, setStudents] = useState<Student[]>([]);
   const [filteredStudents, setFilteredStudents] = useState<Student[]>([]);
-  const [schoolAdmin, setSchoolAdmin] = useState<any>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedGrade, setSelectedGrade] = useState("all");
 
@@ -61,7 +60,6 @@ export default function SchoolAdminStudentsPage() {
       
       if (response.success) {
         setStudents(response.data.students);
-        setSchoolAdmin(response.data.schoolAdmin);
       } else {
         toast.error("Failed to load students");
       }

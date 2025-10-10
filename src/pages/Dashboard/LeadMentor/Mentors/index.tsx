@@ -237,7 +237,7 @@ export default function MentorsPage() {
                         size="sm"
                         onClick={() =>
                           setResetPasswordUser({
-                            id: mentor.user._id,
+                            id: mentor._id,
                             name: mentor.user.name,
                             email: mentor.user.email,
                           })
@@ -307,7 +307,7 @@ export default function MentorsPage() {
                       size="sm"
                       onClick={() =>
                         setResetPasswordUser({
-                          id: mentor.user._id,
+                          id: mentor._id,
                           name: mentor.user.name,
                           email: mentor.user.email,
                         })

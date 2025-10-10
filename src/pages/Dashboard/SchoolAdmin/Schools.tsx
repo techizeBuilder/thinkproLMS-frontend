@@ -117,10 +117,10 @@ export default function SchoolAdminSchoolsPage() {
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4 text-xs md:text-sm">
-                  {school.boards && school.boards.length > 0 && (
+                  {school.board && (
                     <div>
                       <span className="text-muted-foreground">Board:</span>
-                      <div className="font-medium">{school.boards.join(", ")}</div>
+                      <div className="font-medium">{school.board}</div>
                     </div>
                   )}
                   {school.affiliatedTo && (

@@ -6,7 +6,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Users, BookOpen, MessageSquare, GraduationCap } from "lucide-react";
+import { Users, MessageSquare } from "lucide-react";
 import { mentorService } from "@/api/mentorService";
 import { studentService } from "@/api/studentService";
 

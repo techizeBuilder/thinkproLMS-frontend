@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import { Plus, Edit, Trash2, Search, FolderOpen, Calendar } from "lucide-react";
+import { Plus, Edit, Trash2, Search, FolderOpen } from "lucide-react";
 import { moduleService, type Module } from "@/api/moduleService";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
