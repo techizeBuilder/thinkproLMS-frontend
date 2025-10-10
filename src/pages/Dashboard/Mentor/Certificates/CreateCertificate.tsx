@@ -194,6 +194,33 @@ export default function CreateCertificatePage() {
     }
   };
 
+  const handleSignatureImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      // Validate file type
+      if (!file.type.startsWith('image/')) {
+        toast.error('Please select a valid image file');
+        return;
+      }
+
+      // Validate file size (max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        toast.error('Image size should be less than 5MB');
+        return;
+      }
+
+      // Create preview URL
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        setFormData(prev => ({
+          ...prev,
+          signatureImage: event.target?.result as string
+        }));
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -210,6 +237,15 @@ export default function CreateCertificatePage() {
 
     try {
       setLoading(true);
+      
+      // Handle signature image upload if present
+      if (formData.signatureImage && formData.signatureImage.startsWith('data:')) {
+        // For now, we'll send the base64 data directly
+        // In a production environment, you'd want to upload the file to a server
+        // and get back a file path/URL
+        console.log('Signature image detected, sending as base64 data');
+      }
+      
       const certificateData = {
         ...formData,
         studentIds: selectedStudents,
@@ -452,6 +488,32 @@ export default function CreateCertificatePage() {
                       placeholder="e.g., Principal"
                       required
                     />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="signatureImage">Signature Image (Optional)</Label>
+                  <div className="space-y-2">
+                    <Input
+                      id="signatureImage"
+                      type="file"
+                      accept="image/*"
+                      onChange={handleSignatureImageChange}
+                      className="cursor-pointer"
+                    />
+                    {formData.signatureImage && (
+                      <div className="mt-2">
+                        <p className="text-sm text-muted-foreground mb-2">Preview:</p>
+                        <img 
+                          src={formData.signatureImage} 
+                          alt="Signature preview" 
+                          className="max-w-[200px] max-h-[80px] object-contain border rounded"
+                        />
+                      </div>
+                    )}
+                    <p className="text-xs text-muted-foreground">
+                      Upload a signature image (JPG, PNG, GIF). Recommended size: 200x80px
+                    </p>
                   </div>
                 </div>
 
