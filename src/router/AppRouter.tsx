@@ -14,8 +14,7 @@ import SchoolAdmin from "../pages/Dashboard/SchoolAdmin";
 import SchoolAdminDashboard from "../pages/Dashboard/SchoolAdmin/Dashboard";
 import SchoolAdminMentorsPage from "../pages/Dashboard/SchoolAdmin/Mentors";
 import SchoolAdminStudentsPage from "../pages/Dashboard/SchoolAdmin/Students";
-import SchoolAdminModuleProgressPage from "../pages/Dashboard/SchoolAdmin/ModuleProgress";
-import SchoolAdminAssessmentReportsPage from "../pages/Dashboard/SchoolAdmin/AssessmentReports";
+import SchoolAdminSessionProgressPage from "../pages/Dashboard/SchoolAdmin/SessionProgress";
 import SchoolAdminSchoolsPage from "../pages/Dashboard/SchoolAdmin/Schools";
 import SchoolAdminSettingsPage from "../pages/Dashboard/SchoolAdmin/Settings";
 import AdminsPage from "../pages/Dashboard/SuperAdmin/Admins";
@@ -352,8 +351,7 @@ export default function AppRouter() {
           <Route path="profile" element={<SchoolAdminProfile />} />
           <Route path="mentors" element={<SchoolAdminMentorsPage />} />
           <Route path="students" element={<SchoolAdminStudentsPage />} />
-          <Route path="module-progress" element={<SchoolAdminModuleProgressPage />} />
-          <Route path="assessment-reports" element={<SchoolAdminAssessmentReportsPage />} />
+          <Route path="session-progress" element={<SchoolAdminSessionProgressPage />} />
           <Route path="schools" element={<SchoolAdminSchoolsPage />} />
           <Route path="settings" element={<SchoolAdminSettingsPage />} />
           

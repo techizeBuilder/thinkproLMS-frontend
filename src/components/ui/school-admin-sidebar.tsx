@@ -19,7 +19,6 @@ import {
   UserCheck,
   GraduationCap,
   BookOpen,
-  BarChart3,
   School,
   MessageSquare,
 } from "lucide-react";
@@ -77,11 +76,8 @@ export function SchoolAdminSidebar({ className }: SchoolAdminSidebarProps) {
 
         <SidebarGroup label="Analytics">
           <SidebarNav>
-            <SidebarNavItem to="/schooladmin/module-progress" icon={BookOpen}>
-              Module Progress
-            </SidebarNavItem>
-            <SidebarNavItem to="/schooladmin/assessment-reports" icon={BarChart3}>
-              Assessment Reports
+            <SidebarNavItem to="/schooladmin/session-progress" icon={BookOpen}>
+              Session Progress
             </SidebarNavItem>
           </SidebarNav>
         </SidebarGroup>

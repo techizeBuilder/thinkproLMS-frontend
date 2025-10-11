@@ -114,4 +114,16 @@ export const sessionProgressService = {
     const response = await axiosInstance.post("/session-progress/lead-mentor/mark-completed", data);
     return response.data;
   },
+
+  // School Admin specific methods
+  // Get session progress for a specific mentor (School Admin view)
+  getSchoolAdminSessionProgress: async (mentorId: string, schoolId?: string, section?: string, grade?: string): Promise<MentorSessionProgress> => {
+    const params: any = { mentorId };
+    if (schoolId) params.schoolId = schoolId;
+    if (section) params.section = section;
+    if (grade) params.grade = grade;
+    
+    const response = await axiosInstance.get("/school-admins/session-progress", { params });
+    return response.data.data;
+  },
 };
