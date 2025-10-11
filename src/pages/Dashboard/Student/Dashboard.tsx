@@ -52,72 +52,72 @@ export default function StudentDashboard() {
   };
 
   return (
-    <div className="p-4 md:p-6 space-y-6">
+    <div className="p-3 sm:p-4 lg:p-6 space-y-4 sm:space-y-6">
       {/* Dashboard Stats */}
-      <div className="grid gap-3 sm:gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-3 sm:gap-4 grid-cols-1 xs:grid-cols-2 lg:grid-cols-4">
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 px-3 sm:px-6 pt-3 sm:pt-6">
             <CardTitle className="text-xs sm:text-sm font-medium">
               Available Resources
             </CardTitle>
             <BookOpen className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
-          <CardContent>
-            <div className="text-xl sm:text-2xl font-bold">
+          <CardContent className="px-3 sm:px-6 pb-3 sm:pb-6">
+            <div className="text-lg sm:text-xl lg:text-2xl font-bold">
               {loading ? "..." : stats.resources}
             </div>
-            <p className="text-[11px] sm:text-xs text-muted-foreground">
+            <p className="text-[10px] sm:text-xs text-muted-foreground">
               Learning materials
             </p>
           </CardContent>
         </Card>
         
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 px-3 sm:px-6 pt-3 sm:pt-6">
             <CardTitle className="text-xs sm:text-sm font-medium">
               Available Assessments
             </CardTitle>
             <FileText className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
-          <CardContent>
-            <div className="text-xl sm:text-2xl font-bold">
+          <CardContent className="px-3 sm:px-6 pb-3 sm:pb-6">
+            <div className="text-lg sm:text-xl lg:text-2xl font-bold">
               {loading ? "..." : stats.assessments}
             </div>
-            <p className="text-[11px] sm:text-xs text-muted-foreground">
+            <p className="text-[10px] sm:text-xs text-muted-foreground">
               Ready to start now
             </p>
           </CardContent>
         </Card>
         
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 px-3 sm:px-6 pt-3 sm:pt-6">
             <CardTitle className="text-xs sm:text-sm font-medium">
               Certificates
             </CardTitle>
             <Award className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
-          <CardContent>
-            <div className="text-xl sm:text-2xl font-bold">
+          <CardContent className="px-3 sm:px-6 pb-3 sm:pb-6">
+            <div className="text-lg sm:text-xl lg:text-2xl font-bold">
               {loading ? "..." : stats.certificates}
             </div>
-            <p className="text-[11px] sm:text-xs text-muted-foreground">
+            <p className="text-[10px] sm:text-xs text-muted-foreground">
               Earned certificates
             </p>
           </CardContent>
         </Card>
         
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 px-3 sm:px-6 pt-3 sm:pt-6">
             <CardTitle className="text-xs sm:text-sm font-medium">
               Messages
             </CardTitle>
             <MessageSquare className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
-          <CardContent>
-            <div className="text-xl sm:text-2xl font-bold">
+          <CardContent className="px-3 sm:px-6 pb-3 sm:pb-6">
+            <div className="text-lg sm:text-xl lg:text-2xl font-bold">
               {loading ? "..." : stats.messages}
             </div>
-            <p className="text-[11px] sm:text-xs text-muted-foreground">
+            <p className="text-[10px] sm:text-xs text-muted-foreground">
               Unread messages
             </p>
           </CardContent>
@@ -125,24 +125,24 @@ export default function StudentDashboard() {
       </div>
 
       {/* Quick Actions */}
-      <div className="grid gap-3 sm:gap-4 md:grid-cols-3">
+      <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
         <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
-              <FileText className="h-5 w-5" />
+          <CardHeader className="px-3 sm:px-6 pt-3 sm:pt-6">
+            <CardTitle className="flex items-center gap-2 text-sm sm:text-base lg:text-lg">
+              <FileText className="h-4 w-4 sm:h-5 sm:w-5" />
               Assessments
             </CardTitle>
-            <CardDescription>
+            <CardDescription className="text-xs sm:text-sm">
               Take your assigned assessments and view results
             </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-2">
-            <Button asChild className="w-full h-9 sm:h-10 text-sm sm:text-base">
+          <CardContent className="px-3 sm:px-6 pb-3 sm:pb-6 space-y-2">
+            <Button asChild className="w-full h-8 sm:h-9 lg:h-10 text-xs sm:text-sm lg:text-base touch-manipulation">
               <Link to="/student/assessments">
                 View Available Assessments
               </Link>
             </Button>
-            <Button asChild variant="outline" className="w-full h-9 sm:h-10 text-sm sm:text-base">
+            <Button asChild variant="outline" className="w-full h-8 sm:h-9 lg:h-10 text-xs sm:text-sm lg:text-base touch-manipulation">
               <Link to="/student/assessments/results">
                 View Results
               </Link>
@@ -151,17 +151,17 @@ export default function StudentDashboard() {
         </Card>
 
         <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
-              <BookOpen className="h-5 w-5" />
+          <CardHeader className="px-3 sm:px-6 pt-3 sm:pt-6">
+            <CardTitle className="flex items-center gap-2 text-sm sm:text-base lg:text-lg">
+              <BookOpen className="h-4 w-4 sm:h-5 sm:w-5" />
               Resources
             </CardTitle>
-            <CardDescription>
+            <CardDescription className="text-xs sm:text-sm">
               Access your learning materials and resources
             </CardDescription>
           </CardHeader>
-          <CardContent>
-            <Button asChild className="w-full h-9 sm:h-10 text-sm sm:text-base">
+          <CardContent className="px-3 sm:px-6 pb-3 sm:pb-6">
+            <Button asChild className="w-full h-8 sm:h-9 lg:h-10 text-xs sm:text-sm lg:text-base touch-manipulation">
               <Link to="/student/resources">
                 Browse Resources
               </Link>
@@ -170,17 +170,17 @@ export default function StudentDashboard() {
         </Card>
 
         <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
-              <Bell className="h-5 w-5" />
+          <CardHeader className="px-3 sm:px-6 pt-3 sm:pt-6">
+            <CardTitle className="flex items-center gap-2 text-sm sm:text-base lg:text-lg">
+              <Bell className="h-4 w-4 sm:h-5 sm:w-5" />
               Notifications
             </CardTitle>
-            <CardDescription>
+            <CardDescription className="text-xs sm:text-sm">
               Stay updated with your latest notifications
             </CardDescription>
           </CardHeader>
-          <CardContent>
-            <Button asChild className="w-full h-9 sm:h-10 text-sm sm:text-base">
+          <CardContent className="px-3 sm:px-6 pb-3 sm:pb-6">
+            <Button asChild className="w-full h-8 sm:h-9 lg:h-10 text-xs sm:text-sm lg:text-base touch-manipulation">
               <Link to="/student/notifications">
                 View Notifications
               </Link>
@@ -190,36 +190,36 @@ export default function StudentDashboard() {
       </div>
 
       {/* Recent Activity & Messages */}
-      <div className="grid gap-3 sm:gap-4 md:grid-cols-2">
+      <div className="grid gap-3 sm:gap-4 grid-cols-1 lg:grid-cols-2">
         <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
-              <Calendar className="h-5 w-5" />
+          <CardHeader className="px-3 sm:px-6 pt-3 sm:pt-6">
+            <CardTitle className="flex items-center gap-2 text-sm sm:text-base lg:text-lg">
+              <Calendar className="h-4 w-4 sm:h-5 sm:w-5" />
               Recent Activity
             </CardTitle>
-            <CardDescription>
+            <CardDescription className="text-xs sm:text-sm">
               Your latest learning activities and progress
             </CardDescription>
           </CardHeader>
-          <CardContent>
-            <div className="text-center py-8 text-muted-foreground text-sm">
+          <CardContent className="px-3 sm:px-6 pb-3 sm:pb-6">
+            <div className="text-center py-6 sm:py-8 text-muted-foreground text-xs sm:text-sm">
               No recent activity to display
             </div>
           </CardContent>
         </Card>
 
         <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
-              <MessageSquare className="h-5 w-5" />
+          <CardHeader className="px-3 sm:px-6 pt-3 sm:pt-6">
+            <CardTitle className="flex items-center gap-2 text-sm sm:text-base lg:text-lg">
+              <MessageSquare className="h-4 w-4 sm:h-5 sm:w-5" />
               Messages
             </CardTitle>
-            <CardDescription>
+            <CardDescription className="text-xs sm:text-sm">
               Communicate with your mentor and peers
             </CardDescription>
           </CardHeader>
-          <CardContent>
-            <Button asChild className="w-full h-9 sm:h-10 text-sm sm:text-base">
+          <CardContent className="px-3 sm:px-6 pb-3 sm:pb-6">
+            <Button asChild className="w-full h-8 sm:h-9 lg:h-10 text-xs sm:text-sm lg:text-base touch-manipulation">
               <Link to="/student/messages">
                 Open Messages
               </Link>

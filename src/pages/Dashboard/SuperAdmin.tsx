@@ -30,7 +30,7 @@ function SuperAdminContent() {
         </div>
       </header>
       <main className="flex-1 overflow-auto">
-        <div className="p-4 md:p-6 space-y-6">
+        <div className="p-2 sm:p-4 md:p-6 space-y-6">
           {/* Dashboard Stats - Only show on main routes */}
           {/* {showDashboardStats && (
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">

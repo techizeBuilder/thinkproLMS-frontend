@@ -48,9 +48,9 @@ export function SidebarProvider({
   // Handle responsive behavior
   React.useEffect(() => {
     const checkScreenSize = () => {
-      const mobile = window.innerWidth < 768
+      const mobile = window.innerWidth < 1024 // Changed to 1024px for tablet support
       setIsMobile(mobile)
-      // Auto-collapse on mobile
+      // Auto-collapse on mobile/tablet
       if (mobile) {
         setIsMobileOpen(false)
       }
@@ -112,9 +112,9 @@ export function Sidebar({ children, className, ...props }: SidebarProps) {
 
   return (
     <>
-      {/* Mobile overlay */}
+      {/* Mobile/Tablet overlay */}
       {isMobile && isMobileOpen && (
-        <div className="fixed inset-0 z-40 bg-black/50 md:hidden" />
+        <div className="fixed inset-0 z-40 bg-black/50 lg:hidden" />
       )}
       
       <div
@@ -122,15 +122,15 @@ export function Sidebar({ children, className, ...props }: SidebarProps) {
         className={cn(
           "relative flex h-screen flex-col border-r bg-background transition-all duration-300 ease-in-out",
           // Desktop behavior
-          "md:relative md:translate-x-0",
-          // Mobile behavior
+          "lg:relative lg:translate-x-0",
+          // Mobile/Tablet behavior
           isMobile && "fixed left-0 top-0 z-50 transform",
           isMobile && !isMobileOpen && "-translate-x-full",
           isMobile && isMobileOpen && "translate-x-0",
           // Desktop width
           !isMobile && (isCollapsed ? "w-16" : "w-64"),
-          // Mobile width
-          isMobile && "w-64",
+          // Mobile/Tablet width - responsive width
+          isMobile && "w-72 sm:w-80",
           className
         )}
         {...props}

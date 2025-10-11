@@ -259,15 +259,15 @@ const NewMessageDialog: React.FC<NewMessageDialogProps> = ({ onSelectUser }) => 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button size="sm">
-          <MessageSquarePlus className="h-4 w-4" />
-          New Message
+        <Button size="sm" className="h-8 text-xs">
+          <MessageSquarePlus className="h-3 w-3" />
+          <span className="hidden sm:inline">New Message</span>
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-4xl h-[95vh] w-[95vw] sm:w-[90vw] md:w-[80vw] lg:w-[70vw] xl:w-[60vw] p-4 sm:p-6 flex flex-col">
-        <DialogHeader className="mb-4 sm:mb-6">
-          <DialogTitle className="text-lg sm:text-xl">Start New Conversation</DialogTitle>
-          <DialogDescription className="text-sm">
+      <DialogContent className="max-w-4xl h-[95vh] w-[95vw] sm:w-[90vw] md:w-[80vw] lg:w-[70vw] xl:w-[60vw] p-3 sm:p-4 lg:p-6 flex flex-col">
+        <DialogHeader className="mb-3 sm:mb-4 lg:mb-6">
+          <DialogTitle className="text-base sm:text-lg lg:text-xl">Start New Conversation</DialogTitle>
+          <DialogDescription className="text-xs sm:text-sm">
             Select a role and find a user to start messaging with
           </DialogDescription>
         </DialogHeader>

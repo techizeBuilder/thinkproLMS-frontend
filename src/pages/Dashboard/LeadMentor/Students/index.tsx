@@ -216,72 +216,72 @@ export default function StudentsPage() {
   }
 
   return (
-    <div className="space-y-4 md:space-y-6">
+    <div className="space-y-3 sm:space-y-4 lg:space-y-6">
       {/* Header */}
-      <div className="space-y-3 md:space-y-4">
+      <div className="space-y-2 sm:space-y-3 lg:space-y-4">
         <div>
-          <h1 className="text-xl md:text-2xl lg:text-3xl font-bold text-gray-900">Students</h1>
-          <p className="text-sm md:text-base text-gray-600">Manage student accounts and records</p>
+          <h1 className="text-lg sm:text-xl lg:text-2xl xl:text-3xl font-bold text-gray-900">Students</h1>
+          <p className="text-xs sm:text-sm lg:text-base text-gray-600">Manage student accounts and records</p>
         </div>
         
         {/* Action Buttons */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 md:flex md:flex-wrap md:gap-2">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3 lg:flex lg:flex-wrap lg:gap-2">
           <Button
             variant="outline"
             size="sm"
             onClick={() => navigate(`${studentsPath}/promote`)}
-            className="flex items-center gap-2 text-xs md:text-sm"
+            className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm touch-manipulation h-8 sm:h-9"
           >
-            <ArrowUp className="h-3 w-3 md:h-4 md:w-4" />
-            <span className="hidden sm:inline">Promote Grade</span>
-            <span className="sm:hidden">Promote</span>
+            <ArrowUp className="h-3 w-3 sm:h-4 sm:w-4" />
+            <span className="hidden xs:inline">Promote Grade</span>
+            <span className="xs:hidden">Promote</span>
           </Button>
           <Button
             variant="outline"
             size="sm"
             onClick={() => navigate(`${studentsPath}/bulk-upload`)}
-            className="flex items-center gap-2 text-xs md:text-sm"
+            className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm touch-manipulation h-8 sm:h-9"
           >
-            <Upload className="h-3 w-3 md:h-4 md:w-4" />
-            <span className="hidden sm:inline">Bulk Upload</span>
-            <span className="sm:hidden">Upload</span>
+            <Upload className="h-3 w-3 sm:h-4 sm:w-4" />
+            <span className="hidden xs:inline">Bulk Upload</span>
+            <span className="xs:hidden">Upload</span>
           </Button>
           <Button
             variant="outline"
             size="sm"
             onClick={() => handleDownload("excel")}
-            className="flex items-center gap-2 text-xs md:text-sm"
+            className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm touch-manipulation h-8 sm:h-9"
           >
-            <Download className="h-3 w-3 md:h-4 md:w-4" />
-            <span className="hidden sm:inline">Download List</span>
-            <span className="sm:hidden">Download</span>
+            <Download className="h-3 w-3 sm:h-4 sm:w-4" />
+            <span className="hidden xs:inline">Download List</span>
+            <span className="xs:hidden">Download</span>
           </Button>
           <Button
             size="sm"
             onClick={() => navigate(`${studentsPath}/create`)}
-            className="flex items-center gap-2 text-xs md:text-sm"
+            className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm touch-manipulation h-8 sm:h-9"
           >
-            <Plus className="h-3 w-3 md:h-4 md:w-4" />
-            <span className="hidden sm:inline">Add Student</span>
-            <span className="sm:hidden">Add</span>
+            <Plus className="h-3 w-3 sm:h-4 sm:w-4" />
+            <span className="hidden xs:inline">Add Student</span>
+            <span className="xs:hidden">Add</span>
           </Button>
         </div>
 
         {/* Summary Stats */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 md:flex md:flex-wrap md:gap-4 text-xs md:text-sm">
-          <div className="flex items-center gap-2">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3 lg:flex lg:flex-wrap lg:gap-4 text-xs sm:text-sm">
+          <div className="flex items-center gap-1 sm:gap-2">
             <span className="text-gray-600">Total:</span>
             <span className="font-semibold text-blue-600">{students.length}</span>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1 sm:gap-2">
             <span className="text-gray-600">Verified:</span>
             <span className="font-semibold text-green-600">{students.filter((s) => s.user.isVerified).length}</span>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1 sm:gap-2">
             <span className="text-gray-600">Pending:</span>
             <span className="font-semibold text-orange-600">{students.filter((s) => !s.user.isVerified).length}</span>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1 sm:gap-2">
             <span className="text-gray-600">Schools:</span>
             <span className="font-semibold text-purple-600">{new Set(students.map((s) => s.school._id)).size}</span>
           </div>
@@ -290,21 +290,21 @@ export default function StudentsPage() {
 
       {/* Filters */}
       <Card>
-        <CardContent className="p-3 md:p-4">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
+        <CardContent className="p-3 sm:p-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
               <Input
                 placeholder="Search students by name, email, student ID..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10 text-sm md:text-base"
+                className="pl-10 text-sm sm:text-base h-9 sm:h-10"
               />
             </div>
             <select
               value={selectedSchool}
               onChange={(e) => setSelectedSchool(e.target.value)}
-              className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm md:text-base"
+              className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base h-9 sm:h-10"
             >
               <option value="">All Schools</option>
               {schools.map((school) => (
@@ -316,7 +316,7 @@ export default function StudentsPage() {
             <select
               value={selectedGrade}
               onChange={(e) => setSelectedGrade(e.target.value)}
-              className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm md:text-base"
+              className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base h-9 sm:h-10"
             >
               <option value="">All Grades</option>
               {grades.map((grade) => (
@@ -455,13 +455,13 @@ export default function StudentsPage() {
 
       {/* Mobile/Tablet Card View */}
       <div className="xl:hidden">
-        <div className="grid gap-4">
+        <div className="grid gap-3 sm:gap-4">
           {filteredStudents.map((student) => (
             <Card key={student._id}>
-              <CardContent className="p-4">
-                <div className="flex items-start justify-between mb-3">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 flex-shrink-0">
+              <CardContent className="p-3 sm:p-4">
+                <div className="flex items-start justify-between mb-2 sm:mb-3">
+                  <div className="flex items-center gap-2 sm:gap-3">
+                    <div className="w-8 h-8 sm:w-10 sm:h-10 flex-shrink-0">
                       <ProfilePictureDisplay
                         profilePicture={student.user.profilePicture}
                         name={student.user.name}
@@ -469,7 +469,7 @@ export default function StudentsPage() {
                       />
                     </div>
                     <div className="min-w-0 flex-1">
-                      <div className="font-medium text-sm md:text-base truncate">{student.user.name}</div>
+                      <div className="font-medium text-sm sm:text-base truncate">{student.user.name}</div>
                       <div className="flex gap-1 mt-1 flex-wrap">
                         <Badge
                           variant={
@@ -495,37 +495,37 @@ export default function StudentsPage() {
                   />
                 </div>
                 
-                <div className="space-y-2 text-sm">
+                <div className="space-y-1.5 sm:space-y-2 text-xs sm:text-sm">
                   <div className="flex items-center justify-between">
                     <span className="text-gray-600">Student ID:</span>
-                    <span className="font-mono text-xs md:text-sm">{student.studentId}</span>
+                    <span className="font-mono text-xs sm:text-sm">{student.studentId}</span>
                   </div>
                   <div className="flex items-center">
-                    <span className="text-gray-600 w-20">Email:</span>
-                    <span className="truncate">{student.user.email}</span>
+                    <span className="text-gray-600 w-16 sm:w-20 flex-shrink-0">Email:</span>
+                    <span className="truncate text-xs sm:text-sm">{student.user.email}</span>
                   </div>
                   <div className="flex items-center">
-                    <GraduationCap className="h-4 w-4 text-gray-500 mr-2 flex-shrink-0" />
-                    <span className="font-medium">
+                    <GraduationCap className="h-3 w-3 sm:h-4 sm:w-4 text-gray-500 mr-1 sm:mr-2 flex-shrink-0" />
+                    <span className="font-medium text-xs sm:text-sm">
                       Grade {student.grade} - {student.section || 'No Section'}
                     </span>
                   </div>
                   <div className="flex items-start">
-                    <span className="text-gray-600 w-20 flex-shrink-0">School:</span>
+                    <span className="text-gray-600 w-16 sm:w-20 flex-shrink-0">School:</span>
                     <div className="min-w-0 flex-1">
-                      <div className="font-medium truncate">{student.school.name}</div>
-                      <div className="text-gray-500 text-xs">
+                      <div className="font-medium truncate text-xs sm:text-sm">{student.school.name}</div>
+                      <div className="text-gray-500 text-[10px] sm:text-xs">
                         {student.school.city}, {student.school.state}
                       </div>
                     </div>
                   </div>
                   {(student.parentEmail || student.parentPhoneNumber) && (
                     <div className="flex items-start">
-                      <span className="text-gray-600 w-20 flex-shrink-0">Parent:</span>
+                      <span className="text-gray-600 w-16 sm:w-20 flex-shrink-0">Parent:</span>
                       <div className="min-w-0 flex-1">
-                        <div className="truncate">{student.parentEmail}</div>
+                        <div className="truncate text-xs sm:text-sm">{student.parentEmail}</div>
                         {student.parentPhoneNumber && (
-                          <div className="text-gray-500 text-xs">{student.parentPhoneNumber}</div>
+                          <div className="text-gray-500 text-[10px] sm:text-xs">{student.parentPhoneNumber}</div>
                         )}
                       </div>
                     </div>
@@ -533,7 +533,7 @@ export default function StudentsPage() {
                   <div className="flex items-center justify-between">
                     <span className="text-gray-600">Password:</span>
                     {showPassword[student._id] ? (
-                      <div className="text-xs text-green-600 font-mono bg-green-50 p-1 rounded border">
+                      <div className="text-[10px] sm:text-xs text-green-600 font-mono bg-green-50 p-1 rounded border">
                         {showPassword[student._id]}
                       </div>
                     ) : (
@@ -542,7 +542,7 @@ export default function StudentsPage() {
                         size="sm"
                         onClick={() => handleShowPassword(student._id)}
                         disabled={loadingPassword[student._id]}
-                        className="text-blue-600 hover:text-blue-700 h-6 px-2"
+                        className="text-blue-600 hover:text-blue-700 h-5 sm:h-6 px-1 sm:px-2 touch-manipulation"
                         title="Show password"
                       >
                         <Eye className="h-3 w-3" />

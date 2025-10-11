@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -11,10 +11,28 @@ import { PhoneInput } from "@/components/ui/phone-input";
 import { isValidPhoneNumber } from "@/utils/validation";
 
 export default function GuestRegister() {
-  const { login } = useAuth();
+  const { login, user, loading } = useAuth();
   const navigate = useNavigate();
-  const [loading, setLoading] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
+  
+  // Redirect authenticated users to their role-based dashboard
+  useEffect(() => {
+    if (!loading && user) {
+      const roleRouteMap: { [key: string]: string } = {
+        superadmin: "/superadmin",
+        leadmentor: "/leadmentor", 
+        schooladmin: "/schooladmin",
+        admin: "/admin",
+        mentor: "/mentor",
+        student: "/student",
+        guest: "/guest"
+      };
+      
+      const route = roleRouteMap[user.role] || "/login";
+      navigate(route, { replace: true });
+    }
+  }, [user, loading, navigate]);
   
   // Form state
   const [formData, setFormData] = useState({
@@ -41,26 +59,26 @@ export default function GuestRegister() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
+    setIsSubmitting(true);
     setError("");
 
     // Validation
     if (formData.password !== formData.confirmPassword) {
       setError("Passwords do not match");
-      setLoading(false);
+      setIsSubmitting(false);
       return;
     }
 
     if (formData.password.length < 6) {
       setError("Password must be at least 6 characters long");
-      setLoading(false);
+      setIsSubmitting(false);
       return;
     }
 
     // Validate phone number if provided
     if (formData.phoneNumber && !isValidPhoneNumber(formData.phoneNumber)) {
       setError("Please enter a valid phone number");
-      setLoading(false);
+      setIsSubmitting(false);
       return;
     }
 
@@ -84,9 +102,21 @@ export default function GuestRegister() {
     } catch (err: any) {
       setError(err.response?.data?.message || "Registration failed");
     } finally {
-      setLoading(false);
+      setIsSubmitting(false);
     }
   };
+
+  // Show loading while checking authentication
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="flex items-center space-x-2">
+          <div className="w-6 h-6 border-2 border-green-600 border-t-transparent rounded-full animate-spin"></div>
+          <span className="text-gray-600">Loading...</span>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50 flex items-center justify-center p-4">
@@ -335,9 +365,9 @@ export default function GuestRegister() {
               <Button 
                 type="submit" 
                 className="w-full h-11 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-medium shadow-lg hover:shadow-xl transition-all duration-200" 
-                disabled={loading}
+                disabled={isSubmitting}
               >
-                {loading ? (
+                {isSubmitting ? (
                   <div className="flex items-center space-x-2">
                     <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
                     <span>Creating Account...</span>

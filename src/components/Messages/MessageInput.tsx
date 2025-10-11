@@ -56,9 +56,9 @@ const MessageInput: React.FC<MessageInputProps> = ({
           onClick={handleSend}
           disabled={!message.trim() || disabled}
           size="icon"
-          className="flex-shrink-0"
+          className="flex-shrink-0 h-8 w-8"
         >
-          <Send className="h-4 w-4" />
+          <Send className="h-3 w-3" />
         </Button>
       </div>
     </div>

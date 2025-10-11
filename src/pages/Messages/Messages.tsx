@@ -51,14 +51,14 @@ const Messages: React.FC = () => {
     loadConversations();
   }, []);
 
-  // Handle window resize to adjust mobile layout
+  // Handle window resize to adjust mobile/tablet layout
   useEffect(() => {
     const handleResize = () => {
-      if (window.innerWidth >= 768) {
+      if (window.innerWidth >= 1024) {
         // Desktop: always show conversations list
         setShowConversationsList(true);
       } else {
-        // Mobile: show conversations list only if no conversation is selected
+        // Mobile/Tablet: show conversations list only if no conversation is selected
         if (!selectedConversationId) {
           setShowConversationsList(true);
         }
@@ -248,7 +248,7 @@ const Messages: React.FC = () => {
       setSelectedConversationId(response.conversation._id);
       
       // On mobile, hide conversations list when a conversation is selected
-      if (window.innerWidth < 768) {
+      if (window.innerWidth < 1024) {
         setShowConversationsList(false);
       }
     } catch (error: any) {
@@ -261,7 +261,7 @@ const Messages: React.FC = () => {
     setSelectedConversationId(conversationId);
     
     // On mobile, hide conversations list when a conversation is selected
-    if (window.innerWidth < 768) {
+    if (window.innerWidth < 1024) {
       setShowConversationsList(false);
     }
   };
@@ -290,35 +290,35 @@ const Messages: React.FC = () => {
     : false;
 
   return (
-    <div className="container mx-auto p-3 max-w-7xl h-[calc(100vh-80px)]">
+    <div className="container mx-auto max-w-7xl h-[calc(100vh-80px)]">
       {/* Header */}
-      <div className="mb-3 flex items-center justify-between">
+      <div className="mb-2 sm:mb-3 flex items-center justify-between">
         <div className="flex items-center gap-2">
           {/* Mobile menu button - only visible on small screens */}
           <Button
             variant="outline"
             size="sm"
-            className="md:hidden"
+            className="lg:hidden h-8 w-8 p-0"
             onClick={toggleConversationsList}
           >
-            <Menu className="h-4 w-4" />
+            <Menu className="h-3 w-3" />
           </Button>
-          <h1 className="text-2xl font-bold">Messages</h1>
+          <h1 className="text-xl sm:text-2xl font-bold">Messages</h1>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1 sm:gap-2">
           {isConnected ? (
-            <Badge variant="outline" className="gap-1">
+            <Badge variant="outline" className="gap-1 text-xs sm:text-sm">
               <Wifi className="h-3 w-3" />
-              Online
+              <span className="hidden sm:inline">Online</span>
             </Badge>
           ) : (
-            <Badge variant="destructive" className="gap-1">
+            <Badge variant="destructive" className="gap-1 text-xs sm:text-sm">
               <WifiOff className="h-3 w-3" />
-              Offline
+              <span className="hidden sm:inline">Offline</span>
             </Badge>
           )}
           {totalUnreadCount > 0 && (
-            <Badge variant="default" className="text-sm">
+            <Badge variant="default" className="text-xs sm:text-sm">
               {totalUnreadCount} unread
             </Badge>
           )}
@@ -326,29 +326,29 @@ const Messages: React.FC = () => {
         </div>
       </div>
 
-      <div className="flex h-full gap-3 relative">
+      <div className="flex h-full gap-2 sm:gap-3 relative">
         {/* Mobile overlay backdrop */}
         {showConversationsList && (
           <div 
-            className="md:hidden fixed inset-0 bg-black/50 z-40"
+            className="lg:hidden fixed inset-0 bg-black/50 z-40"
             onClick={() => setShowConversationsList(false)}
           />
         )}
 
         {/* Conversations List - Desktop: always visible, Mobile: conditional with overlay */}
-        <div className={`${showConversationsList ? 'block' : 'hidden'} md:block w-full md:w-1/3 relative z-50 md:z-auto`}>
+        <div className={`${showConversationsList ? 'block' : 'hidden'} lg:block w-full lg:w-1/3 relative z-50 lg:z-auto`}>
           <Card className="flex flex-col h-full">
-            <CardHeader className="border-b py-3">
+            <CardHeader className="border-b py-2 sm:py-3">
               <div className="flex items-center justify-between">
-                <CardTitle className="text-lg">Conversations</CardTitle>
+                <CardTitle className="text-base sm:text-lg">Conversations</CardTitle>
                 {/* Mobile close button */}
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="md:hidden"
+                  className="lg:hidden h-8 w-8 p-0"
                   onClick={() => setShowConversationsList(false)}
                 >
-                  <ArrowLeft className="h-4 w-4" />
+                  <ArrowLeft className="h-3 w-3" />
                 </Button>
               </div>
             </CardHeader>
@@ -364,41 +364,41 @@ const Messages: React.FC = () => {
         </div>
 
         {/* Messages Area - Desktop: 2/3 width, Mobile: full width */}
-        <div className={`${!showConversationsList ? 'block' : 'hidden'} md:block w-full md:w-2/3`}>
+        <div className={`${!showConversationsList ? 'block' : 'hidden'} lg:block w-full lg:w-2/3`}>
           <Card className="flex flex-col h-full">
             {selectedConversation ? (
               <>
-                <CardHeader className="border-b py-3">
+                <CardHeader className="border-b py-2 sm:py-3">
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 min-w-0 flex-1">
                       {/* Mobile back button */}
                       <Button
                         variant="ghost"
                         size="sm"
-                        className="md:hidden"
+                        className="lg:hidden flex-shrink-0 h-8 w-8 p-0"
                         onClick={handleBackToConversations}
                       >
-                        <ArrowLeft className="h-4 w-4" />
+                        <ArrowLeft className="h-3 w-3" />
                       </Button>
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <CardTitle className="text-lg">{selectedConversation.participant.name}</CardTitle>
-                          <Badge variant="secondary" className="text-xs">
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-1 sm:gap-2 flex-wrap">
+                          <CardTitle className="text-base sm:text-lg truncate">{selectedConversation.participant.name}</CardTitle>
+                          <Badge variant="secondary" className="text-xs flex-shrink-0">
                             {selectedConversation.participant.role}
                           </Badge>
                           {isParticipantOnline && (
-                            <Badge variant="outline" className="gap-1 text-xs">
+                            <Badge variant="outline" className="gap-1 text-xs flex-shrink-0">
                               <div className="h-2 w-2 rounded-full bg-green-500" />
-                              Online
+                              <span className="hidden sm:inline">Online</span>
                             </Badge>
                           )}
                         </div>
-                        <div className="flex flex-col gap-0.5">
-                          <p className="text-xs text-muted-foreground">
+                        <div className="flex flex-col gap-0.5 mt-1">
+                          <p className="text-xs text-muted-foreground truncate">
                             {selectedConversation.participant.email}
                           </p>
                           {selectedConversation.participant.school && (
-                            <p className="text-xs text-muted-foreground">
+                            <p className="text-xs text-muted-foreground truncate">
                               🏫 {selectedConversation.participant.school.name} - {selectedConversation.participant.school.city}, {selectedConversation.participant.school.state}
                             </p>
                           )}
@@ -416,7 +416,7 @@ const Messages: React.FC = () => {
                     />
                   </div>
                   {isTyping && (
-                    <p className="px-4 py-2 text-sm text-muted-foreground italic bg-background border-t relative z-10">
+                    <p className="px-2 sm:px-4 py-2 text-xs sm:text-sm text-muted-foreground italic bg-background border-t relative z-10">
                       {selectedConversation.participant.name} is typing...
                     </p>
                   )}
@@ -427,11 +427,11 @@ const Messages: React.FC = () => {
                 </CardContent>
               </>
             ) : (
-              <CardContent className="flex-1 flex items-center justify-center">
+              <CardContent className="flex-1 flex items-center justify-center p-4">
                 <div className="text-center">
-                  <MessageSquare className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                  <p className="text-lg font-medium mb-2">Select a conversation</p>
-                  <p className="text-sm text-muted-foreground">
+                  <MessageSquare className="h-8 w-8 sm:h-12 sm:w-12 text-muted-foreground mx-auto mb-3 sm:mb-4" />
+                  <p className="text-base sm:text-lg font-medium mb-2">Select a conversation</p>
+                  <p className="text-xs sm:text-sm text-muted-foreground">
                     Choose a conversation from the list or start a new one
                   </p>
                 </div>

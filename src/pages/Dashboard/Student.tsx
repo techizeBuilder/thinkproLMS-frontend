@@ -10,12 +10,12 @@ function StudentContent({ student }: { student: Student | null }) {
 
   return (
     <div className="flex-1 flex flex-col overflow-hidden">
-      <header className="h-16 border-b bg-background px-4 md:px-6 flex items-center justify-between">
-        <div className="flex items-center gap-4">
+      <header className="h-14 sm:h-16 border-b bg-background px-3 sm:px-4 lg:px-6 flex items-center justify-between">
+        <div className="flex items-center gap-2 sm:gap-4">
           {isMobile && (
             <button
               onClick={toggle}
-              className="p-2 rounded-md hover:bg-accent md:hidden"
+              className="p-2 rounded-md hover:bg-accent lg:hidden touch-manipulation"
               aria-label="Open menu"
             >
               <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -24,10 +24,10 @@ function StudentContent({ student }: { student: Student | null }) {
             </button>
           )}
           <div className="flex-1 min-w-0">
-            <h1 className="text-xl md:text-2xl font-semibold truncate">
+            <h1 className="text-lg sm:text-xl lg:text-2xl font-semibold truncate">
               Student Dashboard {student?.studentId && `(${student.studentId})`}
             </h1>
-            <p className="text-xs sm:text-sm text-muted-foreground hidden sm:block">
+            <p className="text-xs sm:text-sm text-muted-foreground hidden xs:block">
               Track your learning progress and achievements
             </p>
           </div>

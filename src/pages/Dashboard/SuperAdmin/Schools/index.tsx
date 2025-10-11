@@ -106,16 +106,16 @@ export default function SchoolsPage() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
+    <div className="space-y-4 sm:space-y-6">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 sm:gap-4">
         <div>
-          <h1 className="text-2xl md:text-3xl font-bold">Schools</h1>
-          <p className="text-gray-600 text-sm md:text-base">
+          <h1 className="text-lg sm:text-xl lg:text-2xl xl:text-3xl font-bold">Schools</h1>
+          <p className="text-gray-600 text-xs sm:text-sm lg:text-base">
             Manage all schools in the system ({schools.length} {schools.length === 1 ? 'school' : 'schools'})
           </p>
         </div>
         <Link to="/superadmin/schools/create" className="w-full sm:w-auto">
-          <Button className="w-full sm:w-auto">
+          <Button className="w-full sm:w-auto h-9 sm:h-10 text-sm sm:text-base touch-manipulation">
             <Plus className="mr-2 h-4 w-4" />
             Add School
           </Button>
@@ -124,15 +124,15 @@ export default function SchoolsPage() {
 
       {/* Filters Section */}
       <Card>
-        <CardHeader>
-          <CardTitle>Filters</CardTitle>
+        <CardHeader className="px-3 sm:px-6 pt-3 sm:pt-6">
+          <CardTitle className="text-sm sm:text-base lg:text-lg">Filters</CardTitle>
         </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="state-filter">State</Label>
+        <CardContent className="px-3 sm:px-6 pb-3 sm:pb-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+            <div className="space-y-1 sm:space-y-2">
+              <Label htmlFor="state-filter" className="text-xs sm:text-sm">State</Label>
               <Select value={selectedState} onValueChange={setSelectedState}>
-                <SelectTrigger>
+                <SelectTrigger className="h-9 sm:h-10">
                   <SelectValue placeholder="Select state" />
                 </SelectTrigger>
                 <SelectContent>
@@ -146,10 +146,10 @@ export default function SchoolsPage() {
               </Select>
             </div>
             
-            <div className="space-y-2">
-              <Label htmlFor="city-filter">City</Label>
+            <div className="space-y-1 sm:space-y-2">
+              <Label htmlFor="city-filter" className="text-xs sm:text-sm">City</Label>
               <Select value={selectedCity} onValueChange={setSelectedCity}>
-                <SelectTrigger>
+                <SelectTrigger className="h-9 sm:h-10">
                   <SelectValue placeholder="Select city" />
                 </SelectTrigger>
                 <SelectContent>
@@ -163,13 +163,13 @@ export default function SchoolsPage() {
               </Select>
             </div>
             
-            <div className="space-y-2">
-              <Label htmlFor="status-filter">Status</Label>
+            <div className="space-y-1 sm:space-y-2">
+              <Label htmlFor="status-filter" className="text-xs sm:text-sm">Status</Label>
               <Select 
                 value={includeInactive ? "all" : "active"} 
                 onValueChange={(value) => setIncludeInactive(value === "all")}
               >
-                <SelectTrigger>
+                <SelectTrigger className="h-9 sm:h-10">
                   <SelectValue placeholder="Select status" />
                 </SelectTrigger>
                 <SelectContent>
@@ -179,9 +179,9 @@ export default function SchoolsPage() {
               </Select>
             </div>
             
-            <div className="space-y-2">
-              <Label>&nbsp;</Label>
-              <Button variant="outline" onClick={clearFilters} className="w-full">
+            <div className="space-y-1 sm:space-y-2">
+              <Label className="text-xs sm:text-sm">&nbsp;</Label>
+              <Button variant="outline" onClick={clearFilters} className="w-full h-9 sm:h-10 text-xs sm:text-sm touch-manipulation">
                 Clear Filters
               </Button>
             </div>

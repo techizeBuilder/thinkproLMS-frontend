@@ -94,27 +94,27 @@ export default function MentorDashboard() {
   }
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-3 sm:p-4 lg:p-6 space-y-4 sm:space-y-6">
       {/* School Selection */}
       {mentor && mentor.assignedSchool && (
         <Card>
-          <CardHeader>
-            <CardTitle>School Information</CardTitle>
-            <CardDescription>Your assigned school details</CardDescription>
+          <CardHeader className="px-3 sm:px-6 pt-3 sm:pt-6">
+            <CardTitle className="text-sm sm:text-base lg:text-lg">School Information</CardTitle>
+            <CardDescription className="text-xs sm:text-sm">Your assigned school details</CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="px-3 sm:px-6 pb-3 sm:pb-6">
             <div className="space-y-2">
-              <div className="text-lg font-semibold">
+              <div className="text-base sm:text-lg font-semibold">
                 {mentor.assignedSchool.name}
                 {mentor.assignedSchool.branchName &&
                   ` - ${mentor.assignedSchool.branchName}`}
               </div>
-              <div className="text-sm text-muted-foreground">
+              <div className="text-xs sm:text-sm text-muted-foreground">
                 {mentor.assignedSchool.city}, {mentor.assignedSchool.state}
               </div>
               {mentor.assignedSchool.boards &&
                 mentor.assignedSchool.boards.length > 0 && (
-                  <div className="text-sm text-muted-foreground">
+                  <div className="text-xs sm:text-sm text-muted-foreground">
                     Boards: {mentor.assignedSchool.boards.join(", ")}
                   </div>
                 )}
@@ -124,53 +124,53 @@ export default function MentorDashboard() {
       )}
 
       {/* Dashboard Stats */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-3 sm:gap-4 grid-cols-1 xs:grid-cols-2 lg:grid-cols-4">
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">My Students</CardTitle>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 px-3 sm:px-6 pt-3 sm:pt-6">
+            <CardTitle className="text-xs sm:text-sm font-medium">My Students</CardTitle>
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{studentCount}</div>
-            <p className="text-xs text-muted-foreground">
+          <CardContent className="px-3 sm:px-6 pb-3 sm:pb-6">
+            <div className="text-lg sm:text-xl lg:text-2xl font-bold">{studentCount}</div>
+            <p className="text-[10px] sm:text-xs text-muted-foreground">
               Students in your assigned school
             </p>
           </CardContent>
         </Card>
 
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Messages</CardTitle>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 px-3 sm:px-6 pt-3 sm:pt-6">
+            <CardTitle className="text-xs sm:text-sm font-medium">Messages</CardTitle>
             <MessageSquare className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">0</div>
-            <p className="text-xs text-muted-foreground">Unread messages</p>
+          <CardContent className="px-3 sm:px-6 pb-3 sm:pb-6">
+            <div className="text-lg sm:text-xl lg:text-2xl font-bold">0</div>
+            <p className="text-[10px] sm:text-xs text-muted-foreground">Unread messages</p>
           </CardContent>
         </Card>
       </div>
 
       {/* Recent Activity */}
-      <div className="grid gap-4 md:grid-cols-2">
+      <div className="grid gap-3 sm:gap-4 grid-cols-1 lg:grid-cols-2">
         <Card>
-          <CardHeader>
-            <CardTitle>Recent Messages</CardTitle>
-            <CardDescription>Latest student communications</CardDescription>
+          <CardHeader className="px-3 sm:px-6 pt-3 sm:pt-6">
+            <CardTitle className="text-sm sm:text-base lg:text-lg">Recent Messages</CardTitle>
+            <CardDescription className="text-xs sm:text-sm">Latest student communications</CardDescription>
           </CardHeader>
-          <CardContent>
-            <div className="text-center py-8 text-muted-foreground">
+          <CardContent className="px-3 sm:px-6 pb-3 sm:pb-6">
+            <div className="text-center py-6 sm:py-8 text-muted-foreground text-xs sm:text-sm">
               No recent messages
             </div>
           </CardContent>
         </Card>
 
         <Card>
-          <CardHeader>
-            <CardTitle>Student Progress</CardTitle>
-            <CardDescription>Overview of student performance</CardDescription>
+          <CardHeader className="px-3 sm:px-6 pt-3 sm:pt-6">
+            <CardTitle className="text-sm sm:text-base lg:text-lg">Student Progress</CardTitle>
+            <CardDescription className="text-xs sm:text-sm">Overview of student performance</CardDescription>
           </CardHeader>
-          <CardContent>
-            <div className="text-center py-8 text-muted-foreground">
+          <CardContent className="px-3 sm:px-6 pb-3 sm:pb-6">
+            <div className="text-center py-6 sm:py-8 text-muted-foreground text-xs sm:text-sm">
               No student data available
             </div>
           </CardContent>
