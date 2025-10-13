@@ -311,7 +311,7 @@ export default function SessionProgressViewer({
         {/* Mentor Selection */}
         <div>
           <Label htmlFor="mentor-select" className="text-xs font-medium">
-            Mentor
+            School Mentor
           </Label>
           <Select
             value={selectedMentorId}
@@ -322,7 +322,7 @@ export default function SessionProgressViewer({
           >
             <SelectTrigger className="w-full h-8">
               <SelectValue
-                placeholder={loadingMentors ? "Loading..." : "Select mentor"}
+                placeholder={loadingMentors ? "Loading..." : "Select school mentor"}
               />
             </SelectTrigger>
             <SelectContent>

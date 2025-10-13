@@ -278,8 +278,8 @@ const NewMessageDialog: React.FC<NewMessageDialogProps> = ({ onSelectUser }) => 
               <TabsTrigger value="mentor" className="flex items-center justify-center gap-1 sm:gap-2 text-xs sm:text-sm min-h-[48px] touch-manipulation px-3 sm:px-4 whitespace-nowrap flex-shrink-0 min-w-[120px]">
                 {getRoleIcon("mentor")}
                 <span className="hidden md:inline">School Mentor</span>
-                <span className="hidden sm:inline md:hidden">Mentor</span>
-                <span className="sm:hidden">Mentor</span>
+                <span className="hidden sm:inline md:hidden">School Mentor</span>
+                <span className="sm:hidden">School Mentor</span>
                 <Badge variant="secondary" className="ml-1 h-4 min-w-[16px] px-1 text-xs">
                   {getRoleCount("mentor")}
                 </Badge>

@@ -127,7 +127,7 @@ export default function MentorsPage() {
           className="flex items-center gap-2 w-full sm:w-auto"
         >
           <Plus className="h-4 w-4" />
-          <span className="text-sm md:text-base">Add Mentor</span>
+          <span className="text-sm md:text-base">Add School Mentor</span>
         </Button>
       </div>
 

@@ -26,7 +26,7 @@ export function MentorSidebar({ className }: MentorSidebarProps) {
   return (
     <Sidebar className={cn("", className)}>
       <SidebarHeader>
-        <SidebarTitle>Mentor Portal</SidebarTitle>
+        <SidebarTitle>School Mentor Portal</SidebarTitle>
         <SidebarToggle />
       </SidebarHeader>
       

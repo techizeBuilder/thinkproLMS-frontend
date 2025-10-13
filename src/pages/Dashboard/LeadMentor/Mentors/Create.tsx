@@ -34,7 +34,9 @@ export default function CreateMentorPage() {
     phoneNumber: "",
     schoolIds: [] as string[],
   });
-  const [creationMethod, setCreationMethod] = useState<"invite" | "credentials">("invite");
+  const [creationMethod, setCreationMethod] = useState<
+    "invite" | "credentials"
+  >("invite");
   const [password, setPassword] = useState("");
 
   const salutations = ["Mr.", "Ms.", "Mrs.", "Dr.", "Prof."];
@@ -52,17 +54,21 @@ export default function CreateMentorPage() {
     }
   };
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+  const handleInputChange = (
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >
+  ) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleSchoolToggle = (schoolId: string, checked: boolean) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       schoolIds: checked
         ? [...prev.schoolIds, schoolId]
-        : prev.schoolIds.filter(id => id !== schoolId)
+        : prev.schoolIds.filter((id) => id !== schoolId),
     }));
   };
 
@@ -83,7 +89,7 @@ export default function CreateMentorPage() {
         createWithCredentials: creationMethod === "credentials",
         password: creationMethod === "credentials" ? password : undefined,
       };
-      
+
       await axiosInstance.post("/mentors", submitData);
       toast.success("Mentor created successfully");
       navigate("/leadmentor/mentors");
@@ -107,8 +113,12 @@ export default function CreateMentorPage() {
           <ArrowLeft className="h-4 w-4" />
         </Button>
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Create School Mentor</h1>
-          <p className="text-gray-600">Create a new mentor account and assign schools</p>
+          <h1 className="text-3xl font-bold text-gray-900">
+            Create School Mentor
+          </h1>
+          <p className="text-gray-600">
+            Create a new mentor account and assign schools
+          </p>
         </div>
       </div>
 
@@ -130,7 +140,7 @@ export default function CreateMentorPage() {
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
                   <option value="">Select Salutation</option>
-                  {salutations.map(salutation => (
+                  {salutations.map((salutation) => (
                     <option key={salutation} value={salutation}>
                       {salutation}
                     </option>
@@ -166,7 +176,9 @@ export default function CreateMentorPage() {
               <PhoneInput
                 label="Phone Number"
                 value={formData.phoneNumber}
-                onChange={(value) => setFormData(prev => ({ ...prev, phoneNumber: value }))}
+                onChange={(value) =>
+                  setFormData((prev) => ({ ...prev, phoneNumber: value }))
+                }
                 required
               />
             </div>
@@ -188,7 +200,9 @@ export default function CreateMentorPage() {
               <Label>Account Creation Method *</Label>
               <RadioGroup
                 value={creationMethod}
-                onValueChange={(value) => setCreationMethod(value as "invite" | "credentials")}
+                onValueChange={(value) =>
+                  setCreationMethod(value as "invite" | "credentials")
+                }
                 className="space-y-3"
               >
                 <div className="flex items-center space-x-2">
@@ -206,9 +220,12 @@ export default function CreateMentorPage() {
                   <RadioGroupItem value="credentials" id="credentials" />
                   <Label htmlFor="credentials" className="cursor-pointer">
                     <div>
-                      <div className="font-medium">Create with Manual Credentials</div>
+                      <div className="font-medium">
+                        Create with Manual Credentials
+                      </div>
                       <div className="text-sm text-gray-500">
-                        Mentor will be created with provided password and auto-verified
+                        Mentor will be created with provided password and
+                        auto-verified
                       </div>
                     </div>
                   </Label>
@@ -229,7 +246,8 @@ export default function CreateMentorPage() {
                   required={creationMethod === "credentials"}
                 />
                 <p className="text-xs text-gray-500">
-                  The mentor will be able to log in immediately with this password
+                  The mentor will be able to log in immediately with this
+                  password
                 </p>
               </div>
             )}
@@ -246,11 +264,14 @@ export default function CreateMentorPage() {
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-64 overflow-y-auto">
               {schools.map((school) => (
-                <div key={school._id} className="flex items-center space-x-2 p-3 border rounded-lg">
+                <div
+                  key={school._id}
+                  className="flex items-center space-x-2 p-3 border rounded-lg"
+                >
                   <Checkbox
                     id={school._id}
                     checked={formData.schoolIds.includes(school._id)}
-                    onCheckedChange={(checked) => 
+                    onCheckedChange={(checked) =>
                       handleSchoolToggle(school._id, checked as boolean)
                     }
                   />
@@ -259,7 +280,9 @@ export default function CreateMentorPage() {
                       <p className="font-medium">{school.name}</p>
                       <p className="text-sm text-gray-500">
                         {school.city}, {school.state}
-                        {school.boards && school.boards.length > 0 && ` • ${school.boards.join(", ")}`}
+                        {school.boards &&
+                          school.boards.length > 0 &&
+                          ` • ${school.boards.join(", ")}`}
                         {school.branchName && ` • ${school.branchName}`}
                       </p>
                     </div>
@@ -279,14 +302,26 @@ export default function CreateMentorPage() {
           <h4 className="font-medium text-blue-900 mb-2">What happens next?</h4>
           {creationMethod === "invite" ? (
             <ul className="text-sm text-blue-800 space-y-1">
-              <li>• An invitation email will be sent to the provided email address</li>
-              <li>• The mentor will receive a setup link to create their password</li>
-              <li>• Once setup is complete, they can log in and access the mentor panel</li>
+              <li>
+                • An invitation email will be sent to the provided email address
+              </li>
+              <li>
+                • The mentor will receive a setup link to create their password
+              </li>
+              <li>
+                • Once setup is complete, they can log in and access the mentor
+                panel
+              </li>
             </ul>
           ) : (
             <ul className="text-sm text-blue-800 space-y-1">
-              <li>• The mentor account will be created immediately with the provided password</li>
-              <li>• The mentor will be auto-verified and can log in right away</li>
+              <li>
+                • The mentor account will be created immediately with the
+                provided password
+              </li>
+              <li>
+                • The mentor will be auto-verified and can log in right away
+              </li>
               <li>• They can access the mentor panel immediately</li>
             </ul>
           )}
@@ -302,15 +337,24 @@ export default function CreateMentorPage() {
           </Button>
           <Button
             type="submit"
-            disabled={loading || formData.schoolIds.length === 0 || (creationMethod === "credentials" && !password)}
+            disabled={
+              loading ||
+              formData.schoolIds.length === 0 ||
+              (creationMethod === "credentials" && !password)
+            }
             className="flex items-center gap-2"
           >
             {loading ? (
-              creationMethod === "invite" ? "Sending Invitation..." : "Creating Mentor..."
+              creationMethod === "invite" ? (
+                "Sending Invitation..."
+              ) : (
+                "Creating Mentor..."
+              )
             ) : (
               <>
-                <Plus className="h-4 w-4" />
-                {creationMethod === "invite" ? "Create Mentor & Send Invite" : "Create Mentor"}
+                {creationMethod === "invite"
+                  ? "Create Mentor & Send Invite"
+                  : "Create Mentor"}
               </>
             )}
           </Button>
