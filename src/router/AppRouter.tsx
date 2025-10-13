@@ -373,9 +373,7 @@ export default function AppRouter() {
           <Route path="school-admins" element={<SchoolAdminsPage />} />
           <Route path="school-admins/create" element={<CreateSchoolAdminPage />} />
           <Route path="school-admins/:id/edit" element={<LeadMentorEditSchoolAdminPage />} />
-          <Route path="lead-mentors" element={<LeadMentorsPage />} />
-          <Route path="lead-mentors/create" element={<CreateLeadMentorPage />} />
-          <Route path="lead-mentors/:id/edit" element={<LeadMentorEditLeadMentorPage />} />
+          {/* Lead mentors management is not available to leadmentor role */}
           
           {/* Mentor Management */}
           <Route path="mentors" element={<MentorsPage />} />

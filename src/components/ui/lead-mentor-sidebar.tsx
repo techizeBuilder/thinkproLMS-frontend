@@ -84,9 +84,6 @@ export function LeadMentorSidebar({ className }: LeadMentorSidebarProps) {
             <SidebarNavItem to="/leadmentor/school-admins" icon={UserCheck}>
               School Admins
             </SidebarNavItem>
-            <SidebarNavItem to="/leadmentor/lead-mentors" icon={Crown}>
-              Lead Mentors
-            </SidebarNavItem>
           </SidebarNav>
           <SidebarNav>
             <SidebarNavItem to="/leadmentor/mentors" icon={Users}>
