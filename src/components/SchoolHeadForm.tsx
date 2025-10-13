@@ -143,7 +143,7 @@ export default function SchoolHeadForm({ schoolHeads, onChange }: SchoolHeadForm
               </div>
             </div>
 
-            <div className="space-y-2">
+            {/* <div className="space-y-2">
               <Label htmlFor={`head-profile-${index}`}>Profile Picture</Label>
               <div className="flex items-center gap-4">
                 <input
@@ -184,7 +184,7 @@ export default function SchoolHeadForm({ schoolHeads, onChange }: SchoolHeadForm
                   </div>
                 )}
               </div>
-            </div>
+            </div> */}
           </CardContent>
         </Card>
       ))}

@@ -210,7 +210,7 @@ export default function CreateSchoolPage() {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="branchName">Branch Name</Label>
                 <Input
@@ -232,7 +232,7 @@ export default function CreateSchoolPage() {
                   placeholder="Enter affiliation details (optional)"
                 />
               </div>
-            </div>
+            </div> */}
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
@@ -295,7 +295,7 @@ export default function CreateSchoolPage() {
         </Card>
 
         {/* Project Dates */}
-        <Card>
+        {/* <Card>
           <CardHeader>
             <CardTitle>Project Information</CardTitle>
           </CardHeader>
@@ -324,7 +324,7 @@ export default function CreateSchoolPage() {
               </div>
             </div>
           </CardContent>
-        </Card>
+        </Card> */}
 
         {/* School Heads */}
         <Card>

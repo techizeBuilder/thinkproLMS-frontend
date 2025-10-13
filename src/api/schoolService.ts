@@ -20,7 +20,7 @@ export interface AvailableGrade {
 
 export interface ServiceDetails {
   serviceType?: string;
-  mentors: ("School Mentor" | "Thinker Mentor")[];
+  mentors: ("School Mentor" | "ThinkPro Mentor")[];
   subjects: string[];
   grades: GradeWithSections[];
 }

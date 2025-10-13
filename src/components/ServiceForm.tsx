@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Plus, X } from "lucide-react";
 import type { ServiceDetails, GradeWithSections } from "@/api/schoolService";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
 interface ServiceFormProps {
   serviceDetails: ServiceDetails | null | undefined;
@@ -44,7 +45,7 @@ export default function ServiceForm({
   };
 
   const handleMentorChange = (
-    mentor: "School Mentor" | "Thinker Mentor",
+    mentor: "School Mentor" | "ThinkPro Mentor",
     checked: boolean
   ) => {
     const currentMentors = serviceDetails?.mentors || [];
@@ -55,6 +56,10 @@ export default function ServiceForm({
         mentors: currentMentors.filter((m) => m !== mentor),
       });
     }
+  };
+
+  const handleMentorSelect = (value: "School Mentor" | "ThinkPro Mentor") => {
+    updateServiceDetails({ mentors: [value] });
   };
 
   const handleGradeChange = (grade: number, checked: boolean) => {
@@ -203,7 +208,7 @@ export default function ServiceForm({
       <h3 className="text-lg font-semibold">Service Details</h3>
 
       {/* Service Type */}
-      <div className="space-y-2">
+      {/* <div className="space-y-2">
         <Label htmlFor="serviceType">Service Type</Label>
         <Input
           id="serviceType"
@@ -213,37 +218,25 @@ export default function ServiceForm({
           }
           placeholder="Enter service type"
         />
-      </div>
+      </div> */}
 
       {/* Mentor Selection */}
       <div className="space-y-3">
         <Label>Mentor Type *</Label>
-        <div className="space-y-2">
+        <RadioGroup
+          value={serviceDetails?.mentors?.[0] || ""}
+          onValueChange={(v) => handleMentorSelect(v as "School Mentor" | "ThinkPro Mentor")}
+          className="space-y-2"
+        >
           <div className="flex items-center space-x-2">
-            <Checkbox
-              id="school-mentor"
-              checked={
-                serviceDetails?.mentors.includes("School Mentor") || false
-              }
-              onCheckedChange={(checked) =>
-                handleMentorChange("School Mentor", checked as boolean)
-              }
-            />
+            <RadioGroupItem id="school-mentor" value="School Mentor" />
             <Label htmlFor="school-mentor">School Mentor</Label>
           </div>
           <div className="flex items-center space-x-2">
-            <Checkbox
-              id="thinker-mentor"
-              checked={
-                serviceDetails?.mentors.includes("Thinker Mentor") || false
-              }
-              onCheckedChange={(checked) =>
-                handleMentorChange("Thinker Mentor", checked as boolean)
-              }
-            />
-            <Label htmlFor="thinker-mentor">Thinker Mentor</Label>
+            <RadioGroupItem id="thinker-mentor" value="ThinkPro Mentor" />
+            <Label htmlFor="thinker-mentor">ThinkPro Mentor</Label>
           </div>
-        </div>
+        </RadioGroup>
       </div>
 
       {/* Grade Selection */}
@@ -290,9 +283,9 @@ export default function ServiceForm({
       </div>
 
       {/* Subject Selection */}
-      <div className="space-y-3">
-        <Label>Subjects *</Label>
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+      {/* <div className="space-y-3"> */}
+        {/* <Label>Subjects *</Label> */}
+        {/* <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
           {COMMON_SUBJECTS.map((subject) => (
             <div key={subject} className="flex items-center space-x-2">
               <Checkbox
@@ -307,10 +300,10 @@ export default function ServiceForm({
               </Label>
             </div>
           ))}
-        </div>
+        </div> */}
 
         {/* Custom Subject Input */}
-        <div className="flex gap-2">
+        {/* <div className="flex gap-2">
           <Input
             value={customSubject}
             onChange={(e) => setCustomSubject(e.target.value)}
@@ -325,10 +318,10 @@ export default function ServiceForm({
           >
             <Plus className="h-4 w-4" />
           </Button>
-        </div>
+        </div> */}
 
         {/* Selected Subjects */}
-        {serviceDetails?.subjects && serviceDetails.subjects.length > 0 && (
+        {/* {serviceDetails?.subjects && serviceDetails.subjects.length > 0 && (
           <div className="space-y-2">
             <Label className="text-sm font-medium">Selected Subjects:</Label>
             <div className="flex flex-wrap gap-2">
@@ -349,8 +342,8 @@ export default function ServiceForm({
               ))}
             </div>
           </div>
-        )}
-      </div>
+        )} */}
+      {/* </div> */}
 
       {/* Sections for Selected Grades */}
       {selectedGrades.length > 0 && (
