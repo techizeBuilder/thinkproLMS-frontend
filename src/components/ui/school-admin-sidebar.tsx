@@ -74,7 +74,7 @@ export function SchoolAdminSidebar({ className }: SchoolAdminSidebarProps) {
           </SidebarNav>
         </SidebarGroup>
 
-        <SidebarGroup label="Analytics">
+        <SidebarGroup label="Curriculum">
           <SidebarNav>
             <SidebarNavItem to="/schooladmin/session-progress" icon={BookOpen}>
               Session Progress

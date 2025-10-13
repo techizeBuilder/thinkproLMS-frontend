@@ -5,6 +5,8 @@ import {
   School as SchoolIcon,
   UserCheck
 } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
+import { Badge } from "@/components/ui/badge";
 import { schoolAdminService } from "@/api/schoolAdminService";
 import { toast } from "sonner";
 
@@ -14,6 +16,7 @@ interface DashboardStats {
 }
 
 export default function SchoolAdminDashboard() {
+  const { user } = useAuth();
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState<DashboardStats>({
     totalMentors: 0,
@@ -68,11 +71,11 @@ export default function SchoolAdminDashboard() {
     <div className="space-y-4 md:space-y-6">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl md:text-3xl font-bold">School Admin Dashboard</h1>
-          <p className="text-sm md:text-base text-muted-foreground">
-            Welcome back, {schoolAdmin?.name || "School Admin"}
-          </p>
+        <div className="min-w-0">
+          <div className="flex items-center gap-2 sm:gap-3 truncate">
+            <h1 className="text-base sm:text-lg md:text-xl font-semibold truncate">{user?.name || schoolAdmin?.name || "User"}</h1>
+            <Badge variant="secondary" className="text-[10px] sm:text-xs flex-shrink-0">School Admin</Badge>
+          </div>
         </div>
         <div className="flex items-center space-x-2">
           <SchoolIcon className="h-4 w-4 md:h-5 md:w-5 text-primary" />

@@ -7,19 +7,20 @@ import {
   CardTitle 
 } from "@/components/ui/card"
 import { BookOpen, GraduationCap, DollarSign } from "lucide-react"
+import { useAuth } from "@/contexts/AuthContext"
+import { Badge } from "@/components/ui/badge"
 
 export default function Admin() {
+  const { user } = useAuth();
   return (
     <SidebarProvider defaultCollapsed={false}>
       <div className="flex h-screen bg-background">
         <AdminSidebar />
         <div className="flex-1 flex flex-col overflow-hidden">
-          <header className="h-16 border-b bg-background px-6 flex items-center justify-between">
-            <div>
-              <h1 className="text-2xl font-semibold">Admin Dashboard</h1>
-              <p className="text-sm text-muted-foreground">
-                Manage your courses and students
-              </p>
+          <header className="h-16 border-b bg-background px-4 sm:px-6 flex items-center justify-between">
+            <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+              <h1 className="text-base sm:text-lg md:text-xl font-semibold truncate">{user?.name || "User"}</h1>
+              <Badge variant="secondary" className="text-[10px] sm:text-xs flex-shrink-0">Admin</Badge>
             </div>
           </header>
           <main className="flex-1 overflow-auto">

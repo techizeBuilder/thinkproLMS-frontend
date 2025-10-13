@@ -4,9 +4,12 @@ import { SidebarProvider, useSidebar } from "@/components/ui/collapsible-sidebar
 import { useState, useEffect } from "react"
 import { studentService } from "@/api/studentService"
 import type { Student } from "@/api/studentService"
+import { useAuth } from "@/contexts/AuthContext"
+import { Badge } from "@/components/ui/badge"
 
 function StudentContent({ student }: { student: Student | null }) {
   const { toggle, isMobile } = useSidebar()
+  const { user } = useAuth()
 
   return (
     <div className="flex-1 flex flex-col overflow-hidden">
@@ -24,12 +27,10 @@ function StudentContent({ student }: { student: Student | null }) {
             </button>
           )}
           <div className="flex-1 min-w-0">
-            <h1 className="text-lg sm:text-xl lg:text-2xl font-semibold truncate">
-              Student Dashboard {student?.studentId && `(${student.studentId})`}
-            </h1>
-            <p className="text-xs sm:text-sm text-muted-foreground hidden xs:block">
-              Track your learning progress and achievements
-            </p>
+            <div className="flex items-center gap-2 sm:gap-3 truncate">
+              <h1 className="text-base sm:text-lg md:text-xl font-semibold truncate">{user?.name || student?.user?.name || "User"}</h1>
+              <Badge variant="secondary" className="text-[10px] sm:text-xs flex-shrink-0">Student</Badge>
+            </div>
           </div>
         </div>
       </header>

@@ -1,9 +1,12 @@
 import { Outlet } from "react-router-dom";
 import { SidebarProvider, useSidebar } from "@/components/ui/collapsible-sidebar";
 import { LeadMentorSidebar } from "@/components/ui/lead-mentor-sidebar";
+import { useAuth } from "@/contexts/AuthContext";
+import { Badge } from "@/components/ui/badge";
 
 function LeadMentorContent() {
   const { toggle, isMobile } = useSidebar();
+  const { user } = useAuth();
 
   return (
     <div className="flex-1 flex flex-col overflow-hidden">
@@ -22,10 +25,10 @@ function LeadMentorContent() {
             </button>
           )}
           <div className="flex-1 min-w-0">
-            <h1 className="text-base md:text-xl font-semibold truncate">Lead Mentor Dashboard</h1>
-            <p className="text-xs md:text-sm text-muted-foreground hidden sm:block">
-              Manage mentors, students, and curriculum
-            </p>
+            <div className="flex items-center gap-2 sm:gap-3 truncate">
+              <h1 className="text-base sm:text-lg md:text-xl font-semibold truncate">{user?.name || "User"}</h1>
+              <Badge variant="secondary" className="text-[10px] sm:text-xs flex-shrink-0">Lead Mentor</Badge>
+            </div>
           </div>
         </div>
       </header>

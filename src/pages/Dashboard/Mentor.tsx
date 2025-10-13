@@ -11,6 +11,8 @@ import {
 import { Users, BookOpen, MessageSquare } from "lucide-react"
 import { mentorService } from "@/api/mentorService"
 import { studentService } from "@/api/studentService"
+import { useAuth } from "@/contexts/AuthContext"
+import { Badge } from "@/components/ui/badge"
 
 interface School {
   _id: string;
@@ -36,6 +38,7 @@ interface Mentor {
 
 function MentorContent() {
   const { toggle, isMobile } = useSidebar();
+  const { user } = useAuth();
   const [mentor, setMentor] = useState<Mentor | null>(null);
   const [studentCount, setStudentCount] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -101,10 +104,12 @@ function MentorContent() {
               </button>
             )}
             <div className="flex-1 min-w-0">
-              <h1 className="text-xl md:text-2xl font-semibold truncate">Mentor Dashboard</h1>
-              <p className="text-sm text-muted-foreground hidden sm:block">
-                Guide and support your students' learning journey
-              </p>
+              <div className="flex items-center gap-2 sm:gap-3 truncate">
+                <h1 className="text-base sm:text-lg md:text-xl font-semibold truncate">
+                  {user?.name || "User"}
+                </h1>
+                <Badge variant="secondary" className="text-[10px] sm:text-xs flex-shrink-0">Mentor</Badge>
+              </div>
             </div>
           </div>
         </header>
@@ -137,10 +142,12 @@ function MentorContent() {
             </button>
           )}
           <div className="flex-1 min-w-0">
-            <h1 className="text-xl md:text-2xl font-semibold truncate">Mentor Dashboard</h1>
-            <p className="text-sm text-muted-foreground hidden sm:block">
-              Guide and support your students' learning journey
-            </p>
+            <div className="flex items-center gap-2 sm:gap-3 truncate">
+              <h1 className="text-base sm:text-lg md:text-xl font-semibold truncate">
+                {user?.name || (mentor?.user?.name ?? "User")}
+              </h1>
+              <Badge variant="secondary" className="text-[10px] sm:text-xs flex-shrink-0">Mentor</Badge>
+            </div>
           </div>
         </div>
       </header>

@@ -68,6 +68,11 @@ export function MentorSidebar({ className }: MentorSidebarProps) {
             <SidebarNavItem to="/mentor/question-bank" icon={Database}>
               Question Bank
             </SidebarNavItem>
+          </SidebarNav>
+        </SidebarGroup>
+
+        <SidebarGroup label="Curriculum">
+          <SidebarNav>
             <SidebarNavItem to="/mentor/session-progress" icon={BookOpen}>
               Session Progress
             </SidebarNavItem>

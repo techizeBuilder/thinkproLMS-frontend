@@ -40,8 +40,10 @@ export function LeadMentorSidebar({ className }: LeadMentorSidebarProps) {
   const unreadCount = useUnreadMessageCount();
 
   // Check if user has permission to manage modules and resources
-  const hasModulePermission = user?.role === "superadmin" || user?.permissions?.includes("add_modules");
-  const hasResourcePermission = user?.role === "superadmin" || user?.permissions?.includes("add_resources");
+  const hasModulePermission =
+    user?.role === "superadmin" || user?.permissions?.includes("add_modules");
+  const hasResourcePermission =
+    user?.role === "superadmin" || user?.permissions?.includes("add_resources");
 
   return (
     <Sidebar className={cn("h-screen", className)}>
@@ -104,13 +106,10 @@ export function LeadMentorSidebar({ className }: LeadMentorSidebarProps) {
             <SidebarNavItem to="/leadmentor/certificates" icon={Award}>
               Certificates
             </SidebarNavItem>
-            <SidebarNavItem to="/leadmentor/session-progress" icon={BarChart3}>
-              Session Progress
-            </SidebarNavItem>
           </SidebarNav>
         </SidebarGroup>
 
-        {hasModulePermission && (
+        {hasModulePermission ? (
           <SidebarGroup label="Curriculum">
             <SidebarNav>
               <SidebarNavItem to="/leadmentor/modules" icon={Layers}>
@@ -118,6 +117,23 @@ export function LeadMentorSidebar({ className }: LeadMentorSidebarProps) {
               </SidebarNavItem>
               <SidebarNavItem to="/leadmentor/sessions" icon={Calendar}>
                 Sessions
+              </SidebarNavItem>
+              <SidebarNavItem
+                to="/leadmentor/session-progress"
+                icon={BarChart3}
+              >
+                Session Progress
+              </SidebarNavItem>
+            </SidebarNav>
+          </SidebarGroup>
+        ) : (
+          <SidebarGroup label="Curriculum">
+            <SidebarNav>
+              <SidebarNavItem
+                to="/leadmentor/session-progress"
+                icon={BarChart3}
+              >
+                Session Progress
               </SidebarNavItem>
             </SidebarNav>
           </SidebarGroup>

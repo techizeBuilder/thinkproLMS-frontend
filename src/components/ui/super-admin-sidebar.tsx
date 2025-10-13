@@ -93,9 +93,6 @@ export function SuperAdminSidebar({ className }: SuperAdminSidebarProps) {
             <SidebarNavItem to="/superadmin/certificates" icon={Award}>
               Certificates
             </SidebarNavItem>
-            <SidebarNavItem to="/superadmin/session-progress" icon={BarChart3}>
-              Session Progress
-            </SidebarNavItem>
           </SidebarNav>
         </SidebarGroup>
 
@@ -106,6 +103,9 @@ export function SuperAdminSidebar({ className }: SuperAdminSidebarProps) {
             </SidebarNavItem>
             <SidebarNavItem to="/superadmin/sessions" icon={Calendar}>
               Sessions
+            </SidebarNavItem>
+            <SidebarNavItem to="/superadmin/session-progress" icon={BarChart3}>
+              Session Progress
             </SidebarNavItem>
           </SidebarNav>
         </SidebarGroup>
