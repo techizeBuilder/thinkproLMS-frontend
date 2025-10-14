@@ -156,15 +156,18 @@ export default function SchoolAdminSessionProgressPage({
   const loadMentorSchools = async (mentorId: string) => {
     try {
       setLoadingSchools(true);
-      // Find the selected mentor and get their assigned school
-      const selectedMentor = availableMentors.find(mentor => mentor._id === mentorId);
-      if (selectedMentor && selectedMentor.assignedSchool) {
-        setAvailableSchools([selectedMentor.assignedSchool]);
-        setSelectedSchoolId(selectedMentor.assignedSchool._id);
-      } else {
-        setAvailableSchools([]);
-        setSelectedSchoolId("");
-      }
+      // Find the selected mentor and get their assigned school(s)
+      const selectedMentor: any = availableMentors.find(mentor => mentor._id === mentorId);
+      const schools: School[] = selectedMentor
+        ? (Array.isArray((selectedMentor as any).assignedSchools)
+            ? (selectedMentor as any).assignedSchools
+            : selectedMentor.assignedSchool
+            ? [selectedMentor.assignedSchool]
+            : [])
+        : [];
+
+      setAvailableSchools(schools);
+      setSelectedSchoolId(schools[0]?._id || "");
     } catch (error) {
       console.error("Error loading mentor schools:", error);
       toast.error("Failed to load mentor schools");
@@ -332,22 +335,29 @@ export default function SchoolAdminSessionProgressPage({
           </Select>
         </div>
 
-        {/* School Display */}
+        {/* School Selection */}
         <div>
-          <Label className="text-xs font-medium">
+          <Label htmlFor="school-select" className="text-xs font-medium">
             School
           </Label>
-          <div className="w-full h-8 px-3 py-1 border rounded-md bg-muted/50 flex items-center text-sm">
-            {loadingSchools ? (
-              <span className="text-muted-foreground">Loading...</span>
-            ) : availableSchools && availableSchools.length > 0 && selectedSchoolId ? (
-              <span className="truncate">{availableSchools.find(s => s._id === selectedSchoolId)?.name || 'Unknown School'} - {availableSchools.find(s => s._id === selectedSchoolId)?.city}, {availableSchools.find(s => s._id === selectedSchoolId)?.state}</span>
-            ) : availableSchools && availableSchools.length > 0 ? (
-              <span className="truncate">{availableSchools[0].name} - {availableSchools[0].city}, {availableSchools[0].state}</span>
-            ) : (
-              <span className="text-muted-foreground">No school assigned</span>
-            )}
-          </div>
+          <Select
+            value={selectedSchoolId}
+            onValueChange={(value) => {
+              setSelectedSchoolId(value);
+            }}
+            disabled={loadingSchools || availableSchools.length === 0}
+          >
+            <SelectTrigger className="w-full h-8">
+              <SelectValue placeholder={loadingSchools ? "Loading..." : "Select school"} />
+            </SelectTrigger>
+            <SelectContent>
+              {availableSchools.map((school) => (
+                <SelectItem key={school._id} value={school._id}>
+                  {school.name} - {school.city}, {school.state}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
 
         {/* Grade Selection */}

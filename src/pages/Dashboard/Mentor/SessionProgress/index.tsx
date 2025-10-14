@@ -10,7 +10,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Loader2, BookOpen, Search, MapPin } from "lucide-react";
+import { Loader2, BookOpen, Search } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import {
@@ -344,16 +344,27 @@ export default function SessionProgressPage() {
       <div className="flex flex-wrap items-center gap-3">
         {/* Filters on the left */}
         <div className="flex gap-2 items-center justify-between w-full">
-          {/* School info on the right - simplified */}
-          <div className="flex items-center gap-2 text-xs sm:text-sm text-muted-foreground">
-            <MapPin className="h-3 w-3 sm:h-4 sm:w-4 text-primary" />
-            {availableSchools.length > 0 ? (
-              <span className="font-medium text-foreground">
-                {availableSchools[0].name}
-              </span>
-            ) : (
-              <span className="text-muted-foreground">No school assigned</span>
-            )}
+          {/* School selection */}
+          <div className="min-w-[180px] sm:min-w-[220px]">
+            <Label htmlFor="school-select" className="text-xs font-medium">
+              School
+            </Label>
+            <Select
+              value={selectedSchoolId}
+              onValueChange={(value) => setSelectedSchoolId(value)}
+              disabled={availableSchools.length === 0}
+            >
+              <SelectTrigger className="w-full h-7 sm:h-8">
+                <SelectValue placeholder="Select school" />
+              </SelectTrigger>
+              <SelectContent>
+                {availableSchools.map((school) => (
+                  <SelectItem key={school._id} value={school._id}>
+                    {school.name} - {school.city}, {school.state}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           <div className="flex gap-2 items-center">
