@@ -29,7 +29,6 @@ interface Mentor {
     isVerified: boolean;
     createdAt: string;
   };
-  salutation: string;
   address: string;
   phoneNumber: string;
   assignedSchools: School[];
@@ -45,13 +44,11 @@ export default function EditMentorPage() {
   const [mentor, setMentor] = useState<Mentor | null>(null);
   const [formData, setFormData] = useState({
     name: "",
-    salutation: "",
     address: "",
     phoneNumber: "",
     schoolIds: [] as string[],
   });
 
-  const salutations = ["Mr.", "Ms.", "Mrs.", "Dr.", "Prof."];
 
   useEffect(() => {
     if (id) {
@@ -67,7 +64,6 @@ export default function EditMentorPage() {
       setMentor(mentorData);
       setFormData({
         name: mentorData.user.name,
-        salutation: mentorData.salutation,
         address: mentorData.address,
         phoneNumber: mentorData.phoneNumber,
         schoolIds: mentorData.assignedSchools.map((school: School) => school._id),
@@ -158,24 +154,6 @@ export default function EditMentorPage() {
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="salutation">Salutation *</Label>
-                <select
-                  id="salutation"
-                  name="salutation"
-                  value={formData.salutation}
-                  onChange={handleInputChange}
-                  required
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                  <option value="">Select Salutation</option>
-                  {salutations.map(salutation => (
-                    <option key={salutation} value={salutation}>
-                      {salutation}
-                    </option>
-                  ))}
-                </select>
-              </div>
               <div className="space-y-2">
                 <Label htmlFor="name">Full Name *</Label>
                 <Input

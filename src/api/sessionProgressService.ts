@@ -97,6 +97,12 @@ export const sessionProgressService = {
     return response.data.data;
   },
 
+  // Get mentor's assigned schools
+  getMentorSchools: async (): Promise<{ schools: School[]; mentor: any }> => {
+    const response = await axiosInstance.get("/session-progress/mentor/schools");
+    return response.data.data;
+  },
+
   // Lead Mentor specific methods
   // Get session progress for a specific mentor (Lead Mentor view)
   getLeadMentorSessionProgress: async (mentorId: string, schoolId?: string, section?: string, grade?: string): Promise<MentorSessionProgress> => {

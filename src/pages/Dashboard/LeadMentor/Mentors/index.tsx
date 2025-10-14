@@ -22,16 +22,16 @@ interface School {
 interface Mentor {
   _id: string;
   user: {
+    _id: string;
     name: string;
     email: string;
     isVerified: boolean;
     createdAt: string;
     profilePicture?: string | null;
   };
-  salutation: string;
   address: string;
   phoneNumber: string;
-  assignedSchool: School;
+  assignedSchools: School[];
   isActive: boolean;
 }
 
@@ -92,7 +92,13 @@ export default function MentorsPage() {
 
     if (selectedSchool) {
       filtered = filtered.filter((mentor) =>
-        mentor.assignedSchool._id === selectedSchool
+        Array.isArray(mentor.assignedSchools) &&
+        mentor.assignedSchools.some((school: any) => {
+          if (!school) return false;
+          return typeof school === "string"
+            ? school === selectedSchool
+            : school._id === selectedSchool;
+        })
       );
     }
 
@@ -191,7 +197,7 @@ export default function MentorsPage() {
                       </div>
                       <div>
                         <div className="font-medium">
-                          {mentor.salutation} {mentor.user.name}
+                          {mentor.user.name}
                         </div>
                       </div>
                     </div>
@@ -216,9 +222,18 @@ export default function MentorsPage() {
                   </TableCell>
                   <TableCell>
                     <div className="text-sm">
-                      <Badge variant="outline" className="text-xs">
-                        {mentor.assignedSchool.name}
-                      </Badge>
+                      <div className="flex flex-wrap gap-1">
+                        {(mentor.assignedSchools ?? [])
+                          .filter((school: any) => !!school && typeof school !== "string")
+                          .map((school: any) => (
+                            <Badge key={school._id} variant="outline" className="text-xs">
+                              {school.name}
+                            </Badge>
+                          ))}
+                        {(!mentor.assignedSchools || mentor.assignedSchools.length === 0) && (
+                          <span className="text-xs text-gray-500">No schools</span>
+                        )}
+                      </div>
                     </div>
                   </TableCell>
                   <TableCell>
@@ -237,7 +252,7 @@ export default function MentorsPage() {
                         size="sm"
                         onClick={() =>
                           setResetPasswordUser({
-                            id: mentor._id,
+                            id: mentor.user._id,
                             name: mentor.user.name,
                             email: mentor.user.email,
                           })
@@ -289,7 +304,7 @@ export default function MentorsPage() {
                     </div>
                     <div>
                       <div className="font-medium text-sm md:text-base">
-                        {mentor.salutation} {mentor.user.name}
+                        {mentor.user.name}
                       </div>
                       <Badge
                         variant={
@@ -352,9 +367,18 @@ export default function MentorsPage() {
                     <span className="line-clamp-2">{mentor.address}</span>
                   </div>
                   <div className="pt-2">
-                    <Badge variant="outline" className="text-xs">
-                      {mentor.assignedSchool.name}
-                    </Badge>
+                    <div className="flex flex-wrap gap-1">
+                      {(mentor.assignedSchools ?? [])
+                        .filter((school: any) => !!school && typeof school !== "string")
+                        .map((school: any) => (
+                          <Badge key={school._id} variant="outline" className="text-xs">
+                            {school.name}
+                          </Badge>
+                        ))}
+                      {(!mentor.assignedSchools || mentor.assignedSchools.length === 0) && (
+                        <span className="text-xs text-gray-500">No schools</span>
+                      )}
+                    </div>
                   </div>
                 </div>
               </CardContent>

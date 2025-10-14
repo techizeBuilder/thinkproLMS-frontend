@@ -386,6 +386,11 @@ const Messages: React.FC = () => {
                           <Badge variant="secondary" className="text-xs flex-shrink-0">
                             {selectedConversation.participant.role}
                           </Badge>
+                          {selectedConversation.participant.role === "mentor" && selectedConversation.participant.school?.schoolCount && selectedConversation.participant.school.schoolCount > 1 && (
+                            <Badge variant="outline" className="text-xs flex-shrink-0 bg-blue-50 text-blue-700 border-blue-200">
+                              {selectedConversation.participant.school.schoolCount} schools
+                            </Badge>
+                          )}
                           {isParticipantOnline && (
                             <Badge variant="outline" className="gap-1 text-xs flex-shrink-0">
                               <div className="h-2 w-2 rounded-full bg-green-500" />

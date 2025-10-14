@@ -5,8 +5,9 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { ArrowLeft, Plus } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import axiosInstance from "@/api/axiosInstance";
 import { PhoneInput } from "@/components/ui/phone-input";
 import { isValidPhoneNumber } from "@/utils/validation";
@@ -27,18 +28,16 @@ export default function CreateMentorPage() {
   const [schools, setSchools] = useState<School[]>([]);
   const [formData, setFormData] = useState({
     name: "",
-    salutation: "",
     address: "",
     email: "",
     phoneNumber: "",
-    schoolId: "",
+    schoolIds: [] as string[],
   });
   const [creationMethod, setCreationMethod] = useState<
     "invite" | "credentials"
   >("invite");
   const [password, setPassword] = useState("");
 
-  const salutations = ["Mr.", "Ms.", "Mrs.", "Dr.", "Prof."];
 
   useEffect(() => {
     fetchSchools();
@@ -120,24 +119,6 @@ export default function CreateMentorPage() {
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="salutation">Salutation *</Label>
-                <select
-                  id="salutation"
-                  name="salutation"
-                  value={formData.salutation}
-                  onChange={handleInputChange}
-                  required
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                  <option value="">Select Salutation</option>
-                  {salutations.map((salutation) => (
-                    <option key={salutation} value={salutation}>
-                      {salutation}
-                    </option>
-                  ))}
-                </select>
-              </div>
               <div className="space-y-2">
                 <Label htmlFor="name">Full Name *</Label>
                 <Input
@@ -249,37 +230,54 @@ export default function CreateMentorPage() {
           <CardHeader>
             <CardTitle>School Assignment</CardTitle>
             <p className="text-sm text-gray-600">
-              Select one school to assign to this mentor
+              Select one or more schools to assign to this mentor
             </p>
           </CardHeader>
           <CardContent>
-            <div className="space-y-2">
-              <Label htmlFor="schoolId">School *</Label>
-              <select
-                id="schoolId"
-                name="schoolId"
-                value={formData.schoolId}
-                onChange={handleInputChange}
-                required
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                <option value="">Select a school</option>
+            <div className="space-y-3">
+              <Label>Schools *</Label>
+              <div className="grid grid-cols-1 gap-3 max-h-60 overflow-y-auto">
                 {schools.map((school) => (
-                  <option key={school._id} value={school._id}>
-                    {school.name} - {school.city}, {school.state}
-                    {school.boards &&
-                      school.boards.length > 0 &&
-                      ` • ${school.boards.join(", ")}`}
-                    {school.branchName && ` • ${school.branchName}`}
-                  </option>
+                  <div key={school._id} className="flex items-start space-x-3 p-3 border rounded-lg hover:bg-gray-50">
+                    <Checkbox
+                      id={`school-${school._id}`}
+                      checked={formData.schoolIds.includes(school._id)}
+                      onCheckedChange={(checked: boolean) => {
+                        if (checked) {
+                          setFormData(prev => ({
+                            ...prev,
+                            schoolIds: [...prev.schoolIds, school._id]
+                          }));
+                        } else {
+                          setFormData(prev => ({
+                            ...prev,
+                            schoolIds: prev.schoolIds.filter(id => id !== school._id)
+                          }));
+                        }
+                      }}
+                    />
+                    <div className="flex-1 min-w-0">
+                      <Label
+                        htmlFor={`school-${school._id}`}
+                        className="text-sm font-medium cursor-pointer"
+                      >
+                        {school.name}
+                      </Label>
+                      <p className="text-xs text-gray-500 mt-1">
+                        {school.city}, {school.state}
+                        {school.boards && school.boards.length > 0 && ` • ${school.boards.join(", ")}`}
+                        {school.branchName && ` • ${school.branchName}`}
+                      </p>
+                    </div>
+                  </div>
                 ))}
-              </select>
+              </div>
+              {formData.schoolIds.length === 0 && (
+                <p className="text-red-500 text-sm">
+                  Please select at least one school
+                </p>
+              )}
             </div>
-            {!formData.schoolId && (
-              <p className="text-red-500 text-sm mt-2">
-                Please select a school
-              </p>
-            )}
           </CardContent>
         </Card>
 
@@ -324,7 +322,7 @@ export default function CreateMentorPage() {
             type="submit"
             disabled={
               loading ||
-              !formData.schoolId ||
+              formData.schoolIds.length === 0 ||
               (creationMethod === "credentials" && !password)
             }
             className="flex items-center gap-2"

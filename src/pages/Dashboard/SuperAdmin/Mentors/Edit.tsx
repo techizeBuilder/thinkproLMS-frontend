@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
 import { ArrowLeft, Save } from "lucide-react";
 import axiosInstance from "@/api/axiosInstance";
 import { PhoneInput } from "@/components/ui/phone-input";
@@ -28,7 +29,6 @@ interface Mentor {
     isVerified: boolean;
     createdAt: string;
   };
-  salutation: string;
   address: string;
   phoneNumber: string;
   assignedSchool: School;
@@ -44,13 +44,11 @@ export default function EditMentorPage() {
   const [mentor, setMentor] = useState<Mentor | null>(null);
   const [formData, setFormData] = useState({
     name: "",
-    salutation: "",
     address: "",
     phoneNumber: "",
-    schoolId: "",
+    schoolIds: [] as string[],
   });
 
-  const salutations = ["Mr.", "Ms.", "Mrs.", "Dr.", "Prof."];
 
   useEffect(() => {
     if (id) {
@@ -66,10 +64,9 @@ export default function EditMentorPage() {
       setMentor(mentorData);
       setFormData({
         name: mentorData.user.name,
-        salutation: mentorData.salutation,
         address: mentorData.address,
         phoneNumber: mentorData.phoneNumber,
-        schoolId: mentorData.assignedSchool._id,
+        schoolIds: mentorData.assignedSchools.map((school: School) => school._id),
       });
     } catch (error) {
       console.error("Error fetching mentor:", error);
@@ -150,24 +147,6 @@ export default function EditMentorPage() {
           <CardContent className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="salutation">Salutation *</Label>
-                <select
-                  id="salutation"
-                  name="salutation"
-                  value={formData.salutation}
-                  onChange={handleInputChange}
-                  required
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                  <option value="">Select Salutation</option>
-                  {salutations.map(salutation => (
-                    <option key={salutation} value={salutation}>
-                      {salutation}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div className="space-y-2">
                 <Label htmlFor="name">Full Name *</Label>
                 <Input
                   id="name"
@@ -217,35 +196,54 @@ export default function EditMentorPage() {
           <CardHeader>
             <CardTitle>School Assignment</CardTitle>
             <p className="text-sm text-gray-600">
-              Select one school to assign to this mentor
+              Select one or more schools to assign to this mentor
             </p>
           </CardHeader>
           <CardContent>
-            <div className="space-y-2">
-              <Label htmlFor="schoolId">School *</Label>
-              <select
-                id="schoolId"
-                name="schoolId"
-                value={formData.schoolId}
-                onChange={handleInputChange}
-                required
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                <option value="">Select a school</option>
+            <div className="space-y-3">
+              <Label>Schools *</Label>
+              <div className="grid grid-cols-1 gap-3 max-h-60 overflow-y-auto">
                 {schools.map((school) => (
-                  <option key={school._id} value={school._id}>
-                    {school.name} - {school.city}, {school.state}
-                    {school.boards && school.boards.length > 0 && ` • ${school.boards.join(", ")}`}
-                    {school.branchName && ` • ${school.branchName}`}
-                  </option>
+                  <div key={school._id} className="flex items-start space-x-3 p-3 border rounded-lg hover:bg-gray-50">
+                    <Checkbox
+                      id={`school-${school._id}`}
+                      checked={formData.schoolIds.includes(school._id)}
+                      onCheckedChange={(checked: boolean) => {
+                        if (checked) {
+                          setFormData(prev => ({
+                            ...prev,
+                            schoolIds: [...prev.schoolIds, school._id]
+                          }));
+                        } else {
+                          setFormData(prev => ({
+                            ...prev,
+                            schoolIds: prev.schoolIds.filter(id => id !== school._id)
+                          }));
+                        }
+                      }}
+                    />
+                    <div className="flex-1 min-w-0">
+                      <Label
+                        htmlFor={`school-${school._id}`}
+                        className="text-sm font-medium cursor-pointer"
+                      >
+                        {school.name}
+                      </Label>
+                      <p className="text-xs text-gray-500 mt-1">
+                        {school.city}, {school.state}
+                        {school.boards && school.boards.length > 0 && ` • ${school.boards.join(", ")}`}
+                        {school.branchName && ` • ${school.branchName}`}
+                      </p>
+                    </div>
+                  </div>
                 ))}
-              </select>
+              </div>
+              {formData.schoolIds.length === 0 && (
+                <p className="text-red-500 text-sm">
+                  Please select at least one school
+                </p>
+              )}
             </div>
-            {!formData.schoolId && (
-              <p className="text-red-500 text-sm mt-2">
-                Please select a school
-              </p>
-            )}
           </CardContent>
         </Card>
 
@@ -259,7 +257,7 @@ export default function EditMentorPage() {
           </Button>
           <Button
             type="submit"
-            disabled={loading || !formData.schoolId}
+            disabled={loading || formData.schoolIds.length === 0}
             className="flex items-center gap-2"
           >
             {loading ? (

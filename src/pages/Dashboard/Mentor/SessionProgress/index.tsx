@@ -112,7 +112,7 @@ export default function SessionProgressPage() {
 
   const loadAvailableSchools = async () => {
     try {
-      const schools = await sessionProgressService.getAvailableSchools();
+      const { schools } = await sessionProgressService.getMentorSchools();
       setAvailableSchools(schools);
       if (schools.length > 0) {
         setSelectedSchoolId(schools[0]._id);
