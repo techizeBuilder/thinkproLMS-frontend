@@ -39,7 +39,9 @@ export default function SessionProgressViewer({
 }: SessionProgressViewerProps) {
   const [loading, setLoading] = useState(false);
   const [sessions, setSessions] = useState<SessionProgress[]>([]);
-  const [expandedNotes, setExpandedNotes] = useState<Record<string, boolean>>({});
+  const [expandedNotes, setExpandedNotes] = useState<Record<string, boolean>>(
+    {}
+  );
   const [availableSchools, setAvailableSchools] = useState<School[]>([]);
   const [availableMentors, setAvailableMentors] = useState<Mentor[]>([]);
   const [selectedMentorId, setSelectedMentorId] = useState<string>("");
@@ -57,7 +59,6 @@ export default function SessionProgressViewer({
   const [availableGrades, setAvailableGrades] = useState<AvailableGrade[]>([]);
   const [availableSections, setAvailableSections] = useState<string[]>([]);
   const [hasServiceDetails, setHasServiceDetails] = useState(false);
-
 
   // Auto-select first available options in sequence
 
@@ -323,7 +324,9 @@ export default function SessionProgressViewer({
           >
             <SelectTrigger className="w-full h-8">
               <SelectValue
-                placeholder={loadingMentors ? "Loading..." : "Select school mentor"}
+                placeholder={
+                  loadingMentors ? "Loading..." : "Select school mentor"
+                }
               />
             </SelectTrigger>
             <SelectContent>
@@ -349,7 +352,9 @@ export default function SessionProgressViewer({
             disabled={loadingSchools || availableSchools.length === 0}
           >
             <SelectTrigger className="w-full h-8">
-              <SelectValue placeholder={loadingSchools ? "Loading..." : "Select school"} />
+              <SelectValue
+                placeholder={loadingSchools ? "Loading..." : "Select school"}
+              />
             </SelectTrigger>
             <SelectContent>
               {availableSchools.map((school) => (
@@ -466,36 +471,32 @@ export default function SessionProgressViewer({
 
       {/* Session Summary Report */}
       {filtersCompleted && sessions && sessions.length > 0 && (
-        <Card>
-          <CardContent className="p-3">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-              <div className="text-center p-2 bg-gray-50 rounded">
-                <div className="text-lg font-bold text-gray-700">
-                  {totalSessions}
-                </div>
-                <div className="text-xs text-gray-600">Total</div>
-              </div>
-              <div className="text-center p-2 bg-gray-100 rounded">
-                <div className="text-lg font-bold text-gray-600">
-                  {pendingCount}
-                </div>
-                <div className="text-xs text-gray-600">Pending</div>
-              </div>
-              <div className="text-center p-2 bg-blue-50 rounded">
-                <div className="text-lg font-bold text-blue-600">
-                  {inProgressCount}
-                </div>
-                <div className="text-xs text-blue-600">In Progress</div>
-              </div>
-              <div className="text-center p-2 bg-green-50 rounded">
-                <div className="text-lg font-bold text-green-600">
-                  {completedCount}
-                </div>
-                <div className="text-xs text-green-600">Completed</div>
-              </div>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          <div className="text-center p-2 bg-gray-50 rounded">
+            <div className="text-lg font-bold text-gray-700">
+              {totalSessions}
             </div>
-          </CardContent>
-        </Card>
+            <div className="text-xs text-gray-600">Total</div>
+          </div>
+          <div className="text-center p-2 bg-gray-100 rounded">
+            <div className="text-lg font-bold text-gray-600">
+              {pendingCount}
+            </div>
+            <div className="text-xs text-gray-600">Pending</div>
+          </div>
+          <div className="text-center p-2 bg-blue-50 rounded">
+            <div className="text-lg font-bold text-blue-600">
+              {inProgressCount}
+            </div>
+            <div className="text-xs text-blue-600">In Progress</div>
+          </div>
+          <div className="text-center p-2 bg-green-50 rounded">
+            <div className="text-lg font-bold text-green-600">
+              {completedCount}
+            </div>
+            <div className="text-xs text-green-600">Completed</div>
+          </div>
+        </div>
       )}
 
       {/* Sessions Table */}
@@ -535,7 +536,8 @@ export default function SessionProgressViewer({
                 {filteredSessions.map((session, index) => {
                   const currentStatus = session.status || "Pending";
                   const note = (session.notes || "").trim();
-                  const isLongNote = note.length > 120 || note.split("\n").length > 2;
+                  const isLongNote =
+                    note.length > 120 || note.split("\n").length > 2;
                   const isExpanded = !!expandedNotes[session.sessionId];
 
                   return (
@@ -547,9 +549,6 @@ export default function SessionProgressViewer({
                         <div>
                           <div className="font-semibold text-sm">
                             {session.displayName}
-                          </div>
-                          <div className="text-xs text-gray-500">
-                            {session.sessionName}
                           </div>
                         </div>
                       </TableCell>
@@ -575,7 +574,13 @@ export default function SessionProgressViewer({
                       <TableCell className="text-gray-700 text-xs">
                         {note.length > 0 ? (
                           <div className="max-w-xs whitespace-pre-wrap break-words">
-                            <div className={!isExpanded ? "max-h-10 overflow-hidden" : undefined}>
+                            <div
+                              className={
+                                !isExpanded
+                                  ? "max-h-10 overflow-hidden"
+                                  : undefined
+                              }
+                            >
                               {note}
                             </div>
                             {isLongNote && (
