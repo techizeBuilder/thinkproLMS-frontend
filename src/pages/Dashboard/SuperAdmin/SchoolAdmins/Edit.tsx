@@ -28,6 +28,7 @@ export default function EditSchoolAdminPage() {
     phoneNumber: "",
     assignedSchool: "",
     isActive: true,
+    position: "",
   });
   const [schoolAdmin, setSchoolAdmin] = useState<SchoolAdmin | null>(null);
 
@@ -50,6 +51,7 @@ export default function EditSchoolAdminPage() {
             phoneNumber: admin.phoneNumber || "",
             assignedSchool: admin.assignedSchool._id,
             isActive: admin.isActive,
+            position: (admin as any).position || "",
           });
         } else {
           toast.error("School admin not found");
@@ -163,6 +165,17 @@ export default function EditSchoolAdminPage() {
                 onChange={handleInputChange}
                 placeholder="Enter admin name"
                 required
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="position">Position</Label>
+              <Input
+                id="position"
+                name="position"
+                value={formData.position || ""}
+                onChange={handleInputChange}
+                placeholder="Enter position/title (e.g., Coordinator)"
               />
             </div>
 

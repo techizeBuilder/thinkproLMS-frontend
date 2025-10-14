@@ -14,6 +14,7 @@ export interface SchoolAdmin {
   user: User;
   assignedSchool: School;
   phoneNumber: string;
+  position?: string;
   isActive: boolean;
   createdAt: string;
   updatedAt: string;
@@ -24,6 +25,7 @@ export interface CreateSchoolAdminData {
   email: string;
   phoneNumber: string;
   assignedSchool: string;
+  position?: string;
 }
 
 export interface UpdateSchoolAdminData {
@@ -31,6 +33,7 @@ export interface UpdateSchoolAdminData {
   phoneNumber?: string;
   assignedSchool?: string;
   isActive?: boolean;
+  position?: string;
 }
 
 export interface Mentor {

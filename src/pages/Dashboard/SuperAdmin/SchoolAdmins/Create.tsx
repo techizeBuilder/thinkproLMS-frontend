@@ -26,6 +26,7 @@ export default function CreateSchoolAdminPage() {
     email: "",
     phoneNumber: "",
     assignedSchool: "",
+    position: "",
   });
   const [creationMethod, setCreationMethod] = useState<"invite" | "credentials">("invite");
   const [password, setPassword] = useState("");
@@ -160,6 +161,17 @@ export default function CreateSchoolAdminPage() {
               {!phoneError && formData.phoneNumber && (
                 <p className="text-xs text-green-600">✓ Valid phone number</p>
               )}
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="position">Position</Label>
+              <Input
+                id="position"
+                name="position"
+                value={(formData as any).position || ""}
+                onChange={handleInputChange}
+                placeholder="Enter position/title (e.g., Coordinator)"
+              />
             </div>
 
             <div className="space-y-2">
