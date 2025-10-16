@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -49,6 +50,7 @@ import { toast } from "sonner";
 import RecommendQuestionForm from "./RecommendQuestionForm";
 
 const MentorQuestionBankPage: React.FC = () => {
+  const navigate = useNavigate();
   const {} = useAuth();
   const [questions, setQuestions] = useState<Question[]>([]);
   const [loading, setLoading] = useState(true);
@@ -191,7 +193,7 @@ const MentorQuestionBankPage: React.FC = () => {
         <div className="flex gap-2">
           <Button
             variant="outline"
-            onClick={() => setShowRecommendForm(true)}
+            onClick={() => navigate('/mentor/question-bank/recommend')}
             className="flex items-center gap-1 md:gap-2 text-xs sm:text-sm h-8 sm:h-9"
           >
             <Plus className="h-3 w-3 sm:h-4 sm:w-4" />

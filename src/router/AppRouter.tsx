@@ -37,7 +37,6 @@ import SuperAdminSessionProgressPage from "../pages/Dashboard/SuperAdmin/Session
 
 // LeadMentor Edit Components (re-exported from SuperAdmin)
 import LeadMentorEditSchoolAdminPage from "../pages/Dashboard/LeadMentor/SchoolAdmins/Edit";
-import LeadMentorEditLeadMentorPage from "../pages/Dashboard/LeadMentor/LeadMentors/Edit";
 
 // LeadMentor Mentor & Student Management
 import MentorsPage from "../pages/Dashboard/LeadMentor/Mentors";
@@ -49,6 +48,9 @@ import EditStudentPage from "../pages/Dashboard/LeadMentor/Students/Edit";
 import BulkUploadStudentsPage from "../pages/Dashboard/LeadMentor/Students/BulkUpload";
 import PromoteGradePage from "../pages/Dashboard/LeadMentor/Students/Promote";
 import QuestionBankPage from "../pages/Dashboard/LeadMentor/QuestionBank";
+import AddQuestionPage from "../pages/Dashboard/LeadMentor/QuestionBank/AddQuestion";
+import ViewRecommendationsPage from "../pages/Dashboard/LeadMentor/QuestionBank/ViewRecommendations";
+import BulkUploadPage from "../pages/Dashboard/LeadMentor/QuestionBank/BulkUpload";
 import LeadMentorSessionProgressPage from "../pages/Dashboard/LeadMentor/SessionProgress";
 import ModulesPage from "../pages/Dashboard/Modules/index";
 import CreateModulePage from "../pages/Dashboard/Modules/Create";
@@ -71,6 +73,7 @@ import MentorResourcesPage from "../pages/Dashboard/Mentor/Resources";
 import MentorResourceViewPage from "../pages/Dashboard/Mentor/ResourceView";
 import MentorStudentsPage from "../pages/Dashboard/Mentor/Students";
 import MentorQuestionBankPage from "../pages/Dashboard/Mentor/QuestionBank";
+import AddRecommendationPage from "../pages/Dashboard/Mentor/QuestionBank/AddRecommendation";
 
 // Assessment Components
 import MentorAssessmentsPage from "../pages/Dashboard/Mentor/Assessments";
@@ -226,6 +229,9 @@ export default function AppRouter() {
           
           {/* Question Bank */}
           <Route path="question-bank" element={<QuestionBankPage />} />
+          <Route path="question-bank/add" element={<AddQuestionPage />} />
+          <Route path="question-bank/recommendations" element={<ViewRecommendationsPage />} />
+          <Route path="question-bank/bulk-upload" element={<BulkUploadPage />} />
           
           {/* Session Progress */}
           <Route path="session-progress" element={<SuperAdminSessionProgressPage />} />
@@ -389,6 +395,9 @@ export default function AppRouter() {
           
           {/* Question Bank */}
           <Route path="question-bank" element={<QuestionBankPage />} />
+          <Route path="question-bank/add" element={<AddQuestionPage />} />
+          <Route path="question-bank/recommendations" element={<ViewRecommendationsPage />} />
+          <Route path="question-bank/bulk-upload" element={<BulkUploadPage />} />
           
           {/* Session Progress */}
           <Route path="session-progress" element={<LeadMentorSessionProgressPage />} />
@@ -511,6 +520,7 @@ export default function AppRouter() {
           
           {/* Question Bank */}
           <Route path="question-bank" element={<MentorQuestionBankPage />} />
+          <Route path="question-bank/recommend" element={<AddRecommendationPage />} />
           
           {/* Assessment Management */}
           <Route path="assessments" element={<MentorAssessmentsPage />} />

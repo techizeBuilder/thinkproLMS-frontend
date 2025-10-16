@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -67,7 +68,16 @@ import BulkUploadForm from "./BulkUploadForm";
 import QuestionRecommendations from "./QuestionRecommendations";
 
 const QuestionBankPage: React.FC = () => {
-  const { } = useAuth();
+  const navigate = useNavigate();
+  const { user } = useAuth();
+  
+  // Determine the base route based on user role
+  const getBaseRoute = () => {
+    if (user?.role === 'superadmin') return '/superadmin';
+    if (user?.role === 'leadmentor') return '/leadmentor';
+    return '/leadmentor'; // fallback
+  };
+  
   const [questions, setQuestions] = useState<Question[]>([]);
   const [loading, setLoading] = useState(true);
   const [filters, setFilters] = useState<QuestionFilters>({
@@ -252,7 +262,7 @@ const QuestionBankPage: React.FC = () => {
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 md:flex md:gap-2">
           <Button
             variant="outline"
-            onClick={() => setShowRecommendations(true)}
+            onClick={() => navigate(`${getBaseRoute()}/question-bank/recommendations`)}
             className="flex items-center gap-2 text-xs md:text-sm"
           >
             <Eye className="h-3 w-3 md:h-4 md:w-4" />
@@ -261,7 +271,7 @@ const QuestionBankPage: React.FC = () => {
           </Button>
           <Button
             variant="outline"
-            onClick={() => setShowBulkUpload(true)}
+            onClick={() => navigate(`${getBaseRoute()}/question-bank/bulk-upload`)}
             className="flex items-center gap-2 text-xs md:text-sm"
           >
             <Upload className="h-3 w-3 md:h-4 md:w-4" />
@@ -269,7 +279,7 @@ const QuestionBankPage: React.FC = () => {
             <span className="sm:hidden">Upload</span>
           </Button>
           <Button
-            onClick={() => setShowCreateForm(true)}
+            onClick={() => navigate(`${getBaseRoute()}/question-bank/add`)}
             className="flex items-center gap-2 text-xs md:text-sm"
           >
             <Plus className="h-3 w-3 md:h-4 md:w-4" />
