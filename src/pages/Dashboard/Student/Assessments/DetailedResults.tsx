@@ -320,7 +320,7 @@ export default function DetailedAssessmentResultsPage() {
         </Card>
       )}
 
-      {/* Correct Answers Summary */}
+      {/* Correct Answers with Options */}
       {correctAnswers.length > 0 && (
         <Card className="border-green-200">
           <CardHeader className="pb-3 p-3 sm:p-6">
@@ -329,33 +329,98 @@ export default function DetailedAssessmentResultsPage() {
               Correct Answers ({correctAnswers.length})
             </CardTitle>
             <p className="text-xs sm:text-sm text-gray-600">
-              Questions you answered correctly.
+              Review the questions you answered correctly. Options show the correct choice and your selection.
             </p>
           </CardHeader>
-          <CardContent className="p-3 sm:p-6 pt-0">
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-3">
-              {correctAnswers.map((question: any, index) => {
-                const questionNumber = result.assessment.questions.findIndex(q => q.questionId === question.questionId) + 1;
-                return (
-                  <div key={String(question.questionId) || index} className="p-2 sm:p-3 bg-green-50 border border-green-200 rounded-lg">
-                    <div className="flex items-center justify-between mb-1 sm:mb-2">
-                      <Badge className="bg-green-100 text-green-800 text-xs">
+          <CardContent className="space-y-3 sm:space-y-4 p-3 sm:p-6 pt-0">
+            {/* Legend */}
+            <div className="flex items-center gap-3 text-xs sm:text-sm text-gray-600">
+              <div className="flex items-center gap-1">
+                <CheckCircle className="h-3 w-3 sm:h-4 sm:w-4 text-green-600" />
+                <span>Correct option</span>
+              </div>
+              <div className="flex items-center gap-1">
+                <div className="h-3 w-3 sm:h-4 sm:w-4 rounded-full border-2 border-gray-300 bg-green-50" />
+                <span>Your selection</span>
+              </div>
+            </div>
+
+            {correctAnswers.map((question: any, index) => {
+              const questionNumber = result.assessment.questions.findIndex(q => q.questionId === question.questionId) + 1;
+              return (
+                <div key={String(question.questionId) || index} className="border border-green-200 rounded-lg p-3 sm:p-4 bg-green-50">
+                  <div className="flex items-start justify-between mb-2 sm:mb-3">
+                    <div className="flex items-center gap-1 sm:gap-2 flex-wrap">
+                      <Badge variant="outline" className="text-green-700 border-green-300 text-xs">
                         Q{questionNumber}
                       </Badge>
                       <Badge className={`text-xs ${getDifficultyColor(question.difficulty)}`}>
                         {question.difficulty}
                       </Badge>
+                      <Badge variant="outline" className="text-green-700 border-green-300 text-xs">
+                        {question.marks}m
+                      </Badge>
                     </div>
-                    <p className="text-xs sm:text-sm text-gray-700 mb-1 sm:mb-2 line-clamp-2">
-                      {question.questionText}
-                    </p>
-                    <div className="text-xs text-green-600 font-medium">
-                      {question.studentAnswer?.marksObtained || 0}/{question.marks}m
+                    <div className="text-xs sm:text-sm text-green-700 font-medium">
+                      {question.studentAnswer?.marksObtained || 0}/{question.marks}
                     </div>
                   </div>
-                );
-              })}
-            </div>
+
+                  <div className="mb-3 sm:mb-4">
+                    <h4 className="font-semibold text-gray-800 mb-2 text-sm sm:text-base">{question.questionText}</h4>
+
+                    <div className="space-y-1 sm:space-y-2">
+                      {question.answerChoices.map((choice: any, choiceIndex: number) => {
+                        const isSelected = question.studentAnswer?.selectedAnswers.includes(choiceIndex);
+                        const isCorrect = question.correctAnswers.includes(choiceIndex);
+
+                        return (
+                          <div
+                            key={choiceIndex}
+                            className={`p-2 sm:p-3 rounded-lg border-2 ${
+                              isCorrect
+                                ? "border-green-500 bg-green-50"
+                                : isSelected
+                                ? "border-green-300 bg-green-50"
+                                : "border-gray-200 bg-white"
+                            }`}
+                          >
+                            <div className="flex items-center gap-2">
+                              {isCorrect ? (
+                                <CheckCircle className="h-3 w-3 sm:h-4 sm:w-4 text-green-600" />
+                              ) : isSelected ? (
+                                <div className="h-3 w-3 sm:h-4 sm:w-4 rounded-full border-2 border-green-300" />
+                              ) : (
+                                <div className="h-3 w-3 sm:h-4 sm:w-4 rounded-full border-2 border-gray-300" />
+                              )}
+                              <span className={`font-medium text-xs sm:text-sm ${
+                                isCorrect ? "text-green-800" : isSelected ? "text-green-700" : "text-gray-700"
+                              }`}>
+                                {String.fromCharCode(65 + choiceIndex)}. {choice.text}
+                              </span>
+                              {isCorrect && (
+                                <Badge className="bg-green-100 text-green-800 text-xs">
+                                  Correct
+                                </Badge>
+                              )}
+                              {isSelected && !isCorrect && (
+                                <Badge className="bg-green-100 text-green-800 text-xs">
+                                  Yours
+                                </Badge>
+                              )}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  <div className="mt-2 sm:mt-3 text-xs text-gray-500">
+                    Time: {formatTime(question.studentAnswer?.timeSpent || 0)}
+                  </div>
+                </div>
+              );
+            })}
           </CardContent>
         </Card>
       )}
