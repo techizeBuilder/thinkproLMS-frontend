@@ -97,7 +97,7 @@ const QuestionRecommendations: React.FC<QuestionRecommendationsProps> = ({
       setLoading(true);
       const response = await questionRecommendationService.getRecommendations(filters);
       if (response.success) {
-        setRecommendations(response.data.recommendations);
+        setRecommendations(response.data.recommendations || []);
         setPagination(response.data.pagination);
       }
     } catch (error) {
@@ -290,7 +290,7 @@ const QuestionRecommendations: React.FC<QuestionRecommendationsProps> = ({
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {recommendations.map((recommendation) => (
+                      {Array.isArray(recommendations) && recommendations.map((recommendation) => (
                         <TableRow key={recommendation._id}>
                           <TableCell className="max-w-xs">
                             <div className="truncate" title={recommendation.questionText}>

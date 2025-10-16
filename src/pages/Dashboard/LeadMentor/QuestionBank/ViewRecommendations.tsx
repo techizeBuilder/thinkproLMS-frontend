@@ -120,10 +120,11 @@ const ViewRecommendationsPage: React.FC = () => {
     try {
       setLoading(true);
       const response = await questionRecommendationService.getRecommendations(filters);
-      setRecommendations(response.data);
+      setRecommendations(response.data.recommendations || []);
     } catch (error) {
       console.error('Error fetching recommendations:', error);
       toast.error('Failed to fetch recommendations');
+      setRecommendations([]);
     } finally {
       setLoading(false);
     }
@@ -322,7 +323,7 @@ const ViewRecommendationsPage: React.FC = () => {
             </div>
           ) : (
             <div className="space-y-4">
-              {recommendations.length === 0 ? (
+              {!Array.isArray(recommendations) || recommendations.length === 0 ? (
                 <div className="text-center py-8">
                   <p className="text-gray-500">No recommendations found</p>
                 </div>
