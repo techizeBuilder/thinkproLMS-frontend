@@ -30,6 +30,7 @@ export interface NotificationFilters {
   limit?: number;
   type?: string;
   priority?: string;
+  isRead?: boolean;
 }
 
 export const notificationService = {

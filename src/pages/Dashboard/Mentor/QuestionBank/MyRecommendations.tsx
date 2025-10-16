@@ -22,7 +22,6 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { questionRecommendationService, questionBankService, type QuestionRecommendation, type RecommendationFilters } from '@/api/questionBankService';
-import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 
 const MyRecommendationsPage: React.FC = () => {
@@ -48,6 +47,7 @@ const MyRecommendationsPage: React.FC = () => {
   const [sessionSelectOpen, setSessionSelectOpen] = useState(false);
   const [selectedRecommendation, setSelectedRecommendation] = useState<QuestionRecommendation | null>(null);
   const [showReRecommendDialog, setShowReRecommendDialog] = useState(false);
+  const [showViewDialog, setShowViewDialog] = useState(false);
   const [reRecommendData, setReRecommendData] = useState({
     questionText: '',
     session: '',
@@ -151,6 +151,7 @@ const MyRecommendationsPage: React.FC = () => {
     setSelectedRecommendation(recommendation);
     setReRecommendData({
       questionText: recommendation.questionText,
+      session: recommendation.session || '',
       answerType: recommendation.answerType,
       answerChoices: recommendation.answerChoices.map(choice => ({
         text: choice.text,

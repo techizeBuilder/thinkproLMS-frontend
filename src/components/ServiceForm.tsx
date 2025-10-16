@@ -18,7 +18,6 @@ export default function ServiceForm({
   serviceDetails,
   onChange,
 }: ServiceFormProps) {
-  const [customSubject, setCustomSubject] = useState("");
   const [selectedGrades, setSelectedGrades] = useState<number[]>([]);
 
   // Initialize selectedGrades from existing serviceDetails
