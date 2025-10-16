@@ -47,7 +47,7 @@ const MyRecommendationsPage: React.FC = () => {
   const [sessionSelectOpen, setSessionSelectOpen] = useState(false);
   const [selectedRecommendation, setSelectedRecommendation] = useState<QuestionRecommendation | null>(null);
   const [showReRecommendDialog, setShowReRecommendDialog] = useState(false);
-  const [showViewDialog, setShowViewDialog] = useState(false);
+  const [, setShowViewDialog] = useState(false);
   const [reRecommendData, setReRecommendData] = useState({
     questionText: '',
     session: '',
@@ -151,7 +151,7 @@ const MyRecommendationsPage: React.FC = () => {
     setSelectedRecommendation(recommendation);
     setReRecommendData({
       questionText: recommendation.questionText,
-      session: recommendation.session || '',
+      session: recommendation.session?._id || '',
       answerType: recommendation.answerType,
       answerChoices: recommendation.answerChoices.map(choice => ({
         text: choice.text,
