@@ -177,28 +177,23 @@ export default function EditSchoolPage() {
               </div>
 
               <div className="space-y-2">
-                <Label>Boards *</Label>
+                <Label>Board *</Label>
                 <div className="flex flex-wrap items-center gap-4 border border-gray-300 rounded-md p-3">
-                  {["CBSE", "ICSE", "State", "Other"].map((board) => (
+                  {["CBSE", "ICSE", "State Board", "IGCSE", "IB", "Other"].map((board) => (
                     <div key={board} className="flex items-center space-x-2">
                       <input
-                        type="checkbox"
+                        type="radio"
                         id={`board-${board}`}
+                        name="board"
+                        value={board}
                         checked={formData.boards?.includes(board as any)}
                         onChange={(e) => {
-                          if (e.target.checked) {
-                            setFormData((prev) => ({
-                              ...prev,
-                              boards: [...(prev.boards || []), board as any],
-                            }));
-                          } else {
-                            setFormData((prev) => ({
-                              ...prev,
-                              boards: (prev.boards || []).filter((b) => b !== board),
-                            }));
-                          }
+                          setFormData((prev) => ({
+                            ...prev,
+                            boards: [board as any],
+                          }));
                         }}
-                        className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                        className="h-4 w-4 border-gray-300 text-blue-600 focus:ring-blue-500"
                       />
                       <label
                         htmlFor={`board-${board}`}
@@ -210,7 +205,7 @@ export default function EditSchoolPage() {
                   ))}
                 </div>
                 <p className="text-xs text-gray-500">
-                  Select at least one board
+                  Select one board
                 </p>
               </div>
             </div>

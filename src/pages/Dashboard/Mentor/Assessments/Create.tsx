@@ -111,7 +111,7 @@ export default function CreateAssessmentPage() {
               address: "", // Not available in mentor profile
               city: school.city,
               state: school.state,
-              boards: (school.boards || []) as ("ICSE" | "CBSE" | "State" | "Other")[],
+              boards: (school.boards || []) as ("CBSE" | "ICSE" | "State Board" | "IGCSE" | "IB" | "Other")[],
               branchName: school.branchName || "",
               isActive: true, // Assume active since they're assigned
               createdAt: new Date().toISOString(),

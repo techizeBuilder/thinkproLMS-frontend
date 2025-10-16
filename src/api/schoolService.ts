@@ -29,7 +29,7 @@ export interface School {
   _id: string;
   name: string;
   address: string;
-  boards: ("ICSE" | "CBSE" | "State" | "Other")[];
+  boards: ("CBSE" | "ICSE" | "State Board" | "IGCSE" | "IB" | "Other")[];
   image?: string;
   logo?: string;
   affiliatedTo?: string;
@@ -48,7 +48,7 @@ export interface School {
 export interface CreateSchoolData {
   name: string;
   address: string;
-  boards: ("ICSE" | "CBSE" | "State" | "Other")[];
+  boards: ("CBSE" | "ICSE" | "State Board" | "IGCSE" | "IB" | "Other")[];
   image?: File;
   logo?: File;
   affiliatedTo?: string;
