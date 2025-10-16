@@ -31,6 +31,7 @@ export interface CreateLeadMentorData {
 }
 
 export interface UpdateLeadMentorData {
+  name?: string;
   phoneNumber?: string;
   assignedSchools?: string[];
   hasAccessToAllSchools?: boolean;

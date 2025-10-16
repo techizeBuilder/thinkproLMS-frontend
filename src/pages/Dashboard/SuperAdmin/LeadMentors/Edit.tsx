@@ -25,6 +25,7 @@ export default function EditLeadMentorPage() {
   const [schools, setSchools] = useState<School[]>([]);
   const [schoolsLoading, setSchoolsLoading] = useState(true);
   const [formData, setFormData] = useState<UpdateLeadMentorData>({
+    name: "",
     phoneNumber: "",
     assignedSchools: [],
     hasAccessToAllSchools: false,
@@ -47,6 +48,7 @@ export default function EditLeadMentorPage() {
         const mentor = response.data;
         setLeadMentor(mentor);
         setFormData({
+          name: mentor.user.name || "",
           phoneNumber: mentor.phoneNumber || "",
           assignedSchools: mentor.assignedSchools.map(s => s._id),
           hasAccessToAllSchools: mentor.hasAccessToAllSchools,
@@ -183,6 +185,19 @@ export default function EditLeadMentorPage() {
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-6">
+            <div className="space-y-2">
+              <Label htmlFor="name">Name</Label>
+              <input
+                id="name"
+                name="name"
+                type="text"
+                value={formData.name || ""}
+                onChange={handleInputChange}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                required
+              />
+            </div>
+
             <PhoneInput
               label="Phone Number"
               value={formData.phoneNumber || ""}

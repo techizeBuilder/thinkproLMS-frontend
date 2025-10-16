@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
+import { useUploadCompletion } from "@/hooks/useUploadCompletion";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -138,6 +139,11 @@ export default function ResourcesPage() {
   useEffect(() => {
     fetchResources(1);
   }, [selectedUserType, selectedBucket, searchTerm]);
+
+  // Listen for upload completion and refetch resources
+  useUploadCompletion(() => {
+    fetchResources(1);
+  });
 
   // Update URL when filters change
   useEffect(() => {

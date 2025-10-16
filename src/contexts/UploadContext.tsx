@@ -37,6 +37,8 @@ export function UploadProvider({ children }: { children: ReactNode }) {
 
   const finishUpload = useCallback(() => {
     setActiveUpload((prev) => (prev ? { ...prev, progress: 100 } : prev));
+    // Emit custom event when upload completes
+    window.dispatchEvent(new CustomEvent('uploadCompleted'));
     // Allow a short delay for UI to show 100% then clear
     setTimeout(() => setActiveUpload(null), 1500);
   }, []);
