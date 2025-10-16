@@ -13,14 +13,14 @@ interface Mentor {
     isVerified: boolean;
     createdAt: string;
   };
-  assignedSchool: {
+  assignedSchools: {
     _id: string;
     name: string;
     city: string;
     state: string;
     boards: string[];
     branchName: string;
-  };
+  }[];
   isActive: boolean;
 }
 
@@ -65,9 +65,11 @@ function MentorLayoutContent() {
           <div className="flex-1 min-w-0">
             {loading ? (
               <h1 className="text-base md:text-xl font-semibold truncate">Loading...</h1>
-            ) : mentor && mentor.user && mentor.assignedSchool ? (
+            ) : mentor && mentor.user && mentor.assignedSchools && mentor.assignedSchools.length > 0 ? (
               <h1 className="text-base md:text-xl font-semibold truncate">
-                {mentor.user.name} - {mentor.assignedSchool.name}
+                {mentor.user.name} - {mentor.assignedSchools.length > 1 
+                  ? `${mentor.assignedSchools[0].name} (+${mentor.assignedSchools.length - 1} more)`
+                  : mentor.assignedSchools[0].name}
               </h1>
             ) : (
               <h1 className="text-base md:text-xl font-semibold truncate">School Mentor Portal</h1>

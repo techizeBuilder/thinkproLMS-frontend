@@ -10,14 +10,14 @@ export interface Mentor {
     createdAt: string;
   };
   phoneNumber: string;
-  assignedSchool: {
+  assignedSchools: {
     _id: string;
     name: string;
     city: string;
     state: string;
     boards: string[];
     branchName: string;
-  };
+  }[];
   addedBy: {
     _id: string;
     name: string;
@@ -33,14 +33,14 @@ export interface CreateMentorData {
   name: string;
   email: string;
   phoneNumber: string;
-  assignedSchool: string;
+  assignedSchools: string[];
 }
 
 export interface UpdateMentorData {
   name?: string;
   email?: string;
   phoneNumber?: string;
-  assignedSchool?: string;
+  assignedSchools?: string[];
   isActive?: boolean;
 }
 

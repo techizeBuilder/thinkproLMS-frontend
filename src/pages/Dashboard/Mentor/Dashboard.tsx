@@ -28,7 +28,7 @@ interface Mentor {
     isVerified: boolean;
     createdAt: string;
   };
-  assignedSchool: School;
+  assignedSchools: School[];
   isActive: boolean;
 }
 
@@ -42,7 +42,7 @@ export default function MentorDashboard() {
   }, []);
 
   useEffect(() => {
-    if (mentor && mentor.assignedSchool) {
+    if (mentor && mentor.assignedSchools && mentor.assignedSchools.length > 0) {
       fetchStudentCount();
     }
   }, [mentor]);
@@ -61,16 +61,14 @@ export default function MentorDashboard() {
   };
 
   const fetchStudentCount = async () => {
-    if (!mentor || !mentor.assignedSchool) {
+    if (!mentor || !mentor.assignedSchools || mentor.assignedSchools.length === 0) {
       setStudentCount(0);
       return;
     }
 
     try {
-      // Count students from assigned school
-      const response = await studentService.getAll({
-        schoolId: mentor.assignedSchool._id,
-      });
+      // Count students from all assigned schools - backend will handle filtering
+      const response = await studentService.getAll();
       if (response.success) {
         setStudentCount(response.data.length);
       } else {
@@ -96,28 +94,30 @@ export default function MentorDashboard() {
   return (
     <div className="p-3 sm:p-4 lg:p-6 space-y-4 sm:space-y-6">
       {/* School Selection */}
-      {mentor && mentor.assignedSchool && (
+      {mentor && mentor.assignedSchools && mentor.assignedSchools.length > 0 && (
         <Card>
           <CardHeader className="px-3 sm:px-6 pt-3 sm:pt-6">
-            <CardTitle className="text-sm sm:text-base lg:text-lg">School Information</CardTitle>
+            <CardTitle className="text-sm sm:text-base lg:text-lg">Assigned Schools ({mentor.assignedSchools.length})</CardTitle>
             <CardDescription className="text-xs sm:text-sm">Your assigned school details</CardDescription>
           </CardHeader>
           <CardContent className="px-3 sm:px-6 pb-3 sm:pb-6">
-            <div className="space-y-2">
-              <div className="text-base sm:text-lg font-semibold">
-                {mentor.assignedSchool.name}
-                {mentor.assignedSchool.branchName &&
-                  ` - ${mentor.assignedSchool.branchName}`}
-              </div>
-              <div className="text-xs sm:text-sm text-muted-foreground">
-                {mentor.assignedSchool.city}, {mentor.assignedSchool.state}
-              </div>
-              {mentor.assignedSchool.boards &&
-                mentor.assignedSchool.boards.length > 0 && (
-                  <div className="text-xs sm:text-sm text-muted-foreground">
-                    Boards: {mentor.assignedSchool.boards.join(", ")}
+            <div className="space-y-3">
+              {mentor.assignedSchools.map((school, index) => (
+                <div key={school._id} className="border rounded-lg p-3 bg-muted/30">
+                  <div className="text-base sm:text-lg font-semibold">
+                    {school.name}
+                    {school.branchName && ` - ${school.branchName}`}
                   </div>
-                )}
+                  <div className="text-xs sm:text-sm text-muted-foreground">
+                    {school.city}, {school.state}
+                  </div>
+                  {school.boards && school.boards.length > 0 && (
+                    <div className="text-xs sm:text-sm text-muted-foreground">
+                      Boards: {school.boards.join(", ")}
+                    </div>
+                  )}
+                </div>
+              ))}
             </div>
           </CardContent>
         </Card>
@@ -133,7 +133,7 @@ export default function MentorDashboard() {
           <CardContent className="px-3 sm:px-6 pb-3 sm:pb-6">
             <div className="text-lg sm:text-xl lg:text-2xl font-bold">{studentCount}</div>
             <p className="text-[10px] sm:text-xs text-muted-foreground">
-              Students in your assigned school
+              Students in your assigned schools
             </p>
           </CardContent>
         </Card>

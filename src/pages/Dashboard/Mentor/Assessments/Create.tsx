@@ -104,22 +104,24 @@ export default function CreateAssessmentPage() {
         try {
           const response = await mentorService.getMyProfile();
           if (response.success) {
-            // Convert assigned school to the format expected by the form
-            const assignedSchool: School = {
-              _id: response.data.assignedSchool._id,
-              name: response.data.assignedSchool.name,
+            // Convert assigned schools to the format expected by the form
+            const assignedSchools: School[] = response.data.assignedSchools.map((school: any) => ({
+              _id: school._id,
+              name: school.name,
               address: "", // Not available in mentor profile
-              city: response.data.assignedSchool.city,
-              state: response.data.assignedSchool.state,
-              boards: (response.data.assignedSchool.boards || []) as ("ICSE" | "CBSE" | "State" | "Other")[],
-              branchName: response.data.assignedSchool.branchName || "",
+              city: school.city,
+              state: school.state,
+              boards: (school.boards || []) as ("ICSE" | "CBSE" | "State" | "Other")[],
+              branchName: school.branchName || "",
               isActive: true, // Assume active since they're assigned
               createdAt: new Date().toISOString(),
               updatedAt: new Date().toISOString()
-            };
-            setSchools([assignedSchool]);
-            // Automatically set the school for mentors
-            setFormData(prev => ({ ...prev, school: assignedSchool._id }));
+            }));
+            setSchools(assignedSchools);
+            // Automatically set the first school for mentors
+            if (assignedSchools.length > 0) {
+              setFormData(prev => ({ ...prev, school: assignedSchools[0]._id }));
+            }
           }
         } catch (error) {
           console.error("Error loading mentor profile:", error);

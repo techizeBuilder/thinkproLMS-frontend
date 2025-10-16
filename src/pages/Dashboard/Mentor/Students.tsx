@@ -72,7 +72,7 @@ interface Mentor {
     isVerified: boolean;
     createdAt: string;
   };
-  assignedSchool: School;
+  assignedSchools: School[];
   isActive: boolean;
 }
 
@@ -82,6 +82,7 @@ export default function MentorStudentsPage() {
   const [mentor, setMentor] = useState<Mentor | null>(null);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
+  const [selectedSchool, setSelectedSchool] = useState<string>("all");
   const [selectedGrade, setSelectedGrade] = useState("all");
   const [selectedSection, setSelectedSection] = useState("all");
   const [availableGrades, setAvailableGrades] = useState<string[]>([]);
@@ -92,30 +93,34 @@ export default function MentorStudentsPage() {
   }, []);
 
   useEffect(() => {
-    if (mentor && mentor.assignedSchool) {
+    if (mentor && mentor.assignedSchools && mentor.assignedSchools.length > 0) {
       fetchStudents();
     }
   }, [mentor]);
 
   useEffect(() => {
     filterStudents();
-  }, [students, searchTerm, selectedGrade, selectedSection]);
+  }, [students, searchTerm, selectedSchool, selectedGrade, selectedSection]);
 
   useEffect(() => {
     // Extract grades and sections from school service details
-    if (mentor?.assignedSchool?.serviceDetails?.grades) {
-      const gradesFromService = mentor.assignedSchool.serviceDetails.grades;
-      
-      // Extract unique grades
-      const grades = gradesFromService.map(g => `Grade ${g.grade}`).sort();
-      setAvailableGrades(grades);
-      
-      // Extract all unique sections from all grades
-      const allSections = new Set<string>();
-      gradesFromService.forEach(g => {
-        g.sections?.forEach(section => allSections.add(section));
-      });
-      setAvailableSections(Array.from(allSections).sort());
+    if (mentor?.assignedSchools && mentor.assignedSchools.length > 0) {
+      // Use the first school for now (can be enhanced to handle multiple schools)
+      const firstSchool = mentor.assignedSchools[0];
+      if (firstSchool?.serviceDetails?.grades) {
+        const gradesFromService = firstSchool.serviceDetails.grades;
+        
+        // Extract unique grades
+        const grades = gradesFromService.map(g => `Grade ${g.grade}`).sort();
+        setAvailableGrades(grades);
+        
+        // Extract all unique sections from all grades
+        const allSections = new Set<string>();
+        gradesFromService.forEach(g => {
+          g.sections?.forEach(section => allSections.add(section));
+        });
+        setAvailableSections(Array.from(allSections).sort());
+      }
     }
   }, [mentor]);
 
@@ -133,15 +138,14 @@ export default function MentorStudentsPage() {
   };
 
   const fetchStudents = async () => {
-    if (!mentor || !mentor.assignedSchool) {
+    if (!mentor || !mentor.assignedSchools || mentor.assignedSchools.length === 0) {
       setLoading(false);
       return;
     }
 
     try {
-      // Fetch students from assigned school
-      const schoolId = mentor.assignedSchool._id;
-      const response = await studentService.getAll({ schoolId });
+      // Fetch students - backend will automatically filter by mentor's assigned schools
+      const response = await studentService.getAll();
       if (response.success) {
         setStudents(response.data);
       }
@@ -154,6 +158,11 @@ export default function MentorStudentsPage() {
 
   const filterStudents = () => {
     let filtered = students;
+
+    // Filter by school
+    if (selectedSchool !== "all") {
+      filtered = filtered.filter((student) => student.school._id === selectedSchool);
+    }
 
     // Filter by search term
     if (searchTerm) {
@@ -201,7 +210,7 @@ export default function MentorStudentsPage() {
     );
   }
 
-  if (!mentor.assignedSchool) {
+  if (!mentor.assignedSchools || mentor.assignedSchools.length === 0) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
@@ -218,19 +227,31 @@ export default function MentorStudentsPage() {
         <div>
           <h1 className="text-2xl md:text-3xl font-bold">My Students</h1>
           <p className="text-sm md:text-base text-muted-foreground">
-            View students from your assigned school
+            {selectedSchool === "all" 
+              ? `View students from all your assigned schools (${mentor.assignedSchools.length} schools)`
+              : `View students from ${mentor.assignedSchools.find(s => s._id === selectedSchool)?.name || 'selected school'}`
+            }
           </p>
         </div>
       </div>
 
       {/* School Info - inline, no card */}
-      <div className="flex items-center gap-2 text-sm md:text-base text-muted-foreground">
-        <MapPin className="h-4 w-4 md:h-5 md:w-5 text-primary shrink-0" />
-        <span className="font-medium text-foreground">{mentor.assignedSchool.name}</span>
-        {mentor.assignedSchool.branchName && (
-          <span>• {mentor.assignedSchool.branchName}</span>
-        )}
-        <span>• {mentor.assignedSchool.city}, {mentor.assignedSchool.state}</span>
+      <div className="space-y-2">
+        <div className="flex items-center gap-2 text-sm md:text-base text-muted-foreground">
+          <MapPin className="h-4 w-4 md:h-5 md:w-5 text-primary shrink-0" />
+          <span className="font-medium text-foreground">Assigned Schools ({mentor.assignedSchools.length})</span>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          {mentor.assignedSchools.map((school, index) => (
+            <div key={school._id} className="flex items-center gap-1 text-xs md:text-sm text-muted-foreground bg-muted/50 px-2 py-1 rounded">
+              <span className="font-medium text-foreground">{school.name}</span>
+              {school.branchName && (
+                <span>• {school.branchName}</span>
+              )}
+              <span>• {school.city}, {school.state}</span>
+            </div>
+          ))}
+        </div>
       </div>
 
       {/* Filters */}
@@ -246,6 +267,21 @@ export default function MentorStudentsPage() {
             />
           </div>
         </div>
+
+        <Select value={selectedSchool} onValueChange={setSelectedSchool}>
+          <SelectTrigger className="w-[180px] text-sm">
+            <SelectValue placeholder="School" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Schools</SelectItem>
+            {mentor?.assignedSchools.map((school) => (
+              <SelectItem key={school._id} value={school._id}>
+                {school.name}
+                {school.branchName && ` - ${school.branchName}`}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
 
         <Select value={selectedGrade} onValueChange={setSelectedGrade}>
           <SelectTrigger className="w-[130px] text-sm">
@@ -274,8 +310,40 @@ export default function MentorStudentsPage() {
             ))}
           </SelectContent>
         </Select>
+
+        <button
+          onClick={() => {
+            setSelectedSchool("all");
+            setSelectedGrade("all");
+            setSelectedSection("all");
+            setSearchTerm("");
+          }}
+          className="px-3 py-2 text-sm border rounded-md hover:bg-muted/50 transition-colors"
+        >
+          Clear Filters
+        </button>
       </div>
 
+      {/* Selection Summary */}
+      <div className="flex items-center justify-between p-3 bg-muted/30 rounded-lg">
+        <div className="flex items-center gap-2">
+          <div className="text-sm font-medium">
+            {selectedSchool === "all" ? (
+              <span>Showing students from all schools</span>
+            ) : (
+              <span>
+                Showing students from{" "}
+                <span className="font-semibold text-primary">
+                  {mentor.assignedSchools.find(s => s._id === selectedSchool)?.name}
+                </span>
+              </span>
+            )}
+          </div>
+        </div>
+        <div className="text-sm text-muted-foreground">
+          {filteredStudents.length} of {students.length} students
+        </div>
+      </div>
 
       {/* Students Table */}
       <Card>
@@ -287,7 +355,9 @@ export default function MentorStudentsPage() {
               <p className="text-sm text-muted-foreground">
                 {students.length === 0
                   ? "No students are enrolled in your assigned schools yet."
-                  : "No students match your current filters."}
+                  : selectedSchool === "all"
+                  ? "No students match your current filters. Try adjusting your search or filter criteria."
+                  : "No students found in the selected school. Try selecting a different school or clear filters to see all students."}
               </p>
             </div>
           ) : (
