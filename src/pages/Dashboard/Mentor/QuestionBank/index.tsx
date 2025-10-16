@@ -193,6 +193,14 @@ const MentorQuestionBankPage: React.FC = () => {
         <div className="flex gap-2">
           <Button
             variant="outline"
+            onClick={() => navigate('/mentor/question-bank/my-recommendations')}
+            className="flex items-center gap-1 md:gap-2 text-xs sm:text-sm h-8 sm:h-9"
+          >
+            <Eye className="h-3 w-3 sm:h-4 sm:w-4" />
+            My Recommendations
+          </Button>
+          <Button
+            variant="outline"
             onClick={() => navigate('/mentor/question-bank/recommend')}
             className="flex items-center gap-1 md:gap-2 text-xs sm:text-sm h-8 sm:h-9"
           >

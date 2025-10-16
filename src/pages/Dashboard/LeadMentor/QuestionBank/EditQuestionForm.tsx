@@ -112,10 +112,18 @@ const EditQuestionForm: React.FC<EditQuestionFormProps> = ({
 
   const handleAnswerChoiceChange = (index: number, field: 'text' | 'isCorrect', value: any) => {
     const newChoices = [...formData.answerChoices];
-    newChoices[index] = {
-      ...newChoices[index],
-      [field]: value,
-    };
+    
+    if (field === 'isCorrect' && formData.answerType === 'radio') {
+      // For radio buttons, only one can be selected at a time
+      newChoices.forEach((choice, idx) => {
+        choice.isCorrect = idx === index ? value : false;
+      });
+    } else {
+      newChoices[index] = {
+        ...newChoices[index],
+        [field]: value,
+      };
+    }
 
     setFormData(prev => ({
       ...prev,

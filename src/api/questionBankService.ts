@@ -202,6 +202,43 @@ export const questionRecommendationService = {
     });
     return response.data;
   },
+
+  // Get my recommendations
+  getMyRecommendations: async (filters: RecommendationFilters = {}) => {
+    const params = new URLSearchParams();
+    Object.entries(filters).forEach(([key, value]) => {
+      if (value !== undefined && value !== '') {
+        params.append(key, value.toString());
+      }
+    });
+    
+    const response = await axiosInstance.get(`/question-bank/recommendations/my?${params.toString()}`);
+    return response.data;
+  },
+
+  // Re-recommend question
+  reRecommendQuestion: async (id: string, data: CreateQuestionData) => {
+    const response = await axiosInstance.post(`/question-bank/recommendations/${id}/re-recommend`, data);
+    return response.data;
+  },
+
+  // Approve recommendation
+  approveRecommendation: async (id: string, data: { reviewComments?: string }) => {
+    const response = await axiosInstance.put(`/question-bank/recommendations/${id}/review`, {
+      status: 'approved',
+      reviewComments: data.reviewComments,
+    });
+    return response.data;
+  },
+
+  // Reject recommendation
+  rejectRecommendation: async (id: string, data: { reviewComments: string }) => {
+    const response = await axiosInstance.put(`/question-bank/recommendations/${id}/review`, {
+      status: 'rejected',
+      reviewComments: data.reviewComments,
+    });
+    return response.data;
+  },
 };
 
 // Bulk Upload API

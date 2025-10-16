@@ -17,7 +17,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
-import { Check, ChevronsUpDown, ArrowLeft, CheckCircle, XCircle, Eye, Clock } from 'lucide-react';
+import { Check, ChevronsUpDown, ArrowLeft, CheckCircle, XCircle, Eye, Clock, RefreshCw } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
@@ -27,16 +27,10 @@ import { questionRecommendationService, questionBankService, type QuestionRecomm
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 
-const ViewRecommendationsPage: React.FC = () => {
+const MyRecommendationsPage: React.FC = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   
-  // Determine the base route based on user role
-  const getBaseRoute = () => {
-    if (user?.role === 'superadmin') return '/superadmin';
-    if (user?.role === 'leadmentor') return '/leadmentor';
-    return '/leadmentor'; // fallback
-  };
   const [recommendations, setRecommendations] = useState<QuestionRecommendation[]>([]);
   const [loading, setLoading] = useState(true);
   const [filters, setFilters] = useState<RecommendationFilters>({
@@ -58,9 +52,15 @@ const ViewRecommendationsPage: React.FC = () => {
   const [sessionSelectOpen, setSessionSelectOpen] = useState(false);
   const [selectedRecommendation, setSelectedRecommendation] = useState<QuestionRecommendation | null>(null);
   const [showViewDialog, setShowViewDialog] = useState(false);
-  const [showApproveDialog, setShowApproveDialog] = useState(false);
-  const [showRejectDialog, setShowRejectDialog] = useState(false);
-  const [reviewComments, setReviewComments] = useState('');
+  const [showReRecommendDialog, setShowReRecommendDialog] = useState(false);
+  const [reRecommendData, setReRecommendData] = useState({
+    questionText: '',
+    answerType: 'radio' as 'radio' | 'checkbox',
+    answerChoices: [{ text: '', isCorrect: false }],
+    correctAnswers: [] as number[],
+    explanation: '',
+    difficulty: 'Medium' as 'Easy' | 'Medium' | 'Tough',
+  });
 
   const difficulties = ['Easy', 'Medium', 'Tough'];
   const statuses = [
@@ -119,7 +119,7 @@ const ViewRecommendationsPage: React.FC = () => {
   const fetchRecommendations = async () => {
     try {
       setLoading(true);
-      const response = await questionRecommendationService.getRecommendations(filters);
+      const response = await questionRecommendationService.getMyRecommendations(filters);
       setRecommendations(response.data.recommendations || []);
     } catch (error) {
       console.error('Error fetching recommendations:', error);
@@ -151,41 +151,97 @@ const ViewRecommendationsPage: React.FC = () => {
     setShowViewDialog(true);
   };
 
-  const handleApprove = async () => {
+  const handleReRecommend = (recommendation: QuestionRecommendation) => {
+    setSelectedRecommendation(recommendation);
+    setReRecommendData({
+      questionText: recommendation.questionText,
+      answerType: recommendation.answerType,
+      answerChoices: recommendation.answerChoices.map(choice => ({
+        text: choice.text,
+        isCorrect: choice.isCorrect
+      })),
+      correctAnswers: recommendation.correctAnswers,
+      explanation: recommendation.explanation,
+      difficulty: recommendation.difficulty,
+    });
+    setShowReRecommendDialog(true);
+  };
+
+  const handleReRecommendSubmit = async () => {
     if (!selectedRecommendation) return;
 
     try {
-      await questionRecommendationService.approveRecommendation(selectedRecommendation._id, {
-        reviewComments: reviewComments,
-      });
-      toast.success('Recommendation approved successfully');
-      setShowApproveDialog(false);
+      await questionRecommendationService.reRecommendQuestion(selectedRecommendation._id, reRecommendData);
+      toast.success('Question re-recommended successfully');
+      setShowReRecommendDialog(false);
       setShowViewDialog(false);
-      setSelectedRecommendation(null);
-      setReviewComments('');
       fetchRecommendations();
+      navigate('/mentor/question-bank');
     } catch (error: any) {
-      console.error('Error approving recommendation:', error);
-      toast.error(error.response?.data?.message || 'Failed to approve recommendation');
+      console.error('Error re-recommending question:', error);
+      toast.error(error.response?.data?.message || 'Failed to re-recommend question');
     }
   };
 
-  const handleReject = async () => {
-    if (!selectedRecommendation) return;
-
-    try {
-      await questionRecommendationService.rejectRecommendation(selectedRecommendation._id, {
-        reviewComments: reviewComments,
+  const handleAnswerChoiceChange = (index: number, field: 'text' | 'isCorrect', value: any) => {
+    const newChoices = [...reRecommendData.answerChoices];
+    
+    if (field === 'isCorrect' && reRecommendData.answerType === 'radio') {
+      // For radio buttons, only one can be selected at a time
+      newChoices.forEach((choice, idx) => {
+        choice.isCorrect = idx === index ? value : false;
       });
-      toast.success('Recommendation rejected successfully');
-      setShowRejectDialog(false);
-      setShowViewDialog(false);
-      setSelectedRecommendation(null);
-      setReviewComments('');
-      fetchRecommendations();
-    } catch (error: any) {
-      console.error('Error rejecting recommendation:', error);
-      toast.error(error.response?.data?.message || 'Failed to reject recommendation');
+    } else {
+      newChoices[index] = {
+        ...newChoices[index],
+        [field]: value,
+      };
+    }
+
+    setReRecommendData(prev => ({
+      ...prev,
+      answerChoices: newChoices,
+    }));
+
+    // Update correct answers
+    if (field === 'isCorrect') {
+      const correctAnswers = newChoices
+        .map((choice, idx) => choice.isCorrect ? idx : -1)
+        .filter(idx => idx !== -1);
+      
+      setReRecommendData(prev => ({
+        ...prev,
+        correctAnswers,
+      }));
+    }
+  };
+
+  const addAnswerChoice = () => {
+    if (reRecommendData.answerChoices.length < 15) {
+      setReRecommendData(prev => ({
+        ...prev,
+        answerChoices: [...prev.answerChoices, { text: '', isCorrect: false }],
+      }));
+    }
+  };
+
+  const removeAnswerChoice = (index: number) => {
+    if (reRecommendData.answerChoices.length > 2) {
+      const newChoices = reRecommendData.answerChoices.filter((_, i) => i !== index);
+      setReRecommendData(prev => ({
+        ...prev,
+        answerChoices: newChoices,
+      }));
+
+      // Update correct answers
+      const correctAnswers = newChoices
+        .map((choice, idx) => choice.isCorrect ? idx : -1)
+        .filter(idx => idx !== -1);
+      
+      setReRecommendData(prev => ({
+        ...prev,
+        correctAnswers,
+      }));
     }
   };
 
@@ -197,15 +253,15 @@ const ViewRecommendationsPage: React.FC = () => {
         <Button
           variant="outline"
           size="sm"
-          onClick={() => navigate(`${getBaseRoute()}/question-bank`)}
+          onClick={() => navigate('/mentor/question-bank')}
           className="flex items-center gap-2"
         >
           <ArrowLeft className="h-4 w-4" />
           Back to Question Bank
         </Button>
         <div>
-          <h1 className="text-2xl md:text-3xl font-bold">View Recommendations</h1>
-          <p className="text-gray-600">Review and manage question recommendations</p>
+          <h1 className="text-2xl md:text-3xl font-bold">My Recommendations</h1>
+          <p className="text-gray-600">View and manage your question recommendations</p>
         </div>
       </div>
 
@@ -317,7 +373,7 @@ const ViewRecommendationsPage: React.FC = () => {
       {/* Recommendations Table */}
       <Card>
         <CardHeader>
-          <CardTitle>Question Recommendations</CardTitle>
+          <CardTitle>My Question Recommendations</CardTitle>
         </CardHeader>
         <CardContent>
           {loading ? (
@@ -352,8 +408,13 @@ const ViewRecommendationsPage: React.FC = () => {
                             </Badge>
                           </div>
                           <p className="text-xs text-gray-500">
-                            Recommended by: {recommendation.recommendedBy.name}
+                            Submitted: {new Date(recommendation.createdAt).toLocaleDateString()}
                           </p>
+                          {recommendation.status === 'rejected' && recommendation.reviewComments && (
+                            <p className="text-xs text-red-600 mt-1">
+                              Rejection reason: {recommendation.reviewComments}
+                            </p>
+                          )}
                         </div>
                         <div className="flex items-center gap-2">
                           <Button
@@ -364,6 +425,17 @@ const ViewRecommendationsPage: React.FC = () => {
                             <Eye className="h-4 w-4 mr-1" />
                             View
                           </Button>
+                          {recommendation.status === 'rejected' && (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleReRecommend(recommendation)}
+                              className="text-blue-600 hover:text-blue-700"
+                            >
+                              <RefreshCw className="h-4 w-4 mr-1" />
+                              Re-recommend
+                            </Button>
+                          )}
                         </div>
                       </div>
                     </div>
@@ -384,7 +456,10 @@ const ViewRecommendationsPage: React.FC = () => {
                 <h2 className="text-xl font-bold">Question Recommendation</h2>
                 <Button
                   variant="outline"
-                  onClick={() => setShowViewDialog(false)}
+                  onClick={() => {
+                    setShowViewDialog(false);
+                    navigate('/mentor/question-bank');
+                  }}
                 >
                   Close
                 </Button>
@@ -439,14 +514,14 @@ const ViewRecommendationsPage: React.FC = () => {
 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <Label className="text-sm font-medium">Recommended by</Label>
-                    <p className="text-sm mt-1">{selectedRecommendation.recommendedBy.name}</p>
-                  </div>
-                  <div>
                     <Label className="text-sm font-medium">Status</Label>
                     <Badge className={getStatusColor(selectedRecommendation.status)}>
                       {selectedRecommendation.status}
                     </Badge>
+                  </div>
+                  <div>
+                    <Label className="text-sm font-medium">Submitted</Label>
+                    <p className="text-sm mt-1">{new Date(selectedRecommendation.createdAt).toLocaleDateString()}</p>
                   </div>
                 </div>
 
@@ -459,22 +534,14 @@ const ViewRecommendationsPage: React.FC = () => {
                   </div>
                 )}
 
-                {selectedRecommendation.status === 'pending' && (
+                {selectedRecommendation.status === 'rejected' && (
                   <div className="flex gap-2 pt-4">
                     <Button
-                      onClick={() => setShowApproveDialog(true)}
-                      className="bg-green-600 hover:bg-green-700"
+                      onClick={() => handleReRecommend(selectedRecommendation)}
+                      className="bg-blue-600 hover:bg-blue-700"
                     >
-                      <CheckCircle className="h-4 w-4 mr-1" />
-                      Approve
-                    </Button>
-                    <Button
-                      variant="outline"
-                      onClick={() => setShowRejectDialog(true)}
-                      className="text-red-600 hover:text-red-700"
-                    >
-                      <XCircle className="h-4 w-4 mr-1" />
-                      Reject
+                      <RefreshCw className="h-4 w-4 mr-1" />
+                      Re-recommend
                     </Button>
                   </div>
                 )}
@@ -484,60 +551,108 @@ const ViewRecommendationsPage: React.FC = () => {
         </div>
       )}
 
-      {/* Approve Dialog */}
-      <AlertDialog open={showApproveDialog} onOpenChange={setShowApproveDialog}>
-        <AlertDialogContent>
+      {/* Re-recommend Dialog */}
+      <AlertDialog open={showReRecommendDialog} onOpenChange={setShowReRecommendDialog}>
+        <AlertDialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
           <AlertDialogHeader>
-            <AlertDialogTitle>Approve Recommendation</AlertDialogTitle>
+            <AlertDialogTitle>Re-recommend Question</AlertDialogTitle>
           </AlertDialogHeader>
           <div className="space-y-4">
             <div>
-              <Label htmlFor="approveComments">Review Comments (Optional)</Label>
+              <Label htmlFor="questionText">Question Text *</Label>
               <Textarea
-                id="approveComments"
-                value={reviewComments}
-                onChange={(e) => setReviewComments(e.target.value)}
-                placeholder="Add any comments about this recommendation..."
-                className="mt-1"
-              />
-            </div>
-          </div>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleApprove}>
-              Approve
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-
-      {/* Reject Dialog */}
-      <AlertDialog open={showRejectDialog} onOpenChange={setShowRejectDialog}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Reject Recommendation</AlertDialogTitle>
-          </AlertDialogHeader>
-          <div className="space-y-4">
-            <div>
-              <Label htmlFor="rejectComments">Review Comments (Required)</Label>
-              <Textarea
-                id="rejectComments"
-                value={reviewComments}
-                onChange={(e) => setReviewComments(e.target.value)}
-                placeholder="Please provide a reason for rejection..."
-                className="mt-1"
+                id="questionText"
+                value={reRecommendData.questionText}
+                onChange={(e) => setReRecommendData(prev => ({ ...prev, questionText: e.target.value }))}
+                placeholder="Enter your question here..."
+                className="mt-1 min-h-[100px]"
                 required
               />
+            </div>
+
+            <div>
+              <Label>Answer Choices *</Label>
+              <div className="mt-1 space-y-2">
+                {reRecommendData.answerChoices.map((choice, index) => (
+                  <div key={index} className="flex items-center gap-2">
+                    <div className="flex-1">
+                      <Input
+                        value={choice.text}
+                        onChange={(e) => handleAnswerChoiceChange(index, 'text', e.target.value)}
+                        placeholder={`Option ${index + 1}`}
+                      />
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <input
+                        type={reRecommendData.answerType === 'radio' ? 'radio' : 'checkbox'}
+                        name={reRecommendData.answerType === 'radio' ? 'correctAnswer' : undefined}
+                        checked={choice.isCorrect}
+                        onChange={(e) => handleAnswerChoiceChange(index, 'isCorrect', e.target.checked)}
+                        className="w-4 h-4"
+                      />
+                      <span className="text-sm text-gray-600">Correct</span>
+                      {reRecommendData.answerChoices.length > 2 && (
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => removeAnswerChoice(index)}
+                          className="text-red-600 hover:text-red-700"
+                        >
+                          Remove
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+                ))}
+                {reRecommendData.answerChoices.length < 15 && (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={addAnswerChoice}
+                    className="w-full"
+                  >
+                    Add Answer Choice
+                  </Button>
+                )}
+              </div>
+            </div>
+
+            <div>
+              <Label htmlFor="explanation">Explanation (Optional)</Label>
+              <Textarea
+                id="explanation"
+                value={reRecommendData.explanation}
+                onChange={(e) => setReRecommendData(prev => ({ ...prev, explanation: e.target.value }))}
+                placeholder="Provide an explanation for the correct answer..."
+                className="mt-1 min-h-[100px]"
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="difficulty">Difficulty *</Label>
+              <Select 
+                value={reRecommendData.difficulty} 
+                onValueChange={(value) => setReRecommendData(prev => ({ ...prev, difficulty: value as 'Easy' | 'Medium' | 'Tough' }))}
+              >
+                <SelectTrigger className="mt-1">
+                  <SelectValue placeholder="Select Difficulty" />
+                </SelectTrigger>
+                <SelectContent>
+                  {difficulties.map(difficulty => (
+                    <SelectItem key={difficulty} value={difficulty}>{difficulty}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
           </div>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction 
-              onClick={handleReject}
-              disabled={!reviewComments.trim()}
-              className="bg-red-600 hover:bg-red-700"
+              onClick={handleReRecommendSubmit}
+              disabled={!reRecommendData.questionText.trim() || reRecommendData.correctAnswers.length === 0}
             >
-              Reject
+              Re-recommend
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -546,4 +661,4 @@ const ViewRecommendationsPage: React.FC = () => {
   );
 };
 
-export default ViewRecommendationsPage;
+export default MyRecommendationsPage;

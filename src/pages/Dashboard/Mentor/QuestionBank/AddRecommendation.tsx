@@ -91,10 +91,18 @@ const AddRecommendationPage: React.FC = () => {
 
   const handleAnswerChoiceChange = (index: number, field: 'text' | 'isCorrect', value: any) => {
     const newChoices = [...formData.answerChoices];
-    newChoices[index] = {
-      ...newChoices[index],
-      [field]: value,
-    };
+    
+    if (field === 'isCorrect' && formData.answerType === 'radio') {
+      // For radio buttons, only one can be selected at a time
+      newChoices.forEach((choice, idx) => {
+        choice.isCorrect = idx === index ? value : false;
+      });
+    } else {
+      newChoices[index] = {
+        ...newChoices[index],
+        [field]: value,
+      };
+    }
 
     setFormData(prev => ({
       ...prev,
@@ -321,6 +329,7 @@ const AddRecommendationPage: React.FC = () => {
                 <div className="flex items-center gap-2">
                   <input
                     type={formData.answerType === 'radio' ? 'radio' : 'checkbox'}
+                    name={formData.answerType === 'radio' ? 'correctAnswer' : undefined}
                     checked={choice.isCorrect}
                     onChange={(e) => handleAnswerChoiceChange(index, 'isCorrect', e.target.checked)}
                     className="w-4 h-4"

@@ -65,7 +65,7 @@ function MentorLayoutContent() {
           <div className="flex-1 min-w-0">
             {loading ? (
               <h1 className="text-base md:text-xl font-semibold truncate">Loading...</h1>
-            ) : mentor ? (
+            ) : mentor && mentor.user && mentor.assignedSchool ? (
               <h1 className="text-base md:text-xl font-semibold truncate">
                 {mentor.user.name} - {mentor.assignedSchool.name}
               </h1>

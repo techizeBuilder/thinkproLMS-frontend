@@ -74,6 +74,7 @@ import MentorResourceViewPage from "../pages/Dashboard/Mentor/ResourceView";
 import MentorStudentsPage from "../pages/Dashboard/Mentor/Students";
 import MentorQuestionBankPage from "../pages/Dashboard/Mentor/QuestionBank";
 import AddRecommendationPage from "../pages/Dashboard/Mentor/QuestionBank/AddRecommendation";
+import MyRecommendationsPage from "../pages/Dashboard/Mentor/QuestionBank/MyRecommendations";
 
 // Assessment Components
 import MentorAssessmentsPage from "../pages/Dashboard/Mentor/Assessments";
@@ -521,6 +522,7 @@ export default function AppRouter() {
           {/* Question Bank */}
           <Route path="question-bank" element={<MentorQuestionBankPage />} />
           <Route path="question-bank/recommend" element={<AddRecommendationPage />} />
+          <Route path="question-bank/my-recommendations" element={<MyRecommendationsPage />} />
           
           {/* Assessment Management */}
           <Route path="assessments" element={<MentorAssessmentsPage />} />
