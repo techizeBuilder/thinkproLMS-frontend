@@ -10,16 +10,14 @@ import {
   CommandGroup,
   CommandInput,
   CommandItem,
-  CommandList,
 } from '@/components/ui/command';
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
-import { Check, ChevronsUpDown, ArrowLeft, CheckCircle, XCircle, Eye, Clock, RefreshCw } from 'lucide-react';
+import { Check, ChevronsUpDown, ArrowLeft, CheckCircle, Eye, RefreshCw } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
@@ -29,13 +27,11 @@ import { toast } from 'sonner';
 
 const MyRecommendationsPage: React.FC = () => {
   const navigate = useNavigate();
-  const { user } = useAuth();
   
   const [recommendations, setRecommendations] = useState<QuestionRecommendation[]>([]);
   const [loading, setLoading] = useState(true);
   const [filters, setFilters] = useState<RecommendationFilters>({
     status: 'all',
-    difficulty: 'all',
     session: 'all',
   });
   const [sessions, setSessions] = useState<Array<{
@@ -51,10 +47,10 @@ const MyRecommendationsPage: React.FC = () => {
   }>>([]);
   const [sessionSelectOpen, setSessionSelectOpen] = useState(false);
   const [selectedRecommendation, setSelectedRecommendation] = useState<QuestionRecommendation | null>(null);
-  const [showViewDialog, setShowViewDialog] = useState(false);
   const [showReRecommendDialog, setShowReRecommendDialog] = useState(false);
   const [reRecommendData, setReRecommendData] = useState({
     questionText: '',
+    session: '',
     answerType: 'radio' as 'radio' | 'checkbox',
     answerChoices: [{ text: '', isCorrect: false }],
     correctAnswers: [] as number[],
@@ -291,25 +287,6 @@ const MyRecommendationsPage: React.FC = () => {
               </Select>
             </div>
 
-            <div>
-              <Label className="text-sm font-medium">Difficulty</Label>
-              <Select
-                value={filters.difficulty || "all"}
-                onValueChange={(value) => handleFilterChange("difficulty", value)}
-              >
-                <SelectTrigger className="mt-1">
-                  <SelectValue placeholder="All Difficulties" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Difficulties</SelectItem>
-                  {difficulties.map((difficulty) => (
-                    <SelectItem key={difficulty} value={difficulty}>
-                      {difficulty}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
 
             <div>
               <Label className="text-sm font-medium">Session</Label>

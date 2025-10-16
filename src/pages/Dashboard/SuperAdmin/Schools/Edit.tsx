@@ -187,7 +187,7 @@ export default function EditSchoolPage() {
                         name="board"
                         value={board}
                         checked={formData.boards?.includes(board as any)}
-                        onChange={(e) => {
+                        onChange={() => {
                           setFormData((prev) => ({
                             ...prev,
                             boards: [board as any],

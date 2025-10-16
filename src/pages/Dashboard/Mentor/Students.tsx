@@ -242,7 +242,7 @@ export default function MentorStudentsPage() {
           <span className="font-medium text-foreground">Assigned Schools ({mentor.assignedSchools.length})</span>
         </div>
         <div className="flex flex-wrap gap-2">
-          {mentor.assignedSchools.map((school, index) => (
+          {mentor.assignedSchools.map((school) => (
             <div key={school._id} className="flex items-center gap-1 text-xs md:text-sm text-muted-foreground bg-muted/50 px-2 py-1 rounded">
               <span className="font-medium text-foreground">{school.name}</span>
               {school.branchName && (

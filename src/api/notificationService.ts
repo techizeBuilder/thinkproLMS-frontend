@@ -14,11 +14,22 @@ export interface Notification {
   };
   createdAt: string;
   readBy?: string[];
+  relatedAssessment?: {
+    _id: string;
+    title: string;
+  };
 }
 
 export interface NotificationCounts {
   unreadNotifications: number;
   pendingRecommendations: number;
+}
+
+export interface NotificationFilters {
+  page?: number;
+  limit?: number;
+  type?: string;
+  priority?: string;
 }
 
 export const notificationService = {
@@ -54,6 +65,17 @@ export const notificationService = {
   // Mark a specific recommendation as viewed
   markRecommendationAsViewed: async (recommendationId: string) => {
     const response = await axiosInstance.post(`/notifications/mentor/recommendation/${recommendationId}/viewed`);
+    return response.data;
+  },
+
+  // Get student notifications
+  getStudentNotifications: async (params?: {
+    page?: number;
+    limit?: number;
+    type?: string;
+    priority?: string;
+  }) => {
+    const response = await axiosInstance.get('/notifications/student', { params });
     return response.data;
   },
 };

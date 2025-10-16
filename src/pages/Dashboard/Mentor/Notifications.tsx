@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Bell, CheckCircle, XCircle, Clock } from 'lucide-react';
+import { Bell, CheckCircle } from 'lucide-react';
 import { notificationService, type Notification } from '@/api/notificationService';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNotifications } from '@/contexts/NotificationContext';
@@ -13,8 +13,8 @@ const MentorNotifications: React.FC = () => {
   const { refreshCounts } = useNotifications();
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [loading, setLoading] = useState(true);
-  const [page, setPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
+  const [page] = useState(1);
+  const [totalPages] = useState(1);
 
   useEffect(() => {
     fetchNotifications();

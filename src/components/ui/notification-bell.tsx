@@ -18,8 +18,8 @@ export function NotificationBell({ className }: NotificationBellProps) {
   const loadUnreadCount = async () => {
     try {
       setLoading(true);
-      const response = await notificationService.getStudentNotifications({ limit: 1 });
-      setUnreadCount(response.data.unreadCount);
+      const response = await notificationService.getNotificationCounts();
+      setUnreadCount(response.unreadNotifications || 0);
     } catch (error) {
       console.error("Error loading unread count:", error);
     } finally {

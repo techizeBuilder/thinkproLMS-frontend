@@ -32,7 +32,7 @@ interface Mentor {
     isVerified: boolean;
     createdAt: string;
   };
-  assignedSchool: School;
+  assignedSchools: School[];
   isActive: boolean;
 }
 
@@ -48,7 +48,7 @@ function MentorContent() {
   }, []);
 
   useEffect(() => {
-    if (mentor && mentor.assignedSchool) {
+    if (mentor && mentor.assignedSchools && mentor.assignedSchools.length > 0) {
       fetchStudentCount();
     }
   }, [mentor]);
@@ -67,19 +67,21 @@ function MentorContent() {
   };
 
   const fetchStudentCount = async () => {
-    if (!mentor || !mentor.assignedSchool) {
+    if (!mentor || !mentor.assignedSchools || mentor.assignedSchools.length === 0) {
       setStudentCount(0);
       return;
     }
 
     try {
-      // Count students from assigned school
-      const response = await studentService.getAll({ schoolId: mentor.assignedSchool._id });
-      if (response.success) {
-        setStudentCount(response.data.length);
-      } else {
-        setStudentCount(0);
+      // Count students from all assigned schools
+      let totalStudents = 0;
+      for (const school of mentor.assignedSchools) {
+        const response = await studentService.getAll({ schoolId: school._id });
+        if (response.success) {
+          totalStudents += response.data.length;
+        }
       }
+      setStudentCount(totalStudents);
     } catch (error) {
       console.error("Error fetching student count:", error);
       setStudentCount(0);

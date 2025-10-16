@@ -3,9 +3,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { Plus, Trash2, Upload } from "lucide-react";
+import { Plus, Trash2 } from "lucide-react";
 import { type SchoolHead } from "@/api/schoolService";
-import { getMediaUrl } from "@/utils/mediaUrl";
 
 interface SchoolHeadFormProps {
   schoolHeads: SchoolHead[];
@@ -42,16 +41,6 @@ export default function SchoolHeadForm({ schoolHeads, onChange }: SchoolHeadForm
     onChange(updatedHeads);
   };
 
-  const handleProfilePicUpload = (index: number, file: File | null) => {
-    setProfilePicFiles(prev => ({ ...prev, [index]: file }));
-    
-    if (file) {
-      // Store the file directly in the school head data
-      updateSchoolHead(index, 'profilePic', file as any);
-    } else {
-      updateSchoolHead(index, 'profilePic', '');
-    }
-  };
 
   return (
     <div className="space-y-4">

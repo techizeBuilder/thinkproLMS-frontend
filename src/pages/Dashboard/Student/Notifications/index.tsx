@@ -76,7 +76,7 @@ export default function StudentNotificationsPage() {
           notification._id === notificationId
             ? {
                 ...notification,
-                readBy: [...notification.readBy, user?.id || ""],
+                readBy: [...(notification.readBy || []), user?.id || ""],
               }
             : notification
         )
@@ -137,7 +137,7 @@ export default function StudentNotificationsPage() {
   };
 
   const isNotificationRead = (notification: Notification) => {
-    return notification.readBy.includes(user?.id || "");
+    return notification.readBy?.includes(user?.id || "") || false;
   };
 
   return (
@@ -173,7 +173,7 @@ export default function StudentNotificationsPage() {
               <Select
                 value={filters.type || "all"}
                 onValueChange={(value) =>
-                  setFilters((prev) => ({
+                  setFilters((prev: NotificationFilters) => ({
                     ...prev,
                     type: value === "all" ? undefined : value,
                     page: 1,
@@ -198,7 +198,7 @@ export default function StudentNotificationsPage() {
               <Select
                 value={filters.priority || "all"}
                 onValueChange={(value) =>
-                  setFilters((prev) => ({
+                  setFilters((prev: NotificationFilters) => ({
                     ...prev,
                     priority: value === "all" ? undefined : value,
                     page: 1,
@@ -227,7 +227,7 @@ export default function StudentNotificationsPage() {
                     : filters.isRead.toString()
                 }
                 onValueChange={(value) =>
-                  setFilters((prev) => ({
+                  setFilters((prev: NotificationFilters) => ({
                     ...prev,
                     isRead: value === "all" ? undefined : value === "true",
                     page: 1,
@@ -371,7 +371,7 @@ export default function StudentNotificationsPage() {
             variant="outline"
             size="sm"
             onClick={() =>
-              setFilters((prev) => ({ ...prev, page: prev.page! - 1 }))
+              setFilters((prev: NotificationFilters) => ({ ...prev, page: (prev.page || 1) - 1 }))
             }
             disabled={pagination.currentPage === 1}
           >
@@ -386,7 +386,7 @@ export default function StudentNotificationsPage() {
             variant="outline"
             size="sm"
             onClick={() =>
-              setFilters((prev) => ({ ...prev, page: prev.page! + 1 }))
+              setFilters((prev: NotificationFilters) => ({ ...prev, page: (prev.page || 1) + 1 }))
             }
             disabled={pagination.currentPage === pagination.totalPages}
           >

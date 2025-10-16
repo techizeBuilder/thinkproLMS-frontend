@@ -13,11 +13,6 @@ interface ServiceFormProps {
   onChange: (serviceDetails: ServiceDetails | null) => void;
 }
 
-const COMMON_SUBJECTS = [
-  "Robotics",
-  "Artificial Intelligence",
-  "Machine Learning",
-];
 
 export default function ServiceForm({
   serviceDetails,
@@ -44,19 +39,6 @@ export default function ServiceForm({
     onChange({ ...current, ...updates });
   };
 
-  const handleMentorChange = (
-    mentor: "School Mentor" | "ThinkPro Mentor",
-    checked: boolean
-  ) => {
-    const currentMentors = serviceDetails?.mentors || [];
-    if (checked) {
-      updateServiceDetails({ mentors: [...currentMentors, mentor] });
-    } else {
-      updateServiceDetails({
-        mentors: currentMentors.filter((m) => m !== mentor),
-      });
-    }
-  };
 
   const handleMentorSelect = (value: "School Mentor" | "ThinkPro Mentor") => {
     updateServiceDetails({ mentors: [value] });
@@ -117,36 +99,6 @@ export default function ServiceForm({
     updateServiceDetails({ grades: [] });
   };
 
-  const handleSubjectChange = (subject: string, checked: boolean) => {
-    const currentSubjects = serviceDetails?.subjects || [];
-    if (checked) {
-      updateServiceDetails({ subjects: [...currentSubjects, subject] });
-    } else {
-      updateServiceDetails({
-        subjects: currentSubjects.filter((s) => s !== subject),
-      });
-    }
-  };
-
-  const addCustomSubject = () => {
-    if (
-      customSubject.trim() &&
-      !serviceDetails?.subjects.includes(customSubject.trim())
-    ) {
-      const currentSubjects = serviceDetails?.subjects || [];
-      updateServiceDetails({
-        subjects: [...currentSubjects, customSubject.trim()],
-      });
-      setCustomSubject("");
-    }
-  };
-
-  const removeSubject = (subject: string) => {
-    const currentSubjects = serviceDetails?.subjects || [];
-    updateServiceDetails({
-      subjects: currentSubjects.filter((s) => s !== subject),
-    });
-  };
 
   const addSectionToGrade = (grade: number) => {
     const currentGrades = serviceDetails?.grades || [];
