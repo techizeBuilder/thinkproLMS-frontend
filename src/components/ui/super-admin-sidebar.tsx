@@ -107,7 +107,6 @@ export function SuperAdminSidebar({ className }: SuperAdminSidebarProps) {
                 <span>Question Bank</span>
                 {counts.pendingRecommendations > 0 && !isCollapsed && (
                   <div className="flex items-center space-x-1">
-                    <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
                     <Badge
                       variant="default"
                       className="ml-auto text-xs px-1.5 py-0 h-5"
