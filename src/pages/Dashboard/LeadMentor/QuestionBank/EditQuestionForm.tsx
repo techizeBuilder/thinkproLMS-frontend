@@ -67,8 +67,8 @@ const EditQuestionForm: React.FC<EditQuestionFormProps> = ({
 
   const difficulties = ['Easy', 'Medium', 'Tough'];
   const answerTypes = [
-    { value: 'radio', label: 'Single Choice (Radio)' },
-    { value: 'checkbox', label: 'Multiple Choice (Checkbox)' },
+    { value: 'radio', label: 'Single right answer' },
+    { value: 'checkbox', label: 'Multiple right answers' },
   ];
 
   useEffect(() => {

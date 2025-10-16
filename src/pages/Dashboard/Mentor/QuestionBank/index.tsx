@@ -167,9 +167,9 @@ const MentorQuestionBankPage: React.FC = () => {
   const getAnswerTypeLabel = (type: string) => {
     switch (type) {
       case "radio":
-        return "Single Choice";
+        return "Single right answer";
       case "checkbox":
-        return "Multiple Choice";
+        return "Multiple right answers";
       case "dropdown":
         return "Dropdown";
       case "multichoice":

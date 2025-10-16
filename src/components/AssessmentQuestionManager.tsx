@@ -315,8 +315,8 @@ export default function AssessmentQuestionManager({
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">All</SelectItem>
-                    <SelectItem value="radio">Single Choice</SelectItem>
-                    <SelectItem value="checkbox">Multiple Choice</SelectItem>
+                    <SelectItem value="radio">Single right answer</SelectItem>
+                    <SelectItem value="checkbox">Multiple right answers</SelectItem>
                     <SelectItem value="dropdown">Dropdown</SelectItem>
                   </SelectContent>
                 </Select>
