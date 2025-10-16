@@ -11,10 +11,12 @@ interface MobileActionsProps {
   editUrl?: string
   onEdit?: () => void
   onDelete?: () => void
+  onDeactivate?: () => void
   onResetPassword?: () => void
   onToggleStatus?: () => void
   isActive?: boolean
   isSystemAdmin?: boolean
+  isSuperAdmin?: boolean
   deleteLoading?: boolean
   toggleLoading?: boolean
 }
@@ -23,10 +25,12 @@ export function MobileActions({
   editUrl,
   onEdit,
   onDelete,
+  onDeactivate,
   onResetPassword,
   onToggleStatus,
   isActive,
   isSystemAdmin,
+  isSuperAdmin,
   deleteLoading,
   toggleLoading
 }: MobileActionsProps) {
@@ -74,18 +78,35 @@ export function MobileActions({
             <Edit className="h-4 w-4" />
           </Button>
         )}
-        {onDelete && !isSystemAdmin && (
+        {onDelete && isSuperAdmin && !isSystemAdmin && (
           <Button
             variant="outline"
             size="icon"
             className="text-red-600 hover:text-red-700"
             onClick={onDelete}
             disabled={deleteLoading}
+            title="Delete (Permanent)"
           >
             {deleteLoading ? (
               <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current"></div>
             ) : (
               <Trash2 className="h-4 w-4" />
+            )}
+          </Button>
+        )}
+        {onDeactivate && (
+          <Button
+            variant="outline"
+            size="icon"
+            className="text-orange-600 hover:text-orange-700"
+            onClick={onDeactivate}
+            disabled={deleteLoading}
+            title="Deactivate"
+          >
+            {deleteLoading ? (
+              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current"></div>
+            ) : (
+              <PowerOff className="h-4 w-4" />
             )}
           </Button>
         )}
@@ -154,7 +175,7 @@ export function MobileActions({
                   Edit
                 </Button>
               )}
-              {onDelete && !isSystemAdmin && (
+              {onDelete && isSuperAdmin && !isSystemAdmin && (
                 <Button
                   variant="ghost"
                   size="sm"
@@ -167,7 +188,23 @@ export function MobileActions({
                   ) : (
                     <Trash2 className="mr-2 h-4 w-4" />
                   )}
-                  Delete
+                  Delete (Permanent)
+                </Button>
+              )}
+              {onDeactivate && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={onDeactivate}
+                  disabled={deleteLoading}
+                  className="w-full justify-start text-orange-600 hover:text-orange-600 hover:bg-orange-50"
+                >
+                  {deleteLoading ? (
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current mr-2"></div>
+                  ) : (
+                    <PowerOff className="mr-2 h-4 w-4" />
+                  )}
+                  Deactivate
                 </Button>
               )}
             </div>

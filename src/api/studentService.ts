@@ -107,7 +107,15 @@ export const studentService = {
     return response.data;
   },
 
-  // Delete student
+  // Deactivate student (soft delete)
+  deactivate: async (
+    id: string
+  ): Promise<{ success: boolean; message: string }> => {
+    const response = await axiosInstance.patch(`/students/${id}/deactivate`);
+    return response.data;
+  },
+
+  // Delete student (hard delete - only superadmin)
   delete: async (
     id: string
   ): Promise<{ success: boolean; message: string }> => {

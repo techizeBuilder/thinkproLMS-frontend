@@ -19,6 +19,8 @@ import { useStudentsPath } from "@/utils/navigation";
 import { ResetPasswordDialog } from "@/components/ResetPasswordDialog";
 import ProfilePictureDisplay from "@/components/ProfilePictureDisplay";
 import { MobileActions } from "@/components/ui/mobile-actions";
+import { useAuth } from "@/contexts/AuthContext";
+import { studentService } from "@/api/studentService";
 
 interface School {
   _id: string;
@@ -71,6 +73,7 @@ export default function StudentsPage() {
   } | null>(null);
   const navigate = useNavigate();
   const studentsPath = useStudentsPath();
+  const { user } = useAuth();
 
   const grades = [
     "Grade 1",
@@ -147,13 +150,24 @@ export default function StudentsPage() {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm("Are you sure you want to delete this student?")) return;
+    if (!confirm("Are you sure you want to delete this student? This action cannot be undone.")) return;
 
     try {
-      await axiosInstance.delete(`/students/${id}`);
+      await studentService.delete(id);
       setStudents(students.filter((student) => student._id !== id));
     } catch (error) {
       console.error("Error deleting student:", error);
+    }
+  };
+
+  const handleDeactivate = async (id: string) => {
+    if (!confirm("Are you sure you want to deactivate this student?")) return;
+
+    try {
+      await studentService.deactivate(id);
+      setStudents(students.filter((student) => student._id !== id));
+    } catch (error) {
+      console.error("Error deactivating student:", error);
     }
   };
 
@@ -164,7 +178,7 @@ export default function StudentsPage() {
       queryParams.append("format", format);
 
       const response = await axiosInstance.get(
-        `/students/download?${queryParams}`,
+        "/students/download?" + queryParams.toString(),
         {
           responseType: format === "excel" ? "blob" : "json",
         }
@@ -192,7 +206,7 @@ export default function StudentsPage() {
     setLoadingPassword((prev) => ({ ...prev, [studentId]: true }));
     try {
       const response = await axiosInstance.get(
-        `/students/${studentId}/password`
+        "/students/" + studentId + "/password"
       );
       console.log(response.data);
       const passwordData = response.data.data;
@@ -229,7 +243,7 @@ export default function StudentsPage() {
           <Button
             variant="outline"
             size="sm"
-            onClick={() => navigate(`${studentsPath}/promote`)}
+            onClick={() => navigate(studentsPath + "/promote")}
             className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm touch-manipulation h-8 sm:h-9"
           >
             <ArrowUp className="h-3 w-3 sm:h-4 sm:w-4" />
@@ -239,7 +253,7 @@ export default function StudentsPage() {
           <Button
             variant="outline"
             size="sm"
-            onClick={() => navigate(`${studentsPath}/bulk-upload`)}
+            onClick={() => navigate(studentsPath + "/bulk-upload")}
             className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm touch-manipulation h-8 sm:h-9"
           >
             <Upload className="h-3 w-3 sm:h-4 sm:w-4" />
@@ -258,7 +272,7 @@ export default function StudentsPage() {
           </Button>
           <Button
             size="sm"
-            onClick={() => navigate(`${studentsPath}/create`)}
+            onClick={() => navigate(studentsPath + "/create")}
             className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm touch-manipulation h-8 sm:h-9"
           >
             <Plus className="h-3 w-3 sm:h-4 sm:w-4" />
@@ -433,7 +447,7 @@ export default function StudentsPage() {
                   </TableCell>
                   <TableCell className="text-right">
                     <MobileActions
-                      editUrl={`${studentsPath}/${student._id}/edit`}
+                      editUrl={studentsPath + "/" + student._id + "/edit"}
                       onResetPassword={() =>
                         setResetPasswordUser({
                           id: student.user._id,
@@ -441,7 +455,9 @@ export default function StudentsPage() {
                           email: student.user.email,
                         })
                       }
-                      onDelete={() => handleDelete(student._id)}
+                      onDelete={user?.role === "superadmin" ? () => handleDelete(student._id) : undefined}
+                      onDeactivate={() => handleDeactivate(student._id)}
+                      isSuperAdmin={user?.role === "superadmin"}
                     />
                   </TableCell>
                 </TableRow>
@@ -483,7 +499,7 @@ export default function StudentsPage() {
                     </div>
                   </div>
                   <MobileActions
-                    editUrl={`${studentsPath}/${student._id}/edit`}
+                    editUrl={studentsPath + "/" + student._id + "/edit"}
                     onResetPassword={() =>
                       setResetPasswordUser({
                         id: student.user._id,
@@ -491,7 +507,9 @@ export default function StudentsPage() {
                         email: student.user.email,
                       })
                     }
-                    onDelete={() => handleDelete(student._id)}
+                    onDelete={user?.role === "superadmin" ? () => handleDelete(student._id) : undefined}
+                    onDeactivate={() => handleDeactivate(student._id)}
+                    isSuperAdmin={user?.role === "superadmin"}
                   />
                 </div>
                 
