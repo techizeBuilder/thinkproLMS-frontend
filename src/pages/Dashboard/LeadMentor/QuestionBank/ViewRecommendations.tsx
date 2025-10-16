@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import {
   Command,
@@ -10,26 +9,26 @@ import {
   CommandGroup,
   CommandInput,
   CommandItem,
-  CommandList,
 } from '@/components/ui/command';
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
-import { Check, ChevronsUpDown, ArrowLeft, CheckCircle, XCircle, Eye, Clock } from 'lucide-react';
+import { Check, ChevronsUpDown, ArrowLeft, CheckCircle, XCircle, Eye } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { questionRecommendationService, questionBankService, type QuestionRecommendation, type RecommendationFilters } from '@/api/questionBankService';
 import { useAuth } from '@/contexts/AuthContext';
+import { useNotifications } from '@/contexts/NotificationContext';
 import { toast } from 'sonner';
 
 const ViewRecommendationsPage: React.FC = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { counts, refreshCounts } = useNotifications();
   
   // Determine the base route based on user role
   const getBaseRoute = () => {
@@ -41,7 +40,6 @@ const ViewRecommendationsPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [filters, setFilters] = useState<RecommendationFilters>({
     status: 'all',
-    difficulty: 'all',
     session: 'all',
   });
   const [sessions, setSessions] = useState<Array<{
@@ -57,12 +55,10 @@ const ViewRecommendationsPage: React.FC = () => {
   }>>([]);
   const [sessionSelectOpen, setSessionSelectOpen] = useState(false);
   const [selectedRecommendation, setSelectedRecommendation] = useState<QuestionRecommendation | null>(null);
-  const [showViewDialog, setShowViewDialog] = useState(false);
   const [showApproveDialog, setShowApproveDialog] = useState(false);
   const [showRejectDialog, setShowRejectDialog] = useState(false);
   const [reviewComments, setReviewComments] = useState('');
 
-  const difficulties = ['Easy', 'Medium', 'Tough'];
   const statuses = [
     { value: 'all', label: 'All Status' },
     { value: 'pending', label: 'Pending' },
@@ -121,6 +117,9 @@ const ViewRecommendationsPage: React.FC = () => {
       setLoading(true);
       const response = await questionRecommendationService.getRecommendations(filters);
       setRecommendations(response.data.recommendations || []);
+      
+      // Refresh notification counts
+      await refreshCounts();
     } catch (error) {
       console.error('Error fetching recommendations:', error);
       toast.error('Failed to fetch recommendations');
@@ -148,7 +147,6 @@ const ViewRecommendationsPage: React.FC = () => {
 
   const handleViewRecommendation = (recommendation: QuestionRecommendation) => {
     setSelectedRecommendation(recommendation);
-    setShowViewDialog(true);
   };
 
   const handleApprove = async () => {
@@ -160,7 +158,6 @@ const ViewRecommendationsPage: React.FC = () => {
       });
       toast.success('Recommendation approved successfully');
       setShowApproveDialog(false);
-      setShowViewDialog(false);
       setSelectedRecommendation(null);
       setReviewComments('');
       fetchRecommendations();
@@ -179,7 +176,6 @@ const ViewRecommendationsPage: React.FC = () => {
       });
       toast.success('Recommendation rejected successfully');
       setShowRejectDialog(false);
-      setShowViewDialog(false);
       setSelectedRecommendation(null);
       setReviewComments('');
       fetchRecommendations();
@@ -204,7 +200,14 @@ const ViewRecommendationsPage: React.FC = () => {
           Back to Question Bank
         </Button>
         <div>
-          <h1 className="text-2xl md:text-3xl font-bold">View Recommendations</h1>
+          <div className="flex items-center gap-2">
+            <h1 className="text-2xl md:text-3xl font-bold">View Recommendations</h1>
+            {counts.pendingRecommendations > 0 && (
+              <Badge variant="default" className="text-xs px-2 py-1">
+                {counts.pendingRecommendations} new
+              </Badge>
+            )}
+          </div>
           <p className="text-gray-600">Review and manage question recommendations</p>
         </div>
       </div>
@@ -215,7 +218,7 @@ const ViewRecommendationsPage: React.FC = () => {
           <CardTitle>Filters</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <Label className="text-sm font-medium">Status</Label>
               <Select
@@ -235,25 +238,6 @@ const ViewRecommendationsPage: React.FC = () => {
               </Select>
             </div>
 
-            <div>
-              <Label className="text-sm font-medium">Difficulty</Label>
-              <Select
-                value={filters.difficulty || "all"}
-                onValueChange={(value) => handleFilterChange("difficulty", value)}
-              >
-                <SelectTrigger className="mt-1">
-                  <SelectValue placeholder="All Difficulties" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Difficulties</SelectItem>
-                  {difficulties.map((difficulty) => (
-                    <SelectItem key={difficulty} value={difficulty}>
-                      {difficulty}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
 
             <div>
               <Label className="text-sm font-medium">Session</Label>
@@ -333,8 +317,17 @@ const ViewRecommendationsPage: React.FC = () => {
                 </div>
               ) : (
                 <div className="space-y-3">
-                  {recommendations.map((recommendation) => (
-                    <div key={recommendation._id} className="border rounded-lg p-4">
+                  {recommendations.map((recommendation) => {
+                    // Highlight pending recommendations subtly
+                    const isPending = recommendation.status === 'pending';
+                    
+                    return (
+                    <div 
+                      key={recommendation._id} 
+                      className={`border rounded-lg p-4 ${
+                        isPending ? 'bg-yellow-50 border-yellow-200' : ''
+                      }`}
+                    >
                       <div className="flex items-start justify-between">
                         <div className="flex-1">
                           <h3 className="font-medium text-sm mb-2 line-clamp-2">
@@ -367,7 +360,8 @@ const ViewRecommendationsPage: React.FC = () => {
                         </div>
                       </div>
                     </div>
-                  ))}
+                    );
+                  })}
                 </div>
               )}
             </div>
@@ -384,7 +378,9 @@ const ViewRecommendationsPage: React.FC = () => {
                 <h2 className="text-xl font-bold">Question Recommendation</h2>
                 <Button
                   variant="outline"
-                  onClick={() => setShowViewDialog(false)}
+                  onClick={() => {
+                    setSelectedRecommendation(null);
+                  }}
                 >
                   Close
                 </Button>

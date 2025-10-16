@@ -12,16 +12,18 @@ import {
   SidebarFooter,
   useSidebar
 } from "@/components/ui/collapsible-sidebar"
-import { BookOpen, HomeIcon, User, Users, MessageSquare, FolderOpen, ClipboardList, Database } from "lucide-react"
+import { BookOpen, HomeIcon, User, Users, MessageSquare, FolderOpen, ClipboardList, Database, Bell } from "lucide-react"
 import { LogoutButton } from "@/components/ui/logout-button"
 import { Badge } from "@/components/ui/badge"
 import { useUnreadMessageCount } from "@/hooks/useUnreadMessageCount"
+import { useNotifications } from "@/contexts/NotificationContext"
 
 interface MentorSidebarProps extends React.HTMLAttributes<HTMLDivElement> {}
 
 export function MentorSidebar({ className }: MentorSidebarProps) {
   const { isCollapsed } = useSidebar()
   const unreadCount = useUnreadMessageCount()
+  const { counts } = useNotifications()
 
   return (
     <Sidebar className={cn("", className)}>
@@ -47,6 +49,19 @@ export function MentorSidebar({ className }: MentorSidebarProps) {
                 {unreadCount > 0 && !isCollapsed && (
                   <Badge variant="default" className="ml-auto text-xs px-1.5 py-0 h-5">
                     {unreadCount}
+                  </Badge>
+                )}
+              </div>
+            </SidebarNavItem>
+            <SidebarNavItem to="/mentor/notifications" icon={Bell}>
+              <div className="flex items-center justify-between w-full">
+                <span>Notifications</span>
+                {counts.unreadNotifications > 0 && !isCollapsed && (
+                  <Badge
+                    variant="default"
+                    className="ml-auto text-xs px-1.5 py-0 h-5"
+                  >
+                    {counts.unreadNotifications}
                   </Badge>
                 )}
               </div>

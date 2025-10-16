@@ -61,6 +61,7 @@ import {
   type QuestionFilters,
 } from "@/api/questionBankService";
 import { useAuth } from "@/contexts/AuthContext";
+import { useNotifications } from "@/contexts/NotificationContext";
 import { toast } from "sonner";
 import CreateQuestionForm from "./CreateQuestionForm";
 import EditQuestionForm from "./EditQuestionForm";
@@ -70,6 +71,7 @@ import QuestionRecommendations from "./QuestionRecommendations";
 const QuestionBankPage: React.FC = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { counts } = useNotifications();
   
   // Determine the base route based on user role
   const getBaseRoute = () => {
@@ -263,11 +265,19 @@ const QuestionBankPage: React.FC = () => {
           <Button
             variant="outline"
             onClick={() => navigate(`${getBaseRoute()}/question-bank/recommendations`)}
-            className="flex items-center gap-2 text-xs md:text-sm"
+            className="flex items-center gap-2 text-xs md:text-sm relative"
           >
             <Eye className="h-3 w-3 md:h-4 md:w-4" />
             <span className="hidden sm:inline">View Recommendations</span>
             <span className="sm:hidden">Recommendations</span>
+            {counts.pendingRecommendations > 0 && (
+              <Badge 
+                variant="default" 
+                className="absolute -top-2 -right-2 h-5 w-5 flex items-center justify-center p-0 text-xs"
+              >
+                {counts.pendingRecommendations}
+              </Badge>
+            )}
           </Button>
           <Button
             variant="outline"

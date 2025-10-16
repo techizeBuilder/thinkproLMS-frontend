@@ -26,11 +26,13 @@ import {
   Calendar,
   BarChart3,
   MessageSquare,
+  Bell,
 } from "lucide-react";
 import { LogoutButton } from "@/components/ui/logout-button";
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUnreadMessageCount } from "@/hooks/useUnreadMessageCount";
+import { useNotifications } from "@/contexts/NotificationContext";
 
 interface LeadMentorSidebarProps extends React.HTMLAttributes<HTMLDivElement> {}
 
@@ -38,6 +40,7 @@ export function LeadMentorSidebar({ className }: LeadMentorSidebarProps) {
   const { isCollapsed } = useSidebar();
   const { user } = useAuth();
   const unreadCount = useUnreadMessageCount();
+  const { counts } = useNotifications();
 
   // Check if user has permission to manage modules and resources
   const hasModulePermission =
@@ -76,6 +79,19 @@ export function LeadMentorSidebar({ className }: LeadMentorSidebarProps) {
                 )}
               </div>
             </SidebarNavItem>
+            <SidebarNavItem to="/leadmentor/notifications" icon={Bell}>
+              <div className="flex items-center justify-between w-full">
+                <span>Notifications</span>
+                {counts.unreadNotifications > 0 && !isCollapsed && (
+                  <Badge
+                    variant="default"
+                    className="ml-auto text-xs px-1.5 py-0 h-5"
+                  >
+                    {counts.unreadNotifications}
+                  </Badge>
+                )}
+              </div>
+            </SidebarNavItem>
           </SidebarNav>
         </SidebarGroup>
 
@@ -98,7 +114,20 @@ export function LeadMentorSidebar({ className }: LeadMentorSidebarProps) {
         <SidebarGroup label="Assessment">
           <SidebarNav>
             <SidebarNavItem to="/leadmentor/question-bank" icon={BookOpen}>
-              Question Bank
+              <div className="flex items-center justify-between w-full">
+                <span>Question Bank</span>
+                {counts.pendingRecommendations > 0 && !isCollapsed && (
+                  <div className="flex items-center space-x-1">
+                    <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                    <Badge
+                      variant="default"
+                      className="ml-auto text-xs px-1.5 py-0 h-5"
+                    >
+                      {counts.pendingRecommendations}
+                    </Badge>
+                  </div>
+                )}
+              </div>
             </SidebarNavItem>
             <SidebarNavItem to="/leadmentor/certificates" icon={Award}>
               Certificates

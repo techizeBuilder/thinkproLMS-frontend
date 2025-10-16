@@ -12,16 +12,18 @@ import {
   SidebarFooter,
   useSidebar
 } from "@/components/ui/collapsible-sidebar"
-import { Building2, HomeIcon, Users, User, School, UserCheck, Crown, BookOpen, FileText, Layers, Award, Calendar, BarChart3, MessageSquare } from "lucide-react"
+import { Building2, HomeIcon, Users, User, School, UserCheck, Crown, BookOpen, FileText, Layers, Award, Calendar, BarChart3, MessageSquare, Bell } from "lucide-react"
 import { LogoutButton } from "@/components/ui/logout-button"
 import { Badge } from "@/components/ui/badge"
 import { useUnreadMessageCount } from "@/hooks/useUnreadMessageCount"
+import { useNotifications } from "@/contexts/NotificationContext"
 
 interface SuperAdminSidebarProps extends React.HTMLAttributes<HTMLDivElement> {}
 
 export function SuperAdminSidebar({ className }: SuperAdminSidebarProps) {
   const { isCollapsed } = useSidebar()
   const unreadCount = useUnreadMessageCount()
+  const { counts } = useNotifications()
 
   return (
     <Sidebar className={cn("h-screen", className)}>
@@ -47,6 +49,19 @@ export function SuperAdminSidebar({ className }: SuperAdminSidebarProps) {
                 {unreadCount > 0 && !isCollapsed && (
                   <Badge variant="default" className="ml-auto text-xs px-1.5 py-0 h-5">
                     {unreadCount}
+                  </Badge>
+                )}
+              </div>
+            </SidebarNavItem>
+            <SidebarNavItem to="/superadmin/notifications" icon={Bell}>
+              <div className="flex items-center justify-between w-full">
+                <span>Notifications</span>
+                {counts.unreadNotifications > 0 && !isCollapsed && (
+                  <Badge
+                    variant="default"
+                    className="ml-auto text-xs px-1.5 py-0 h-5"
+                  >
+                    {counts.unreadNotifications}
                   </Badge>
                 )}
               </div>
@@ -88,7 +103,20 @@ export function SuperAdminSidebar({ className }: SuperAdminSidebarProps) {
         <SidebarGroup label="Assessment">
           <SidebarNav>
             <SidebarNavItem to="/superadmin/question-bank" icon={BookOpen}>
-              Question Bank
+              <div className="flex items-center justify-between w-full">
+                <span>Question Bank</span>
+                {counts.pendingRecommendations > 0 && !isCollapsed && (
+                  <div className="flex items-center space-x-1">
+                    <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                    <Badge
+                      variant="default"
+                      className="ml-auto text-xs px-1.5 py-0 h-5"
+                    >
+                      {counts.pendingRecommendations}
+                    </Badge>
+                  </div>
+                )}
+              </div>
             </SidebarNavItem>
             <SidebarNavItem to="/superadmin/certificates" icon={Award}>
               Certificates

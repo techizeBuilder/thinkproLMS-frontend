@@ -76,6 +76,11 @@ import MentorQuestionBankPage from "../pages/Dashboard/Mentor/QuestionBank";
 import AddRecommendationPage from "../pages/Dashboard/Mentor/QuestionBank/AddRecommendation";
 import MyRecommendationsPage from "../pages/Dashboard/Mentor/QuestionBank/MyRecommendations";
 
+// Notification Components
+import LeadMentorNotifications from "../pages/Dashboard/LeadMentor/Notifications";
+import SuperAdminNotifications from "../pages/Dashboard/SuperAdmin/Notifications";
+import MentorNotifications from "../pages/Dashboard/Mentor/Notifications";
+
 // Assessment Components
 import MentorAssessmentsPage from "../pages/Dashboard/Mentor/Assessments";
 import CreateAssessmentPage from "../pages/Dashboard/Mentor/Assessments/Create";
@@ -333,6 +338,9 @@ export default function AppRouter() {
           
           {/* Messaging */}
           <Route path="messages" element={<Messages />} />
+          
+          {/* Notifications */}
+          <Route path="notifications" element={<SuperAdminNotifications />} />
         </Route>
 
         {/* Admin */}
@@ -502,6 +510,9 @@ export default function AppRouter() {
           
           {/* Messaging */}
           <Route path="messages" element={<Messages />} />
+          
+          {/* Notifications */}
+          <Route path="notifications" element={<LeadMentorNotifications />} />
         </Route>
 
         {/* Mentor */}
@@ -536,6 +547,9 @@ export default function AppRouter() {
           
           {/* Messaging */}
           <Route path="messages" element={<Messages />} />
+          
+          {/* Notifications */}
+          <Route path="notifications" element={<MentorNotifications />} />
         </Route>
 
         {/* Student */}
