@@ -4,9 +4,13 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Bell, CheckCircle, XCircle, Clock } from 'lucide-react';
 import { notificationService, type Notification } from '@/api/notificationService';
+import { useAuth } from '@/contexts/AuthContext';
+import { useNotifications } from '@/contexts/NotificationContext';
 import { toast } from 'sonner';
 
 const SuperAdminNotifications: React.FC = () => {
+  const { user } = useAuth();
+  const { refreshCounts } = useNotifications();
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
@@ -43,10 +47,12 @@ const SuperAdminNotifications: React.FC = () => {
       setNotifications(prev => 
         prev.map(notif => 
           notif._id === notificationId 
-            ? { ...notif, readBy: [...(notif.readBy || []), 'current-user'] }
+            ? { ...notif, readBy: [...(notif.readBy || []), user?.id || ''] }
             : notif
         )
       );
+      // Refresh sidebar counts
+      await refreshCounts();
       toast.success('Notification marked as read');
     } catch (error) {
       console.error('Error marking notification as read:', error);
@@ -58,8 +64,10 @@ const SuperAdminNotifications: React.FC = () => {
     try {
       await notificationService.markAllAsRead();
       setNotifications(prev => 
-        prev.map(notif => ({ ...notif, readBy: [...(notif.readBy || []), 'current-user'] }))
+        prev.map(notif => ({ ...notif, readBy: [...(notif.readBy || []), user?.id || ''] }))
       );
+      // Refresh sidebar counts
+      await refreshCounts();
       toast.success('All notifications marked as read');
     } catch (error) {
       console.error('Error marking all notifications as read:', error);
@@ -122,13 +130,15 @@ const SuperAdminNotifications: React.FC = () => {
             </div>
           ) : (
             <div className="space-y-4">
-              {notifications.map((notification) => (
+              {notifications.map((notification) => {
+                const isRead = notification.readBy?.includes(user?.id || '');
+                return (
                 <div
                   key={notification._id}
-                  className={`p-4 border rounded-lg ${
-                    notification.readBy?.includes('current-user') 
-                      ? 'bg-gray-50 opacity-75' 
-                      : 'bg-white'
+                  className={`p-4 border rounded-lg transition-all duration-200 ${
+                    isRead 
+                      ? 'bg-gray-50 opacity-60 border-gray-200' 
+                      : 'bg-white border-gray-300 shadow-sm'
                   }`}
                 >
                   <div className="flex items-start justify-between">
@@ -137,10 +147,14 @@ const SuperAdminNotifications: React.FC = () => {
                         {getTypeIcon(notification.type)}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <h3 className="text-sm font-medium text-gray-900">
+                        <h3 className={`text-sm font-medium ${
+                          isRead ? 'text-gray-600' : 'text-gray-900'
+                        }`}>
                           {notification.title}
                         </h3>
-                        <p className="text-sm text-gray-600 mt-1">
+                        <p className={`text-sm mt-1 ${
+                          isRead ? 'text-gray-500' : 'text-gray-600'
+                        }`}>
                           {notification.message}
                         </p>
                         <div className="flex items-center space-x-2 mt-2">
@@ -158,7 +172,7 @@ const SuperAdminNotifications: React.FC = () => {
                         </div>
                       </div>
                     </div>
-                    {!notification.readBy?.includes('current-user') && (
+                    {!isRead && (
                       <Button
                         size="sm"
                         variant="outline"
@@ -169,7 +183,8 @@ const SuperAdminNotifications: React.FC = () => {
                     )}
                   </div>
                 </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </CardContent>
