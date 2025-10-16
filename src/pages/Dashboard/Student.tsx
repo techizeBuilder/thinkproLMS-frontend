@@ -6,6 +6,7 @@ import { studentService } from "@/api/studentService"
 import type { Student } from "@/api/studentService"
 import { useAuth } from "@/contexts/AuthContext"
 import { Badge } from "@/components/ui/badge"
+import { User } from "lucide-react"
 
 function StudentContent({ student }: { student: Student | null }) {
   const { toggle, isMobile } = useSidebar()
@@ -28,7 +29,10 @@ function StudentContent({ student }: { student: Student | null }) {
           )}
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 sm:gap-3 truncate">
-              <h1 className="text-base sm:text-lg md:text-xl font-semibold truncate">{user?.name || student?.user?.name || "User"}</h1>
+              <div className="flex items-center gap-2">
+                <User className="h-4 w-4 text-indigo-500 flex-shrink-0" />
+                <h1 className="text-base sm:text-lg md:text-xl font-semibold truncate">{user?.name || student?.user?.name || "User"}</h1>
+              </div>
               <Badge variant="secondary" className="text-[10px] sm:text-xs flex-shrink-0">Student</Badge>
             </div>
           </div>

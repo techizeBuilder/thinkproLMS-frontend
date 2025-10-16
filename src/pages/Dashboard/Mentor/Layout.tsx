@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { MentorSidebar } from "@/components/ui/mentor-sidebar";
 import { SidebarProvider, useSidebar } from "@/components/ui/collapsible-sidebar";
 import { mentorService } from "@/api/mentorService";
+import { GraduationCap } from "lucide-react";
 
 interface Mentor {
   _id: string;
@@ -64,15 +65,24 @@ function MentorLayoutContent() {
           )}
           <div className="flex-1 min-w-0">
             {loading ? (
-              <h1 className="text-base md:text-xl font-semibold truncate">Loading...</h1>
+              <div className="flex items-center gap-2">
+                <GraduationCap className="h-4 w-4 text-green-500 flex-shrink-0" />
+                <h1 className="text-base md:text-xl font-semibold truncate">Loading...</h1>
+              </div>
             ) : mentor && mentor.user && mentor.assignedSchools && mentor.assignedSchools.length > 0 ? (
-              <h1 className="text-base md:text-xl font-semibold truncate">
-                {mentor.user.name} - {mentor.assignedSchools.length > 1 
-                  ? `${mentor.assignedSchools[0].name} (+${mentor.assignedSchools.length - 1} more)`
-                  : mentor.assignedSchools[0].name}
-              </h1>
+              <div className="flex items-center gap-2">
+                <GraduationCap className="h-4 w-4 text-green-500 flex-shrink-0" />
+                <h1 className="text-base md:text-xl font-semibold truncate">
+                  {mentor.user.name} - {mentor.assignedSchools.length > 1 
+                    ? `${mentor.assignedSchools[0].name} (+${mentor.assignedSchools.length - 1} more)`
+                    : mentor.assignedSchools[0].name}
+                </h1>
+              </div>
             ) : (
-              <h1 className="text-base md:text-xl font-semibold truncate">School Mentor Portal</h1>
+              <div className="flex items-center gap-2">
+                <GraduationCap className="h-4 w-4 text-green-500 flex-shrink-0" />
+                <h1 className="text-base md:text-xl font-semibold truncate">School Mentor Portal</h1>
+              </div>
             )}
             <p className="text-xs md:text-sm text-muted-foreground hidden sm:block">
               Guide and support your students' learning journey

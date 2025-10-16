@@ -1,6 +1,7 @@
 import { Outlet } from "react-router-dom";
 import { SidebarProvider, useSidebar } from "@/components/ui/collapsible-sidebar";
 import { SchoolAdminSidebar } from "@/components/ui/school-admin-sidebar";
+import { Building2 } from "lucide-react";
 
 function SchoolAdminContent() {
   const { toggle, isMobile } = useSidebar();
@@ -22,7 +23,10 @@ function SchoolAdminContent() {
             </button>
           )}
           <div className="flex-1 min-w-0">
-            <h1 className="text-xl md:text-2xl font-semibold truncate">School Admin Dashboard</h1>
+            <div className="flex items-center gap-2">
+              <Building2 className="h-5 w-5 text-purple-500 flex-shrink-0" />
+              <h1 className="text-xl md:text-2xl font-semibold truncate">School Admin Dashboard</h1>
+            </div>
             <p className="text-sm text-muted-foreground hidden sm:block">
               Manage your school and students
             </p>

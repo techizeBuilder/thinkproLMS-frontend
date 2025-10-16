@@ -3,6 +3,7 @@ import { SidebarProvider, useSidebar } from "@/components/ui/collapsible-sidebar
 import { LeadMentorSidebar } from "@/components/ui/lead-mentor-sidebar";
 import { useAuth } from "@/contexts/AuthContext";
 import { Badge } from "@/components/ui/badge";
+import { Crown } from "lucide-react";
 
 function LeadMentorContent() {
   const { toggle, isMobile } = useSidebar();
@@ -26,7 +27,10 @@ function LeadMentorContent() {
           )}
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 sm:gap-3 truncate">
-              <h1 className="text-base sm:text-lg md:text-xl font-semibold truncate">{user?.name || "User"}</h1>
+              <div className="flex items-center gap-2">
+                <Crown className="h-4 w-4 text-amber-500 flex-shrink-0" />
+                <h1 className="text-base sm:text-lg md:text-xl font-semibold truncate">{user?.name || "User"}</h1>
+              </div>
               <Badge variant="secondary" className="text-[10px] sm:text-xs flex-shrink-0">Lead Mentor</Badge>
             </div>
           </div>

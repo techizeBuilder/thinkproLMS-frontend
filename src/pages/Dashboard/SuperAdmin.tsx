@@ -3,6 +3,7 @@ import { SuperAdminSidebar } from "@/components/ui/super-admin-sidebar";
 import { SidebarProvider, useSidebar } from "@/components/ui/collapsible-sidebar";
 import { useAuth } from "@/contexts/AuthContext";
 import { Badge } from "@/components/ui/badge";
+import { Shield } from "lucide-react";
 
 function SuperAdminContent() {
   const { toggle, isMobile } = useSidebar();
@@ -26,7 +27,10 @@ function SuperAdminContent() {
           )}
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 sm:gap-3 truncate">
-              <h1 className="text-base sm:text-lg md:text-xl font-semibold truncate">{user?.name || "User"}</h1>
+              <div className="flex items-center gap-2">
+                <Shield className="h-4 w-4 text-blue-500 flex-shrink-0" />
+                <h1 className="text-base sm:text-lg md:text-xl font-semibold truncate">{user?.name || "User"}</h1>
+              </div>
               <Badge variant="secondary" className="text-[10px] sm:text-xs flex-shrink-0">Super Admin</Badge>
             </div>
           </div>
