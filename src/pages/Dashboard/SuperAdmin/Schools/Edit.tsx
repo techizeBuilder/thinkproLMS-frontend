@@ -9,6 +9,7 @@ import { schoolService, type UpdateSchoolData, type SchoolHead, type ServiceDeta
 import { toast } from "sonner";
 import SchoolHeadForm from "@/components/SchoolHeadForm";
 import ServiceForm from "@/components/ServiceForm";
+import StateCitySelector from "@/components/StateCitySelector";
 import { getMediaUrl } from "@/utils/mediaUrl";
 
 export default function EditSchoolPage() {
@@ -222,31 +223,13 @@ export default function EditSchoolPage() {
               />
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="city">City *</Label>
-                <Input
-                  id="city"
-                  name="city"
-                  value={formData.city}
-                  onChange={handleInputChange}
-                  placeholder="Enter city"
-                  required
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="state">State *</Label>
-                <Input
-                  id="state"
-                  name="state"
-                  value={formData.state}
-                  onChange={handleInputChange}
-                  placeholder="Enter state"
-                  required
-                />
-              </div>
-            </div>
+            <StateCitySelector
+              selectedState={formData.state || ''}
+              selectedCity={formData.city || ''}
+              onStateChange={(state) => setFormData(prev => ({ ...prev, state }))}
+              onCityChange={(city) => setFormData(prev => ({ ...prev, city }))}
+              required
+            />
 
             {/* <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
