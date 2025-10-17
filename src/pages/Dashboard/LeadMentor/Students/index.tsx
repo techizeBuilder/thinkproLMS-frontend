@@ -3,7 +3,21 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import {
   Plus,
   Search,
@@ -12,6 +26,9 @@ import {
   GraduationCap,
   Eye,
   ArrowUp,
+  Users,
+  UserCheck,
+  UserX,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import axiosInstance from "@/api/axiosInstance";
@@ -55,10 +72,12 @@ interface Student {
 export default function StudentsPage() {
   const [students, setStudents] = useState<Student[]>([]);
   const [filteredStudents, setFilteredStudents] = useState<Student[]>([]);
+  const [allStudents, setAllStudents] = useState<Student[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedSchool, setSelectedSchool] = useState("");
   const [selectedGrade, setSelectedGrade] = useState("");
+  const [statusFilter, setStatusFilter] = useState<string>("active");
   const [schools, setSchools] = useState<School[]>([]);
   const [showPassword, setShowPassword] = useState<{ [key: string]: string }>(
     {}
@@ -91,7 +110,7 @@ export default function StudentsPage() {
   useEffect(() => {
     fetchStudents();
     fetchSchools();
-  }, []);
+  }, [statusFilter]);
 
   useEffect(() => {
     filterStudents();
@@ -99,8 +118,24 @@ export default function StudentsPage() {
 
   const fetchStudents = async () => {
     try {
-      const response = await axiosInstance.get("/students");
-      setStudents(response.data.data);
+      setLoading(true);
+      const includeInactive =
+        statusFilter === "all" || statusFilter === "inactive";
+      const response = await studentService.getAll({ includeInactive });
+      if (response.success) {
+        let filteredData = response.data;
+
+        // Apply client-side filtering based on status
+        if (statusFilter === "active") {
+          filteredData = response.data.filter((student) => student.isActive);
+        } else if (statusFilter === "inactive") {
+          filteredData = response.data.filter((student) => !student.isActive);
+        }
+        // If statusFilter === "all", show all data
+
+        setStudents(filteredData);
+        setAllStudents(response.data); // Store all data for statistics
+      }
     } catch (error) {
       console.error("Error fetching students:", error);
     } finally {
@@ -150,7 +185,12 @@ export default function StudentsPage() {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm("Are you sure you want to delete this student? This action cannot be undone.")) return;
+    if (
+      !confirm(
+        "Are you sure you want to delete this student? This action cannot be undone."
+      )
+    )
+      return;
 
     try {
       await studentService.delete(id);
@@ -234,10 +274,14 @@ export default function StudentsPage() {
       {/* Header */}
       <div className="space-y-2 sm:space-y-3 lg:space-y-4">
         <div>
-          <h1 className="text-lg sm:text-xl lg:text-2xl xl:text-3xl font-bold text-gray-900">Students</h1>
-          <p className="text-xs sm:text-sm lg:text-base text-gray-600">Manage student accounts and records</p>
+          <h1 className="text-lg sm:text-xl lg:text-2xl xl:text-3xl font-bold text-gray-900">
+            Students
+          </h1>
+          <p className="text-xs sm:text-sm lg:text-base text-gray-600">
+            Manage student accounts and records
+          </p>
         </div>
-        
+
         {/* Action Buttons */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3 lg:flex lg:flex-wrap lg:gap-2">
           <Button
@@ -282,63 +326,74 @@ export default function StudentsPage() {
         </div>
 
         {/* Summary Stats */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3 lg:flex lg:flex-wrap lg:gap-4 text-xs sm:text-sm">
-          <div className="flex items-center gap-1 sm:gap-2">
-            <span className="text-gray-600">Total:</span>
-            <span className="font-semibold text-blue-600">{students.length}</span>
-          </div>
-          <div className="flex items-center gap-1 sm:gap-2">
-            <span className="text-gray-600">Verified:</span>
-            <span className="font-semibold text-green-600">{students.filter((s) => s.user.isVerified).length}</span>
-          </div>
-          <div className="flex items-center gap-1 sm:gap-2">
-            <span className="text-gray-600">Pending:</span>
-            <span className="font-semibold text-orange-600">{students.filter((s) => !s.user.isVerified).length}</span>
-          </div>
-          <div className="flex items-center gap-1 sm:gap-2">
-            <span className="text-gray-600">Schools:</span>
-            <span className="font-semibold text-purple-600">{new Set(students.map((s) => s.school._id)).size}</span>
-          </div>
-        </div>
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4"></div>
       </div>
 
       {/* Filters */}
       <Card>
         <CardContent className="p-3 sm:p-4">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
-            <div className="relative">
+          <div className="flex flex-col gap-3 md:flex-row md:items-center md:gap-4">
+            <div className="relative w-full md:max-w-xs">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
               <Input
                 placeholder="Search students by name, email, student ID..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10 text-sm sm:text-base h-9 sm:h-10"
+                className="pl-10 text-sm sm:text-base h-9 sm:h-10 w-full"
               />
             </div>
-            <select
-              value={selectedSchool}
-              onChange={(e) => setSelectedSchool(e.target.value)}
-              className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base h-9 sm:h-10"
-            >
-              <option value="">All Schools</option>
-              {schools.map((school) => (
-                <option key={school._id} value={school._id}>
-                  {school.name} - {school.city}
-                </option>
-              ))}
-            </select>
-            <select
-              value={selectedGrade}
-              onChange={(e) => setSelectedGrade(e.target.value)}
-              className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base h-9 sm:h-10"
-            >
-              <option value="">All Grades</option>
-              {grades.map((grade) => (
-                <option key={grade} value={grade}>
-                  {grade}
-                </option>
-              ))}
-            </select>
+            <div className="w-full md:max-w-xs">
+              <Select
+                value={selectedSchool || "all"}
+                onValueChange={(value) =>
+                  setSelectedSchool(value === "all" ? "" : value)
+                }
+              >
+                <SelectTrigger className="w-full px-3 py-2 text-sm sm:text-base h-9 sm:h-10 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                  <SelectValue placeholder="All Schools" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Schools</SelectItem>
+                  {schools.map((school) => (
+                    <SelectItem key={school._id} value={school._id}>
+                      {school.name} - {school.city}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="w-full md:max-w-xs">
+              <Select
+                value={selectedGrade || "all"}
+                onValueChange={(value) =>
+                  setSelectedGrade(value === "all" ? "" : value)
+                }
+              >
+                <SelectTrigger className="w-full px-3 py-2 text-sm sm:text-base h-9 sm:h-10 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                  <SelectValue placeholder="All Grades" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Grades</SelectItem>
+                  {grades.map((grade) => (
+                    <SelectItem key={grade} value={grade}>
+                      {grade}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="w-full md:max-w-[128px]">
+              <Select value={statusFilter} onValueChange={setStatusFilter}>
+                <SelectTrigger className="w-full px-3 py-2 text-sm sm:text-base h-9 sm:h-10 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                  <SelectValue placeholder="All" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All</SelectItem>
+                  <SelectItem value="active">Active</SelectItem>
+                  <SelectItem value="inactive">Inactive</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
         </CardContent>
       </Card>
@@ -351,117 +406,153 @@ export default function StudentsPage() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead className="sticky left-0 bg-background z-10 min-w-[200px]">Student</TableHead>
+                    <TableHead className="sticky left-0 bg-background z-10 min-w-[200px]">
+                      Student
+                    </TableHead>
                     <TableHead className="min-w-[120px]">Student ID</TableHead>
                     <TableHead className="min-w-[180px]">Email</TableHead>
-                    <TableHead className="min-w-[140px]">Grade - Section</TableHead>
+                    <TableHead className="min-w-[140px]">
+                      Grade - Section
+                    </TableHead>
                     <TableHead className="min-w-[200px]">School</TableHead>
                     <TableHead className="min-w-[150px]">Parent Info</TableHead>
                     <TableHead className="min-w-[120px]">Password</TableHead>
-                    <TableHead className="text-right min-w-[120px]">Actions</TableHead>
+                    <TableHead className="text-right min-w-[120px]">
+                      Actions
+                    </TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-              {filteredStudents.map((student) => (
-                <TableRow key={student._id}>
-                  <TableCell className="font-medium sticky left-0 bg-background z-10 min-w-[200px]">
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 flex-shrink-0">
-                        <ProfilePictureDisplay
-                          profilePicture={student.user.profilePicture}
-                          name={student.user.name}
-                          size="sm"
-                        />
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <div className="font-medium truncate">{student.user.name}</div>
-                        <div className="flex gap-1 mt-1 flex-wrap">
-                          <Badge
-                            variant={
-                              student.user.isVerified ? "default" : "secondary"
-                            }
-                            className="text-xs truncate max-w-[80px]"
-                          >
-                            {student.user.isVerified ? "Verified" : "Pending"}
-                          </Badge>
+                  {filteredStudents.map((student) => (
+                    <TableRow
+                      key={student._id}
+                      className={!student.isActive ? "opacity-60" : ""}
+                    >
+                      <TableCell className="font-medium sticky left-0 bg-background z-10 min-w-[200px]">
+                        <div className="flex items-center gap-3">
+                          <div className="w-8 h-8 flex-shrink-0">
+                            <ProfilePictureDisplay
+                              profilePicture={student.user.profilePicture}
+                              name={student.user.name}
+                              size="sm"
+                            />
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <div className="flex items-center gap-2">
+                              <div className="font-medium truncate">
+                                {student.user.name}
+                              </div>
+                              {!student.isActive && (
+                                <Badge variant="outline" className="text-xs">
+                                  Inactive
+                                </Badge>
+                              )}
+                            </div>
+                            <div className="flex gap-1 mt-1 flex-wrap">
+                              <Badge
+                                variant={
+                                  student.user.isVerified
+                                    ? "default"
+                                    : "secondary"
+                                }
+                                className="text-xs truncate max-w-[80px]"
+                              >
+                                {student.user.isVerified
+                                  ? "Verified"
+                                  : "Pending"}
+                              </Badge>
+                            </div>
+                          </div>
                         </div>
-                      </div>
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <span className="font-mono text-sm">{student.studentId}</span>
-                  </TableCell>
-                  <TableCell>
-                    <span className="text-sm">{student.user.email}</span>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-1 text-sm">
-                      <GraduationCap className="h-4 w-4" />
-                      <span className="font-medium">
-                        Grade {student.grade} - {student.section || 'No Section'}
-                      </span>
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <div className="text-sm">
-                      <div className="font-medium">{student.school.name}</div>
-                      <div className="text-gray-500">
-                        {student.school.city}, {student.school.state}
-                      </div>
-                      <div className="text-xs text-gray-400">
-                        {student.school.boards && student.school.boards.length > 0 
-                          ? student.school.boards.join(", ") 
-                          : "No boards"}
-                      </div>
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    {(student.parentEmail || student.parentPhoneNumber) ? (
-                      <div className="text-sm">
-                        <div>{student.parentEmail}</div>
-                        {student.parentPhoneNumber && (
-                          <div className="text-gray-500">{student.parentPhoneNumber}</div>
+                      </TableCell>
+                      <TableCell>
+                        <span className="font-mono text-sm">
+                          {student.studentId}
+                        </span>
+                      </TableCell>
+                      <TableCell>
+                        <span className="text-sm">{student.user.email}</span>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-1 text-sm">
+                          <GraduationCap className="h-4 w-4" />
+                          <span className="font-medium">
+                            Grade {student.grade} -{" "}
+                            {student.section || "No Section"}
+                          </span>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="text-sm">
+                          <div className="font-medium">
+                            {student.school.name}
+                          </div>
+                          <div className="text-gray-500">
+                            {student.school.city}, {student.school.state}
+                          </div>
+                          <div className="text-xs text-gray-400">
+                            {student.school.boards &&
+                            student.school.boards.length > 0
+                              ? student.school.boards.join(", ")
+                              : "No boards"}
+                          </div>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        {student.parentEmail || student.parentPhoneNumber ? (
+                          <div className="text-sm">
+                            <div>{student.parentEmail}</div>
+                            {student.parentPhoneNumber && (
+                              <div className="text-gray-500">
+                                {student.parentPhoneNumber}
+                              </div>
+                            )}
+                          </div>
+                        ) : (
+                          <span className="text-gray-400 text-sm">
+                            No parent info
+                          </span>
                         )}
-                      </div>
-                    ) : (
-                      <span className="text-gray-400 text-sm">No parent info</span>
-                    )}
-                  </TableCell>
-                  <TableCell>
-                    {showPassword[student._id] ? (
-                      <div className="text-sm text-green-600 font-mono bg-green-50 p-2 rounded border">
-                        {showPassword[student._id]}
-                      </div>
-                    ) : (
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleShowPassword(student._id)}
-                        disabled={loadingPassword[student._id]}
-                        className="text-blue-600 hover:text-blue-700"
-                        title="Show password"
-                      >
-                        <Eye className="h-4 w-4" />
-                      </Button>
-                    )}
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <MobileActions
-                      editUrl={studentsPath + "/" + student._id + "/edit"}
-                      onResetPassword={() =>
-                        setResetPasswordUser({
-                          id: student.user._id,
-                          name: student.user.name,
-                          email: student.user.email,
-                        })
-                      }
-                      onDelete={user?.role === "superadmin" ? () => handleDelete(student._id) : undefined}
-                      onDeactivate={() => handleDeactivate(student._id)}
-                      isSuperAdmin={user?.role === "superadmin"}
-                    />
-                  </TableCell>
-                </TableRow>
-              ))}
+                      </TableCell>
+                      <TableCell>
+                        {showPassword[student._id] ? (
+                          <div className="text-sm text-green-600 font-mono bg-green-50 p-2 rounded border">
+                            {showPassword[student._id]}
+                          </div>
+                        ) : (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleShowPassword(student._id)}
+                            disabled={loadingPassword[student._id]}
+                            className="text-blue-600 hover:text-blue-700"
+                            title="Show password"
+                          >
+                            <Eye className="h-4 w-4" />
+                          </Button>
+                        )}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <MobileActions
+                          editUrl={studentsPath + "/" + student._id + "/edit"}
+                          onResetPassword={() =>
+                            setResetPasswordUser({
+                              id: student.user._id,
+                              name: student.user.name,
+                              email: student.user.email,
+                            })
+                          }
+                          onDelete={
+                            user?.role === "superadmin"
+                              ? () => handleDelete(student._id)
+                              : undefined
+                          }
+                          onDeactivate={() => handleDeactivate(student._id)}
+                          isSuperAdmin={user?.role === "superadmin"}
+                        />
+                      </TableCell>
+                    </TableRow>
+                  ))}
                 </TableBody>
               </Table>
             </div>
@@ -473,7 +564,10 @@ export default function StudentsPage() {
       <div className="xl:hidden">
         <div className="grid gap-3 sm:gap-4">
           {filteredStudents.map((student) => (
-            <Card key={student._id}>
+            <Card
+              key={student._id}
+              className={!student.isActive ? "opacity-60" : ""}
+            >
               <CardContent className="p-3 sm:p-4">
                 <div className="flex items-start justify-between mb-2 sm:mb-3">
                   <div className="flex items-center gap-2 sm:gap-3">
@@ -485,7 +579,16 @@ export default function StudentsPage() {
                       />
                     </div>
                     <div className="min-w-0 flex-1">
-                      <div className="font-medium text-sm sm:text-base truncate">{student.user.name}</div>
+                      <div className="flex items-center gap-2">
+                        <div className="font-medium text-sm sm:text-base truncate">
+                          {student.user.name}
+                        </div>
+                        {!student.isActive && (
+                          <Badge variant="outline" className="text-xs">
+                            Inactive
+                          </Badge>
+                        )}
+                      </div>
                       <div className="flex gap-1 mt-1 flex-wrap">
                         <Badge
                           variant={
@@ -507,31 +610,45 @@ export default function StudentsPage() {
                         email: student.user.email,
                       })
                     }
-                    onDelete={user?.role === "superadmin" ? () => handleDelete(student._id) : undefined}
+                    onDelete={
+                      user?.role === "superadmin"
+                        ? () => handleDelete(student._id)
+                        : undefined
+                    }
                     onDeactivate={() => handleDeactivate(student._id)}
                     isSuperAdmin={user?.role === "superadmin"}
                   />
                 </div>
-                
+
                 <div className="space-y-1.5 sm:space-y-2 text-xs sm:text-sm">
                   <div className="flex items-center justify-between">
                     <span className="text-gray-600">Student ID:</span>
-                    <span className="font-mono text-xs sm:text-sm">{student.studentId}</span>
+                    <span className="font-mono text-xs sm:text-sm">
+                      {student.studentId}
+                    </span>
                   </div>
                   <div className="flex items-center">
-                    <span className="text-gray-600 w-16 sm:w-20 flex-shrink-0">Email:</span>
-                    <span className="truncate text-xs sm:text-sm">{student.user.email}</span>
+                    <span className="text-gray-600 w-16 sm:w-20 flex-shrink-0">
+                      Email:
+                    </span>
+                    <span className="truncate text-xs sm:text-sm">
+                      {student.user.email}
+                    </span>
                   </div>
                   <div className="flex items-center">
                     <GraduationCap className="h-3 w-3 sm:h-4 sm:w-4 text-gray-500 mr-1 sm:mr-2 flex-shrink-0" />
                     <span className="font-medium text-xs sm:text-sm">
-                      Grade {student.grade} - {student.section || 'No Section'}
+                      Grade {student.grade} - {student.section || "No Section"}
                     </span>
                   </div>
                   <div className="flex items-start">
-                    <span className="text-gray-600 w-16 sm:w-20 flex-shrink-0">School:</span>
+                    <span className="text-gray-600 w-16 sm:w-20 flex-shrink-0">
+                      School:
+                    </span>
                     <div className="min-w-0 flex-1">
-                      <div className="font-medium truncate text-xs sm:text-sm">{student.school.name}</div>
+                      <div className="font-medium truncate text-xs sm:text-sm">
+                        {student.school.name}
+                      </div>
                       <div className="text-gray-500 text-[10px] sm:text-xs">
                         {student.school.city}, {student.school.state}
                       </div>
@@ -539,11 +656,17 @@ export default function StudentsPage() {
                   </div>
                   {(student.parentEmail || student.parentPhoneNumber) && (
                     <div className="flex items-start">
-                      <span className="text-gray-600 w-16 sm:w-20 flex-shrink-0">Parent:</span>
+                      <span className="text-gray-600 w-16 sm:w-20 flex-shrink-0">
+                        Parent:
+                      </span>
                       <div className="min-w-0 flex-1">
-                        <div className="truncate text-xs sm:text-sm">{student.parentEmail}</div>
+                        <div className="truncate text-xs sm:text-sm">
+                          {student.parentEmail}
+                        </div>
                         {student.parentPhoneNumber && (
-                          <div className="text-gray-500 text-[10px] sm:text-xs">{student.parentPhoneNumber}</div>
+                          <div className="text-gray-500 text-[10px] sm:text-xs">
+                            {student.parentPhoneNumber}
+                          </div>
                         )}
                       </div>
                     </div>
@@ -577,7 +700,9 @@ export default function StudentsPage() {
       {filteredStudents.length === 0 && (
         <Card>
           <CardContent className="text-center py-8">
-            <p className="text-gray-500 text-sm md:text-base">No students found</p>
+            <p className="text-gray-500 text-sm md:text-base">
+              No students found
+            </p>
           </CardContent>
         </Card>
       )}

@@ -57,10 +57,12 @@ export const studentService = {
   getAll: async (filters?: {
     schoolId?: string;
     grade?: string;
+    includeInactive?: boolean;
   }): Promise<{ success: boolean; data: Student[] }> => {
     const params = new URLSearchParams();
     if (filters?.schoolId) params.append("schoolId", filters.schoolId);
     if (filters?.grade) params.append("grade", filters.grade);
+    if (filters?.includeInactive) params.append("includeInactive", "true");
 
     const response = await axiosInstance.get(`/students?${params.toString()}`);
     return response.data;
