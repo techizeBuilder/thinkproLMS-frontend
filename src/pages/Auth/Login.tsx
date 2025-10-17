@@ -14,7 +14,7 @@ export default function Login() {
   const [password, setPassword] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
-  const [userType, setUserType] = useState<"main" | "guest" | null>(null);
+  const [showGuestForm, setShowGuestForm] = useState(false);
 
   // Redirect authenticated users to their role-based dashboard
   useEffect(() => {
@@ -53,8 +53,13 @@ export default function Login() {
     }
   };
 
-  const handleUserTypeSelection = (type: "main" | "guest") => {
-    setUserType(type);
+  const handleGuestLogin = () => {
+    setShowGuestForm(true);
+    setError("");
+  };
+
+  const handleBackToLogin = () => {
+    setShowGuestForm(false);
     setError("");
   };
 
@@ -123,55 +128,16 @@ export default function Login() {
               />
             </div>
             <h1 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">Welcome to ThinkPro LMS</h1>
-            <p className="text-sm sm:text-base text-gray-600">Choose how you'd like to access the platform</p>
+            <p className="text-sm sm:text-base text-gray-600">Sign in to your account</p>
           </div>
 
-        {!userType ? (
-          /* User Type Selection */
+        {!showGuestForm ? (
+          /* Main Login Form */
           <Card className="shadow-xl border-0 bg-white/80 backdrop-blur-sm">
             <CardHeader className="space-y-1 pb-4 sm:pb-6 px-4 sm:px-6 pt-4 sm:pt-6">
               <CardTitle className="text-lg sm:text-xl lg:text-2xl font-semibold text-center text-gray-900">
-                How would you like to access?
+                Sign In
               </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3 sm:space-y-4 px-4 sm:px-6 pb-4 sm:pb-6">
-              <Button
-                onClick={() => handleUserTypeSelection("main")}
-                className="w-full h-16 sm:h-20 bg-gradient-to-r from-blue-500 via-purple-500 to-indigo-500 hover:from-blue-600 hover:via-purple-600 hover:to-indigo-600 text-white font-semibold shadow-xl hover:shadow-2xl transition-all duration-300 flex flex-col items-center justify-center space-y-1 sm:space-y-2 group relative overflow-hidden rounded-xl touch-manipulation"
-              >
-                <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                <span className="text-base sm:text-lg lg:text-xl font-bold relative z-10">School Member</span>
-                <span className="text-xs hidden sm:flex sm:text-sm opacity-90 relative z-10 text-center px-2">Student, Teacher, or Admin from registered school</span>
-              </Button>
-              
-              <Button
-                onClick={() => handleUserTypeSelection("guest")}
-                variant="outline"
-                className="w-full h-16 sm:h-20 border-2 border-emerald-400 text-emerald-600 hover:bg-emerald-50 hover:border-emerald-500 font-semibold shadow-xl hover:shadow-2xl transition-all duration-300 flex flex-col items-center justify-center space-y-1 sm:space-y-2 group relative rounded-xl touch-manipulation"
-              >
-                <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                <span className="text-base sm:text-lg lg:text-xl font-bold relative z-10">Guest User</span>
-                <span className="text-xs hidden sm:flex sm:text-sm opacity-90 relative z-10 text-center px-2">Explore content, take quizzes, request demos</span>
-              </Button>
-            </CardContent>
-          </Card>
-        ) : userType === "main" ? (
-          /* Main User Login */
-          <Card className="shadow-xl border-0 bg-white/80 backdrop-blur-sm">
-            <CardHeader className="space-y-1 pb-4 sm:pb-6 px-4 sm:px-6 pt-4 sm:pt-6">
-              <div className="flex items-center justify-between">
-                <CardTitle className="text-lg sm:text-xl lg:text-2xl font-semibold text-gray-900">
-                  School Member Login
-                </CardTitle>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setUserType(null)}
-                  className="text-gray-500 hover:text-gray-700 text-sm sm:text-base touch-manipulation"
-                >
-                  ← Back
-                </Button>
-              </div>
             </CardHeader>
             <CardContent className="px-4 sm:px-6 pb-4 sm:pb-6">
               <form onSubmit={handleLogin} className="space-y-4 sm:space-y-6">
@@ -223,20 +189,36 @@ export default function Login() {
                   )}
                 </Button>
               </form>
+              
+              {/* Guest Option */}
+              <div className="mt-6 pt-6 border-t border-gray-200">
+                <div className="text-center">
+                  <p className="text-sm text-gray-600 mb-3">
+                    Don't have an account? Enter as a guest
+                  </p>
+                  <Button
+                    onClick={handleGuestLogin}
+                    variant="outline"
+                    className="w-full h-10 sm:h-11 border-2 border-emerald-400 text-emerald-600 hover:bg-emerald-50 hover:border-emerald-500 font-medium shadow-lg hover:shadow-xl transition-all duration-200 text-sm sm:text-base touch-manipulation"
+                  >
+                    Enter as Guest
+                  </Button>
+                </div>
+              </div>
             </CardContent>
           </Card>
         ) : (
-          /* Guest Registration */
+          /* Guest Form */
           <Card className="shadow-xl border-0 bg-white/80 backdrop-blur-sm">
             <CardHeader className="space-y-1 pb-4 sm:pb-6 px-4 sm:px-6 pt-4 sm:pt-6">
               <div className="flex items-center justify-between">
                 <CardTitle className="text-lg sm:text-xl lg:text-2xl font-semibold text-gray-900">
-                  Guest Registration
+                  Guest Access
                 </CardTitle>
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={() => setUserType(null)}
+                  onClick={handleBackToLogin}
                   className="text-gray-500 hover:text-gray-700 text-sm sm:text-base touch-manipulation"
                 >
                   ← Back
@@ -244,24 +226,26 @@ export default function Login() {
               </div>
             </CardHeader>
             <CardContent className="px-4 sm:px-6 pb-4 sm:pb-6">
-              <div className="text-center space-y-3 sm:space-y-4">
+              <div className="text-center space-y-4">
                 <p className="text-sm sm:text-base text-gray-600">
                   Register as a guest to explore our platform and access promotional content.
                 </p>
-                <Button
-                  onClick={() => navigate("/guest/register")}
-                  className="w-full h-10 sm:h-11 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-medium shadow-lg hover:shadow-xl transition-all duration-200 text-sm sm:text-base touch-manipulation"
-                >
-                  Register as Guest
-                </Button>
-                <div className="text-xs sm:text-sm text-gray-500">
-                  Already have a guest account?{" "}
-                  <button
-                    onClick={() => navigate("/guest/login")}
-                    className="text-green-600 hover:text-green-700 font-medium touch-manipulation"
+                <div className="space-y-3">
+                  <Button
+                    onClick={() => navigate("/guest/register")}
+                    className="w-full h-10 sm:h-11 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-medium shadow-lg hover:shadow-xl transition-all duration-200 text-sm sm:text-base touch-manipulation"
                   >
-                    Sign in here
-                  </button>
+                    Register as Guest
+                  </Button>
+                  <div className="text-xs sm:text-sm text-gray-500">
+                    Already have a guest account?{" "}
+                    <button
+                      onClick={() => navigate("/guest/login")}
+                      className="text-green-600 hover:text-green-700 font-medium touch-manipulation"
+                    >
+                      Sign in here
+                    </button>
+                  </div>
                 </div>
               </div>
             </CardContent>

@@ -119,8 +119,8 @@ export default function GuestRegister() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50 flex items-center justify-center p-4">
-      <div className="w-full max-w-2xl">
+    <div className="h-screen bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50 flex items-start justify-center p-4 overflow-y-auto">
+      <div className="w-full max-w-2xl py-8">
         {/* Logo Section */}
         <div className="text-center mb-8">
           <div className="mx-auto w-24 h-24 mb-4 rounded-full bg-white shadow-lg flex items-center justify-center">
