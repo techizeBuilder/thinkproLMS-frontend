@@ -7,12 +7,12 @@ const axiosInstance = axios.create({
 
 console.log("API_URL:", API_URL);
 
-// Inteceptor to check if any request returned 401 and logout the user by clearing localStorage
+// Interceptor to check if any request returned 401 or 403 and logout the user by clearing localStorage
 axiosInstance.interceptors.response.use(
   (response) => response,
   (error) => {
-    // Only handle 401s if we have a token (meaning we're trying to access an authenticated route)
-    if (error.response?.status === 401 && localStorage.getItem("token")) {
+    // Handle 401s (unauthorized) and 403s (forbidden - account deactivated) if we have a token
+    if ((error.response?.status === 401 || error.response?.status === 403) && localStorage.getItem("token")) {
       localStorage.removeItem("user");
       localStorage.removeItem("token");
       window.location.reload(); // forces reloading the app and redirecting to login
