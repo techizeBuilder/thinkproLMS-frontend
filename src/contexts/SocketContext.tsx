@@ -146,6 +146,25 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
     newSocket.on("reconnect_failed", () => {
       console.error("❌ Failed to reconnect to socket server after all attempts");
     });
+
+    // Handle force logout event
+    newSocket.on("force_logout", (data: { message: string; reason: string }) => {
+      console.log("🔌 Force logout received:", data);
+      
+      // Clear local storage
+      localStorage.removeItem("user");
+      localStorage.removeItem("token");
+      
+      // Show notification to user
+      if (data.reason === 'school_deactivated') {
+        alert("Your account has been deactivated because your school has been deactivated. You will be redirected to the login page.");
+      } else {
+        alert(data.message || "You have been logged out. You will be redirected to the login page.");
+      }
+      
+      // Redirect to login page
+      window.location.href = "/login";
+    });
   };
 
   const sendMessage = useCallback((data: {

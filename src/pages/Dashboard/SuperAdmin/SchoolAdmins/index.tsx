@@ -3,6 +3,7 @@ import { Link, useLocation } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Plus, Mail, Phone, CheckCircle } from "lucide-react";
 import { MobileActions } from "@/components/ui/mobile-actions";
@@ -21,19 +22,35 @@ export default function SchoolAdminsPage() {
     email: string;
   } | null>(null);
   
+  // Filter states
+  const [statusFilter, setStatusFilter] = useState<string>("active");
+  
   // Determine the base path based on current route
   const isLeadMentor = location.pathname.includes('/leadmentor');
   const basePath = isLeadMentor ? '/leadmentor' : '/superadmin';
 
   useEffect(() => {
     fetchSchoolAdmins();
-  }, []);
+  }, [statusFilter]);
 
   const fetchSchoolAdmins = async () => {
     try {
-      const response = await schoolAdminService.getAll();
+      setLoading(true);
+      const includeInactive = statusFilter === "all" || statusFilter === "inactive";
+      const response = await schoolAdminService.getAll({ includeInactive });
       if (response.success) {
-        setSchoolAdmins(response.data);
+        let filteredData = response.data;
+        
+        // Apply client-side filtering based on status
+        if (statusFilter === "active") {
+          filteredData = response.data.filter(admin => admin.isActive);
+        } else if (statusFilter === "inactive") {
+          filteredData = response.data.filter(admin => !admin.isActive);
+        }
+        // If statusFilter === "all", show all data
+        
+        setSchoolAdmins(filteredData);
+        setAllAdmins(response.data); // Store all data for statistics
       }
     } catch (error: any) {
       toast.error(error.response?.data?.message || "Failed to fetch school admins");
@@ -57,6 +74,14 @@ export default function SchoolAdminsPage() {
     }
   };
 
+  // Get all admins for statistics (not filtered)
+  const [allAdmins, setAllAdmins] = useState<SchoolAdmin[]>([]);
+  
+  // Count active and inactive admins from all data
+  const activeCount = allAdmins.filter(admin => admin.isActive).length;
+  const inactiveCount = allAdmins.filter(admin => !admin.isActive).length;
+  const totalCount = allAdmins.length;
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -78,6 +103,26 @@ export default function SchoolAdminsPage() {
             Add School Admin
           </Button>
         </Link>
+      </div>
+
+      {/* Statistics and Filter */}
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
+        <div className="text-sm text-gray-600">
+          Total: {totalCount}, Active: {activeCount}, Inactive: {inactiveCount}
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="text-sm font-medium">Filter:</span>
+          <Select value={statusFilter} onValueChange={setStatusFilter}>
+            <SelectTrigger className="w-32">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All</SelectItem>
+              <SelectItem value="active">Active</SelectItem>
+              <SelectItem value="inactive">Inactive</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
       </div>
 
       {schoolAdmins.length === 0 ? (
@@ -114,8 +159,17 @@ export default function SchoolAdminsPage() {
                 </TableHeader>
                 <TableBody>
               {schoolAdmins.map((admin) => (
-                <TableRow key={admin._id}>
-                  <TableCell className="font-medium sticky left-0 bg-background z-10 min-w-[150px]">{admin.user.name}</TableCell>
+                <TableRow key={admin._id} className={!admin.isActive ? "opacity-60" : ""}>
+                  <TableCell className="font-medium sticky left-0 bg-background z-10 min-w-[150px]">
+                    <div className="flex items-center gap-2">
+                      {admin.user.name}
+                      {!admin.isActive && (
+                        <Badge variant="outline" className="text-xs">
+                          Inactive
+                        </Badge>
+                      )}
+                    </div>
+                  </TableCell>
                   <TableCell>
                     <div className="flex items-center text-sm">
                       <Mail className="mr-2 h-4 w-4 text-gray-500" />

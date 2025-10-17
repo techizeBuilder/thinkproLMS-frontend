@@ -129,8 +129,13 @@ export interface AssessmentReportData {
 // School Admin API functions
 export const schoolAdminService = {
   // Get all school admins
-  getAll: async (): Promise<{ success: boolean; data: SchoolAdmin[] }> => {
-    const response = await axiosInstance.get("/school-admins");
+  getAll: async (params?: { includeInactive?: boolean }): Promise<{ success: boolean; data: SchoolAdmin[] }> => {
+    const queryParams = new URLSearchParams();
+    if (params?.includeInactive) {
+      queryParams.append('includeInactive', 'true');
+    }
+    const url = queryParams.toString() ? `/school-admins?${queryParams.toString()}` : '/school-admins';
+    const response = await axiosInstance.get(url);
     return response.data;
   },
 
