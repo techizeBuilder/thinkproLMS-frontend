@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -9,13 +9,41 @@ import { useAuth } from "@/contexts/AuthContext";
 import axiosInstance from "@/api/axiosInstance";
 import { PhoneInput } from "@/components/ui/phone-input";
 import { isValidPhoneNumber } from "@/utils/validation";
+import GoogleAuthButton from "@/components/GoogleAuthButton";
 
 export default function GuestRegister() {
   const { login, user, loading } = useAuth();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
   
+  // Handle Google OAuth callback
+  useEffect(() => {
+    const token = searchParams.get('token');
+    const userParam = searchParams.get('user');
+    const error = searchParams.get('error');
+
+    if (error) {
+      if (error === 'google_not_configured') {
+        setError("Google authentication is not configured. Please use the registration form below.");
+      } else {
+        setError("Google authentication failed. Please try again.");
+      }
+      return;
+    }
+
+    if (token && userParam) {
+      try {
+        const userData = JSON.parse(decodeURIComponent(userParam));
+        login(userData, token);
+        navigate("/guest", { replace: true });
+      } catch (err) {
+        setError("Failed to process Google authentication. Please try again.");
+      }
+    }
+  }, [searchParams, login, navigate]);
+
   // Redirect authenticated users to their role-based dashboard
   useEffect(() => {
     if (!loading && user) {
@@ -104,6 +132,11 @@ export default function GuestRegister() {
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  const handleGoogleSignIn = () => {
+    // Redirect to backend Google OAuth endpoint
+    window.location.href = `${import.meta.env.VITE_API_URL || 'http://localhost:8000/api'}/auth/google`;
   };
 
   // Show loading while checking authentication
@@ -377,6 +410,23 @@ export default function GuestRegister() {
                 )}
               </Button>
             </form>
+            
+            {/* Divider */}
+            <div className="relative my-6">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-gray-300" />
+              </div>
+              <div className="relative flex justify-center text-sm">
+                <span className="px-2 bg-white text-gray-500">Or continue with</span>
+              </div>
+            </div>
+
+            {/* Google Sign In Button */}
+            <GoogleAuthButton
+              onClick={handleGoogleSignIn}
+              disabled={isSubmitting}
+              text="Continue with Google"
+            />
           </CardContent>
         </Card>
 
