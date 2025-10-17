@@ -98,11 +98,6 @@ export default function GuestLogin() {
   };
 
   const handleGoogleSignIn = () => {
-    console.log(
-      `${
-        import.meta.env.VITE_API_URL || "http://localhost:8000/api"
-      }/auth/google`
-    );
     // Redirect to backend Google OAuth endpoint
     window.location.href = `${
       import.meta.env.VITE_API_URL || "http://localhost:8000/api"

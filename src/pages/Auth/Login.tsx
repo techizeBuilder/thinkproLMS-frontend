@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { useAuth } from "@/contexts/AuthContext";
 import axiosInstance from "@/api/axiosInstance";
+import GoogleAuthButton from "@/components/GoogleAuthButton";
 
 export default function Login() {
   const { login, user, loading } = useAuth();
@@ -21,14 +22,14 @@ export default function Login() {
     if (!loading && user) {
       const roleRouteMap: { [key: string]: string } = {
         superadmin: "/superadmin",
-        leadmentor: "/leadmentor", 
+        leadmentor: "/leadmentor",
         schooladmin: "/schooladmin",
         admin: "/admin",
         mentor: "/mentor",
         student: "/student",
-        guest: "/guest"
+        guest: "/guest",
       };
-      
+
       const route = roleRouteMap[user.role] || "/login";
       navigate(route, { replace: true });
     }
@@ -80,29 +81,35 @@ export default function Login() {
       {/* Left Side - Branding */}
       <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-blue-600 via-purple-600 to-indigo-700 relative overflow-hidden">
         {/* Background Pattern */}
-        <div className="absolute inset-0 opacity-10" style={{
-          backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.1'%3E%3Ccircle cx='30' cy='30' r='2'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`
-        }}></div>
-        
+        <div
+          className="absolute inset-0 opacity-10"
+          style={{
+            backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.1'%3E%3Ccircle cx='30' cy='30' r='2'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
+          }}
+        ></div>
+
         {/* Floating Elements */}
         <div className="absolute top-20 left-20 w-32 h-32 bg-white/10 rounded-full blur-xl"></div>
         <div className="absolute bottom-20 right-20 w-40 h-40 bg-white/5 rounded-full blur-2xl"></div>
         <div className="absolute top-1/2 left-10 w-24 h-24 bg-white/15 rounded-full blur-lg"></div>
-        
+
         {/* Content */}
         <div className="mx-auto relative z-10 flex flex-col justify-center items-center text-center p-12">
           <div className="mb-8">
             <div className="w-[240px] h-[240px] rounded-full bg-white/20 backdrop-blur-sm shadow-2xl flex items-center justify-center mb-6">
-              <img 
-                src="/fancy-logo.jpg" 
-                alt="ThinkPro LMS" 
+              <img
+                src="/fancy-logo.jpg"
+                alt="ThinkPro LMS"
                 className="w-[200px] h-[200px] object-cover rounded-full"
               />
             </div>
           </div>
-          <h1 className="text-4xl font-bold text-white mb-4">Welcome to ThinkPro LMS</h1>
+          <h1 className="text-4xl font-bold text-white mb-4">
+            Welcome to ThinkPro LMS
+          </h1>
           <p className="text-xl text-white/90 mb-8 max-w-md">
-            Empowering education through innovative learning management solutions
+            Empowering education through innovative learning management
+            solutions
           </p>
           <div className="flex items-center space-x-4 text-white/80">
             <div className="w-2 h-2 bg-white/60 rounded-full"></div>
@@ -121,136 +128,160 @@ export default function Login() {
           {/* Mobile Logo */}
           <div className="lg:hidden text-center mb-6 sm:mb-8">
             <div className="mx-auto w-16 h-16 sm:w-20 sm:h-20 mb-3 sm:mb-4 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 shadow-lg flex items-center justify-center">
-              <img 
-                src="/fancy-logo.jpg" 
-                alt="ThinkPro LMS" 
+              <img
+                src="/fancy-logo.jpg"
+                alt="ThinkPro LMS"
                 className="w-10 h-10 sm:w-12 sm:h-12 object-contain rounded-full"
               />
             </div>
-            <h1 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">Welcome to ThinkPro LMS</h1>
-            <p className="text-sm sm:text-base text-gray-600">Sign in to your account</p>
+            <h1 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">
+              Welcome to ThinkPro LMS
+            </h1>
+            <p className="text-sm sm:text-base text-gray-600">
+              Sign in to your account
+            </p>
           </div>
 
-        {!showGuestForm ? (
-          /* Main Login Form */
-          <Card className="shadow-xl border-0 bg-white/80 backdrop-blur-sm">
-            <CardHeader className="space-y-1 pb-4 sm:pb-6 px-4 sm:px-6 pt-4 sm:pt-6">
-              <CardTitle className="text-lg sm:text-xl lg:text-2xl font-semibold text-center text-gray-900">
-                Sign In
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="px-4 sm:px-6 pb-4 sm:pb-6">
-              <form onSubmit={handleLogin} className="space-y-4 sm:space-y-6">
-                <div className="space-y-2">
-                  <Label htmlFor="email" className="text-xs sm:text-sm font-medium text-gray-700">
-                    Email/LoginID
-                  </Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="Enter your email or login ID"
-                    className="h-10 sm:h-11 border-gray-200 focus:border-blue-500 focus:ring-blue-500 text-sm sm:text-base"
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="password" className="text-xs sm:text-sm font-medium text-gray-700">
-                    Password
-                  </Label>
-                  <Input
-                    id="password"
-                    type="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder="Enter your password"
-                    className="h-10 sm:h-11 border-gray-200 focus:border-blue-500 focus:ring-blue-500 text-sm sm:text-base"
-                    required
-                  />
-                </div>
-                {error && (
-                  <div className="p-2 sm:p-3 text-xs sm:text-sm text-red-600 bg-red-50 border border-red-200 rounded-md">
-                    {error}
-                  </div>
-                )}
-                <Button 
-                  type="submit" 
-                  className="w-full h-10 sm:h-11 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-medium shadow-lg hover:shadow-xl transition-all duration-200 text-sm sm:text-base touch-manipulation" 
-                  disabled={isSubmitting}
-                >
-                  {isSubmitting ? (
-                    <div className="flex items-center space-x-2">
-                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                      <span>Signing in...</span>
-                    </div>
-                  ) : (
-                    "Sign In"
-                  )}
-                </Button>
-              </form>
-              
-              {/* Guest Option */}
-              <div className="mt-6 pt-6 border-t border-gray-200">
-                <div className="text-center">
-                  <p className="text-sm text-gray-600 mb-3">
-                    Don't have an account? Enter as a guest
-                  </p>
-                  <Button
-                    onClick={handleGuestLogin}
-                    variant="outline"
-                    className="w-full h-10 sm:h-11 border-2 border-emerald-400 text-emerald-600 hover:bg-emerald-50 hover:border-emerald-500 font-medium shadow-lg hover:shadow-xl transition-all duration-200 text-sm sm:text-base touch-manipulation"
-                  >
-                    Enter as Guest
-                  </Button>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        ) : (
-          /* Guest Form */
-          <Card className="shadow-xl border-0 bg-white/80 backdrop-blur-sm">
-            <CardHeader className="space-y-1 pb-4 sm:pb-6 px-4 sm:px-6 pt-4 sm:pt-6">
-              <div className="flex items-center justify-between">
-                <CardTitle className="text-lg sm:text-xl lg:text-2xl font-semibold text-gray-900">
-                  Guest Access
+          {!showGuestForm ? (
+            /* Main Login Form */
+            <Card className="shadow-xl border-0 bg-white/80 backdrop-blur-sm">
+              <CardHeader className="space-y-1 pb-4 sm:pb-6 px-4 sm:px-6 pt-4 sm:pt-6">
+                <CardTitle className="text-lg sm:text-xl lg:text-2xl font-semibold text-center text-gray-900">
+                  Sign In
                 </CardTitle>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={handleBackToLogin}
-                  className="text-gray-500 hover:text-gray-700 text-sm sm:text-base touch-manipulation"
-                >
-                  ← Back
-                </Button>
-              </div>
-            </CardHeader>
-            <CardContent className="px-4 sm:px-6 pb-4 sm:pb-6">
-              <div className="text-center space-y-4">
-                <p className="text-sm sm:text-base text-gray-600">
-                  Register as a guest to explore our platform and access promotional content.
-                </p>
-                <div className="space-y-3">
-                  <Button
-                    onClick={() => navigate("/guest/register")}
-                    className="w-full h-10 sm:h-11 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-medium shadow-lg hover:shadow-xl transition-all duration-200 text-sm sm:text-base touch-manipulation"
-                  >
-                    Register as Guest
-                  </Button>
-                  <div className="text-xs sm:text-sm text-gray-500">
-                    Already have a guest account?{" "}
-                    <button
-                      onClick={() => navigate("/guest/login")}
-                      className="text-green-600 hover:text-green-700 font-medium touch-manipulation"
+              </CardHeader>
+              <CardContent className="px-4 sm:px-6 pb-4 sm:pb-6">
+                <form onSubmit={handleLogin} className="space-y-4 sm:space-y-6">
+                  <div className="space-y-2">
+                    <Label
+                      htmlFor="email"
+                      className="text-xs sm:text-sm font-medium text-gray-700"
                     >
-                      Sign in here
-                    </button>
+                      Email/LoginID
+                    </Label>
+                    <Input
+                      id="email"
+                      type="email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      placeholder="Enter your email or login ID"
+                      className="h-10 sm:h-11 border-gray-200 focus:border-blue-500 focus:ring-blue-500 text-sm sm:text-base"
+                      required
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label
+                      htmlFor="password"
+                      className="text-xs sm:text-sm font-medium text-gray-700"
+                    >
+                      Password
+                    </Label>
+                    <Input
+                      id="password"
+                      type="password"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      placeholder="Enter your password"
+                      className="h-10 sm:h-11 border-gray-200 focus:border-blue-500 focus:ring-blue-500 text-sm sm:text-base"
+                      required
+                    />
+                  </div>
+                  {error && (
+                    <div className="p-2 sm:p-3 text-xs sm:text-sm text-red-600 bg-red-50 border border-red-200 rounded-md">
+                      {error}
+                    </div>
+                  )}
+                  <Button
+                    type="submit"
+                    className="w-full h-10 sm:h-11 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-medium shadow-lg hover:shadow-xl transition-all duration-200 text-sm sm:text-base touch-manipulation"
+                    disabled={isSubmitting}
+                  >
+                    {isSubmitting ? (
+                      <div className="flex items-center space-x-2">
+                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                        <span>Signing in...</span>
+                      </div>
+                    ) : (
+                      "Sign In"
+                    )}
+                  </Button>
+                </form>
+
+                {/* Guest Option */}
+                <div className="mt-6 pt-6 border-t border-gray-200">
+                  <div className="text-center">
+                    <p className="text-sm text-gray-600 mb-3">
+                      Don't have an account? Enter as a guest
+                    </p>
+                    <Button
+                      onClick={handleGuestLogin}
+                      variant="outline"
+                      className="w-full h-10 sm:h-11 border-2 border-emerald-400 text-emerald-600 hover:bg-emerald-50 hover:border-emerald-500 font-medium shadow-lg hover:shadow-xl transition-all duration-200 text-sm sm:text-base touch-manipulation"
+                    >
+                      Enter as Guest
+                    </Button>
                   </div>
                 </div>
-              </div>
-            </CardContent>
-          </Card>
-        )}
+              </CardContent>
+            </Card>
+          ) : (
+            /* Guest Form */
+            <Card className="shadow-xl border-0 bg-white/80 backdrop-blur-sm">
+              <CardHeader className="space-y-1 pb-4 sm:pb-6 px-4 sm:px-6 pt-4 sm:pt-6">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-lg sm:text-xl lg:text-2xl font-semibold text-gray-900">
+                    Guest Access
+                  </CardTitle>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={handleBackToLogin}
+                    className="text-gray-500 hover:text-gray-700 text-sm sm:text-base touch-manipulation"
+                  >
+                    ← Back
+                  </Button>
+                </div>
+              </CardHeader>
+              <CardContent className="px-4 sm:px-6 pb-4 sm:pb-6">
+                <div className="text-center space-y-4">
+                  <p className="text-sm sm:text-base text-gray-600">
+                    Register as a guest to explore our platform and access
+                    promotional content.
+                  </p>
+                  <div className="space-y-3">
+                    <Button
+                      onClick={() => navigate("/guest/register")}
+                      className="w-full h-10 sm:h-11 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-medium shadow-lg hover:shadow-xl transition-all duration-200 text-sm sm:text-base touch-manipulation"
+                    >
+                      Register as Guest
+                    </Button>
+
+                    {/* Google Sign In Button */}
+                    <GoogleAuthButton
+                      onClick={() =>
+                        (window.location.href = `${
+                          import.meta.env.VITE_API_URL ||
+                          "http://localhost:8000/api"
+                        }/auth/google`)
+                      }
+                      disabled={isSubmitting}
+                      text="Continue with Google"
+                    />
+
+                    <div className="text-xs sm:text-sm text-gray-500">
+                      Already have a guest account?{" "}
+                      <button
+                        onClick={() => navigate("/guest/login")}
+                        className="text-green-600 hover:text-green-700 font-medium touch-manipulation"
+                      >
+                        Sign in here
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
 
           {/* Footer */}
           <div className="text-center mt-6 sm:mt-8">
