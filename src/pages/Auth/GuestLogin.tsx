@@ -41,7 +41,8 @@ export default function GuestLogin() {
         console.log("Parsed user data:", userData);
         login(userData, token);
         console.log("Login called, navigating to /guest");
-        navigate("/guest", { replace: true });
+        // Force a page reload to ensure state is properly updated
+        window.location.href = "/guest";
       } catch (err) {
         console.error("Google OAuth processing error:", err);
         setError("Failed to process Google authentication. Please try again.");
@@ -121,7 +122,7 @@ export default function GuestLogin() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50 flex items-center justify-center p-4">
+    <div className="h-screen overflow-auto bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         {/* Logo Section */}
         <div className="text-center mb-8">
