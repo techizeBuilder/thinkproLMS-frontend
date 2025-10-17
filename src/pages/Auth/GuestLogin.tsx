@@ -19,13 +19,15 @@ export default function GuestLogin() {
 
   // Handle Google OAuth callback
   useEffect(() => {
-    const token = searchParams.get('token');
-    const userParam = searchParams.get('user');
-    const error = searchParams.get('error');
+    const token = searchParams.get("token");
+    const userParam = searchParams.get("user");
+    const error = searchParams.get("error");
 
     if (error) {
-      if (error === 'google_not_configured') {
-        setError("Google authentication is not configured. Please use email and password to sign in.");
+      if (error === "google_not_configured") {
+        setError(
+          "Google authentication is not configured. Please use email and password to sign in."
+        );
       } else {
         setError("Google authentication failed. Please try again.");
       }
@@ -34,10 +36,14 @@ export default function GuestLogin() {
 
     if (token && userParam) {
       try {
+        console.log("Google OAuth callback received:", { token, userParam });
         const userData = JSON.parse(decodeURIComponent(userParam));
+        console.log("Parsed user data:", userData);
         login(userData, token);
+        console.log("Login called, navigating to /guest");
         navigate("/guest", { replace: true });
       } catch (err) {
+        console.error("Google OAuth processing error:", err);
         setError("Failed to process Google authentication. Please try again.");
       }
     }
@@ -48,14 +54,14 @@ export default function GuestLogin() {
     if (!loading && user) {
       const roleRouteMap: { [key: string]: string } = {
         superadmin: "/superadmin",
-        leadmentor: "/leadmentor", 
+        leadmentor: "/leadmentor",
         schooladmin: "/schooladmin",
         admin: "/admin",
         mentor: "/mentor",
         student: "/student",
-        guest: "/guest"
+        guest: "/guest",
       };
-      
+
       const route = roleRouteMap[user.role] || "/login";
       navigate(route, { replace: true });
     }
@@ -71,14 +77,16 @@ export default function GuestLogin() {
         email,
         password,
       });
-      
+
       // Check if user is a guest
       if (res.data.user.role !== "guest") {
-        setError("This account is not a guest account. Please use the main login.");
+        setError(
+          "This account is not a guest account. Please use the main login."
+        );
         setIsSubmitting(false);
         return;
       }
-      
+
       login(res.data.user, res.data.token);
       navigate("/guest"); // Redirect to guest home page
     } catch (err: any) {
@@ -89,8 +97,15 @@ export default function GuestLogin() {
   };
 
   const handleGoogleSignIn = () => {
+    console.log(
+      `${
+        import.meta.env.VITE_API_URL || "http://localhost:8000/api"
+      }/auth/google`
+    );
     // Redirect to backend Google OAuth endpoint
-    window.location.href = `${import.meta.env.VITE_API_URL || 'http://localhost:8000'}/api/auth/google`;
+    window.location.href = `${
+      import.meta.env.VITE_API_URL || "http://localhost:8000/api"
+    }/auth/google`;
   };
 
   // Show loading while checking authentication
@@ -111,9 +126,9 @@ export default function GuestLogin() {
         {/* Logo Section */}
         <div className="text-center mb-8">
           <div className="mx-auto w-24 h-24 mb-4 rounded-full bg-white shadow-lg flex items-center justify-center">
-            <img 
-              src="/fancy-logo.jpg" 
-              alt="ThinkPro LMS" 
+            <img
+              src="/fancy-logo.jpg"
+              alt="ThinkPro LMS"
               className="w-16 h-16 object-contain rounded-full"
             />
           </div>
@@ -140,7 +155,10 @@ export default function GuestLogin() {
           <CardContent>
             <form onSubmit={handleLogin} className="space-y-6">
               <div className="space-y-2">
-                <Label htmlFor="email" className="text-sm font-medium text-gray-700">
+                <Label
+                  htmlFor="email"
+                  className="text-sm font-medium text-gray-700"
+                >
                   Email Address
                 </Label>
                 <Input
@@ -154,7 +172,10 @@ export default function GuestLogin() {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="password" className="text-sm font-medium text-gray-700">
+                <Label
+                  htmlFor="password"
+                  className="text-sm font-medium text-gray-700"
+                >
                   Password
                 </Label>
                 <Input
@@ -172,9 +193,9 @@ export default function GuestLogin() {
                   {error}
                 </div>
               )}
-              <Button 
-                type="submit" 
-                className="w-full h-11 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-medium shadow-lg hover:shadow-xl transition-all duration-200" 
+              <Button
+                type="submit"
+                className="w-full h-11 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-medium shadow-lg hover:shadow-xl transition-all duration-200"
                 disabled={isSubmitting}
               >
                 {isSubmitting ? (
@@ -187,14 +208,16 @@ export default function GuestLogin() {
                 )}
               </Button>
             </form>
-            
+
             {/* Divider */}
             <div className="relative my-6">
               <div className="absolute inset-0 flex items-center">
                 <div className="w-full border-t border-gray-300" />
               </div>
               <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-white text-gray-500">Or continue with</span>
+                <span className="px-2 bg-white text-gray-500">
+                  Or continue with
+                </span>
               </div>
             </div>
 
@@ -204,7 +227,7 @@ export default function GuestLogin() {
               disabled={isSubmitting}
               text="Continue with Google"
             />
-            
+
             <div className="mt-6 text-center">
               <p className="text-sm text-gray-500">
                 Don't have a guest account?{" "}

@@ -2,6 +2,7 @@ import React, { createContext, useContext, useEffect, useState, useCallback } fr
 import { io, Socket } from "socket.io-client";
 import { API_URL } from "@/api/axiosInstance";
 import { getSocketConfig, getBestTransport } from "@/utils/socketConfig";
+import { useAuth } from "./AuthContext";
 
 interface SocketContextType {
   socket: Socket | null;
@@ -37,11 +38,12 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
   const [socket, setSocket] = useState<Socket | null>(null);
   const [isConnected, setIsConnected] = useState(false);
   const [onlineUsers, setOnlineUsers] = useState<string[]>([]);
+  const { user } = useAuth();
 
   useEffect(() => {
     const token = localStorage.getItem("token");
     
-    if (!token) {
+    if (!token || !user || user.role === 'guest') {
       return;
     }
 
@@ -92,7 +94,7 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
         socket.close();
       }
     };
-  }, []);
+  }, [user]);
 
   const setupSocketEventHandlers = (newSocket: Socket) => {
     newSocket.on("connect", () => {

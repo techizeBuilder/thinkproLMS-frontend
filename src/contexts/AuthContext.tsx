@@ -35,10 +35,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   }, []);
 
   const login = (user: User, token: string) => {
+    console.log("AuthContext login called with:", { user, token });
     setUser(user);
     localStorage.setItem("user", JSON.stringify(user));
     localStorage.setItem("token", token);
     axiosInstance.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+    console.log("User and token stored in localStorage");
   };
 
   const logout = () => {

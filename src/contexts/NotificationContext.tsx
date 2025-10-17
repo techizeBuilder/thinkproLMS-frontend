@@ -31,7 +31,7 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({ chil
   const { user } = useAuth();
 
   const refreshCounts = async () => {
-    if (!user) return;
+    if (!user || user.role === 'guest') return;
     
     try {
       setLoading(true);
@@ -47,7 +47,7 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({ chil
   };
 
   useEffect(() => {
-    if (user) {
+    if (user && user.role !== 'guest') {
       refreshCounts();
       
       // Refresh counts every 30 seconds
