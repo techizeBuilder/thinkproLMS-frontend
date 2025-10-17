@@ -50,7 +50,6 @@ export default function SchoolAdminsPage() {
         // If statusFilter === "all", show all data
         
         setSchoolAdmins(filteredData);
-        setAllAdmins(response.data); // Store all data for statistics
       }
     } catch (error: any) {
       toast.error(error.response?.data?.message || "Failed to fetch school admins");
@@ -74,13 +73,6 @@ export default function SchoolAdminsPage() {
     }
   };
 
-  // Get all admins for statistics (not filtered)
-  const [allAdmins, setAllAdmins] = useState<SchoolAdmin[]>([]);
-  
-  // Count active and inactive admins from all data
-  const activeCount = allAdmins.filter(admin => admin.isActive).length;
-  const inactiveCount = allAdmins.filter(admin => !admin.isActive).length;
-  const totalCount = allAdmins.length;
 
   if (loading) {
     return (

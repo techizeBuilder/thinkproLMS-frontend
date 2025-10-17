@@ -26,9 +26,6 @@ import {
   GraduationCap,
   Eye,
   ArrowUp,
-  Users,
-  UserCheck,
-  UserX,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import axiosInstance from "@/api/axiosInstance";
@@ -72,7 +69,6 @@ interface Student {
 export default function StudentsPage() {
   const [students, setStudents] = useState<Student[]>([]);
   const [filteredStudents, setFilteredStudents] = useState<Student[]>([]);
-  const [allStudents, setAllStudents] = useState<Student[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedSchool, setSelectedSchool] = useState("");
@@ -134,7 +130,6 @@ export default function StudentsPage() {
         // If statusFilter === "all", show all data
 
         setStudents(filteredData);
-        setAllStudents(response.data); // Store all data for statistics
       }
     } catch (error) {
       console.error("Error fetching students:", error);

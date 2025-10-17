@@ -8,6 +8,7 @@ export interface Student {
     email: string;
     isVerified: boolean;
     createdAt: string;
+    profilePicture?: string | null;
   };
   studentId: string;
   rollNumber: string;
@@ -27,6 +28,8 @@ export interface Student {
     email: string;
     role: string;
   };
+  hasCustomCredentials: boolean;
+  generatedPassword?: string;
   isActive: boolean;
   createdAt: string;
   updatedAt: string;
