@@ -120,6 +120,14 @@ export const studentService = {
     return response.data;
   },
 
+  // Activate student
+  activate: async (
+    id: string
+  ): Promise<{ success: boolean; message: string }> => {
+    const response = await axiosInstance.patch(`/students/${id}/activate`);
+    return response.data;
+  },
+
   // Delete student (hard delete - only superadmin)
   delete: async (
     id: string

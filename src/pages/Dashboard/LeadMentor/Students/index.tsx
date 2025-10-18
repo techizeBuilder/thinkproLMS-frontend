@@ -206,6 +206,17 @@ export default function StudentsPage() {
     }
   };
 
+  const handleActivate = async (id: string) => {
+    if (!confirm("Are you sure you want to activate this student?")) return;
+
+    try {
+      await studentService.activate(id);
+      setStudents(students.filter((student) => student._id !== id));
+    } catch (error) {
+      console.error("Error activating student:", error);
+    }
+  };
+
   const handleDownload = async (format: "excel" | "pdf" = "excel") => {
     try {
       const queryParams = new URLSearchParams();
@@ -542,7 +553,8 @@ export default function StudentsPage() {
                               ? () => handleDelete(student._id)
                               : undefined
                           }
-                          onDeactivate={() => handleDeactivate(student._id)}
+                          onToggleStatus={student.isActive ? () => handleDeactivate(student._id) : () => handleActivate(student._id)}
+                          isActive={student.isActive}
                           isSuperAdmin={user?.role === "superadmin"}
                         />
                       </TableCell>
@@ -610,7 +622,8 @@ export default function StudentsPage() {
                         ? () => handleDelete(student._id)
                         : undefined
                     }
-                    onDeactivate={() => handleDeactivate(student._id)}
+                    onToggleStatus={student.isActive ? () => handleDeactivate(student._id) : () => handleActivate(student._id)}
+                    isActive={student.isActive}
                     isSuperAdmin={user?.role === "superadmin"}
                   />
                 </div>
