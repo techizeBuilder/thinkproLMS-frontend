@@ -153,8 +153,6 @@ export default function CreateAssessmentPage() {
           setDuplicateQuestions(data.questions);
         }
         
-        // Clear the duplicate data from sessionStorage
-        sessionStorage.removeItem('duplicateAssessmentData');
         toast.success("Assessment data loaded for duplication");
       } catch (error) {
         console.error("Error parsing duplicate data:", error);
@@ -171,6 +169,16 @@ export default function CreateAssessmentPage() {
         if (response.success) {
           setAvailableGrades(response.data.grades);
           setHasServiceDetails(response.data.hasServiceDetails);
+          
+          // If we have a grade selected, set the available sections
+          if (formData.grade) {
+            const selectedGradeData = response.data.grades.find((gradeData: any) => 
+              gradeData.grade === parseInt(formData.grade)
+            );
+            if (selectedGradeData) {
+              setAvailableSections(selectedGradeData.sections || []);
+            }
+          }
         }
       } catch (error) {
         console.error("Error fetching school service details:", error);
@@ -186,7 +194,7 @@ export default function CreateAssessmentPage() {
       setHasServiceDetails(false);
       setAvailableSections([]);
     }
-  }, [formData.school]);
+  }, [formData.school, formData.grade]);
 
   // Session selection not required anymore, but we still keep sessions in state if needed elsewhere
   useEffect(() => {
@@ -365,6 +373,8 @@ export default function CreateAssessmentPage() {
       };
 
       await assessmentService.createAssessment(assessmentData);
+      // Clear any duplicate data from sessionStorage
+      sessionStorage.removeItem('duplicateAssessmentData');
       toast.success("Assessment saved as draft");
       navigate("/mentor/assessments");
     } catch (error) {
@@ -405,6 +415,8 @@ export default function CreateAssessmentPage() {
         await assessmentService.publishAssessment(response.data._id);
       }
 
+      // Clear any duplicate data from sessionStorage
+      sessionStorage.removeItem('duplicateAssessmentData');
       toast.success("Assessment published successfully");
       navigate("/mentor/assessments");
     } catch (error) {
