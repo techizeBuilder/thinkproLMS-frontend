@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -23,7 +23,6 @@ import {
 import {
   sessionProgressService,
   type School,
-  type SessionProgress,
 } from "@/api/sessionProgressService";
 import { schoolService, type AvailableGrade } from "@/api/schoolService";
 import { mentorService, type Mentor } from "@/api/mentorService";
@@ -44,6 +43,8 @@ interface SessionProgressData {
   description?: string;
   status: string;
   notes?: string;
+  // Allow dynamic properties for section-specific data
+  [key: string]: any;
 }
 
 interface GradeSectionData {
@@ -56,7 +57,6 @@ export default function SessionProgressViewer({
   title = "Session Progress Overview",
   description = "Monitor and manage session completion progress for all grades and sections",
 }: SessionProgressViewerProps) {
-  const [loading, setLoading] = useState(false);
   const [gradeSectionData, setGradeSectionData] = useState<GradeSectionData[]>([]);
   const [expandedNotes, setExpandedNotes] = useState<Record<string, boolean>>({});
   const [availableSchools, setAvailableSchools] = useState<School[]>([]);
@@ -70,10 +70,6 @@ export default function SessionProgressViewer({
   const [loadingSchools, setLoadingSchools] = useState(false);
   const [loadingSessions, setLoadingSessions] = useState(false);
 
-  // School service details
-  const [availableGrades, setAvailableGrades] = useState<AvailableGrade[]>([]);
-  const [hasServiceDetails, setHasServiceDetails] = useState(false);
-
   useEffect(() => {
     loadAvailableMentors();
   }, []);
@@ -85,22 +81,155 @@ export default function SessionProgressViewer({
     } else {
       setAvailableSchools([]);
       setSelectedSchoolId("");
-      setAvailableGrades([]);
-      setHasServiceDetails(false);
       setGradeSectionData([]);
     }
   }, [selectedMentorId]);
 
   // Load school service details and all session data when school changes
   useEffect(() => {
+    let isCancelled = false;
+
+    const loadAllSessionData = async (
+      mentorId: string,
+      schoolId: string,
+      grades: AvailableGrade[]
+    ) => {
+      try {
+        const allGradeSectionData: GradeSectionData[] = [];
+
+        // Sort grades in ascending order - ONLY use grades from school's service details
+        const sortedGrades = [...grades].sort((a, b) => a.grade - b.grade);
+
+        console.log("Loading session data for grades:", sortedGrades.map(g => g.grade));
+
+        for (const gradeData of sortedGrades) {
+          // Check if component is still mounted
+          if (isCancelled) {
+            console.log("Component unmounted, cancelling session data load");
+            return;
+          }
+
+          const gradeSections: string[] = gradeData.sections || [];
+          console.log(`Loading data for Grade ${gradeData.grade} with sections:`, gradeSections);
+
+          // Only proceed if this grade has sections
+          if (gradeSections.length === 0) {
+            console.log(`Skipping Grade ${gradeData.grade} - no sections available`);
+            continue;
+          }
+
+          const gradeSessions: SessionProgressData[] = [];
+
+          // Load session data for each section in this grade
+          for (const section of gradeSections) {
+            try {
+              console.log(`Loading sessions for Grade ${gradeData.grade}, Section ${section}`);
+              const progressData = await sessionProgressService.getLeadMentorSessionProgress(
+                mentorId,
+                schoolId,
+                section,
+                gradeData.grade.toString()
+              );
+
+              // Check if component is still mounted
+              if (isCancelled) {
+                console.log("Component unmounted, cancelling session data load");
+                return;
+              }
+
+              const sessions = progressData.sessions || [];
+              console.log(`Found ${sessions.length} sessions for Grade ${gradeData.grade}, Section ${section}`);
+              
+              // Transform session data to include grade and section info
+              const transformedSessions = sessions.map((session: any) => ({
+                grade: gradeData.grade,
+                section: section,
+                sessionId: session.sessionId,
+                sessionName: session.sessionName,
+                displayName: session.displayName,
+                description: session.description,
+                status: session.status || "Pending",
+                notes: session.notes || ""
+              }));
+
+              gradeSessions.push(...transformedSessions);
+            } catch (error) {
+              console.error(`Error loading sessions for grade ${gradeData.grade}, section ${section}:`, error);
+            }
+          }
+
+          // Only create grade data if we have sessions
+          if (gradeSessions.length > 0) {
+            // Group sessions by session name and create session numbers
+            const sessionGroups = gradeSessions.reduce((groups, session) => {
+              const key = session.sessionName;
+              if (!groups[key]) {
+                groups[key] = [];
+              }
+              groups[key].push(session);
+              return groups;
+            }, {} as Record<string, SessionProgressData[]>);
+
+            // Create session entries
+            const sessionEntries: SessionProgressData[] = [];
+            
+            for (const [, sectionSessions] of Object.entries(sessionGroups)) {
+              const firstSession = sectionSessions[0];
+              const sessionEntry: SessionProgressData = {
+                grade: gradeData.grade,
+                section: "ALL", // This represents the session across all sections
+                sessionId: firstSession.sessionId,
+                sessionName: firstSession.sessionName,
+                displayName: firstSession.displayName, // Backend already provides the formatted display name
+                description: firstSession.description,
+                status: "Mixed", // Will be determined by section statuses
+                notes: ""
+              };
+              
+              // Add section-specific data
+              for (const sectionSession of sectionSessions) {
+                sessionEntry[`${sectionSession.section}_status`] = sectionSession.status;
+                sessionEntry[`${sectionSession.section}_notes`] = sectionSession.notes;
+              }
+              
+              sessionEntries.push(sessionEntry);
+            }
+
+            console.log(`Created ${sessionEntries.length} session entries for Grade ${gradeData.grade}`);
+
+            allGradeSectionData.push({
+              grade: gradeData.grade,
+              sections: gradeSections,
+              sessions: sessionEntries
+            });
+          } else {
+            console.log(`No sessions found for Grade ${gradeData.grade} - skipping`);
+          }
+        }
+
+        // Only update state if component is still mounted
+        if (!isCancelled) {
+          console.log("Final grade section data:", allGradeSectionData.map(g => ({ grade: g.grade, sessionCount: g.sessions.length })));
+          setGradeSectionData(allGradeSectionData);
+        }
+      } catch (error) {
+        console.error("Error loading all session data:", error);
+        if (!isCancelled) {
+          toast.error("Failed to load session data");
+          setGradeSectionData([]);
+        }
+      } finally {
+        // No loading state needed
+      }
+    };
+
     const fetchSchoolServiceDetails = async (schoolId: string) => {
       try {
         setLoadingSessions(true);
+        setGradeSectionData([]); // Clear previous data immediately
+        
         const response = await schoolService.getServiceDetails(schoolId);
-        if (response.success) {
-          setAvailableGrades(response.data.grades);
-          setHasServiceDetails(response.data.hasServiceDetails);
-          
+        if (response.success && !isCancelled) {
           // Load all session data for all grades and sections
           if (response.data.grades && response.data.grades.length > 0) {
             await loadAllSessionData(selectedMentorId, schoolId, response.data.grades);
@@ -108,21 +237,26 @@ export default function SessionProgressViewer({
         }
       } catch (error) {
         console.error("Error fetching school service details:", error);
-        setAvailableGrades([]);
-        setHasServiceDetails(false);
-        setGradeSectionData([]);
+        if (!isCancelled) {
+          setGradeSectionData([]);
+        }
       } finally {
-        setLoadingSessions(false);
+        if (!isCancelled) {
+          setLoadingSessions(false);
+        }
       }
     };
 
     if (selectedSchoolId && selectedMentorId) {
       fetchSchoolServiceDetails(selectedSchoolId);
     } else {
-      setAvailableGrades([]);
-      setHasServiceDetails(false);
       setGradeSectionData([]);
     }
+
+    // Cleanup function
+    return () => {
+      isCancelled = true;
+    };
   }, [selectedSchoolId, selectedMentorId]);
 
   const loadAvailableMentors = async () => {
@@ -168,105 +302,6 @@ export default function SessionProgressViewer({
     }
   };
 
-  const loadAllSessionData = async (
-    mentorId: string,
-    schoolId: string,
-    grades: AvailableGrade[]
-  ) => {
-    try {
-      setLoading(true);
-      const allGradeSectionData: GradeSectionData[] = [];
-
-      // Sort grades in ascending order
-      const sortedGrades = [...grades].sort((a, b) => a.grade - b.grade);
-
-      for (const gradeData of sortedGrades) {
-        const gradeSections: string[] = gradeData.sections || [];
-        const gradeSessions: SessionProgressData[] = [];
-
-        // Load session data for each section in this grade
-        for (const section of gradeSections) {
-          try {
-            const progressData = await sessionProgressService.getLeadMentorSessionProgress(
-              mentorId,
-              schoolId,
-              section,
-              gradeData.grade.toString()
-            );
-
-            const sessions = progressData.sessions || [];
-            
-            // Transform session data to include grade and section info
-            const transformedSessions = sessions.map((session: any) => ({
-              grade: gradeData.grade,
-              section: section,
-              sessionId: session.sessionId,
-              sessionName: session.sessionName,
-              displayName: session.displayName,
-              description: session.description,
-              status: session.status || "Pending",
-              notes: session.notes || ""
-            }));
-
-            gradeSessions.push(...transformedSessions);
-          } catch (error) {
-            console.error(`Error loading sessions for grade ${gradeData.grade}, section ${section}:`, error);
-          }
-        }
-
-        // Group sessions by session name and create session numbers
-        const sessionGroups = gradeSessions.reduce((groups, session) => {
-          const key = session.sessionName;
-          if (!groups[key]) {
-            groups[key] = [];
-          }
-          groups[key].push(session);
-          return groups;
-        }, {} as Record<string, SessionProgressData[]>);
-
-        // Create session entries with proper numbering
-        const sessionEntries: SessionProgressData[] = [];
-        let sessionNumber = 1;
-        
-        for (const [sessionName, sectionSessions] of Object.entries(sessionGroups)) {
-          const firstSession = sectionSessions[0];
-          const sessionEntry: SessionProgressData = {
-            grade: gradeData.grade,
-            section: "ALL", // This represents the session across all sections
-            sessionId: firstSession.sessionId,
-            sessionName: firstSession.sessionName,
-            displayName: `${gradeData.grade}.${sessionNumber.toString().padStart(2, '0')} ${firstSession.displayName}`,
-            description: firstSession.description,
-            status: "Mixed", // Will be determined by section statuses
-            notes: ""
-          };
-          
-          // Add section-specific data
-          for (const sectionSession of sectionSessions) {
-            sessionEntry[`${sectionSession.section}_status`] = sectionSession.status;
-            sessionEntry[`${sectionSession.section}_notes`] = sectionSession.notes;
-          }
-          
-          sessionEntries.push(sessionEntry);
-          sessionNumber++;
-        }
-
-        allGradeSectionData.push({
-          grade: gradeData.grade,
-          sections: gradeSections,
-          sessions: sessionEntries
-        });
-      }
-
-      setGradeSectionData(allGradeSectionData);
-    } catch (error) {
-      console.error("Error loading all session data:", error);
-      toast.error("Failed to load session data");
-      setGradeSectionData([]);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   // Filter sessions based on search term
   const filteredGradeSectionData = gradeSectionData.map(gradeData => ({
@@ -342,7 +377,7 @@ export default function SessionProgressViewer({
 
       // Convert to CSV format
       const csvContent = workbookData.map(row => 
-        row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(",")
+        row.map((cell: any) => `"${String(cell).replace(/"/g, '""')}"`).join(",")
       ).join("\n");
 
       // Create and download file
@@ -512,15 +547,15 @@ export default function SessionProgressViewer({
               </CardTitle>
 
               <div className="flex items-center gap-2">
-                {/* Search Input */}
-                <div className="relative w-48">
-                  <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-400 h-3 w-3" />
-                  <Input
+              {/* Search Input */}
+              <div className="relative w-48">
+                <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-400 h-3 w-3" />
+                <Input
                     placeholder="Search sessions..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pl-7 h-7 text-xs"
-                  />
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-7 h-7 text-xs"
+                />
                 </div>
 
                 {/* Export Button */}
@@ -544,30 +579,30 @@ export default function SessionProgressViewer({
                     Grade {gradeData.grade}
                   </h3>
                   <div className="overflow-x-auto">
-                    <Table>
-                      <TableHeader>
-                        <TableRow className="h-8">
+            <Table>
+              <TableHeader>
+                <TableRow className="h-8">
                           <TableHead className="w-[80px] text-xs font-medium">Session</TableHead>
                           {gradeData.sections.map((section) => (
                             <TableHead key={section} className="text-xs font-medium text-center min-w-[120px]">
                               {section}
                             </TableHead>
                           ))}
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {gradeData.sessions.map((session, index) => (
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                        {gradeData.sessions.map((session) => (
                           <TableRow key={`${session.grade}-${session.sessionId}`} className="h-10">
-                            <TableCell className="font-medium text-xs">
+                      <TableCell className="font-medium text-xs">
                               <div className="font-semibold">
-                                {session.displayName}
-                              </div>
+                            {session.displayName}
+                          </div>
                               {session.description && (
                                 <div className="text-gray-500 text-[10px] mt-1">
                                   {session.description}
-                                </div>
+                        </div>
                               )}
-                            </TableCell>
+                      </TableCell>
                             {gradeData.sections.map((section) => {
                               const sectionStatus = session[`${section}_status`] || "Pending";
                               const sectionNotes = session[`${section}_notes`] || "";
@@ -579,55 +614,55 @@ export default function SessionProgressViewer({
                                   <div className="space-y-1">
                                     {/* Status Badge */}
                                     <div className="flex justify-center">
-                                      <span
-                                        className={`px-2 py-1 rounded-full text-xs font-medium ${
+                          <span
+                            className={`px-2 py-1 rounded-full text-xs font-medium ${
                                           sectionStatus === "Completed"
-                                            ? "bg-green-100 text-green-800 border border-green-200"
+                                ? "bg-green-100 text-green-800 border border-green-200"
                                             : sectionStatus === "In Progress"
-                                            ? "bg-blue-100 text-blue-800 border border-blue-200"
-                                            : "bg-gray-100 text-gray-800 border border-gray-200"
-                                        }`}
-                                      >
+                                ? "bg-blue-100 text-blue-800 border border-blue-200"
+                                : "bg-gray-100 text-gray-800 border border-gray-200"
+                            }`}
+                          >
                                         {sectionStatus}
-                                      </span>
-                                    </div>
+                          </span>
+                        </div>
                                     
                                     {/* Notes */}
                                     {sectionNotes && (
                                       <div className="text-[10px] text-gray-600 max-w-[100px] mx-auto">
-                                        <div
-                                          className={
-                                            !isExpanded
+                            <div
+                              className={
+                                !isExpanded
                                               ? "max-h-6 overflow-hidden"
-                                              : undefined
-                                          }
-                                        >
+                                  : undefined
+                              }
+                            >
                                           {sectionNotes}
-                                        </div>
-                                        {isLongNote && (
-                                          <button
-                                            type="button"
+                            </div>
+                            {isLongNote && (
+                              <button
+                                type="button"
                                             className="text-blue-600 hover:underline text-[9px]"
-                                            onClick={() =>
-                                              setExpandedNotes((prev) => ({
-                                                ...prev,
+                                onClick={() =>
+                                  setExpandedNotes((prev) => ({
+                                    ...prev,
                                                 [`${session.sessionId}-${section}`]: !isExpanded,
-                                              }))
-                                            }
-                                          >
+                                  }))
+                                }
+                              >
                                             {isExpanded ? "Less" : "More"}
-                                          </button>
-                                        )}
-                                      </div>
-                                    )}
+                              </button>
+                            )}
+                          </div>
+                        )}
                                   </div>
-                                </TableCell>
-                              );
-                            })}
+                      </TableCell>
+                  );
+                })}
                           </TableRow>
                         ))}
-                      </TableBody>
-                    </Table>
+              </TableBody>
+            </Table>
                   </div>
                 </div>
               ))}
