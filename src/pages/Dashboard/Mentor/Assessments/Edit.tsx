@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
   BookOpen, 
@@ -16,12 +17,16 @@ import {
   Send
 } from "lucide-react";
 import { assessmentService, type Assessment, type AssessmentQuestion } from "@/api/assessmentService";
+import { schoolService, type School } from "@/api/schoolService";
+import { mentorService } from "@/api/mentorService";
 import AssessmentQuestionManager from "@/components/AssessmentQuestionManager";
+import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 
 export default function EditAssessmentPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [assessment, setAssessment] = useState<Assessment | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -31,6 +36,7 @@ export default function EditAssessmentPage() {
   const [formData, setFormData] = useState({
     title: "",
     instructions: "",
+    school: "",
     startDate: "",
     endDate: "",
     duration: 60,
@@ -38,6 +44,53 @@ export default function EditAssessmentPage() {
 
   // Questions state
   const [questions, setQuestions] = useState<AssessmentQuestion[]>([]);
+  
+  // School state
+  const [schools, setSchools] = useState<School[]>([]);
+
+  // Load schools based on user role
+  useEffect(() => {
+    const loadSchools = async () => {
+      if (user?.role === "superadmin" || user?.role === "leadmentor") {
+        try {
+          const response = await schoolService.getAll();
+          if (response.success) {
+            setSchools(response.data);
+          }
+        } catch (error) {
+          console.error("Error loading schools:", error);
+          toast.error("Failed to load schools");
+        }
+      } else if (user?.role === "mentor") {
+        try {
+          const response = await mentorService.getMyProfile();
+          if (response.success) {
+            // Convert assigned schools to the format expected by the form
+            const assignedSchools: School[] = response.data.assignedSchools.map((school: any) => ({
+              _id: school._id,
+              name: school.name,
+              address: "", // Not available in mentor profile
+              city: school.city,
+              state: school.state,
+              boards: (school.boards || []) as ("CBSE" | "ICSE" | "State Board" | "IGCSE" | "IB" | "Other")[],
+              branchName: school.branchName || "",
+              isActive: true, // Assume active since they're assigned
+              createdAt: new Date().toISOString(),
+              updatedAt: new Date().toISOString()
+            }));
+            setSchools(assignedSchools);
+          }
+        } catch (error) {
+          console.error("Error loading mentor profile:", error);
+          toast.error("Failed to load mentor profile");
+        }
+      }
+    };
+
+    if (user) {
+      loadSchools();
+    }
+  }, [user?.role]);
 
   useEffect(() => {
     const loadAssessment = async () => {
@@ -53,6 +106,7 @@ export default function EditAssessmentPage() {
         setFormData({
           title: assessmentData.title,
           instructions: assessmentData.instructions,
+          school: assessmentData.school._id,
           startDate: new Date(assessmentData.startDate).toISOString().slice(0, 16),
           endDate: new Date(assessmentData.endDate).toISOString().slice(0, 16),
           duration: assessmentData.duration,
@@ -275,6 +329,24 @@ export default function EditAssessmentPage() {
                       rows={4}
                       disabled={!canEdit}
                     />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="school">School *</Label>
+                    <Select 
+                      value={formData.school} 
+                      onValueChange={(value) => handleInputChange("school", value)}
+                      disabled={!canEdit}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select school" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {schools.map(school => (
+                          <SelectItem key={school._id} value={school._id}>{school.name}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

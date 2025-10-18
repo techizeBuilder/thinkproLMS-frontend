@@ -118,10 +118,7 @@ export default function CreateAssessmentPage() {
               updatedAt: new Date().toISOString()
             }));
             setSchools(assignedSchools);
-            // Automatically set the first school for mentors
-            if (assignedSchools.length > 0) {
-              setFormData(prev => ({ ...prev, school: assignedSchools[0]._id }));
-            }
+            // Don't automatically set school - let mentor choose
           }
         } catch (error) {
           console.error("Error loading mentor profile:", error);
@@ -462,22 +459,20 @@ export default function CreateAssessmentPage() {
                 />
               </div>
 
-              {/* School selection for SuperAdmin/LeadMentor only - removed for mentors */}
-              {(user?.role === "superadmin" || user?.role === "leadmentor") && (
-                <div className="space-y-2">
-                  <Label htmlFor="school">School *</Label>
-                  <Select value={formData.school} onValueChange={(value) => handleInputChange("school", value)}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select school" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {schools.map(school => (
-                        <SelectItem key={school._id} value={school._id}>{school.name}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              )}
+              {/* School selection for all roles */}
+              <div className="space-y-2">
+                <Label htmlFor="school">School *</Label>
+                <Select value={formData.school} onValueChange={(value) => handleInputChange("school", value)}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select school" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {schools.map(school => (
+                      <SelectItem key={school._id} value={school._id}>{school.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
 
               {/* Grade and Sections in single row for smaller screens */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -594,7 +589,7 @@ export default function CreateAssessmentPage() {
             <div className="flex justify-end">
               <Button 
                 onClick={() => setStep(2)} 
-                disabled={!formData.grade || formData.sections.length === 0 || ((user?.role === "superadmin" || user?.role === "leadmentor") && !formData.school)}
+                disabled={!formData.grade || formData.sections.length === 0 || !formData.school}
                 className="w-full sm:w-auto text-sm"
               >
                 Next: Select Questions
