@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Bell } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { notificationService } from "@/api/notificationService";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface NotificationBellProps {
   className?: string;
@@ -10,12 +11,17 @@ interface NotificationBellProps {
 export function NotificationBell({ className }: NotificationBellProps) {
   const [unreadCount, setUnreadCount] = useState(0);
   const [, setLoading] = useState(false);
+  const { user } = useAuth();
 
   useEffect(() => {
     loadUnreadCount();
-  }, []);
+  }, [user]);
 
   const loadUnreadCount = async () => {
+    // Only call notification counts API for authorized roles
+    const authorizedRoles = ['superadmin', 'leadmentor', 'mentor'];
+    if (!user || !authorizedRoles.includes(user.role)) return;
+    
     try {
       setLoading(true);
       const response = await notificationService.getNotificationCounts();

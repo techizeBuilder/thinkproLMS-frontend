@@ -33,6 +33,10 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({ chil
   const refreshCounts = async () => {
     if (!user || user.role === 'guest') return;
     
+    // Only call notification counts API for authorized roles
+    const authorizedRoles = ['superadmin', 'leadmentor', 'mentor'];
+    if (!authorizedRoles.includes(user.role)) return;
+    
     try {
       setLoading(true);
       const response = await notificationService.getNotificationCounts();
