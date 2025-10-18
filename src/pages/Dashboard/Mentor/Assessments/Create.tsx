@@ -75,6 +75,7 @@ export default function CreateAssessmentPage() {
   });
   const [searchTerm, setSearchTerm] = useState("");
   const [filteredQuestions, setFilteredQuestions] = useState<Question[]>([]);
+  const [duplicateQuestions, setDuplicateQuestions] = useState<any[]>([]);
 
   // UI state
   const [loading, setLoading] = useState(false);
@@ -129,6 +130,38 @@ export default function CreateAssessmentPage() {
 
     loadSchools();
   }, [user?.role]);
+
+  // Check for duplicate data from sessionStorage
+  useEffect(() => {
+    const duplicateData = sessionStorage.getItem('duplicateAssessmentData');
+    if (duplicateData) {
+      try {
+        const data = JSON.parse(duplicateData);
+        setFormData(prev => ({
+          ...prev,
+          title: data.title || "",
+          instructions: data.instructions || "",
+          school: data.school || "",
+          grade: data.grade ? data.grade.toString() : "",
+          sections: data.sections || [],
+          session: data.session || "",
+          duration: data.duration || 60,
+        }));
+        
+        // Set selected questions if available
+        if (data.questions && data.questions.length > 0) {
+          setDuplicateQuestions(data.questions);
+        }
+        
+        // Clear the duplicate data from sessionStorage
+        sessionStorage.removeItem('duplicateAssessmentData');
+        toast.success("Assessment data loaded for duplication");
+      } catch (error) {
+        console.error("Error parsing duplicate data:", error);
+        sessionStorage.removeItem('duplicateAssessmentData');
+      }
+    }
+  }, []);
 
   // Load school service details when school changes
   useEffect(() => {
@@ -216,6 +249,30 @@ export default function CreateAssessmentPage() {
 
     setFilteredQuestions(filtered);
   }, [availableQuestions, searchTerm, questionFilters.difficulty]);
+
+  // Handle duplicate questions when available questions are loaded
+  useEffect(() => {
+    if (duplicateQuestions.length > 0 && availableQuestions.length > 0) {
+      const duplicateQuestionIds = duplicateQuestions.map(q => q.questionId);
+      const questionsToSelect = availableQuestions.filter(q => 
+        duplicateQuestionIds.includes(q._id)
+      );
+      
+      if (questionsToSelect.length > 0) {
+        const selectedQuestionsWithMarks = questionsToSelect.map(question => {
+          const duplicateData = duplicateQuestions.find(dq => dq.questionId === question._id);
+          return {
+            ...question,
+            marks: duplicateData?.marks || 1,
+            order: duplicateData?.order || 1,
+          };
+        });
+        
+        setSelectedQuestions(selectedQuestionsWithMarks);
+        setDuplicateQuestions([]); // Clear duplicate questions after processing
+      }
+    }
+  }, [availableQuestions, duplicateQuestions]);
 
   const handleInputChange = (field: string, value: any) => {
     if (field === "school") {

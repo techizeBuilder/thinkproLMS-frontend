@@ -20,7 +20,8 @@ import {
   BarChart3, 
   BookOpen,
   Send,
-  XCircle
+  XCircle,
+  Copy
 } from "lucide-react";
 import { assessmentService, type Assessment } from "@/api/assessmentService";
 import { toast } from "sonner";
@@ -102,6 +103,34 @@ export default function MentorAssessmentsPage() {
     } catch (error) {
       console.error("Error cancelling assessment:", error);
       toast.error("Failed to cancel assessment");
+    }
+  };
+
+  const handleDuplicateAssessment = async (assessment: Assessment) => {
+    try {
+      // Navigate to create page with pre-filled data
+      const duplicateData = {
+        title: `${assessment.title} (Copy)`,
+        instructions: assessment.instructions,
+        school: assessment.school._id,
+        grade: assessment.grade.toString(),
+        sections: assessment.sections,
+        session: assessment.session?._id || "",
+        duration: assessment.duration,
+        questions: assessment.questions.map(q => ({
+          questionId: typeof q.questionId === 'string' ? q.questionId : q.questionId._id,
+          order: q.order,
+          marks: q.marks,
+        })),
+      };
+      
+      // Store the duplicate data in sessionStorage to be picked up by create page
+      sessionStorage.setItem('duplicateAssessmentData', JSON.stringify(duplicateData));
+      navigate("/mentor/assessments/create");
+      toast.success("Assessment data loaded for duplication");
+    } catch (error) {
+      console.error("Error duplicating assessment:", error);
+      toast.error("Failed to duplicate assessment");
     }
   };
 
@@ -336,6 +365,16 @@ export default function MentorAssessmentsPage() {
                               <BarChart3 className="h-3 w-3 md:h-4 md:w-4" />
                             </Button>
                           )}
+                          
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleDuplicateAssessment(assessment)}
+                            title="Duplicate"
+                            className="text-green-600 hover:text-green-700 h-7 w-7 md:h-8 md:w-8 p-0"
+                          >
+                            <Copy className="h-3 w-3 md:h-4 md:w-4" />
+                          </Button>
                           
                           {assessment.status === "draft" && assessment.totalAttempts === 0 && (
                             <Button
