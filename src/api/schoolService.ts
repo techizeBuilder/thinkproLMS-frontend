@@ -1,12 +1,5 @@
 import axiosInstance from "./axiosInstance";
 
-export interface SchoolHead {
-  name: string;
-  designation: string;
-  email: string;
-  phoneNumber: string;
-  profilePic?: string | File;
-}
 
 export interface GradeWithSections {
   grade: number;
@@ -35,10 +28,19 @@ export interface School {
   affiliatedTo?: string;
   state: string;
   city: string;
+  district: string;
+  pinCode: string;
+  schoolEmail: string;
+  schoolWebsite?: string;
+  principalName: string;
+  principalContact: string;
+  principalEmail: string;
+  stemCoordinatorName?: string;
+  stemCoordinatorContact?: string;
+  stemCoordinatorEmail?: string;
   branchName?: string;
   projectStartDate?: string;
   projectEndDate?: string;
-  schoolHeads?: SchoolHead[];
   serviceDetails?: ServiceDetails;
   isActive: boolean;
   createdAt: string;
@@ -54,10 +56,19 @@ export interface CreateSchoolData {
   affiliatedTo?: string;
   state: string;
   city: string;
+  district: string;
+  pinCode: string;
+  schoolEmail: string;
+  schoolWebsite?: string;
+  principalName: string;
+  principalContact: string;
+  principalEmail: string;
+  stemCoordinatorName?: string;
+  stemCoordinatorContact?: string;
+  stemCoordinatorEmail?: string;
   branchName?: string;
   projectStartDate?: string;
   projectEndDate?: string;
-  schoolHeads?: SchoolHead[];
   serviceDetails?: ServiceDetails;
 }
 
@@ -98,23 +109,23 @@ export const schoolService = {
     formData.append('boards', JSON.stringify(data.boards));
     formData.append('state', data.state);
     formData.append('city', data.city);
+    formData.append('district', data.district);
+    formData.append('pinCode', data.pinCode);
+    formData.append('schoolEmail', data.schoolEmail);
+    formData.append('principalName', data.principalName);
+    formData.append('principalContact', data.principalContact);
+    formData.append('principalEmail', data.principalEmail);
     
     if (data.image) formData.append('image', data.image);
     if (data.logo) formData.append('logo', data.logo);
     if (data.affiliatedTo) formData.append('affiliatedTo', data.affiliatedTo);
+    if (data.schoolWebsite) formData.append('schoolWebsite', data.schoolWebsite);
+    if (data.stemCoordinatorName) formData.append('stemCoordinatorName', data.stemCoordinatorName);
+    if (data.stemCoordinatorContact) formData.append('stemCoordinatorContact', data.stemCoordinatorContact);
+    if (data.stemCoordinatorEmail) formData.append('stemCoordinatorEmail', data.stemCoordinatorEmail);
     if (data.branchName) formData.append('branchName', data.branchName);
     if (data.projectStartDate) formData.append('projectStartDate', data.projectStartDate);
     if (data.projectEndDate) formData.append('projectEndDate', data.projectEndDate);
-    
-    // Add school head profile pictures
-    if (data.schoolHeads) {
-      data.schoolHeads.forEach((head, index) => {
-        if (head.profilePic && typeof head.profilePic === 'object' && head.profilePic instanceof File) {
-          formData.append(`schoolHeadProfilePic${index}`, head.profilePic);
-        }
-      });
-      formData.append('schoolHeads', JSON.stringify(data.schoolHeads));
-    }
     if (data.serviceDetails) formData.append('serviceDetails', JSON.stringify(data.serviceDetails));
 
     const response = await axiosInstance.post("/schools", formData, {
@@ -135,22 +146,22 @@ export const schoolService = {
     if (data.boards !== undefined) formData.append('boards', JSON.stringify(data.boards));
     if (data.state !== undefined) formData.append('state', data.state);
     if (data.city !== undefined) formData.append('city', data.city);
+    if (data.district !== undefined) formData.append('district', data.district);
+    if (data.pinCode !== undefined) formData.append('pinCode', data.pinCode);
+    if (data.schoolEmail !== undefined) formData.append('schoolEmail', data.schoolEmail);
+    if (data.principalName !== undefined) formData.append('principalName', data.principalName);
+    if (data.principalContact !== undefined) formData.append('principalContact', data.principalContact);
+    if (data.principalEmail !== undefined) formData.append('principalEmail', data.principalEmail);
     if (data.image !== undefined) formData.append('image', data.image);
     if (data.logo !== undefined) formData.append('logo', data.logo);
     if (data.affiliatedTo !== undefined) formData.append('affiliatedTo', data.affiliatedTo);
+    if (data.schoolWebsite !== undefined) formData.append('schoolWebsite', data.schoolWebsite);
+    if (data.stemCoordinatorName !== undefined) formData.append('stemCoordinatorName', data.stemCoordinatorName);
+    if (data.stemCoordinatorContact !== undefined) formData.append('stemCoordinatorContact', data.stemCoordinatorContact);
+    if (data.stemCoordinatorEmail !== undefined) formData.append('stemCoordinatorEmail', data.stemCoordinatorEmail);
     if (data.branchName !== undefined) formData.append('branchName', data.branchName);
     if (data.projectStartDate !== undefined) formData.append('projectStartDate', data.projectStartDate);
     if (data.projectEndDate !== undefined) formData.append('projectEndDate', data.projectEndDate);
-    
-    // Add school head profile pictures
-    if (data.schoolHeads !== undefined) {
-      data.schoolHeads.forEach((head, index) => {
-        if (head.profilePic && typeof head.profilePic === 'object' && head.profilePic instanceof File) {
-          formData.append(`schoolHeadProfilePic${index}`, head.profilePic);
-        }
-      });
-      formData.append('schoolHeads', JSON.stringify(data.schoolHeads));
-    }
     if (data.serviceDetails !== undefined) formData.append('serviceDetails', JSON.stringify(data.serviceDetails));
 
     const response = await axiosInstance.put(`/schools/${id}`, formData, {

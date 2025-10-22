@@ -58,12 +58,15 @@ export default function StateCitySelector({
         try {
           const citiesData = await locationService.getCities('India', selectedState);
           setCities(citiesData);
-          // Reset city selection when state changes
-          onCityChange('');
+          // Only clear city if current selectedCity is empty or not in fetched list
+          if (!selectedCity || !citiesData.includes(selectedCity)) {
+            onCityChange('');
+          }
         } catch (error) {
           console.error('Error fetching cities:', error);
           toast.error('Failed to load cities. Please try again.');
           setCities([]);
+          onCityChange('');
         } finally {
           setLoadingCities(false);
         }

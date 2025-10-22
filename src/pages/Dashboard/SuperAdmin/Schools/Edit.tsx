@@ -5,9 +5,8 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { ArrowLeft, Upload } from "lucide-react";
-import { schoolService, type UpdateSchoolData, type SchoolHead, type ServiceDetails } from "@/api/schoolService";
+import { schoolService, type UpdateSchoolData, type ServiceDetails } from "@/api/schoolService";
 import { toast } from "sonner";
-import SchoolHeadForm from "@/components/SchoolHeadForm";
 import ServiceForm from "@/components/ServiceForm";
 import StateCitySelector from "@/components/StateCitySelector";
 import { getMediaUrl } from "@/utils/mediaUrl";
@@ -27,11 +26,20 @@ export default function EditSchoolPage() {
     boards: [],
     state: "",
     city: "",
+    district: "",
+    pinCode: "",
+    schoolEmail: "",
+    schoolWebsite: "",
+    principalName: "",
+    principalContact: "",
+    principalEmail: "",
+    stemCoordinatorName: "",
+    stemCoordinatorContact: "",
+    stemCoordinatorEmail: "",
     affiliatedTo: "",
     branchName: "",
     projectStartDate: "",
     projectEndDate: "",
-    schoolHeads: [],
     serviceDetails: undefined,
   });
 
@@ -52,11 +60,20 @@ export default function EditSchoolPage() {
           boards: school.boards || [],
           state: school.state,
           city: school.city,
+          district: school.district || "",
+          pinCode: school.pinCode || "",
+          schoolEmail: school.schoolEmail || "",
+          schoolWebsite: school.schoolWebsite || "",
+          principalName: school.principalName || "",
+          principalContact: school.principalContact || "",
+          principalEmail: school.principalEmail || "",
+          stemCoordinatorName: school.stemCoordinatorName || "",
+          stemCoordinatorContact: school.stemCoordinatorContact || "",
+          stemCoordinatorEmail: school.stemCoordinatorEmail || "",
           affiliatedTo: school.affiliatedTo || "",
           branchName: school.branchName || "",
           projectStartDate: school.projectStartDate ? new Date(school.projectStartDate).toISOString().split('T')[0] : "",
           projectEndDate: school.projectEndDate ? new Date(school.projectEndDate).toISOString().split('T')[0] : "",
-          schoolHeads: school.schoolHeads || [],
           serviceDetails: school.serviceDetails || undefined,
         });
         
@@ -99,12 +116,6 @@ export default function EditSchoolPage() {
     }));
   };
 
-  const handleSchoolHeadsChange = (schoolHeads: SchoolHead[]) => {
-    setFormData(prev => ({
-      ...prev,
-      schoolHeads
-    }));
-  };
 
   const handleServiceDetailsChange = (serviceDetails: ServiceDetails | null) => {
     setFormData(prev => ({
@@ -113,9 +124,71 @@ export default function EditSchoolPage() {
     }));
   };
 
+  const validateForm = () => {
+    const requiredFields = [
+      { field: 'name', label: 'School Name' },
+      { field: 'address', label: 'Address' },
+      { field: 'state', label: 'State' },
+      { field: 'city', label: 'City' },
+      { field: 'district', label: 'District' },
+      { field: 'pinCode', label: 'PIN Code' },
+      { field: 'schoolEmail', label: 'School Email' },
+      { field: 'principalName', label: 'Principal Name' },
+      { field: 'principalContact', label: 'Principal Contact' },
+      { field: 'principalEmail', label: 'Principal Email' }
+    ];
+
+    const missingFields = requiredFields.filter(({ field }) => {
+      const value = formData[field as keyof UpdateSchoolData];
+      return !value || (typeof value === 'string' && value.trim() === '');
+    });
+
+    // Check if boards are selected
+    if (!formData.boards || formData.boards.length === 0) {
+      missingFields.push({ field: 'boards', label: 'Board' });
+    }
+
+    // Check service details
+    if (!formData.serviceDetails) {
+      missingFields.push({ field: 'serviceDetails', label: 'Service Details' });
+    } else {
+      // Check mentor type
+      if (!formData.serviceDetails.mentors || formData.serviceDetails.mentors.length === 0) {
+        missingFields.push({ field: 'mentors', label: 'Mentor Type' });
+      }
+      
+      // Check grades
+      if (!formData.serviceDetails.grades || formData.serviceDetails.grades.length === 0) {
+        missingFields.push({ field: 'grades', label: 'Grades' });
+      } else {
+        // Check if all grades have valid sections
+        const invalidGrades = formData.serviceDetails.grades.some(gradeData => 
+          !gradeData.sections || 
+          gradeData.sections.length === 0 || 
+          gradeData.sections.some(section => !section || section.trim() === '')
+        );
+        
+        if (invalidGrades) {
+          missingFields.push({ field: 'sections', label: 'Grade Sections' });
+        }
+      }
+    }
+
+    return missingFields;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!id) return;
+    
+    // Validate required fields
+    const missingFields = validateForm();
+    
+    if (missingFields.length > 0) {
+      const fieldNames = missingFields.map(field => field.label).join(', ');
+      toast.error(`Please fill in the following required fields: ${fieldNames}`);
+      return;
+    }
     
     setLoading(true);
 
@@ -230,6 +303,142 @@ export default function EditSchoolPage() {
               onCityChange={(city) => setFormData(prev => ({ ...prev, city }))}
               required
             />
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="district">District *</Label>
+                <Input
+                  id="district"
+                  name="district"
+                  value={formData.district}
+                  onChange={handleInputChange}
+                  placeholder="Enter district"
+                  required
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="pinCode">PIN Code *</Label>
+                <Input
+                  id="pinCode"
+                  name="pinCode"
+                  value={formData.pinCode}
+                  onChange={handleInputChange}
+                  placeholder="Enter PIN code"
+                  required
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="schoolEmail">School Email *</Label>
+                <Input
+                  id="schoolEmail"
+                  name="schoolEmail"
+                  type="email"
+                  value={formData.schoolEmail}
+                  onChange={handleInputChange}
+                  placeholder="Enter school email"
+                  required
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="schoolWebsite">School Website</Label>
+                <Input
+                  id="schoolWebsite"
+                  name="schoolWebsite"
+                  type="url"
+                  value={formData.schoolWebsite}
+                  onChange={handleInputChange}
+                  placeholder="Enter school website (optional)"
+                />
+              </div>
+            </div>
+
+            {/* Principal Information */}
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold">Principal Information</h3>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="principalName">Principal Name *</Label>
+                  <Input
+                    id="principalName"
+                    name="principalName"
+                    value={formData.principalName}
+                    onChange={handleInputChange}
+                    placeholder="Enter principal name"
+                    required
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="principalContact">Principal Contact *</Label>
+                  <Input
+                    id="principalContact"
+                    name="principalContact"
+                    value={formData.principalContact}
+                    onChange={handleInputChange}
+                    placeholder="Enter principal contact"
+                    required
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="principalEmail">Principal Email *</Label>
+                  <Input
+                    id="principalEmail"
+                    name="principalEmail"
+                    type="email"
+                    value={formData.principalEmail}
+                    onChange={handleInputChange}
+                    placeholder="Enter principal email"
+                    required
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* STEM Coordinator Information */}
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold">STEM Coordinator Information (Optional)</h3>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="stemCoordinatorName">STEM Coordinator Name</Label>
+                  <Input
+                    id="stemCoordinatorName"
+                    name="stemCoordinatorName"
+                    value={formData.stemCoordinatorName}
+                    onChange={handleInputChange}
+                    placeholder="Enter STEM coordinator name"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="stemCoordinatorContact">STEM Coordinator Contact</Label>
+                  <Input
+                    id="stemCoordinatorContact"
+                    name="stemCoordinatorContact"
+                    value={formData.stemCoordinatorContact}
+                    onChange={handleInputChange}
+                    placeholder="Enter STEM coordinator contact"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="stemCoordinatorEmail">STEM Coordinator Email</Label>
+                  <Input
+                    id="stemCoordinatorEmail"
+                    name="stemCoordinatorEmail"
+                    type="email"
+                    value={formData.stemCoordinatorEmail}
+                    onChange={handleInputChange}
+                    placeholder="Enter STEM coordinator email"
+                  />
+                </div>
+              </div>
+            </div>
 
             {/* <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
@@ -361,18 +570,6 @@ export default function EditSchoolPage() {
           </CardContent>
         </Card> */}
 
-        {/* School Heads */}
-        <Card>
-          <CardHeader>
-            <CardTitle>School Heads</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <SchoolHeadForm
-              schoolHeads={formData.schoolHeads || []}
-              onChange={handleSchoolHeadsChange}
-            />
-          </CardContent>
-        </Card>
 
         {/* Service Details */}
         <Card>
