@@ -109,14 +109,30 @@ export default function CreateAssessmentPage() {
             const assignedSchools: School[] = response.data.assignedSchools.map((school: any) => ({
               _id: school._id,
               name: school.name,
-              address: "", // Not available in mentor profile
-              city: school.city,
-              state: school.state,
+              address: school.address || "",
+              city: school.city || "",
+              state: school.state || "",
+              district: school.district || "",
+              pinCode: school.pinCode || "",
+              schoolEmail: school.schoolEmail || "",
+              schoolWebsite: school.schoolWebsite || "",
+              principalName: school.principalName || "",
+              principalContact: school.principalContact || "",
+              principalEmail: school.principalEmail || "",
               boards: (school.boards || []) as ("CBSE" | "ICSE" | "State Board" | "IGCSE" | "IB" | "Other")[],
               branchName: school.branchName || "",
-              isActive: true, // Assume active since they're assigned
-              createdAt: new Date().toISOString(),
-              updatedAt: new Date().toISOString()
+              affiliatedTo: school.affiliatedTo || undefined,
+              image: school.image || undefined,
+              logo: school.logo || undefined,
+              stemCoordinatorName: school.stemCoordinatorName || undefined,
+              stemCoordinatorContact: school.stemCoordinatorContact || undefined,
+              stemCoordinatorEmail: school.stemCoordinatorEmail || undefined,
+              projectStartDate: school.projectStartDate || undefined,
+              projectEndDate: school.projectEndDate || undefined,
+              serviceDetails: school.serviceDetails || undefined,
+              isActive: school.isActive !== undefined ? school.isActive : true,
+              createdAt: school.createdAt || new Date().toISOString(),
+              updatedAt: school.updatedAt || new Date().toISOString()
             }));
             setSchools(assignedSchools);
             // Don't automatically set school - let mentor choose

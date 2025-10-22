@@ -47,6 +47,14 @@ export interface School {
   updatedAt: string;
 }
 
+export interface SchoolHead {
+  name: string;
+  designation: string;
+  email: string;
+  phoneNumber: string;
+  profilePic?: string | File;
+}
+
 export interface CreateSchoolData {
   name: string;
   address: string;
