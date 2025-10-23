@@ -12,7 +12,7 @@ import {
   SidebarFooter,
   useSidebar
 } from "@/components/ui/collapsible-sidebar"
-import { Building2, HomeIcon, Users, User, School, UserCheck, Crown, BookOpen, FileText, Layers, Award, Calendar, BarChart3, MessageSquare, Bell } from "lucide-react"
+import { Building2, HomeIcon, Users, User, School, UserCheck, Crown, BookOpen, FileText, Layers, Award, Calendar, BarChart3, MessageSquare, Bell, Activity } from "lucide-react"
 import { LogoutButton } from "@/components/ui/logout-button"
 import { Badge } from "@/components/ui/badge"
 import { useUnreadMessageCount } from "@/hooks/useUnreadMessageCount"
@@ -93,6 +93,9 @@ export function SuperAdminSidebar({ className }: SuperAdminSidebarProps) {
           <SidebarNav>
             <SidebarNavItem to="/superadmin/admins" icon={Building2}>
               SuperAdmins
+            </SidebarNavItem>
+            <SidebarNavItem to="/superadmin/activity-logs" icon={Activity}>
+              Activity Logs
             </SidebarNavItem>
             {/* <SidebarNavItem to="/superadmin/users" icon={Users}>
               All Users

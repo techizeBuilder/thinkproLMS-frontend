@@ -34,6 +34,7 @@ import SuperAdminMentorsPage from "../pages/Dashboard/SuperAdmin/Mentors";
 import CreateSuperAdminMentorPage from "../pages/Dashboard/SuperAdmin/Mentors/Create";
 import EditSuperAdminMentorPage from "../pages/Dashboard/SuperAdmin/Mentors/Edit";
 import SuperAdminSessionProgressPage from "../pages/Dashboard/SuperAdmin/SessionProgress";
+import ActivityLogsPage from "../pages/Dashboard/SuperAdmin/ActivityLogs";
 
 // LeadMentor Edit Components (re-exported from SuperAdmin)
 import LeadMentorEditSchoolAdminPage from "../pages/Dashboard/LeadMentor/SchoolAdmins/Edit";
@@ -341,6 +342,9 @@ export default function AppRouter() {
           
           {/* Notifications */}
           <Route path="notifications" element={<SuperAdminNotifications />} />
+          
+          {/* Activity Logs */}
+          <Route path="activity-logs" element={<ActivityLogsPage />} />
         </Route>
 
         {/* Admin */}
