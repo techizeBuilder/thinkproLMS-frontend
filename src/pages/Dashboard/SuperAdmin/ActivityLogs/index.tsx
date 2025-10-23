@@ -11,7 +11,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { Download, Filter, Search, RefreshCw } from "lucide-react";
+import { Download, Search, RefreshCw } from "lucide-react";
 import {
   getActivityLogs,
   getActivityStatistics,
@@ -43,7 +43,12 @@ const ActivityLogsPage: React.FC = () => {
     actions: [] as string[],
     resourceTypes: [] as string[],
     severities: [] as string[],
-    users: [] as Array<{ _id: string; name: string; email: string; role: string }>,
+    users: [] as Array<{
+      _id: string;
+      name: string;
+      email: string;
+      role: string;
+    }>,
     schools: [] as Array<{ _id: string; name: string }>,
   });
   const [dateRange, setDateRange] = useState<{
@@ -85,7 +90,7 @@ const ActivityLogsPage: React.FC = () => {
 
   // Handle filter changes
   const handleFilterChange = (key: keyof ActivityLogFilters, value: any) => {
-    setFilters(prev => ({
+    setFilters((prev) => ({
       ...prev,
       [key]: value,
       page: 1, // Reset to first page when filters change
@@ -93,9 +98,12 @@ const ActivityLogsPage: React.FC = () => {
   };
 
   // Handle date range change
-  const handleDateRangeChange = (from: Date | undefined, to: Date | undefined) => {
+  const handleDateRangeChange = (
+    from: Date | undefined,
+    to: Date | undefined
+  ) => {
     setDateRange({ from, to });
-    setFilters(prev => ({
+    setFilters((prev) => ({
       ...prev,
       startDate: from?.toISOString(),
       endDate: to?.toISOString(),
@@ -105,7 +113,7 @@ const ActivityLogsPage: React.FC = () => {
 
   // Handle search
   const handleSearch = (searchTerm: string) => {
-    setFilters(prev => ({
+    setFilters((prev) => ({
       ...prev,
       search: searchTerm,
       page: 1,
@@ -114,7 +122,7 @@ const ActivityLogsPage: React.FC = () => {
 
   // Handle pagination
   const handlePageChange = (page: number) => {
-    setFilters(prev => ({
+    setFilters((prev) => ({
       ...prev,
       page,
     }));
@@ -128,7 +136,9 @@ const ActivityLogsPage: React.FC = () => {
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = `activity-logs-${new Date().toISOString().split('T')[0]}.csv`;
+      a.download = `activity-logs-${
+        new Date().toISOString().split("T")[0]
+      }.csv`;
       document.body.appendChild(a);
       a.click();
       window.URL.revokeObjectURL(url);
@@ -189,7 +199,9 @@ const ActivityLogsPage: React.FC = () => {
             size="sm"
             disabled={loading}
           >
-            <RefreshCw className={`h-4 w-4 mr-2 ${loading ? "animate-spin" : ""}`} />
+            <RefreshCw
+              className={`h-4 w-4 mr-2 ${loading ? "animate-spin" : ""}`}
+            />
             Refresh
           </Button>
           <Button
@@ -204,13 +216,14 @@ const ActivityLogsPage: React.FC = () => {
         </div>
       </div>
 
-
       {/* Filters */}
       <div className="space-y-4">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
           {/* Search */}
           <div className="space-y-1">
-            <Label htmlFor="search" className="text-sm">Search</Label>
+            <Label htmlFor="search" className="text-sm">
+              Search
+            </Label>
             <div className="relative">
               <Search className="absolute left-2 top-2.5 h-4 w-4 text-gray-400" />
               <Input
@@ -227,7 +240,12 @@ const ActivityLogsPage: React.FC = () => {
             <Label className="text-sm">Action</Label>
             <Select
               value={filters.action || "all"}
-              onValueChange={(value) => handleFilterChange("action", value === "all" ? undefined : value)}
+              onValueChange={(value) =>
+                handleFilterChange(
+                  "action",
+                  value === "all" ? undefined : value
+                )
+              }
             >
               <SelectTrigger className="h-9">
                 <SelectValue placeholder="All actions" />
@@ -240,36 +258,78 @@ const ActivityLogsPage: React.FC = () => {
                 <SelectItem value="CREATED_STUDENT">Created Student</SelectItem>
                 <SelectItem value="UPDATED_STUDENT">Updated Student</SelectItem>
                 <SelectItem value="DELETED_STUDENT">Deleted Student</SelectItem>
-                <SelectItem value="BULK_UPLOADED_STUDENTS">Bulk Uploaded Students</SelectItem>
+                <SelectItem value="BULK_UPLOADED_STUDENTS">
+                  Bulk Uploaded Students
+                </SelectItem>
                 <SelectItem value="CREATED_MENTOR">Created Mentor</SelectItem>
                 <SelectItem value="UPDATED_MENTOR">Updated Mentor</SelectItem>
                 <SelectItem value="DELETED_MENTOR">Deleted Mentor</SelectItem>
-                <SelectItem value="CREATED_SCHOOL_ADMIN">Created School Admin</SelectItem>
-                <SelectItem value="UPDATED_SCHOOL_ADMIN">Updated School Admin</SelectItem>
-                <SelectItem value="DELETED_SCHOOL_ADMIN">Deleted School Admin</SelectItem>
-                <SelectItem value="CREATED_LEAD_MENTOR">Created Lead Mentor</SelectItem>
-                <SelectItem value="UPDATED_LEAD_MENTOR">Updated Lead Mentor</SelectItem>
-                <SelectItem value="DELETED_LEAD_MENTOR">Deleted Lead Mentor</SelectItem>
-                <SelectItem value="CREATED_SUPER_ADMIN">Created Super Admin</SelectItem>
-                <SelectItem value="UPDATED_SUPER_ADMIN">Updated Super Admin</SelectItem>
-                <SelectItem value="DELETED_SUPER_ADMIN">Deleted Super Admin</SelectItem>
+                <SelectItem value="CREATED_SCHOOL_ADMIN">
+                  Created School Admin
+                </SelectItem>
+                <SelectItem value="UPDATED_SCHOOL_ADMIN">
+                  Updated School Admin
+                </SelectItem>
+                <SelectItem value="DELETED_SCHOOL_ADMIN">
+                  Deleted School Admin
+                </SelectItem>
+                <SelectItem value="CREATED_LEAD_MENTOR">
+                  Created Lead Mentor
+                </SelectItem>
+                <SelectItem value="UPDATED_LEAD_MENTOR">
+                  Updated Lead Mentor
+                </SelectItem>
+                <SelectItem value="DELETED_LEAD_MENTOR">
+                  Deleted Lead Mentor
+                </SelectItem>
+                <SelectItem value="CREATED_SUPER_ADMIN">
+                  Created Super Admin
+                </SelectItem>
+                <SelectItem value="UPDATED_SUPER_ADMIN">
+                  Updated Super Admin
+                </SelectItem>
+                <SelectItem value="DELETED_SUPER_ADMIN">
+                  Deleted Super Admin
+                </SelectItem>
                 <SelectItem value="CREATED_MODULE">Created Module</SelectItem>
                 <SelectItem value="UPDATED_MODULE">Updated Module</SelectItem>
                 <SelectItem value="DELETED_MODULE">Deleted Module</SelectItem>
                 <SelectItem value="CREATED_SESSION">Created Session</SelectItem>
                 <SelectItem value="UPDATED_SESSION">Updated Session</SelectItem>
                 <SelectItem value="DELETED_SESSION">Deleted Session</SelectItem>
-                <SelectItem value="UPLOADED_RESOURCE">Uploaded Resource</SelectItem>
-                <SelectItem value="UPDATED_RESOURCE">Updated Resource</SelectItem>
-                <SelectItem value="DELETED_RESOURCE">Deleted Resource</SelectItem>
-                <SelectItem value="CREATED_ASSESSMENT">Created Assessment</SelectItem>
-                <SelectItem value="UPDATED_ASSESSMENT">Updated Assessment</SelectItem>
-                <SelectItem value="DELETED_ASSESSMENT">Deleted Assessment</SelectItem>
-                <SelectItem value="CREATED_QUESTION">Created Question</SelectItem>
-                <SelectItem value="UPDATED_QUESTION">Updated Question</SelectItem>
-                <SelectItem value="DELETED_QUESTION">Deleted Question</SelectItem>
-                <SelectItem value="GENERATED_CERTIFICATE">Generated Certificate</SelectItem>
-                <SelectItem value="DELETED_CERTIFICATE">Deleted Certificate</SelectItem>
+                <SelectItem value="UPLOADED_RESOURCE">
+                  Uploaded Resource
+                </SelectItem>
+                <SelectItem value="UPDATED_RESOURCE">
+                  Updated Resource
+                </SelectItem>
+                <SelectItem value="DELETED_RESOURCE">
+                  Deleted Resource
+                </SelectItem>
+                <SelectItem value="CREATED_ASSESSMENT">
+                  Created Assessment
+                </SelectItem>
+                <SelectItem value="UPDATED_ASSESSMENT">
+                  Updated Assessment
+                </SelectItem>
+                <SelectItem value="DELETED_ASSESSMENT">
+                  Deleted Assessment
+                </SelectItem>
+                <SelectItem value="CREATED_QUESTION">
+                  Created Question
+                </SelectItem>
+                <SelectItem value="UPDATED_QUESTION">
+                  Updated Question
+                </SelectItem>
+                <SelectItem value="DELETED_QUESTION">
+                  Deleted Question
+                </SelectItem>
+                <SelectItem value="GENERATED_CERTIFICATE">
+                  Generated Certificate
+                </SelectItem>
+                <SelectItem value="DELETED_CERTIFICATE">
+                  Deleted Certificate
+                </SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -279,7 +339,12 @@ const ActivityLogsPage: React.FC = () => {
             <Label className="text-sm">Resource Type</Label>
             <Select
               value={filters.resourceType || "all"}
-              onValueChange={(value) => handleFilterChange("resourceType", value === "all" ? undefined : value)}
+              onValueChange={(value) =>
+                handleFilterChange(
+                  "resourceType",
+                  value === "all" ? undefined : value
+                )
+              }
             >
               <SelectTrigger className="h-9">
                 <SelectValue placeholder="All types" />
@@ -310,7 +375,12 @@ const ActivityLogsPage: React.FC = () => {
             <Label className="text-sm">Severity</Label>
             <Select
               value={filters.severity || "all"}
-              onValueChange={(value) => handleFilterChange("severity", value === "all" ? undefined : value)}
+              onValueChange={(value) =>
+                handleFilterChange(
+                  "severity",
+                  value === "all" ? undefined : value
+                )
+              }
             >
               <SelectTrigger className="h-9">
                 <SelectValue placeholder="All severities" />
@@ -330,7 +400,12 @@ const ActivityLogsPage: React.FC = () => {
             <Label className="text-sm">User</Label>
             <Select
               value={filters.userId || "all"}
-              onValueChange={(value) => handleFilterChange("userId", value === "all" ? undefined : value)}
+              onValueChange={(value) =>
+                handleFilterChange(
+                  "userId",
+                  value === "all" ? undefined : value
+                )
+              }
             >
               <SelectTrigger className="h-9">
                 <SelectValue placeholder="All users" />
@@ -351,7 +426,12 @@ const ActivityLogsPage: React.FC = () => {
             <Label className="text-sm">School</Label>
             <Select
               value={filters.schoolId || "all"}
-              onValueChange={(value) => handleFilterChange("schoolId", value === "all" ? undefined : value)}
+              onValueChange={(value) =>
+                handleFilterChange(
+                  "schoolId",
+                  value === "all" ? undefined : value
+                )
+              }
             >
               <SelectTrigger className="h-9">
                 <SelectValue placeholder="All schools" />
@@ -372,7 +452,12 @@ const ActivityLogsPage: React.FC = () => {
             <Label className="text-sm">Status</Label>
             <Select
               value={filters.isSuccess?.toString() || "all"}
-              onValueChange={(value) => handleFilterChange("isSuccess", value === "all" ? undefined : value === "true")}
+              onValueChange={(value) =>
+                handleFilterChange(
+                  "isSuccess",
+                  value === "all" ? undefined : value === "true"
+                )
+              }
             >
               <SelectTrigger className="h-9">
                 <SelectValue placeholder="All statuses" />
@@ -392,9 +477,15 @@ const ActivityLogsPage: React.FC = () => {
               <div className="relative flex-1">
                 <Input
                   type="date"
-                  value={dateRange.from ? dateRange.from.toISOString().split('T')[0] : ""}
+                  value={
+                    dateRange.from
+                      ? dateRange.from.toISOString().split("T")[0]
+                      : ""
+                  }
                   onChange={(e) => {
-                    const date = e.target.value ? new Date(e.target.value) : undefined;
+                    const date = e.target.value
+                      ? new Date(e.target.value)
+                      : undefined;
                     handleDateRangeChange(date, dateRange.to);
                   }}
                   className="h-9 text-xs"
@@ -403,9 +494,13 @@ const ActivityLogsPage: React.FC = () => {
               <div className="relative flex-1">
                 <Input
                   type="date"
-                  value={dateRange.to ? dateRange.to.toISOString().split('T')[0] : ""}
+                  value={
+                    dateRange.to ? dateRange.to.toISOString().split("T")[0] : ""
+                  }
                   onChange={(e) => {
-                    const date = e.target.value ? new Date(e.target.value) : undefined;
+                    const date = e.target.value
+                      ? new Date(e.target.value)
+                      : undefined;
                     handleDateRangeChange(dateRange.from, date);
                   }}
                   className="h-9 text-xs"
@@ -425,19 +520,27 @@ const ActivityLogsPage: React.FC = () => {
               <div className="flex items-center gap-6 text-sm">
                 <div className="text-center">
                   <div className="text-xs text-gray-500">Total Activities</div>
-                  <div className="font-bold text-lg">{statistics.data.overview.totalActivities}</div>
+                  <div className="font-bold text-lg">
+                    {statistics.data.overview.totalActivities}
+                  </div>
                 </div>
                 <div className="text-center">
                   <div className="text-xs text-gray-500">Success Rate</div>
-                  <div className="font-bold text-lg">{statistics.data.overview.successRate}%</div>
+                  <div className="font-bold text-lg">
+                    {statistics.data.overview.successRate}%
+                  </div>
                 </div>
                 <div className="text-center">
                   <div className="text-xs text-gray-500">Successful</div>
-                  <div className="font-bold text-lg text-green-600">{statistics.data.overview.successfulActivities}</div>
+                  <div className="font-bold text-lg text-green-600">
+                    {statistics.data.overview.successfulActivities}
+                  </div>
                 </div>
                 <div className="text-center">
                   <div className="text-xs text-gray-500">Failed</div>
-                  <div className="font-bold text-lg text-red-600">{statistics.data.overview.failedActivities}</div>
+                  <div className="font-bold text-lg text-red-600">
+                    {statistics.data.overview.failedActivities}
+                  </div>
                 </div>
               </div>
             )}
@@ -477,37 +580,65 @@ const ActivityLogsPage: React.FC = () => {
                           </div>
                         </td>
                         <td className="p-2">
-                          <div className="font-medium text-sm">{log.userName}</div>
-                          <div className="text-xs text-gray-500">{log.userEmail}</div>
-                          <div className="text-xs text-gray-400">{log.userRole}</div>
+                          <div className="font-medium text-sm">
+                            {log.userName}
+                          </div>
+                          <div className="text-xs text-gray-500">
+                            {log.userEmail}
+                          </div>
+                          <div className="text-xs text-gray-400">
+                            {log.userRole}
+                          </div>
                         </td>
                         <td className="p-2">
-                          <div className="font-medium text-sm">{log.action.replace(/_/g, ' ')}</div>
-                          <div className="text-xs text-gray-500 max-w-xs truncate">{log.description}</div>
+                          <div className="font-medium text-sm">
+                            {log.action.replace(/_/g, " ")}
+                          </div>
+                          <div className="text-xs text-gray-500 max-w-xs truncate">
+                            {log.description}
+                          </div>
                         </td>
                         <td className="p-2">
-                          <div className="font-medium text-sm">{log.resourceType}</div>
+                          <div className="font-medium text-sm">
+                            {log.resourceType}
+                          </div>
                           {log.resourceName && (
-                            <div className="text-xs text-gray-500 max-w-xs truncate">{log.resourceName}</div>
+                            <div className="text-xs text-gray-500 max-w-xs truncate">
+                              {log.resourceName}
+                            </div>
                           )}
                           {log.schoolName && (
-                            <div className="text-xs text-gray-400 max-w-xs truncate">{log.schoolName}</div>
+                            <div className="text-xs text-gray-400 max-w-xs truncate">
+                              {log.schoolName}
+                            </div>
                           )}
                         </td>
                         <td className="p-2">
-                          <Badge className={`${getStatusColor(log.isSuccess)} text-xs`}>
+                          <Badge
+                            className={`${getStatusColor(
+                              log.isSuccess
+                            )} text-xs`}
+                          >
                             {log.isSuccess ? "Success" : "Failed"}
                           </Badge>
                           {log.errorMessage && (
-                            <div className="text-xs text-red-500 mt-1 max-w-xs truncate">{log.errorMessage}</div>
+                            <div className="text-xs text-red-500 mt-1 max-w-xs truncate">
+                              {log.errorMessage}
+                            </div>
                           )}
                         </td>
                         <td className="p-2">
-                          <Badge className={`${getSeverityColor(log.severity)} text-xs`}>
+                          <Badge
+                            className={`${getSeverityColor(
+                              log.severity
+                            )} text-xs`}
+                          >
                             {log.severity}
                           </Badge>
                         </td>
-                        <td className="p-2 text-xs text-gray-500">{log.ipAddress}</td>
+                        <td className="p-2 text-xs text-gray-500">
+                          {log.ipAddress}
+                        </td>
                         <td className="p-2 text-xs text-gray-500">
                           {log.duration ? `${log.duration}ms` : "-"}
                         </td>
@@ -520,9 +651,14 @@ const ActivityLogsPage: React.FC = () => {
               {/* Pagination */}
               <div className="flex justify-between items-center pt-3 border-t">
                 <div className="text-xs text-gray-500">
-                  Showing {((pagination.currentPage - 1) * pagination.itemsPerPage) + 1} to{" "}
-                  {Math.min(pagination.currentPage * pagination.itemsPerPage, pagination.totalItems)} of{" "}
-                  {pagination.totalItems} entries
+                  Showing{" "}
+                  {(pagination.currentPage - 1) * pagination.itemsPerPage + 1}{" "}
+                  to{" "}
+                  {Math.min(
+                    pagination.currentPage * pagination.itemsPerPage,
+                    pagination.totalItems
+                  )}{" "}
+                  of {pagination.totalItems} entries
                 </div>
                 <div className="flex gap-1">
                   <Button
