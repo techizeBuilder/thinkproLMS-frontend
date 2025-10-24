@@ -26,6 +26,8 @@ import {
 } from "@/api/sessionProgressService";
 import { schoolService, type AvailableGrade } from "@/api/schoolService";
 import { mentorService, type Mentor } from "@/api/mentorService";
+import { schoolAdminService } from "@/api/schoolAdminService";
+import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 
 interface SessionProgressViewerProps {
@@ -57,6 +59,7 @@ export default function SessionProgressViewer({
   title = "Session Progress Overview",
   description = "Monitor and manage session completion progress for all grades and sections",
 }: SessionProgressViewerProps) {
+  const { user } = useAuth();
   const [gradeSectionData, setGradeSectionData] = useState<GradeSectionData[]>([]);
   const [expandedNotes, setExpandedNotes] = useState<Record<string, boolean>>({});
   const [availableSchools, setAvailableSchools] = useState<School[]>([]);
@@ -124,12 +127,24 @@ export default function SessionProgressViewer({
           for (const section of gradeSections) {
             try {
               console.log(`Loading sessions for Grade ${gradeData.grade}, Section ${section}`);
-              const progressData = await sessionProgressService.getLeadMentorSessionProgress(
-                mentorId,
-                schoolId,
-                section,
-                gradeData.grade.toString()
-              );
+              
+              // Use different service method based on user role
+              let progressData;
+              if (user?.role === 'schooladmin') {
+                progressData = await sessionProgressService.getSchoolAdminSessionProgress(
+                  mentorId,
+                  schoolId,
+                  section,
+                  gradeData.grade.toString()
+                );
+              } else {
+                progressData = await sessionProgressService.getLeadMentorSessionProgress(
+                  mentorId,
+                  schoolId,
+                  section,
+                  gradeData.grade.toString()
+                );
+              }
 
               // Check if component is still mounted
               if (isCancelled) {
@@ -262,12 +277,26 @@ export default function SessionProgressViewer({
   const loadAvailableMentors = async () => {
     try {
       setLoadingMentors(true);
-      const response = await mentorService.getAll();
-      if (response.success) {
-        setAvailableMentors(response.data);
-        // Auto-select first mentor on initial load
-        if (response.data.length > 0) {
-          setSelectedMentorId(response.data[0]._id);
+      
+      // Use different service based on user role
+      if (user?.role === 'schooladmin') {
+        const response = await schoolAdminService.getMentors();
+        if (response.success) {
+          setAvailableMentors(response.data.mentors);
+          // Auto-select first mentor on initial load
+          if (response.data.mentors.length > 0) {
+            setSelectedMentorId(response.data.mentors[0]._id);
+          }
+        }
+      } else {
+        // For superadmin and leadmentor roles
+        const response = await mentorService.getAll();
+        if (response.success) {
+          setAvailableMentors(response.data);
+          // Auto-select first mentor on initial load
+          if (response.data.length > 0) {
+            setSelectedMentorId(response.data[0]._id);
+          }
         }
       }
     } catch (error) {
@@ -281,18 +310,35 @@ export default function SessionProgressViewer({
   const loadMentorSchools = async (mentorId: string) => {
     try {
       setLoadingSchools(true);
-      const response = await mentorService.getById(mentorId);
-      if (response.success) {
-        const mentor: any = response.data;
-        // Support both single assignedSchool and multiple assignedSchools
-        const schools: School[] = Array.isArray(mentor.assignedSchools)
-          ? mentor.assignedSchools
-          : mentor.assignedSchool
-          ? [mentor.assignedSchool]
+      
+      if (user?.role === 'schooladmin') {
+        // For school admin, get schools from the selected mentor
+        const selectedMentor: any = availableMentors.find(mentor => mentor._id === mentorId);
+        const schools: School[] = selectedMentor
+          ? (Array.isArray((selectedMentor as any).assignedSchools)
+              ? (selectedMentor as any).assignedSchools
+              : selectedMentor.assignedSchool
+              ? [selectedMentor.assignedSchool]
+              : [])
           : [];
 
         setAvailableSchools(schools);
         setSelectedSchoolId(schools[0]?._id || "");
+      } else {
+        // For superadmin and leadmentor roles
+        const response = await mentorService.getById(mentorId);
+        if (response.success) {
+          const mentor: any = response.data;
+          // Support both single assignedSchool and multiple assignedSchools
+          const schools: School[] = Array.isArray(mentor.assignedSchools)
+            ? mentor.assignedSchools
+            : mentor.assignedSchool
+            ? [mentor.assignedSchool]
+            : [];
+
+          setAvailableSchools(schools);
+          setSelectedSchoolId(schools[0]?._id || "");
+        }
       }
     } catch (error) {
       console.error("Error loading mentor schools:", error);
