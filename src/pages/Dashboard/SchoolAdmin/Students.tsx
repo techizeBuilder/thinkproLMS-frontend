@@ -31,6 +31,7 @@ export default function SchoolAdminStudentsPage() {
   const [filteredStudents, setFilteredStudents] = useState<Student[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedGrade, setSelectedGrade] = useState("all");
+  const [selectedStatus, setSelectedStatus] = useState("all");
 
   const grades = [
     "Grade 1",
@@ -51,7 +52,7 @@ export default function SchoolAdminStudentsPage() {
 
   useEffect(() => {
     filterStudents();
-  }, [students, searchTerm, selectedGrade]);
+  }, [students, searchTerm, selectedGrade, selectedStatus]);
 
   const loadStudents = async () => {
     try {
@@ -89,6 +90,15 @@ export default function SchoolAdminStudentsPage() {
       // Extract number from "Grade X" format
       const gradeNumber = parseInt(selectedGrade.replace("Grade ", ""));
       filtered = filtered.filter((student) => student.grade === gradeNumber);
+    }
+
+    // Status filter
+    if (selectedStatus !== "all") {
+      if (selectedStatus === "active") {
+        filtered = filtered.filter((student) => student.isActive === true);
+      } else if (selectedStatus === "inactive") {
+        filtered = filtered.filter((student) => student.isActive === false);
+      }
     }
 
     setFilteredStudents(filtered);
@@ -141,10 +151,21 @@ export default function SchoolAdminStudentsPage() {
             ))}
           </SelectContent>
         </Select>
+
+        <Select value={selectedStatus} onValueChange={setSelectedStatus}>
+          <SelectTrigger className="w-full sm:w-[150px]">
+            <SelectValue placeholder="Select Status" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Status</SelectItem>
+            <SelectItem value="active">Active</SelectItem>
+            <SelectItem value="inactive">Inactive</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
 
       {/* Stats */}
-      <div className="grid gap-3 md:gap-4 sm:grid-cols-2">
+      <div className="grid gap-3 md:gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardContent className="p-3 md:p-4">
             <div className="flex items-center justify-between">
@@ -155,6 +176,38 @@ export default function SchoolAdminStudentsPage() {
                 <p className="text-xl md:text-2xl font-bold">{students.length}</p>
               </div>
               <User className="h-6 w-6 md:h-8 md:w-8 text-muted-foreground" />
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="p-3 md:p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-xs md:text-sm font-medium text-muted-foreground">
+                  Active Students
+                </p>
+                <p className="text-xl md:text-2xl font-bold text-green-600">
+                  {students.filter(student => student.isActive === true).length}
+                </p>
+              </div>
+              <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="p-3 md:p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-xs md:text-sm font-medium text-muted-foreground">
+                  Inactive Students
+                </p>
+                <p className="text-xl md:text-2xl font-bold text-red-600">
+                  {students.filter(student => student.isActive === false).length}
+                </p>
+              </div>
+              <div className="w-3 h-3 bg-red-500 rounded-full"></div>
             </div>
           </CardContent>
         </Card>

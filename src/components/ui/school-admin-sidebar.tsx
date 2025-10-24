@@ -19,7 +19,6 @@ import {
   UserCheck,
   GraduationCap,
   BookOpen,
-  School,
   MessageSquare,
 } from "lucide-react";
 import { LogoutButton } from "@/components/ui/logout-button";
@@ -82,13 +81,6 @@ export function SchoolAdminSidebar({ className }: SchoolAdminSidebarProps) {
           </SidebarNav>
         </SidebarGroup>
 
-        <SidebarGroup label="Schools">
-          <SidebarNav>
-            <SidebarNavItem to="/schooladmin/schools" icon={School}>
-              Assigned Schools
-            </SidebarNavItem>
-          </SidebarNav>
-        </SidebarGroup>
 
         <SidebarGroup label="Account">
           <SidebarNav>

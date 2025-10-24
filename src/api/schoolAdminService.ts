@@ -45,7 +45,7 @@ export interface Mentor {
     isVerified: boolean;
   };
   phoneNumber: string;
-  assignedSchool: School;
+  assignedSchools: School[];
   isActive: boolean;
   createdAt: string;
   updatedAt: string;

@@ -2,9 +2,32 @@ import { Outlet } from "react-router-dom";
 import { SidebarProvider, useSidebar } from "@/components/ui/collapsible-sidebar";
 import { SchoolAdminSidebar } from "@/components/ui/school-admin-sidebar";
 import { Building2 } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
+import { useEffect, useState } from "react";
+import { schoolAdminService } from "@/api/schoolAdminService";
 
 function SchoolAdminContent() {
   const { toggle, isMobile } = useSidebar();
+  const { user } = useAuth();
+  const [schoolAdmin, setSchoolAdmin] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchSchoolAdmin = async () => {
+      try {
+        const response = await schoolAdminService.getMentors();
+        if (response.success) {
+          setSchoolAdmin(response.data.schoolAdmin);
+        }
+      } catch (error) {
+        console.error("Error fetching school admin data:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchSchoolAdmin();
+  }, []);
 
   return (
     <div className="flex-1 flex flex-col overflow-hidden">
@@ -25,7 +48,9 @@ function SchoolAdminContent() {
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2">
               <Building2 className="h-5 w-5 text-purple-500 flex-shrink-0" />
-              <h1 className="text-xl md:text-2xl font-semibold truncate">School Admin Dashboard</h1>
+              <h1 className="text-xl md:text-2xl font-semibold truncate">
+                {loading ? "Loading..." : schoolAdmin ? `${user?.name || 'Admin'} - ${schoolAdmin.assignedSchool?.name || 'School'}` : "School Admin Dashboard"}
+              </h1>
             </div>
             <p className="text-sm text-muted-foreground hidden sm:block">
               Manage your school and students
