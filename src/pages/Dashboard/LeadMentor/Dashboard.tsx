@@ -1,12 +1,10 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { UserCheck, Users, GraduationCap, Building2 } from "lucide-react";
+import { UserCheck, Users, GraduationCap } from "lucide-react";
 import { schoolAdminService } from "@/api/schoolAdminService";
 // leadMentorService intentionally not used for lead mentor dashboard per requirements
 import { mentorService } from "@/api/mentorService";
 import { studentService } from "@/api/studentService";
-import { schoolService } from "@/api/schoolService";
-import { sessionProgressService } from "@/api/sessionProgressService";
 import { useAuth } from "@/contexts/AuthContext";
 
 interface DashboardStats {
@@ -17,15 +15,6 @@ interface DashboardStats {
   totalUsers: number;
 }
 
-interface School {
-  _id: string;
-  name: string;
-  city: string;
-  state: string;
-  boards?: string[];
-  branchName?: string;
-  isActive?: boolean;
-}
 
 export default function LeadMentorDashboard() {
   const { user } = useAuth();
@@ -36,12 +25,9 @@ export default function LeadMentorDashboard() {
     totalUsers: 0,
   });
   const [loading, setLoading] = useState(true);
-  const [schools, setSchools] = useState<School[]>([]);
-  const [schoolsLoading, setSchoolsLoading] = useState(true);
 
   useEffect(() => {
     fetchStats();
-    fetchSchools();
   }, []);
 
   const fetchStats = async () => {
@@ -69,41 +55,6 @@ export default function LeadMentorDashboard() {
     }
   };
 
-  const fetchSchools = async () => {
-    try {
-      setSchoolsLoading(true);
-      
-      // Check if user has global access (superadmin or specific permissions)
-      const hasGlobalAccess = user?.role === "superadmin" || 
-        user?.permissions?.includes("global_school_access");
-      
-      if (hasGlobalAccess) {
-        // Get all schools for global access
-        const response = await schoolService.getAll();
-        if (response.success) {
-          setSchools(response.data);
-        }
-      } else {
-        // Get schools available to this lead mentor
-        const response = await sessionProgressService.getAvailableSchools();
-        // Convert sessionProgressService School format to our School format
-        const convertedSchools: School[] = response.map(school => ({
-          _id: school._id,
-          name: school.name,
-          city: school.city,
-          state: school.state,
-          boards: [],
-          branchName: undefined,
-          isActive: true // Assume active for session progress schools
-        }));
-        setSchools(convertedSchools);
-      }
-    } catch (error) {
-      console.error("Error fetching schools:", error);
-    } finally {
-      setSchoolsLoading(false);
-    }
-  };
 
   const statCards = [
     {
@@ -208,74 +159,6 @@ export default function LeadMentorDashboard() {
         </Card>
       </div>
 
-      {/* School Access Section */}
-      <Card>
-        <CardHeader className="px-3 sm:px-6 pt-3 sm:pt-6">
-          <CardTitle className="text-sm sm:text-base lg:text-lg flex items-center gap-2">
-            <Building2 className="h-4 w-4 sm:h-5 sm:w-5" />
-            School Access
-            {user?.role === "superadmin" || user?.permissions?.includes("global_school_access") ? (
-              <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full">
-                Global Access
-              </span>
-            ) : (
-              <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full">
-                Assigned Schools
-              </span>
-            )}
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="px-3 sm:px-6 pb-3 sm:pb-6">
-          {schoolsLoading ? (
-            <div className="text-center py-4">
-              <div className="text-sm text-gray-500">Loading schools...</div>
-            </div>
-          ) : schools.length === 0 ? (
-            <div className="text-center py-4">
-              <div className="text-sm text-gray-500">No schools available</div>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
-              {schools.map((school) => (
-                <div key={school._id} className="border rounded-lg p-3 sm:p-4 hover:bg-gray-50 transition-colors">
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <h3 className="font-medium text-sm sm:text-base text-gray-900 mb-1">
-                        {school.name}
-                      </h3>
-                      <p className="text-xs sm:text-sm text-gray-600 mb-2">
-                        {school.city}, {school.state}
-                        {school.branchName && ` • ${school.branchName}`}
-                      </p>
-                      {school.boards && school.boards.length > 0 && (
-                        <div className="flex flex-wrap gap-1">
-                          {school.boards.map((board, index) => (
-                            <span 
-                              key={index}
-                              className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-gray-100 text-gray-700"
-                            >
-                              {board}
-                            </span>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                    <div className="ml-2">
-                      <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs ${
-                        school.isActive 
-                          ? 'bg-green-100 text-green-800' 
-                          : 'bg-red-100 text-red-800'
-                      }`}>
-                        {school.isActive ? 'Active' : 'Inactive'}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </CardContent>
-      </Card>
     </div>
   );
 }

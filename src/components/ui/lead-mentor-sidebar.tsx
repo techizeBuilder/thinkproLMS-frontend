@@ -26,6 +26,7 @@ import {
   BarChart3,
   MessageSquare,
   Bell,
+  Building2,
 } from "lucide-react";
 import { LogoutButton } from "@/components/ui/logout-button";
 import { Badge } from "@/components/ui/badge";
@@ -96,6 +97,9 @@ export function LeadMentorSidebar({ className }: LeadMentorSidebarProps) {
 
         <SidebarGroup label="School Management">
           <SidebarNav>
+            <SidebarNavItem to="/leadmentor/schools" icon={Building2}>
+              Schools
+            </SidebarNavItem>
             <SidebarNavItem to="/leadmentor/school-admins" icon={UserCheck}>
               School Admins
             </SidebarNavItem>

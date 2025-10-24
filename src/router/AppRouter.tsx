@@ -38,6 +38,7 @@ import ActivityLogsPage from "../pages/Dashboard/SuperAdmin/ActivityLogs";
 
 // LeadMentor Edit Components (re-exported from SuperAdmin)
 import LeadMentorEditSchoolAdminPage from "../pages/Dashboard/LeadMentor/SchoolAdmins/Edit";
+import LeadMentorSchoolsPage from "../pages/Dashboard/LeadMentor/Schools";
 
 // LeadMentor Mentor & Student Management
 import MentorsPage from "../pages/Dashboard/LeadMentor/Mentors";
@@ -392,6 +393,7 @@ export default function AppRouter() {
           <Route path="school-admins" element={<SchoolAdminsPage />} />
           <Route path="school-admins/create" element={<CreateSchoolAdminPage />} />
           <Route path="school-admins/:id/edit" element={<LeadMentorEditSchoolAdminPage />} />
+          <Route path="schools" element={<LeadMentorSchoolsPage />} />
           {/* Lead mentors management is not available to leadmentor role */}
           
           {/* Mentor Management */}
