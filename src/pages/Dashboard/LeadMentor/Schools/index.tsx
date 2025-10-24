@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Building2, MapPin, Users, Search, Filter } from "lucide-react";
@@ -37,6 +38,9 @@ export default function LeadMentorSchoolsPage() {
   const [selectedState, setSelectedState] = useState<string>("all");
   const [selectedCity, setSelectedCity] = useState<string>("all");
   const [includeInactive, setIncludeInactive] = useState(false);
+  const [searchName, setSearchName] = useState<string>("");
+  const [searchAffiliation, setSearchAffiliation] = useState<string>("");
+  const [selectedStrength, setSelectedStrength] = useState<string>("all");
 
   useEffect(() => {
     fetchSchools();
@@ -85,6 +89,26 @@ export default function LeadMentorSchoolsPage() {
   const states = Array.from(new Set(schools.map(school => school.state))).sort();
   const cities = Array.from(new Set(schools.map(school => school.city))).sort();
 
+  // Count active and inactive schools
+  const activeCount = schools.filter((school) => school.isActive !== false).length;
+  const inactiveCount = schools.filter((school) => school.isActive === false).length;
+
+  // Strength filter options
+  const strengthOptions = [
+    { value: "all", label: "All Strengths" },
+    { value: "upto-500", label: "Up to 500" },
+    { value: "501-1000", label: "501-1000" },
+    { value: "1001-1500", label: "1001-1500" },
+    { value: "1501-2000", label: "1501-2000" },
+    { value: "2001-2500", label: "2001-2500" },
+    { value: "2501-3000", label: "2501-3000" },
+    { value: "3001-3500", label: "3001-3500" },
+    { value: "3501-4000", label: "3501-4000" },
+    { value: "4001-4500", label: "4001-4500" },
+    { value: "4501-5000", label: "4501-5000" },
+    { value: "above-5000", label: "Above 5000" },
+  ];
+
   // Filter schools based on search and filters
   const filteredSchools = schools.filter(school => {
     const matchesSearch = school.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -95,7 +119,52 @@ export default function LeadMentorSchoolsPage() {
     const matchesCity = selectedCity === "all" || school.city === selectedCity;
     const matchesActive = includeInactive || school.isActive !== false;
     
-    return matchesSearch && matchesState && matchesCity && matchesActive;
+    // New filters
+    const matchesName = searchName === "" || school.name.toLowerCase().includes(searchName.toLowerCase());
+    const matchesAffiliation = searchAffiliation === "" || (school.affiliatedTo && school.affiliatedTo.toLowerCase().includes(searchAffiliation.toLowerCase()));
+    
+    // Strength filter logic
+    let matchesStrength = true;
+    if (selectedStrength !== "all") {
+      const strength = school.students_strength || 0;
+      switch (selectedStrength) {
+        case "upto-500":
+          matchesStrength = strength <= 500;
+          break;
+        case "501-1000":
+          matchesStrength = strength >= 501 && strength <= 1000;
+          break;
+        case "1001-1500":
+          matchesStrength = strength >= 1001 && strength <= 1500;
+          break;
+        case "1501-2000":
+          matchesStrength = strength >= 1501 && strength <= 2000;
+          break;
+        case "2001-2500":
+          matchesStrength = strength >= 2001 && strength <= 2500;
+          break;
+        case "2501-3000":
+          matchesStrength = strength >= 2501 && strength <= 3000;
+          break;
+        case "3001-3500":
+          matchesStrength = strength >= 3001 && strength <= 3500;
+          break;
+        case "3501-4000":
+          matchesStrength = strength >= 3501 && strength <= 4000;
+          break;
+        case "4001-4500":
+          matchesStrength = strength >= 4001 && strength <= 4500;
+          break;
+        case "4501-5000":
+          matchesStrength = strength >= 4501 && strength <= 5000;
+          break;
+        case "above-5000":
+          matchesStrength = strength > 5000;
+          break;
+      }
+    }
+    
+    return matchesSearch && matchesState && matchesCity && matchesActive && matchesName && matchesAffiliation && matchesStrength;
   });
 
   const getBoardColor = (board: string) => {
@@ -193,17 +262,69 @@ export default function LeadMentorSchoolsPage() {
               </SelectContent>
             </Select>
 
-            <div className="flex items-center space-x-2">
-              <input
-                type="checkbox"
-                id="includeInactive"
-                checked={includeInactive}
-                onChange={(e) => setIncludeInactive(e.target.checked)}
-                className="rounded border-gray-300"
+            <Select
+              value={includeInactive ? "all" : "active"}
+              onValueChange={(value) => setIncludeInactive(value === "all")}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="active">
+                  Active Only ({activeCount})
+                </SelectItem>
+                <SelectItem value="all">
+                  All (Including Inactive) ({activeCount + inactiveCount})
+                </SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Additional Filters Row */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
+            <div className="space-y-2">
+              <Label htmlFor="name-search" className="text-sm font-medium">
+                Search by Name
+              </Label>
+              <Input
+                id="name-search"
+                placeholder="Enter school name"
+                value={searchName}
+                onChange={(e) => setSearchName(e.target.value)}
               />
-              <label htmlFor="includeInactive" className="text-sm">
-                Include Inactive
-              </label>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="affiliation-search" className="text-sm font-medium">
+                Search by Affiliation
+              </Label>
+              <Input
+                id="affiliation-search"
+                placeholder="Enter affiliation"
+                value={searchAffiliation}
+                onChange={(e) => setSearchAffiliation(e.target.value)}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="strength-filter" className="text-sm font-medium">
+                Students Strength
+              </Label>
+              <Select
+                value={selectedStrength}
+                onValueChange={setSelectedStrength}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select strength range" />
+                </SelectTrigger>
+                <SelectContent>
+                  {strengthOptions.map((option) => (
+                    <SelectItem key={option.value} value={option.value}>
+                      {option.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
           </div>
         </CardContent>

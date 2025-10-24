@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Plus, Search, Edit, Trash2, Mail, Phone, MapPin, KeyRound } from "lucide-react";
 import { useNavigate } from "react-router-dom";
@@ -41,6 +42,7 @@ export default function MentorsPage() {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedSchool, setSelectedSchool] = useState("");
+  const [includeInactive, setIncludeInactive] = useState(false);
   const [schools, setSchools] = useState<School[]>([]);
   const [resetPasswordUser, setResetPasswordUser] = useState<{
     id: string;
@@ -49,6 +51,10 @@ export default function MentorsPage() {
   } | null>(null);
   const navigate = useNavigate();
 
+  // Count active and inactive mentors
+  const activeCount = mentors.filter((mentor) => mentor.isActive !== false).length;
+  const inactiveCount = mentors.filter((mentor) => mentor.isActive === false).length;
+
   useEffect(() => {
     fetchMentors();
     fetchSchools();
@@ -56,7 +62,7 @@ export default function MentorsPage() {
 
   useEffect(() => {
     filterMentors();
-  }, [mentors, searchTerm, selectedSchool]);
+  }, [mentors, searchTerm, selectedSchool, includeInactive]);
 
   const fetchMentors = async () => {
     try {
@@ -100,6 +106,11 @@ export default function MentorsPage() {
             : school._id === selectedSchool;
         })
       );
+    }
+
+    // Active/Inactive filter
+    if (!includeInactive) {
+      filtered = filtered.filter((mentor) => mentor.isActive !== false);
     }
 
     setFilteredMentors(filtered);
@@ -164,6 +175,22 @@ export default function MentorsPage() {
                 </option>
               ))}
             </select>
+            <Select
+              value={includeInactive ? "all" : "active"}
+              onValueChange={(value) => setIncludeInactive(value === "all")}
+            >
+              <SelectTrigger className="min-w-0 sm:min-w-[200px]">
+                <SelectValue placeholder="Select status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="active">
+                  Active Only ({activeCount})
+                </SelectItem>
+                <SelectItem value="all">
+                  All (Including Inactive) ({activeCount + inactiveCount})
+                </SelectItem>
+              </SelectContent>
+            </Select>
           </div>
         </CardContent>
       </Card>
@@ -237,13 +264,21 @@ export default function MentorsPage() {
                     </div>
                   </TableCell>
                   <TableCell>
-                    <Badge
-                      variant={
-                        mentor.user.isVerified ? "default" : "secondary"
-                      }
-                    >
-                      {mentor.user.isVerified ? "Verified" : "Pending"}
-                    </Badge>
+                    <div className="flex flex-col gap-1">
+                      <Badge
+                        variant={mentor.isActive !== false ? "default" : "secondary"}
+                      >
+                        {mentor.isActive !== false ? "Active" : "Inactive"}
+                      </Badge>
+                      <Badge
+                        variant={
+                          mentor.user.isVerified ? "outline" : "secondary"
+                        }
+                        className="text-xs"
+                      >
+                        {mentor.user.isVerified ? "Verified" : "Pending"}
+                      </Badge>
+                    </div>
                   </TableCell>
                   <TableCell className="text-right">
                     <div className="flex gap-2 justify-end">
@@ -306,14 +341,22 @@ export default function MentorsPage() {
                       <div className="font-medium text-sm md:text-base">
                         {mentor.user.name}
                       </div>
-                      <Badge
-                        variant={
-                          mentor.user.isVerified ? "default" : "secondary"
-                        }
-                        className="text-xs mt-1"
-                      >
-                        {mentor.user.isVerified ? "Verified" : "Pending"}
-                      </Badge>
+                      <div className="flex flex-col gap-1 mt-1">
+                        <Badge
+                          variant={mentor.isActive !== false ? "default" : "secondary"}
+                          className="text-xs"
+                        >
+                          {mentor.isActive !== false ? "Active" : "Inactive"}
+                        </Badge>
+                        <Badge
+                          variant={
+                            mentor.user.isVerified ? "outline" : "secondary"
+                          }
+                          className="text-xs"
+                        >
+                          {mentor.user.isVerified ? "Verified" : "Pending"}
+                        </Badge>
+                      </div>
                     </div>
                   </div>
                   <div className="flex gap-1">
