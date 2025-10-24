@@ -178,6 +178,41 @@ export interface DetailedAssessmentResult extends AssessmentResponse {
   };
 }
 
+export interface AssessmentReportData {
+  _id: string;
+  title: string;
+  school: {
+    _id: string;
+    name: string;
+    city: string;
+    state: string;
+  };
+  grade: number;
+  sections: string[];
+  status: string;
+  duration: number;
+  startDate: string;
+  endDate: string;
+  createdBy: {
+    _id: string;
+    name: string;
+    email: string;
+  };
+  totalAttempts: number;
+  averageScore: number;
+  completionRate: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface AssessmentReportFilters {
+  school?: string;
+  createdBy?: string;
+  status?: string;
+  grade?: number;
+  section?: string;
+}
+
 // Assessment API
 export const assessmentService = {
   // Create assessment
@@ -273,6 +308,43 @@ export const assessmentService = {
     });
     
     const response = await axiosInstance.get(`/assessments/questions?${params.toString()}`);
+    return response.data;
+  },
+
+  // Assessment Reports for different roles
+  getAssessmentReportsForSuperAdmin: async (filters: AssessmentReportFilters = {}) => {
+    const params = new URLSearchParams();
+    Object.entries(filters).forEach(([key, value]) => {
+      if (value !== undefined && value !== '') {
+        params.append(key, value.toString());
+      }
+    });
+    
+    const response = await axiosInstance.get(`/assessments/reports/superadmin?${params.toString()}`);
+    return response.data;
+  },
+
+  getAssessmentReportsForLeadMentor: async (filters: AssessmentReportFilters = {}) => {
+    const params = new URLSearchParams();
+    Object.entries(filters).forEach(([key, value]) => {
+      if (value !== undefined && value !== '') {
+        params.append(key, value.toString());
+      }
+    });
+    
+    const response = await axiosInstance.get(`/assessments/reports/leadmentor?${params.toString()}`);
+    return response.data;
+  },
+
+  getAssessmentReportsForSchoolAdmin: async (filters: AssessmentReportFilters = {}) => {
+    const params = new URLSearchParams();
+    Object.entries(filters).forEach(([key, value]) => {
+      if (value !== undefined && value !== '') {
+        params.append(key, value.toString());
+      }
+    });
+    
+    const response = await axiosInstance.get(`/assessments/reports/schooladmin?${params.toString()}`);
     return response.data;
   },
 };

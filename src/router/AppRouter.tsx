@@ -17,6 +17,7 @@ import SchoolAdminStudentsPage from "../pages/Dashboard/SchoolAdmin/Students";
 import SchoolAdminSessionProgressPage from "../pages/Dashboard/SchoolAdmin/SessionProgress";
 import SchoolAdminSchoolsPage from "../pages/Dashboard/SchoolAdmin/Schools";
 import SchoolAdminSettingsPage from "../pages/Dashboard/SchoolAdmin/Settings";
+import SchoolAdminAssessmentReportsPage from "../pages/Dashboard/SchoolAdmin/AssessmentReports";
 import AdminsPage from "../pages/Dashboard/SuperAdmin/Admins";
 import CreateAdminPage from "../pages/Dashboard/SuperAdmin/Admins/Create";
 
@@ -35,6 +36,7 @@ import CreateSuperAdminMentorPage from "../pages/Dashboard/SuperAdmin/Mentors/Cr
 import EditSuperAdminMentorPage from "../pages/Dashboard/SuperAdmin/Mentors/Edit";
 import SuperAdminSessionProgressPage from "../pages/Dashboard/SuperAdmin/SessionProgress";
 import ActivityLogsPage from "../pages/Dashboard/SuperAdmin/ActivityLogs";
+import SuperAdminAssessmentReportsPage from "../pages/Dashboard/SuperAdmin/AssessmentReports";
 
 // LeadMentor Edit Components (re-exported from SuperAdmin)
 import LeadMentorEditSchoolAdminPage from "../pages/Dashboard/LeadMentor/SchoolAdmins/Edit";
@@ -54,6 +56,7 @@ import AddQuestionPage from "../pages/Dashboard/LeadMentor/QuestionBank/AddQuest
 import ViewRecommendationsPage from "../pages/Dashboard/LeadMentor/QuestionBank/ViewRecommendations";
 import BulkUploadPage from "../pages/Dashboard/LeadMentor/QuestionBank/BulkUpload";
 import LeadMentorSessionProgressPage from "../pages/Dashboard/LeadMentor/SessionProgress";
+import LeadMentorAssessmentReportsPage from "../pages/Dashboard/LeadMentor/AssessmentReports";
 import ModulesPage from "../pages/Dashboard/Modules/index";
 import CreateModulePage from "../pages/Dashboard/Modules/Create";
 import EditModulePage from "../pages/Dashboard/Modules/Edit";
@@ -250,6 +253,7 @@ export default function AppRouter() {
           <Route path="assessments/:id" element={<ViewAssessmentPage />} />
           <Route path="assessments/:id/edit" element={<EditAssessmentPage />} />
           <Route path="assessments/:id/analytics" element={<AssessmentAnalyticsPage />} />
+          <Route path="assessment-reports" element={<SuperAdminAssessmentReportsPage />} />
           
           {/* Certificate Management */}
           {certificateRoutes}
@@ -374,6 +378,8 @@ export default function AppRouter() {
           <Route path="session-progress" element={<SchoolAdminSessionProgressPage />} />
           <Route path="schools" element={<SchoolAdminSchoolsPage />} />
           <Route path="settings" element={<SchoolAdminSettingsPage />} />
+          <Route path="assessment-reports" element={<SchoolAdminAssessmentReportsPage />} />
+          <Route path="assessments/:id/analytics" element={<AssessmentAnalyticsPage />} />
           
           {/* Messaging */}
           <Route path="messages" element={<Messages />} />
@@ -423,6 +429,7 @@ export default function AppRouter() {
           <Route path="assessments/:id" element={<ViewAssessmentPage />} />
           <Route path="assessments/:id/edit" element={<EditAssessmentPage />} />
           <Route path="assessments/:id/analytics" element={<AssessmentAnalyticsPage />} />
+          <Route path="assessment-reports" element={<LeadMentorAssessmentReportsPage />} />
           
           {/* Certificate Management */}
           {certificateRoutes}

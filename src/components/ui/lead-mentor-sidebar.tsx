@@ -131,6 +131,9 @@ export function LeadMentorSidebar({ className }: LeadMentorSidebarProps) {
                 )}
               </div>
             </SidebarNavItem>
+            <SidebarNavItem to="/leadmentor/assessment-reports" icon={BarChart3}>
+              Assessment Reports
+            </SidebarNavItem>
             <SidebarNavItem to="/leadmentor/certificates" icon={Award}>
               Certificates
             </SidebarNavItem>

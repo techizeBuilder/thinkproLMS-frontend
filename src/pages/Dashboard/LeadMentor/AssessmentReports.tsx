@@ -23,10 +23,11 @@ import {
   Users,
 } from "lucide-react";
 import { assessmentService, type AssessmentReportData, type AssessmentReportFilters } from "@/api/assessmentService";
-import { schoolAdminService } from "@/api/schoolAdminService";
+import { schoolService } from "@/api/schoolService";
+import { mentorService } from "@/api/mentorService";
 import { toast } from "sonner";
 
-export default function SchoolAdminAssessmentReportsPage() {
+export default function LeadMentorAssessmentReportsPage() {
   const navigate = useNavigate();
   
   const [assessments, setAssessments] = useState<AssessmentReportData[]>([]);
@@ -35,6 +36,7 @@ export default function SchoolAdminAssessmentReportsPage() {
   const [filters, setFilters] = useState<AssessmentReportFilters>({});
   
   // Filter options
+  const [schools, setSchools] = useState<any[]>([]);
   const [mentors, setMentors] = useState<any[]>([]);
   const [grades] = useState([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
   const [statuses] = useState([
@@ -54,9 +56,14 @@ export default function SchoolAdminAssessmentReportsPage() {
   const loadData = async () => {
     try {
       setLoading(true);
-      // Load mentors from the school admin's assigned school
-      const mentorsResponse = await schoolAdminService.getMentors();
-      setMentors(mentorsResponse.data.mentors || []);
+      // Load schools and mentors that the lead mentor has access to
+      const [schoolsResponse, mentorsResponse] = await Promise.all([
+        schoolService.getAllSchools(), // This should be filtered by lead mentor's assigned schools
+        mentorService.getAll() // This should be filtered by lead mentor's assigned schools
+      ]);
+      
+      setSchools(schoolsResponse || []);
+      setMentors(mentorsResponse.data || []);
     } catch (error) {
       console.error("Error loading filter data:", error);
       toast.error("Failed to load filter options");
@@ -68,7 +75,7 @@ export default function SchoolAdminAssessmentReportsPage() {
   const loadAssessments = async () => {
     try {
       setLoading(true);
-      const response = await assessmentService.getAssessmentReportsForSchoolAdmin(filters);
+      const response = await assessmentService.getAssessmentReportsForLeadMentor(filters);
       setAssessments(response.data || []);
     } catch (error) {
       console.error("Error loading assessments:", error);
@@ -135,7 +142,7 @@ export default function SchoolAdminAssessmentReportsPage() {
         <div>
           <h1 className="text-3xl font-bold">Assessment Reports</h1>
           <p className="text-muted-foreground">
-            View and analyze assessment performance for your school
+            View and analyze assessment performance for your assigned schools
           </p>
         </div>
       </div>
@@ -149,7 +156,27 @@ export default function SchoolAdminAssessmentReportsPage() {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div>
+              <label className="text-sm font-medium">School</label>
+              <Select 
+                value={filters.school || ""} 
+                onValueChange={(value) => handleFilterChange('school', value)}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="All Schools" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Schools</SelectItem>
+                  {schools.map(school => (
+                    <SelectItem key={school._id} value={school._id}>
+                      {school.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
             <div>
               <label className="text-sm font-medium">Created By</label>
               <Select 
@@ -242,6 +269,7 @@ export default function SchoolAdminAssessmentReportsPage() {
               <TableHeader>
                 <TableRow>
                   <TableHead>Title</TableHead>
+                  <TableHead>School</TableHead>
                   <TableHead>Mentor</TableHead>
                   <TableHead>Grade & Sections</TableHead>
                   <TableHead>Status</TableHead>
@@ -256,6 +284,14 @@ export default function SchoolAdminAssessmentReportsPage() {
                   <TableRow key={assessment._id}>
                     <TableCell className="font-medium">
                       {assessment.title}
+                    </TableCell>
+                    <TableCell>
+                      <div>
+                        <div className="font-medium">{assessment.school.name}</div>
+                        <div className="text-sm text-muted-foreground">
+                          {assessment.school.city}, {assessment.school.state}
+                        </div>
+                      </div>
                     </TableCell>
                     <TableCell>
                       <div>
@@ -302,7 +338,7 @@ export default function SchoolAdminAssessmentReportsPage() {
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => navigate(`/schooladmin/assessments/${assessment._id}/analytics`)}
+                        onClick={() => navigate(`/leadmentor/assessments/${assessment._id}/analytics`)}
                         className="flex items-center gap-2"
                       >
                         <Eye className="h-4 w-4" />

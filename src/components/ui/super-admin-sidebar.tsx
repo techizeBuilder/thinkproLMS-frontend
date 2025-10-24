@@ -120,6 +120,9 @@ export function SuperAdminSidebar({ className }: SuperAdminSidebarProps) {
                 )}
               </div>
             </SidebarNavItem>
+            <SidebarNavItem to="/superadmin/assessment-reports" icon={BarChart3}>
+              Assessment Reports
+            </SidebarNavItem>
             <SidebarNavItem to="/superadmin/certificates" icon={Award}>
               Certificates
             </SidebarNavItem>

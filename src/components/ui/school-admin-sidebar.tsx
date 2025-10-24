@@ -20,6 +20,7 @@ import {
   GraduationCap,
   BookOpen,
   MessageSquare,
+  BarChart3,
 } from "lucide-react";
 import { LogoutButton } from "@/components/ui/logout-button";
 import { Badge } from "@/components/ui/badge";
@@ -69,6 +70,14 @@ export function SchoolAdminSidebar({ className }: SchoolAdminSidebarProps) {
             </SidebarNavItem>
             <SidebarNavItem to="/schooladmin/students" icon={GraduationCap}>
               Students
+            </SidebarNavItem>
+          </SidebarNav>
+        </SidebarGroup>
+
+        <SidebarGroup label="Assessment">
+          <SidebarNav>
+            <SidebarNavItem to="/schooladmin/assessment-reports" icon={BarChart3}>
+              Assessment Reports
             </SidebarNavItem>
           </SidebarNav>
         </SidebarGroup>
