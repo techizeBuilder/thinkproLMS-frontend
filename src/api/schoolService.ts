@@ -42,6 +42,7 @@ export interface School {
   projectStartDate?: string;
   projectEndDate?: string;
   serviceDetails?: ServiceDetails;
+  students_strength: number;
   isActive: boolean;
   createdAt: string;
   updatedAt: string;
@@ -78,6 +79,7 @@ export interface CreateSchoolData {
   projectStartDate?: string;
   projectEndDate?: string;
   serviceDetails?: ServiceDetails;
+  students_strength: number;
 }
 
 export interface UpdateSchoolData extends Partial<CreateSchoolData> {}
@@ -85,11 +87,21 @@ export interface UpdateSchoolData extends Partial<CreateSchoolData> {}
 // School API functions
 export const schoolService = {
   // Get all schools
-  getAll: async (filters?: { state?: string; city?: string; includeInactive?: boolean }): Promise<{ success: boolean; data: School[] }> => {
+  getAll: async (filters?: { 
+    state?: string; 
+    city?: string; 
+    includeInactive?: boolean;
+    name?: string;
+    affiliatedTo?: string;
+    strength?: string;
+  }): Promise<{ success: boolean; data: School[] }> => {
     const params = new URLSearchParams();
     if (filters?.state && filters.state !== 'all') params.append('state', filters.state);
     if (filters?.city && filters.city !== 'all') params.append('city', filters.city);
     if (filters?.includeInactive) params.append('includeInactive', 'true');
+    if (filters?.name && filters.name !== '') params.append('name', filters.name);
+    if (filters?.affiliatedTo && filters.affiliatedTo !== '') params.append('affiliatedTo', filters.affiliatedTo);
+    if (filters?.strength && filters.strength !== 'all') params.append('strength', filters.strength);
     
     const response = await axiosInstance.get(`/schools?${params.toString()}`);
     return response.data;
@@ -123,6 +135,7 @@ export const schoolService = {
     formData.append('principalName', data.principalName);
     formData.append('principalContact', data.principalContact);
     formData.append('principalEmail', data.principalEmail);
+    formData.append('students_strength', data.students_strength.toString());
     
     if (data.image) formData.append('image', data.image);
     if (data.logo) formData.append('logo', data.logo);
@@ -160,6 +173,7 @@ export const schoolService = {
     if (data.principalName !== undefined) formData.append('principalName', data.principalName);
     if (data.principalContact !== undefined) formData.append('principalContact', data.principalContact);
     if (data.principalEmail !== undefined) formData.append('principalEmail', data.principalEmail);
+    if (data.students_strength !== undefined) formData.append('students_strength', data.students_strength.toString());
     if (data.image !== undefined) formData.append('image', data.image);
     if (data.logo !== undefined) formData.append('logo', data.logo);
     if (data.affiliatedTo !== undefined) formData.append('affiliatedTo', data.affiliatedTo);

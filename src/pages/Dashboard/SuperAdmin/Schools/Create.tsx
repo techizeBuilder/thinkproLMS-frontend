@@ -40,6 +40,7 @@ export default function CreateSchoolPage() {
     projectStartDate: "",
     projectEndDate: "",
     serviceDetails: undefined,
+    students_strength: 0,
   });
 
   const handleInputChange = (
@@ -92,7 +93,8 @@ export default function CreateSchoolPage() {
       { field: 'schoolEmail', label: 'School Email' },
       { field: 'principalName', label: 'Principal Name' },
       { field: 'principalContact', label: 'Principal Contact' },
-      { field: 'principalEmail', label: 'Principal Email' }
+      { field: 'principalEmail', label: 'Principal Email' },
+      { field: 'students_strength', label: 'Students Strength' }
     ];
 
     const missingFields = requiredFields.filter(({ field }) => {
@@ -342,6 +344,20 @@ export default function CreateSchoolPage() {
                     value={formData.principalEmail}
                     onChange={handleInputChange}
                     placeholder="Enter principal email"
+                    required
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="students_strength">Students Strength *</Label>
+                  <Input
+                    id="students_strength"
+                    name="students_strength"
+                    type="number"
+                    min="1"
+                    value={formData.students_strength}
+                    onChange={handleInputChange}
+                    placeholder="Enter number of students"
                     required
                   />
                 </div>

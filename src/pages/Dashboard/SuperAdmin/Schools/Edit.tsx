@@ -41,6 +41,7 @@ export default function EditSchoolPage() {
     projectStartDate: "",
     projectEndDate: "",
     serviceDetails: undefined,
+    students_strength: 0,
   });
 
   useEffect(() => {
@@ -75,6 +76,7 @@ export default function EditSchoolPage() {
           projectStartDate: school.projectStartDate ? new Date(school.projectStartDate).toISOString().split('T')[0] : "",
           projectEndDate: school.projectEndDate ? new Date(school.projectEndDate).toISOString().split('T')[0] : "",
           serviceDetails: school.serviceDetails || undefined,
+          students_strength: school.students_strength || 0,
         });
         
         // Set existing file paths
@@ -394,6 +396,20 @@ export default function EditSchoolPage() {
                     value={formData.principalEmail}
                     onChange={handleInputChange}
                     placeholder="Enter principal email"
+                    required
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="students_strength">Students Strength *</Label>
+                  <Input
+                    id="students_strength"
+                    name="students_strength"
+                    type="number"
+                    min="1"
+                    value={formData.students_strength}
+                    onChange={handleInputChange}
+                    placeholder="Enter number of students"
                     required
                   />
                 </div>

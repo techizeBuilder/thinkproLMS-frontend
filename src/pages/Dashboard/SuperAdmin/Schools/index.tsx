@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Plus, MapPin, Building } from "lucide-react";
@@ -21,10 +22,29 @@ export default function SchoolsPage() {
   const [selectedState, setSelectedState] = useState<string>("all");
   const [selectedCity, setSelectedCity] = useState<string>("all");
   const [includeInactive, setIncludeInactive] = useState<boolean>(false);
+  const [searchName, setSearchName] = useState<string>("");
+  const [searchAffiliation, setSearchAffiliation] = useState<string>("");
+  const [selectedStrength, setSelectedStrength] = useState<string>("all");
   
   // Get unique states and cities for filter options
   const states = Array.from(new Set(schools.map(school => school.state))).sort();
   const cities = Array.from(new Set(schools.map(school => school.city))).sort();
+  
+  // Strength filter options
+  const strengthOptions = [
+    { value: 'all', label: 'All Strengths' },
+    { value: 'upto-500', label: 'Up to 500' },
+    { value: '501-1000', label: '501-1000' },
+    { value: '1001-1500', label: '1001-1500' },
+    { value: '1501-2000', label: '1501-2000' },
+    { value: '2001-2500', label: '2001-2500' },
+    { value: '2501-3000', label: '2501-3000' },
+    { value: '3001-3500', label: '3001-3500' },
+    { value: '3501-4000', label: '3501-4000' },
+    { value: '4001-4500', label: '4001-4500' },
+    { value: '4501-5000', label: '4501-5000' },
+    { value: 'above-5000', label: 'Above 5000' }
+  ];
   
   // Count active and inactive schools
   const activeCount = schools.filter(school => school.isActive).length;
@@ -32,20 +52,29 @@ export default function SchoolsPage() {
 
   useEffect(() => {
     fetchSchools();
-  }, [selectedState, selectedCity, includeInactive]);
+  }, [selectedState, selectedCity, includeInactive, searchName, searchAffiliation, selectedStrength]);
 
   const fetchSchools = async () => {
     try {
       setLoading(true);
-      const response = await schoolService.getAll({
+      const filters = {
         state: selectedState,
         city: selectedCity,
-        includeInactive
-      });
+        includeInactive,
+        name: searchName,
+        affiliatedTo: searchAffiliation,
+        strength: selectedStrength
+      };
+      
+      console.log('Fetching schools with filters:', filters);
+      
+      const response = await schoolService.getAll(filters);
       if (response.success) {
+        console.log('Schools received:', response.data.length);
         setSchools(response.data);
       }
     } catch (error: any) {
+      console.error('Error fetching schools:', error);
       toast.error(error.response?.data?.message || "Failed to fetch schools");
     } finally {
       setLoading(false);
@@ -53,6 +82,15 @@ export default function SchoolsPage() {
   };
 
   const handleDelete = async (id: string, name: string) => {
+    // Show confirmation dialog
+    const confirmed = window.confirm(
+      `Are you sure you want to delete "${name}"? This action cannot be undone and will permanently remove the school from the system.`
+    );
+    
+    if (!confirmed) {
+      return;
+    }
+
     setDeleteLoading(id);
     try {
       const response = await schoolService.delete(id);
@@ -86,6 +124,9 @@ export default function SchoolsPage() {
     setSelectedState("all");
     setSelectedCity("all");
     setIncludeInactive(false);
+    setSearchName("");
+    setSearchAffiliation("");
+    setSelectedStrength("all");
   };
 
   const getBoardColor = (board: string) => {
@@ -188,6 +229,47 @@ export default function SchoolsPage() {
               </Button>
             </div>
           </div>
+          
+          {/* Additional Filters Row */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 mt-4">
+            <div className="space-y-1 sm:space-y-2">
+              <Label htmlFor="name-search" className="text-xs sm:text-sm">Search by Name</Label>
+              <Input
+                id="name-search"
+                placeholder="Enter school name"
+                value={searchName}
+                onChange={(e) => setSearchName(e.target.value)}
+                className="h-9 sm:h-10"
+              />
+            </div>
+            
+            <div className="space-y-1 sm:space-y-2">
+              <Label htmlFor="affiliation-search" className="text-xs sm:text-sm">Search by Affiliation</Label>
+              <Input
+                id="affiliation-search"
+                placeholder="Enter affiliation"
+                value={searchAffiliation}
+                onChange={(e) => setSearchAffiliation(e.target.value)}
+                className="h-9 sm:h-10"
+              />
+            </div>
+            
+            <div className="space-y-1 sm:space-y-2">
+              <Label htmlFor="strength-filter" className="text-xs sm:text-sm">Students Strength</Label>
+              <Select value={selectedStrength} onValueChange={setSelectedStrength}>
+                <SelectTrigger className="h-9 sm:h-10">
+                  <SelectValue placeholder="Select strength range" />
+                </SelectTrigger>
+                <SelectContent>
+                  {strengthOptions.map((option) => (
+                    <SelectItem key={option.value} value={option.value}>
+                      {option.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
         </CardContent>
       </Card>
 
@@ -218,6 +300,7 @@ export default function SchoolsPage() {
                     <TableHead className="min-w-[100px]">Board</TableHead>
                     <TableHead className="min-w-[150px]">Location</TableHead>
                     <TableHead className="min-w-[200px]">Address</TableHead>
+                    <TableHead className="min-w-[100px]">Students</TableHead>
                     <TableHead className="min-w-[100px]">Status</TableHead>
                     <TableHead className="min-w-[120px]">Branch</TableHead>
                     <TableHead className="min-w-[150px]">Affiliation</TableHead>
@@ -255,6 +338,11 @@ export default function SchoolsPage() {
                       </p>
                     </TableCell>
                     <TableCell>
+                      <span className="text-sm font-medium">
+                        {school.students_strength?.toLocaleString() || 'N/A'}
+                      </span>
+                    </TableCell>
+                    <TableCell>
                       <Badge variant={school.isActive ? "default" : "secondary"}>
                         {school.isActive ? "Active" : "Inactive"}
                       </Badge>
@@ -283,6 +371,7 @@ export default function SchoolsPage() {
                         onToggleStatus={() => handleToggleStatus(school._id, school.name, school.isActive)}
                         onDelete={() => handleDelete(school._id, school.name)}
                         isActive={school.isActive}
+                        isSuperAdmin={true}
                         deleteLoading={deleteLoading === school._id}
                         toggleLoading={toggleLoading === school._id}
                       />
