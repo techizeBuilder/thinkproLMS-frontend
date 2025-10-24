@@ -67,6 +67,13 @@ export interface ActivityLogResponse {
       resourceTypes: string[];
       severities: string[];
       users: Array<{ _id: string; name: string; email: string; role: string }>;
+      categorizedUsers: {
+        superadmin: Array<{ _id: string; name: string; email: string; role: string }>;
+        leadmentor: Array<{ _id: string; name: string; email: string; role: string }>;
+        schooladmin: Array<{ _id: string; name: string; email: string; role: string }>;
+        mentor: Array<{ _id: string; name: string; email: string; role: string }>;
+        guest: Array<{ _id: string; name: string; email: string; role: string }>;
+      };
       schools: Array<{ _id: string; name: string }>;
     };
   };

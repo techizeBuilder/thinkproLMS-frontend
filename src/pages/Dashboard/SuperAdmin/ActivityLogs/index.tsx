@@ -49,6 +49,13 @@ const ActivityLogsPage: React.FC = () => {
       email: string;
       role: string;
     }>,
+    categorizedUsers: {
+      superadmin: [] as Array<{ _id: string; name: string; email: string; role: string }>,
+      leadmentor: [] as Array<{ _id: string; name: string; email: string; role: string }>,
+      schooladmin: [] as Array<{ _id: string; name: string; email: string; role: string }>,
+      mentor: [] as Array<{ _id: string; name: string; email: string; role: string }>,
+      guest: [] as Array<{ _id: string; name: string; email: string; role: string }>,
+    },
     schools: [] as Array<{ _id: string; name: string }>,
   });
   const [dateRange, setDateRange] = useState<{
@@ -412,11 +419,76 @@ const ActivityLogsPage: React.FC = () => {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All users</SelectItem>
-                {filterOptions.users.map((user) => (
-                  <SelectItem key={user._id} value={user._id}>
-                    {user.name} ({user.email})
-                  </SelectItem>
-                ))}
+                
+                {/* Super Admins */}
+                {filterOptions.categorizedUsers.superadmin.length > 0 && (
+                  <>
+                    <div className="px-2 py-1.5 text-xs font-semibold text-gray-500 bg-gray-100">
+                      Super Admins
+                    </div>
+                    {filterOptions.categorizedUsers.superadmin.map((user) => (
+                      <SelectItem key={user._id} value={user._id}>
+                        {user.name} ({user.email})
+                      </SelectItem>
+                    ))}
+                  </>
+                )}
+
+                {/* Lead Mentors */}
+                {filterOptions.categorizedUsers.leadmentor.length > 0 && (
+                  <>
+                    <div className="px-2 py-1.5 text-xs font-semibold text-gray-500 bg-gray-100">
+                      Lead Mentors
+                    </div>
+                    {filterOptions.categorizedUsers.leadmentor.map((user) => (
+                      <SelectItem key={user._id} value={user._id}>
+                        {user.name} ({user.email})
+                      </SelectItem>
+                    ))}
+                  </>
+                )}
+
+                {/* School Admins */}
+                {filterOptions.categorizedUsers.schooladmin.length > 0 && (
+                  <>
+                    <div className="px-2 py-1.5 text-xs font-semibold text-gray-500 bg-gray-100">
+                      School Admins
+                    </div>
+                    {filterOptions.categorizedUsers.schooladmin.map((user) => (
+                      <SelectItem key={user._id} value={user._id}>
+                        {user.name} ({user.email})
+                      </SelectItem>
+                    ))}
+                  </>
+                )}
+
+                {/* Mentors */}
+                {filterOptions.categorizedUsers.mentor.length > 0 && (
+                  <>
+                    <div className="px-2 py-1.5 text-xs font-semibold text-gray-500 bg-gray-100">
+                      Mentors
+                    </div>
+                    {filterOptions.categorizedUsers.mentor.map((user) => (
+                      <SelectItem key={user._id} value={user._id}>
+                        {user.name} ({user.email})
+                      </SelectItem>
+                    ))}
+                  </>
+                )}
+
+                {/* Guests */}
+                {filterOptions.categorizedUsers.guest.length > 0 && (
+                  <>
+                    <div className="px-2 py-1.5 text-xs font-semibold text-gray-500 bg-gray-100">
+                      Guests
+                    </div>
+                    {filterOptions.categorizedUsers.guest.map((user) => (
+                      <SelectItem key={user._id} value={user._id}>
+                        {user.name} ({user.email})
+                      </SelectItem>
+                    ))}
+                  </>
+                )}
               </SelectContent>
             </Select>
           </div>
