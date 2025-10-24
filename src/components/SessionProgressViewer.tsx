@@ -282,10 +282,19 @@ export default function SessionProgressViewer({
       if (user?.role === 'schooladmin') {
         const response = await schoolAdminService.getMentors();
         if (response.success) {
-          setAvailableMentors(response.data.mentors);
+          // Map mentors to include addedBy property for compatibility
+          const mappedMentors = response.data.mentors.map((mentor: any) => ({
+            ...mentor,
+            addedBy: {
+              _id: mentor.user._id,
+              name: mentor.user.name,
+              email: mentor.user.email
+            }
+          }));
+          setAvailableMentors(mappedMentors);
           // Auto-select first mentor on initial load
-          if (response.data.mentors.length > 0) {
-            setSelectedMentorId(response.data.mentors[0]._id);
+          if (mappedMentors.length > 0) {
+            setSelectedMentorId(mappedMentors[0]._id);
           }
         }
       } else {

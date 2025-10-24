@@ -130,6 +130,7 @@ export default function CreateAssessmentPage() {
               projectStartDate: school.projectStartDate || undefined,
               projectEndDate: school.projectEndDate || undefined,
               serviceDetails: school.serviceDetails || undefined,
+              students_strength: school.students_strength || 0,
               isActive: school.isActive !== undefined ? school.isActive : true,
               createdAt: school.createdAt || new Date().toISOString(),
               updatedAt: school.updatedAt || new Date().toISOString()

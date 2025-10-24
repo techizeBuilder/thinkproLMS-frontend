@@ -5,7 +5,6 @@ import { schoolAdminService } from "@/api/schoolAdminService";
 // leadMentorService intentionally not used for lead mentor dashboard per requirements
 import { mentorService } from "@/api/mentorService";
 import { studentService } from "@/api/studentService";
-import { useAuth } from "@/contexts/AuthContext";
 
 interface DashboardStats {
   schoolAdmins: number;
@@ -17,7 +16,6 @@ interface DashboardStats {
 
 
 export default function LeadMentorDashboard() {
-  const { user } = useAuth();
   const [stats, setStats] = useState<DashboardStats>({
     schoolAdmins: 0,
     schoolMentors: 0,
