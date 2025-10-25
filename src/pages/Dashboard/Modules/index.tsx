@@ -158,7 +158,6 @@ export default function Modules() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>ID</TableHead>
                   <TableHead>Module Name</TableHead>
                   <TableHead>Description</TableHead>
                   <TableHead>Status</TableHead>
@@ -171,7 +170,6 @@ export default function Modules() {
               <TableBody>
                 {filteredModules.map((module) => (
                   <TableRow key={module._id} className="hover:bg-muted/50">
-                    <TableCell className="font-medium">{module._id}</TableCell>
                     <TableCell className="font-medium">
                       <div className="flex items-center gap-2">
                         <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
