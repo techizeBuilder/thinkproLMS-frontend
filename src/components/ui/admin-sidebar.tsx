@@ -24,7 +24,14 @@ export function AdminSidebar({ className }: AdminSidebarProps) {
   return (
     <Sidebar className={cn("", className)}>
       <SidebarHeader>
-        <SidebarTitle>Admin Panel</SidebarTitle>
+        <div className="flex items-center gap-2">
+          <img 
+            src="/fancy-logo.jpg" 
+            alt="ThinkPro Logo" 
+            className="h-8 w-8 object-contain"
+          />
+          <SidebarTitle>Admin Panel</SidebarTitle>
+        </div>
         <SidebarToggle />
       </SidebarHeader>
       

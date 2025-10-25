@@ -35,7 +35,14 @@ export function SchoolAdminSidebar({ className }: SchoolAdminSidebarProps) {
   return (
     <Sidebar className={cn("h-screen", className)}>
       <SidebarHeader>
-        <SidebarTitle>School Admin Portal</SidebarTitle>
+        <div className="flex items-center gap-2">
+          <img 
+            src="/fancy-logo.jpg" 
+            alt="ThinkPro Logo" 
+            className="h-8 w-8 object-contain"
+          />
+          <SidebarTitle>School Admin Portal</SidebarTitle>
+        </div>
         <SidebarToggle />
       </SidebarHeader>
 

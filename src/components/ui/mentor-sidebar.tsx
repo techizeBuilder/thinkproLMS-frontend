@@ -28,7 +28,14 @@ export function MentorSidebar({ className }: MentorSidebarProps) {
   return (
     <Sidebar className={cn("", className)}>
       <SidebarHeader>
-        <SidebarTitle>School Mentor Portal</SidebarTitle>
+        <div className="flex items-center gap-2">
+          <img 
+            src="/fancy-logo.jpg" 
+            alt="ThinkPro Logo" 
+            className="h-8 w-8 object-contain"
+          />
+          <SidebarTitle>School Mentor Portal</SidebarTitle>
+        </div>
         <SidebarToggle />
       </SidebarHeader>
       

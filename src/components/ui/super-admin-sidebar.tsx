@@ -28,7 +28,14 @@ export function SuperAdminSidebar({ className }: SuperAdminSidebarProps) {
   return (
     <Sidebar className={cn("h-screen", className)}>
       <SidebarHeader>
-        <SidebarTitle>ThinkPro LMS</SidebarTitle>
+        <div className="flex items-center gap-2">
+          <img 
+            src="/fancy-logo.jpg" 
+            alt="ThinkPro Logo" 
+            className="h-8 w-8 object-contain"
+          />
+          <SidebarTitle>ThinkPro LMS</SidebarTitle>
+        </div>
         <SidebarToggle />
       </SidebarHeader>
       
