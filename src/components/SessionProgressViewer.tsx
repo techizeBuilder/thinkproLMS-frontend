@@ -175,9 +175,9 @@ export default function SessionProgressViewer({
 
           // Only create grade data if we have sessions
           if (gradeSessions.length > 0) {
-            // Group sessions by session name and create session numbers
+            // Group sessions by display name to preserve sessions with different display names
             const sessionGroups = gradeSessions.reduce((groups, session) => {
-              const key = session.sessionName;
+              const key = session.displayName;
               if (!groups[key]) {
                 groups[key] = [];
               }
