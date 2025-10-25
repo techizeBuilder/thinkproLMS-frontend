@@ -200,10 +200,10 @@ export default function Sessions() {
               <TableHeader>
                 <TableRow>
                   <TableHead>Session Name</TableHead>
+                  <TableHead>Description</TableHead>
                   <TableHead>Module</TableHead>
                   <TableHead>Grade</TableHead>
-                  <TableHead>Description</TableHead>
-                  <TableHead>Created Date</TableHead>
+                  <TableHead>Created at</TableHead>
                   {hasPermission && (
                     <TableHead className="text-right">Actions</TableHead>
                   )}
@@ -214,11 +214,16 @@ export default function Sessions() {
                   <TableRow key={session._id} className="hover:bg-muted/50">
                     <TableCell className="font-medium">
                       <div className="flex items-center gap-2">
-                        <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                        <div className="min-w-8 min-h-8 bg-blue-100 rounded-full flex items-center justify-center">
                           <BookOpen className="h-4 w-4 text-blue-600" />
                         </div>
                         {session.displayName || session.name}
                       </div>
+                    </TableCell>
+                    <TableCell className="max-w-xs">
+                      <p className="text-sm text-muted-foreground truncate">
+                        {session.description || "-"}
+                      </p>
                     </TableCell>
                     <TableCell>
                       <Badge variant="outline">
@@ -230,13 +235,10 @@ export default function Sessions() {
                     <TableCell>
                       <div className="flex items-center gap-1">
                         <GraduationCap className="h-4 w-4 text-muted-foreground" />
-                        <span className="text-sm">Grade {session.grade}</span>
+                        <span className="text-sm font-bold">
+                          {session.grade}
+                        </span>
                       </div>
-                    </TableCell>
-                    <TableCell className="max-w-xs">
-                      <p className="text-sm text-muted-foreground truncate">
-                        {session.description || "-"}
-                      </p>
                     </TableCell>
                     <TableCell className="text-sm text-muted-foreground">
                       {session.createdAt
