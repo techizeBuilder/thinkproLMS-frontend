@@ -17,6 +17,16 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import axiosInstance from "@/api/axiosInstance";
 import { toast } from "sonner";
 import { Plus, Shield, Users, Loader2 } from "lucide-react";
@@ -35,6 +45,8 @@ const SuperAdminsPage = () => {
   const [superAdmins, setSuperAdmins] = useState<SuperAdmin[]>([]);
   const [loading, setLoading] = useState(true);
   const [deleteLoading, setDeleteLoading] = useState<string | null>(null);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [superAdminToDelete, setSuperAdminToDelete] = useState<SuperAdmin | null>(null);
 
   useEffect(() => {
     const fetchSuperAdmins = async () => {
@@ -51,16 +63,25 @@ const SuperAdminsPage = () => {
     fetchSuperAdmins();
   }, []);
 
-  const handleDelete = async (id: string, name: string) => {
-    setDeleteLoading(id);
+  const handleDeleteClick = (superAdmin: SuperAdmin) => {
+    setSuperAdminToDelete(superAdmin);
+    setShowDeleteDialog(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!superAdminToDelete) return;
+    
+    setDeleteLoading(superAdminToDelete._id);
     try {
-      await axiosInstance.delete(`/superadmins/${id}`);
-      setSuperAdmins(prev => prev.filter(admin => admin._id !== id));
-      toast.success(`${name} has been deleted successfully`);
+      await axiosInstance.delete(`/superadmins/${superAdminToDelete._id}`);
+      setSuperAdmins(prev => prev.filter(admin => admin._id !== superAdminToDelete._id));
+      toast.success(`${superAdminToDelete.name} has been deleted successfully`);
     } catch (error: any) {
       toast.error(error.response?.data?.message || "Failed to delete superadmin");
     } finally {
       setDeleteLoading(null);
+      setShowDeleteDialog(false);
+      setSuperAdminToDelete(null);
     }
   };
 
@@ -166,7 +187,7 @@ const SuperAdminsPage = () => {
                     </TableCell>
                     <TableCell className="text-right">
                       <MobileActions
-                        onDelete={!superAdmin.isSystemAdmin ? () => handleDelete(superAdmin._id, superAdmin.name) : undefined}
+                        onDelete={!superAdmin.isSystemAdmin ? () => handleDeleteClick(superAdmin) : undefined}
                         isSystemAdmin={superAdmin.isSystemAdmin}
                         isSuperAdmin={true}
                         deleteLoading={deleteLoading === superAdmin._id}
@@ -180,6 +201,38 @@ const SuperAdminsPage = () => {
           )}
         </CardContent>
       </Card>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete SuperAdmin</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete <strong>{superAdminToDelete?.name}</strong> ({superAdminToDelete?.email})?
+              <br />
+              <br />
+              This action cannot be undone and will permanently remove the superadmin from the system.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteConfirm}
+              disabled={deleteLoading !== null}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              {deleteLoading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Deleting...
+                </>
+              ) : (
+                "Delete SuperAdmin"
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
