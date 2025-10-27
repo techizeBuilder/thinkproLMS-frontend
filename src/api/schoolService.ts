@@ -92,7 +92,7 @@ export const schoolService = {
     city?: string; 
     includeInactive?: boolean;
     name?: string;
-    affiliatedTo?: string;
+    board?: string;
     strength?: string;
   }): Promise<{ success: boolean; data: School[] }> => {
     const params = new URLSearchParams();
@@ -100,7 +100,7 @@ export const schoolService = {
     if (filters?.city && filters.city !== 'all') params.append('city', filters.city);
     if (filters?.includeInactive) params.append('includeInactive', 'true');
     if (filters?.name && filters.name !== '') params.append('name', filters.name);
-    if (filters?.affiliatedTo && filters.affiliatedTo !== '') params.append('affiliatedTo', filters.affiliatedTo);
+    if (filters?.board && filters.board !== '') params.append('affiliatedTo', filters.board);
     if (filters?.strength && filters.strength !== 'all') params.append('strength', filters.strength);
     
     const response = await axiosInstance.get(`/schools?${params.toString()}`);

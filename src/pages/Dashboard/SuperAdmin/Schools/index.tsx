@@ -20,14 +20,16 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Plus, MapPin, Building } from "lucide-react";
+import { Plus, MapPin, Building, Loader2 } from "lucide-react";
 import { MobileActions } from "@/components/ui/mobile-actions";
 import { schoolService, type School } from "@/api/schoolService";
 import { toast } from "sonner";
+import { useDebounce } from "@/hooks/useDebounce";
 
 export default function SchoolsPage() {
   const [schools, setSchools] = useState<School[]>([]);
   const [loading, setLoading] = useState(true);
+  const [tableLoading, setTableLoading] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState<string | null>(null);
   const [toggleLoading, setToggleLoading] = useState<string | null>(null);
 
@@ -36,10 +38,12 @@ export default function SchoolsPage() {
   const [selectedCity, setSelectedCity] = useState<string>("all");
   const [includeInactive, setIncludeInactive] = useState<boolean>(false);
   const [searchName, setSearchName] = useState<string>("");
-  const [searchAffiliation, setSearchAffiliation] = useState<string>("");
+  const [searchBoard, setSearchBoard] = useState<string>("");
   const [selectedStrength, setSelectedStrength] = useState<string>("all");
 
-  // Get unique states and cities for filter options
+  // Debounced search values
+  const debouncedSearchName = useDebounce(searchName, 500);
+  const debouncedSearchBoard = useDebounce(searchBoard, 500);
   const states = Array.from(
     new Set(schools.map((school) => school.state))
   ).sort();
@@ -73,20 +77,26 @@ export default function SchoolsPage() {
     selectedState,
     selectedCity,
     includeInactive,
-    searchName,
-    searchAffiliation,
+    debouncedSearchName,
+    debouncedSearchBoard,
     selectedStrength,
   ]);
 
   const fetchSchools = async () => {
     try {
-      setLoading(true);
+      // Use table loading for subsequent requests, full loading for initial load
+      if (schools.length === 0) {
+        setLoading(true);
+      } else {
+        setTableLoading(true);
+      }
+      
       const filters = {
         state: selectedState,
         city: selectedCity,
         includeInactive,
-        name: searchName,
-        affiliatedTo: searchAffiliation,
+        name: debouncedSearchName,
+        board: debouncedSearchBoard,
         strength: selectedStrength,
       };
 
@@ -102,6 +112,7 @@ export default function SchoolsPage() {
       toast.error(error.response?.data?.message || "Failed to fetch schools");
     } finally {
       setLoading(false);
+      setTableLoading(false);
     }
   };
 
@@ -157,7 +168,7 @@ export default function SchoolsPage() {
     setSelectedCity("all");
     setIncludeInactive(false);
     setSearchName("");
-    setSearchAffiliation("");
+    setSearchBoard("");
     setSelectedStrength("all");
   };
 
@@ -304,16 +315,16 @@ export default function SchoolsPage() {
 
             <div className="space-y-1 sm:space-y-2">
               <Label
-                htmlFor="affiliation-search"
+                htmlFor="board-search"
                 className="text-xs sm:text-sm"
               >
-                Search by Affiliation
+                Search by Board
               </Label>
               <Input
-                id="affiliation-search"
-                placeholder="Enter affiliation"
-                value={searchAffiliation}
-                onChange={(e) => setSearchAffiliation(e.target.value)}
+                id="board-search"
+                placeholder="Enter board (e.g., CBSE, ICSE)"
+                value={searchBoard}
+                onChange={(e) => setSearchBoard(e.target.value)}
                 className="h-9 sm:h-10"
               />
             </div>
@@ -382,7 +393,17 @@ export default function SchoolsPage() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {schools.map((school) => (
+                  {tableLoading ? (
+                    <TableRow>
+                      <TableCell colSpan={10} className="text-center py-8">
+                        <div className="flex items-center justify-center space-x-2">
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                          <span>Loading schools...</span>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    schools.map((school) => (
                     <TableRow
                       key={school._id}
                       className={!school.isActive ? "opacity-75" : ""}
@@ -472,7 +493,8 @@ export default function SchoolsPage() {
                         />
                       </TableCell>
                     </TableRow>
-                  ))}
+                    ))
+                  )}
                 </TableBody>
               </Table>
             </div>

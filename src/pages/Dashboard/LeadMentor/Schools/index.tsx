@@ -5,10 +5,11 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Building2, MapPin, Users, Search, Filter } from "lucide-react";
+import { Building2, MapPin, Users, Search, Filter, Loader2 } from "lucide-react";
 import { schoolService } from "@/api/schoolService";
 import { sessionProgressService } from "@/api/sessionProgressService";
 import { useAuth } from "@/contexts/AuthContext";
+import { useDebounce } from "@/hooks/useDebounce";
 
 interface School {
   _id: string;
@@ -34,13 +35,21 @@ export default function LeadMentorSchoolsPage() {
   const { user } = useAuth();
   const [schools, setSchools] = useState<School[]>([]);
   const [loading, setLoading] = useState(true);
+  const [tableLoading, setTableLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedState, setSelectedState] = useState<string>("all");
   const [selectedCity, setSelectedCity] = useState<string>("all");
   const [includeInactive, setIncludeInactive] = useState(false);
   const [searchName, setSearchName] = useState<string>("");
-  const [searchAffiliation, setSearchAffiliation] = useState<string>("");
+  const [searchBoard, setSearchBoard] = useState<string>("");
   const [selectedStrength, setSelectedStrength] = useState<string>("all");
+
+  // Debounced search values
+  const debouncedSearchName = useDebounce(searchName, 500);
+  const debouncedSearchBoard = useDebounce(searchBoard, 500);
+  
+  // Show loading when search values are different from debounced values
+  const isSearching = searchName !== debouncedSearchName || searchBoard !== debouncedSearchBoard;
 
   useEffect(() => {
     fetchSchools();
@@ -120,8 +129,8 @@ export default function LeadMentorSchoolsPage() {
     const matchesActive = includeInactive || school.isActive !== false;
     
     // New filters
-    const matchesName = searchName === "" || school.name.toLowerCase().includes(searchName.toLowerCase());
-    const matchesAffiliation = searchAffiliation === "" || (school.affiliatedTo && school.affiliatedTo.toLowerCase().includes(searchAffiliation.toLowerCase()));
+    const matchesName = debouncedSearchName === "" || school.name.toLowerCase().includes(debouncedSearchName.toLowerCase());
+    const matchesBoard = debouncedSearchBoard === "" || (school.boards && school.boards.some(board => board.toLowerCase().includes(debouncedSearchBoard.toLowerCase())));
     
     // Strength filter logic
     let matchesStrength = true;
@@ -164,7 +173,7 @@ export default function LeadMentorSchoolsPage() {
       }
     }
     
-    return matchesSearch && matchesState && matchesCity && matchesActive && matchesName && matchesAffiliation && matchesStrength;
+    return matchesSearch && matchesState && matchesCity && matchesActive && matchesName && matchesBoard && matchesStrength;
   });
 
   const getBoardColor = (board: string) => {
@@ -295,14 +304,14 @@ export default function LeadMentorSchoolsPage() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="affiliation-search" className="text-sm font-medium">
-                Search by Affiliation
+              <Label htmlFor="board-search" className="text-sm font-medium">
+                Search by Board
               </Label>
               <Input
-                id="affiliation-search"
-                placeholder="Enter affiliation"
-                value={searchAffiliation}
-                onChange={(e) => setSearchAffiliation(e.target.value)}
+                id="board-search"
+                placeholder="Enter board (e.g., CBSE, ICSE)"
+                value={searchBoard}
+                onChange={(e) => setSearchBoard(e.target.value)}
               />
             </div>
 
@@ -365,7 +374,17 @@ export default function LeadMentorSchoolsPage() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {filteredSchools.map((school) => (
+                  {isSearching ? (
+                    <TableRow>
+                      <TableCell colSpan={3} className="text-center py-8">
+                        <div className="flex items-center justify-center space-x-2">
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                          <span>Searching...</span>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    filteredSchools.map((school) => (
                     <TableRow key={school._id} className={school.isActive === false ? 'opacity-75' : ''}>
                       <TableCell className="font-medium">
                         <div>
@@ -423,7 +442,8 @@ export default function LeadMentorSchoolsPage() {
                         </span>
                       </TableCell>
                     </TableRow>
-                  ))}
+                    ))
+                  )}
                 </TableBody>
               </Table>
             </div>
