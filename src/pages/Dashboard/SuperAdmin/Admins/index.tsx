@@ -168,6 +168,7 @@ const SuperAdminsPage = () => {
                       <MobileActions
                         onDelete={!superAdmin.isSystemAdmin ? () => handleDelete(superAdmin._id, superAdmin.name) : undefined}
                         isSystemAdmin={superAdmin.isSystemAdmin}
+                        isSuperAdmin={true}
                         deleteLoading={deleteLoading === superAdmin._id}
                       />
                     </TableCell>

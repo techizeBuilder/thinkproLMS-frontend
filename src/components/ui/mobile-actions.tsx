@@ -35,7 +35,7 @@ export function MobileActions({
   toggleLoading
 }: MobileActionsProps) {
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex justify-end items-center gap-2">
       {/* Desktop: Show individual buttons */}
       <div className="hidden sm:flex gap-2">
         {onResetPassword && (
