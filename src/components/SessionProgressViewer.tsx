@@ -45,6 +45,7 @@ interface SessionProgressData {
   description?: string;
   status: string;
   notes?: string;
+  updatedAt?: string | null;
   // Allow dynamic properties for section-specific data
   [key: string]: any;
 }
@@ -164,7 +165,8 @@ export default function SessionProgressViewer({
                 displayName: session.displayName,
                 description: session.description,
                 status: session.status || "Pending",
-                notes: session.notes || ""
+                notes: session.notes || "",
+                updatedAt: session.updatedAt || null
               }));
 
               gradeSessions.push(...transformedSessions);
@@ -661,6 +663,7 @@ export default function SessionProgressViewer({
                             {gradeData.sections.map((section) => {
                               const sectionStatus = session[`${section}_status`] || "Pending";
                               const sectionNotes = session[`${section}_notes`] || "";
+                              const sectionUpdatedAt = session[`${section}_updatedAt`] || session.updatedAt || null;
                               const isExpanded = !!expandedNotes[`${session.sessionId}-${section}`];
                               const isLongNote = sectionNotes.length > 50;
 
@@ -681,6 +684,16 @@ export default function SessionProgressViewer({
                                         {sectionStatus}
                           </span>
                         </div>
+                                    
+                                    {/* Last Updated Date */}
+                                    {sectionUpdatedAt && (
+                                      <div className="text-[9px] text-gray-500">
+                                        {new Date(sectionUpdatedAt).toLocaleDateString('en-US', {
+                                          month: 'short',
+                                          day: 'numeric'
+                                        })}
+                                      </div>
+                                    )}
                                     
                                     {/* Notes */}
                                     {sectionNotes && (

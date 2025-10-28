@@ -16,6 +16,7 @@ export interface SessionProgress {
   notes: string;
   grade: number;
   status: "Pending" | "In Progress" | "Completed";
+  updatedAt: string | null;
 }
 
 export interface MentorSessionProgress {
