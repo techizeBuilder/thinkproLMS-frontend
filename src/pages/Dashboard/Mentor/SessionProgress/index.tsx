@@ -243,6 +243,7 @@ export default function SessionProgressPage() {
       }
 
       // Update local state immediately
+      const optimisticUpdatedAt = new Date().toISOString();
       setSessions((prev) =>
         prev.map((s) =>
           s.sessionId === sessionId
@@ -250,6 +251,7 @@ export default function SessionProgressPage() {
                 ...s,
                 status: newStatus as "Pending" | "In Progress" | "Completed",
                 isCompleted: newStatus === "Completed",
+                updatedAt: optimisticUpdatedAt,
               }
             : s
         )
@@ -276,6 +278,15 @@ export default function SessionProgressPage() {
       });
 
       console.log("Session status update response:", response);
+      // If backend returns updatedAt in response, sync it
+      const apiUpdatedAt = response?.data?.sessionProgress?.updatedAt;
+      if (apiUpdatedAt) {
+        setSessions((prev) =>
+          prev.map((s) =>
+            s.sessionId === sessionId ? { ...s, updatedAt: apiUpdatedAt } : s
+          )
+        );
+      }
       toast.success(`Session status updated to ${newStatus}`);
     } catch (error: any) {
       console.error("Error updating session status:", error);
@@ -547,9 +558,6 @@ export default function SessionProgressPage() {
                   <TableHead className="min-w-[160px] text-xs">
                     Status
                   </TableHead>
-                  <TableHead className="text-xs min-w-[120px]">
-                    Last Updated
-                  </TableHead>
                   <TableHead className="text-xs min-w-[320px]">Notes</TableHead>
                 </TableRow>
               </TableHeader>
@@ -600,29 +608,22 @@ export default function SessionProgressPage() {
                         {isUpdating && (
                           <Loader2 className="h-3 w-3 sm:h-4 sm:w-4 animate-spin text-gray-500 mt-1" />
                         )}
-                      </TableCell>
-                      <TableCell className="text-gray-600 text-xs">
-                        {session.updatedAt ? (
-                          <div className="text-center">
-                            <div className="font-medium">
-                              {new Date(session.updatedAt).toLocaleDateString('en-US', {
+                        {/* Last Updated - under the status field */}
+                        <div className="mt-1 text-[10px] text-gray-500">
+                          Last updated: {session.updatedAt
+                            ? `${new Date(session.updatedAt).toLocaleDateString('en-US', {
                                 month: 'short',
                                 day: 'numeric',
-                                year: 'numeric'
-                              })}
-                            </div>
-                            <div className="text-[10px] text-gray-500">
-                              {new Date(session.updatedAt).toLocaleTimeString('en-US', {
+                                year: 'numeric',
+                              })} ${new Date(session.updatedAt).toLocaleTimeString('en-US', {
                                 hour: '2-digit',
                                 minute: '2-digit',
-                                hour12: true
-                              })}
-                            </div>
-                          </div>
-                        ) : (
-                          <span className="text-gray-400 text-xs">Never</span>
-                        )}
+                                hour12: true,
+                              })}`
+                            : 'Never'}
+                        </div>
                       </TableCell>
+                      
                       <TableCell>
                         <div className="space-y-2">
                           <Textarea

@@ -200,13 +200,15 @@ export default function SessionProgressViewer({
                 displayName: firstSession.displayName, // Backend already provides the formatted display name
                 description: firstSession.description,
                 status: "Mixed", // Will be determined by section statuses
-                notes: ""
+                notes: "",
+                updatedAt: firstSession.updatedAt || null
               };
               
               // Add section-specific data
               for (const sectionSession of sectionSessions) {
                 sessionEntry[`${sectionSession.section}_status`] = sectionSession.status;
                 sessionEntry[`${sectionSession.section}_notes`] = sectionSession.notes;
+                sessionEntry[`${sectionSession.section}_updatedAt`] = sectionSession.updatedAt || null;
               }
               
               sessionEntries.push(sessionEntry);
@@ -406,8 +408,13 @@ export default function SessionProgressViewer({
         // Add grade header
         workbookData.push([`Grade ${gradeData.grade}`, ""]);
         
-        // Add section headers
-        const headers = ["Session", ...gradeData.sections.map(section => `${section} Status`), ...gradeData.sections.map(section => `${section} Notes`)];
+              // Add section headers (include Updated At for each section)
+              const headers = [
+                "Session",
+                ...gradeData.sections.map(section => `${section} Status`),
+                ...gradeData.sections.map(section => `${section} Updated At`),
+                ...gradeData.sections.map(section => `${section} Notes`),
+              ];
         workbookData.push(headers);
         
         // Add session data
@@ -418,6 +425,15 @@ export default function SessionProgressViewer({
           gradeData.sections.forEach(section => {
             const status = session[`${section}_status`] || "Pending";
             row.push(status);
+          });
+          
+          // Add updated at for each section
+          gradeData.sections.forEach(section => {
+            const updatedAt = session[`${section}_updatedAt`] || session.updatedAt || "";
+            const formatted = updatedAt
+              ? `${new Date(updatedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })} ${new Date(updatedAt).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true })}`
+              : "";
+            row.push(formatted);
           });
           
           // Add notes for each section
