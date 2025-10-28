@@ -282,7 +282,6 @@ export default function AddResourcePage() {
                     <SelectItem value="student">Students</SelectItem>
                     <SelectItem value="mentor">Mentors</SelectItem>
                     <SelectItem value="guest">Guests</SelectItem>
-                    <SelectItem value="all">All Users</SelectItem>
                   </SelectContent>
                 </Select>
               </div>

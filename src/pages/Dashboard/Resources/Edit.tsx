@@ -45,6 +45,14 @@ export default function EditResourcePage() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
+  const basePath = user?.role === 'superadmin' ? '/superadmin' : '/leadmentor';
+  const goBack = () => {
+    if (window.history.length > 2) {
+      navigate(-1);
+    } else {
+      navigate(`${basePath}/resources`);
+    }
+  };
   
   const [formData, setFormData] = useState<UpdateResourceData>({
     title: '',
@@ -96,8 +104,7 @@ export default function EditResourcePage() {
       } catch (error) {
         console.error('Error loading data:', error);
         toast.error('Failed to load resource data');
-        const basePath = user?.role === 'superadmin' ? '/superadmin' : '/leadmentor';
-        navigate(`${basePath}/resources`);
+        goBack();
       } finally {
         setIsLoading(false);
       }
@@ -205,7 +212,7 @@ export default function EditResourcePage() {
       await resourceService.update(id, resourceData);
 
       toast.success('Resource updated successfully!');
-      navigate('/leadmentor/resources');
+      goBack();
     } catch (error) {
       console.error('Error updating resource:', error);
       toast.error('Failed to update resource. Please try again.');
@@ -224,7 +231,7 @@ export default function EditResourcePage() {
     try {
       await resourceService.delete(id);
       toast.success('Resource deleted successfully!');
-      navigate('/leadmentor/resources');
+      goBack();
     } catch (error) {
       console.error('Error deleting resource:', error);
       toast.error('Failed to delete resource. Please try again.');
@@ -280,7 +287,7 @@ export default function EditResourcePage() {
           <p className="text-muted-foreground mb-4">
             The resource you're looking for doesn't exist or has been deleted.
           </p>
-          <Button onClick={() => navigate('/leadmentor/resources')}>
+          <Button onClick={goBack}>
             Back to Resources
           </Button>
         </div>
@@ -294,7 +301,7 @@ export default function EditResourcePage() {
         <Button
           variant="outline"
           size="sm"
-          onClick={() => navigate('/leadmentor/resources')}
+          onClick={goBack}
         >
           <ArrowLeft className="h-4 w-4" />
         </Button>
@@ -351,7 +358,6 @@ export default function EditResourcePage() {
                     <SelectItem value="student">Students</SelectItem>
                     <SelectItem value="mentor">Mentors</SelectItem>
                     <SelectItem value="guest">Guests</SelectItem>
-                    <SelectItem value="all">All Users</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -615,7 +621,7 @@ export default function EditResourcePage() {
           <Button
             type="button"
             variant="outline"
-            onClick={() => navigate('/leadmentor/resources')}
+            onClick={goBack}
           >
             Cancel
           </Button>
