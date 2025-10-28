@@ -90,7 +90,7 @@ export const schoolService = {
   getAll: async (filters?: { 
     state?: string; 
     city?: string; 
-    includeInactive?: boolean;
+    statusFilter?: string;
     name?: string;
     board?: string;
     strength?: string;
@@ -98,7 +98,15 @@ export const schoolService = {
     const params = new URLSearchParams();
     if (filters?.state && filters.state !== 'all') params.append('state', filters.state);
     if (filters?.city && filters.city !== 'all') params.append('city', filters.city);
-    if (filters?.includeInactive) params.append('includeInactive', 'true');
+    if (filters?.statusFilter) {
+      if (filters.statusFilter === 'all') {
+        params.append('includeInactive', 'true');
+      } else if (filters.statusFilter === 'inactive') {
+        params.append('includeInactive', 'true');
+        params.append('inactiveOnly', 'true');
+      }
+      // For 'active', we don't add any parameters (default behavior)
+    }
     if (filters?.name && filters.name !== '') params.append('name', filters.name);
     if (filters?.board && filters.board !== '') params.append('affiliatedTo', filters.board);
     if (filters?.strength && filters.strength !== 'all') params.append('strength', filters.strength);

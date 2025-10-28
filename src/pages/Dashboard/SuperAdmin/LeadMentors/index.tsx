@@ -180,6 +180,7 @@ export default function LeadMentorsPage() {
                       }
                       onDelete={() => handleDelete(mentor._id, mentor.user.name)}
                       deleteLoading={deleteLoading === mentor._id}
+                      isSuperAdmin={true}
                     />
                   </TableCell>
                 </TableRow>

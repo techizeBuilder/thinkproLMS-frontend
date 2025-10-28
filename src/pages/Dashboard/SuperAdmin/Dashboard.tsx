@@ -72,8 +72,8 @@ export default function SuperAdminDashboard() {
 
   const statCards = [
     {
-      title: "Total Schools",
-      value: stats.schools,
+      title: "Active Schools",
+      value: stats.activeSchools,
       icon: School,
       color: "text-blue-600",
       bgColor: "bg-blue-100",
@@ -179,12 +179,12 @@ export default function SuperAdminDashboard() {
           <CardContent>
             <div className="space-y-4">
               <div className="flex justify-between items-center">
-                <span className="text-sm text-gray-600">Total Schools</span>
-                <span className="font-medium">{stats.schools}</span>
-              </div>
-              <div className="flex justify-between items-center">
                 <span className="text-sm text-gray-600">Active Schools</span>
                 <span className="font-medium">{stats.activeSchools}</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-sm text-gray-600">Total Schools</span>
+                <span className="font-medium">{stats.schools}</span>
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-sm text-gray-600">Inactive Schools</span>

@@ -36,7 +36,7 @@ export default function SchoolsPage() {
   // Filter states
   const [selectedState, setSelectedState] = useState<string>("all");
   const [selectedCity, setSelectedCity] = useState<string>("all");
-  const [includeInactive, setIncludeInactive] = useState<boolean>(false);
+  const [statusFilter, setStatusFilter] = useState<string>("active");
   const [searchName, setSearchName] = useState<string>("");
   const [searchBoard, setSearchBoard] = useState<string>("");
   const [selectedStrength, setSelectedStrength] = useState<string>("all");
@@ -76,7 +76,7 @@ export default function SchoolsPage() {
   }, [
     selectedState,
     selectedCity,
-    includeInactive,
+    statusFilter,
     debouncedSearchName,
     debouncedSearchBoard,
     selectedStrength,
@@ -94,7 +94,7 @@ export default function SchoolsPage() {
       const filters = {
         state: selectedState,
         city: selectedCity,
-        includeInactive,
+        statusFilter,
         name: debouncedSearchName,
         board: debouncedSearchBoard,
         strength: selectedStrength,
@@ -166,7 +166,7 @@ export default function SchoolsPage() {
   const clearFilters = () => {
     setSelectedState("all");
     setSelectedCity("all");
-    setIncludeInactive(false);
+    setStatusFilter("active");
     setSearchName("");
     setSearchBoard("");
     setSelectedStrength("all");
@@ -269,18 +269,21 @@ export default function SchoolsPage() {
                 Status
               </Label>
               <Select
-                value={includeInactive ? "all" : "active"}
-                onValueChange={(value) => setIncludeInactive(value === "all")}
+                value={statusFilter}
+                onValueChange={setStatusFilter}
               >
                 <SelectTrigger className="h-9 sm:h-10">
                   <SelectValue placeholder="Select status" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="active">
-                    Active Only ({activeCount})
+                    Active Only
+                  </SelectItem>
+                  <SelectItem value="inactive">
+                    Inactive Only
                   </SelectItem>
                   <SelectItem value="all">
-                    All (Including Inactive) ({activeCount + inactiveCount})
+                    All Schools
                   </SelectItem>
                 </SelectContent>
               </Select>
