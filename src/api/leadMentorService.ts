@@ -53,6 +53,12 @@ export const leadMentorService = {
     return response.data;
   },
 
+  // Get my schools (for lead mentors)
+  getMySchools: async (): Promise<{ success: boolean; data: School[] }> => {
+    const response = await axiosInstance.get("/lead-mentors/my-schools");
+    return response.data;
+  },
+
   // Create new lead mentor
   create: async (data: CreateLeadMentorData): Promise<{ success: boolean; data: LeadMentor; message: string }> => {
     const response = await axiosInstance.post("/lead-mentors", data);

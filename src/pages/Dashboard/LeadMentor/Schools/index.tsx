@@ -8,6 +8,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Building2, MapPin, Users, Search, Filter, Loader2 } from "lucide-react";
 import { schoolService } from "@/api/schoolService";
 import { sessionProgressService } from "@/api/sessionProgressService";
+import { leadMentorService } from "@/api/leadMentorService";
 import { useAuth } from "@/contexts/AuthContext";
 import { useDebounce } from "@/hooks/useDebounce";
 
@@ -58,18 +59,20 @@ export default function LeadMentorSchoolsPage() {
     try {
       setLoading(true);
       
-      // Check if user has global access (superadmin or specific permissions)
-      const hasGlobalAccess = user?.role === "superadmin" || 
-        user?.permissions?.includes("global_school_access");
-      
-      if (hasGlobalAccess) {
-        // Get all schools for global access
+      if (user?.role === "superadmin") {
+        // Superadmin gets all schools
         const response = await schoolService.getAll();
         if (response.success) {
           setSchools(response.data);
         }
+      } else if (user?.role === "leadmentor") {
+        // Lead mentor gets schools based on their access level
+        const response = await leadMentorService.getMySchools();
+        if (response.success) {
+          setSchools(response.data);
+        }
       } else {
-        // Get schools available to this lead mentor
+        // Other roles - get limited schools
         const response = await sessionProgressService.getAvailableSchools();
         // Convert sessionProgressService School format to our School format
         const convertedSchools: School[] = response.map((school: SessionProgressSchool) => ({
