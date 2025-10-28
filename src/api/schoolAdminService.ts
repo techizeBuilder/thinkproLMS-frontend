@@ -11,7 +11,7 @@ export interface User {
 
 export interface SchoolAdmin {
   _id: string;
-  user: User;
+  user: User | null;
   assignedSchool: School;
   phoneNumber: string;
   position?: string;
@@ -160,6 +160,18 @@ export const schoolAdminService = {
   // Delete school admin
   delete: async (id: string): Promise<{ success: boolean; message: string }> => {
     const response = await axiosInstance.delete(`/school-admins/${id}`);
+    return response.data;
+  },
+
+  // Activate school admin
+  activate: async (id: string): Promise<{ success: boolean; data: SchoolAdmin; message: string }> => {
+    const response = await axiosInstance.patch(`/school-admins/${id}/activate`);
+    return response.data;
+  },
+
+  // Deactivate school admin
+  deactivate: async (id: string): Promise<{ success: boolean; data: SchoolAdmin; message: string }> => {
+    const response = await axiosInstance.patch(`/school-admins/${id}/deactivate`);
     return response.data;
   },
 

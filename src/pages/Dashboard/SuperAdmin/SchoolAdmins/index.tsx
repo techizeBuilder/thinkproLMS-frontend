@@ -18,6 +18,16 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Plus, Mail, Phone, CheckCircle } from "lucide-react";
 import { MobileActions } from "@/components/ui/mobile-actions";
 import { schoolAdminService, type SchoolAdmin } from "@/api/schoolAdminService";
@@ -34,6 +44,14 @@ export default function SchoolAdminsPage() {
     id: string;
     name: string;
     email: string;
+  } | null>(null);
+  const [toggleLoading, setToggleLoading] = useState<string | null>(null);
+  const [confirmDialog, setConfirmDialog] = useState<{
+    isOpen: boolean;
+    title: string;
+    message: string;
+    onConfirm: () => void;
+    adminName: string;
   } | null>(null);
   const { user } = useAuth();
   // Filter states
@@ -89,6 +107,37 @@ export default function SchoolAdminsPage() {
       );
     } finally {
       setDeleteLoading(null);
+    }
+  };
+
+  const handleToggleStatus = (id: string, name: string, isActive: boolean) => {
+    setConfirmDialog({
+      isOpen: true,
+      title: isActive ? 'Deactivate School Admin' : 'Activate School Admin',
+      message: `Are you sure you want to ${isActive ? 'deactivate' : 'activate'} ${name}?`,
+      adminName: name,
+      onConfirm: () => performToggleStatus(id, name, isActive)
+    });
+  };
+
+  const performToggleStatus = async (id: string, name: string, isActive: boolean) => {
+    setToggleLoading(id);
+    setConfirmDialog(null);
+    try {
+      const response = isActive 
+        ? await schoolAdminService.deactivate(id)
+        : await schoolAdminService.activate(id);
+      
+      if (response.success) {
+        toast.success(`${name} ${isActive ? 'deactivated' : 'activated'} successfully`);
+        fetchSchoolAdmins(); // Refresh the list
+      }
+    } catch (error: any) {
+      toast.error(
+        error.response?.data?.message || `Failed to ${isActive ? 'deactivate' : 'activate'} school admin`
+      );
+    } finally {
+      setToggleLoading(null);
     }
   };
 
@@ -184,7 +233,7 @@ export default function SchoolAdminsPage() {
                     >
                       <TableCell className="font-medium sticky left-0 bg-background z-10 min-w-[150px]">
                         <div className="flex items-center gap-2">
-                          {admin.user.name}
+                          {admin.user?.name || 'Unknown User'}
                           {!admin.isActive && (
                             <Badge variant="outline" className="text-xs">
                               Inactive
@@ -195,7 +244,7 @@ export default function SchoolAdminsPage() {
                       <TableCell>
                         <div className="flex items-center text-sm">
                           <Mail className="mr-2 h-4 w-4 text-gray-500" />
-                          {admin.user.email}
+                          {admin.user?.email || 'No email'}
                         </div>
                       </TableCell>
                       <TableCell>
@@ -219,10 +268,10 @@ export default function SchoolAdminsPage() {
                         <div className="flex gap-2">
                           <Badge
                             variant={
-                              admin.user.isVerified ? "default" : "secondary"
+                              admin.user?.isVerified ? "default" : "secondary"
                             }
                           >
-                            {admin.user.isVerified ? "Verified" : "Pending"}
+                            {admin.user?.isVerified ? "Verified" : "Pending"}
                           </Badge>
                           <Badge
                             variant={admin.isActive ? "default" : "destructive"}
@@ -237,18 +286,23 @@ export default function SchoolAdminsPage() {
                       <TableCell className="text-right">
                         <MobileActions
                           editUrl={`${basePath}/school-admins/${admin._id}/edit`}
-                          onResetPassword={() =>
+                          onResetPassword={admin.user ? () => {
                             setResetPasswordUser({
-                              id: admin.user._id,
-                              name: admin.user.name,
-                              email: admin.user.email,
-                            })
-                          }
+                              id: admin.user!._id,
+                              name: admin.user!.name,
+                              email: admin.user!.email,
+                            });
+                          } : undefined}
                           onDelete={() =>
-                            handleDelete(admin._id, admin.user.name)
+                            handleDelete(admin._id, admin.user?.name || 'Unknown User')
                           }
-                          deleteLoading={deleteLoading === admin._id}
+                          onToggleStatus={() =>
+                            handleToggleStatus(admin._id, admin.user?.name || 'Unknown User', admin.isActive)
+                          }
+                          isActive={admin.isActive}
                           isSuperAdmin={user?.role === "superadmin"}
+                          deleteLoading={deleteLoading === admin._id}
+                          toggleLoading={toggleLoading === admin._id}
                         />
                       </TableCell>
                     </TableRow>
@@ -270,6 +324,27 @@ export default function SchoolAdminsPage() {
           userEmail={resetPasswordUser.email}
         />
       )}
+
+      {/* Confirmation Dialog */}
+      <AlertDialog open={confirmDialog?.isOpen || false} onOpenChange={(open) => !open && setConfirmDialog(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{confirmDialog?.title}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {confirmDialog?.message}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmDialog?.onConfirm}
+              className={confirmDialog?.title?.includes('Deactivate') ? 'bg-orange-600 hover:bg-orange-700' : 'bg-green-600 hover:bg-green-700'}
+            >
+              {confirmDialog?.title?.includes('Deactivate') ? 'Deactivate' : 'Activate'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
