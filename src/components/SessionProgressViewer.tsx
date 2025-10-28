@@ -29,6 +29,7 @@ import { mentorService, type Mentor } from "@/api/mentorService";
 import { schoolAdminService } from "@/api/schoolAdminService";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
+import { utils as XLSXUtils, writeFile as writeXlsx } from "xlsx";
 
 interface SessionProgressViewerProps {
   title?: string;
@@ -427,12 +428,21 @@ export default function SessionProgressViewer({
             row.push(status);
           });
           
-          // Add updated at for each section
+          // Add updated at for each section - compact format to avoid Excel ####
           gradeData.sections.forEach(section => {
             const updatedAt = session[`${section}_updatedAt`] || session.updatedAt || "";
-            const formatted = updatedAt
-              ? `${new Date(updatedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })} ${new Date(updatedAt).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true })}`
-              : "";
+            const formatted = (() => {
+              if (!updatedAt) return "";
+              const d = new Date(updatedAt);
+              if (isNaN(d.getTime())) return "";
+              const pad = (n: number) => n.toString().padStart(2, '0');
+              const yyyy = d.getFullYear();
+              const mm = pad(d.getMonth() + 1);
+              const dd = pad(d.getDate());
+              const hh = pad(d.getHours());
+              const mi = pad(d.getMinutes());
+              return `${yyyy}-${mm}-${dd} ${hh}:${mi}`; // compact 24h format
+            })();
             row.push(formatted);
           });
           
@@ -448,21 +458,32 @@ export default function SessionProgressViewer({
         workbookData.push([""]); // Empty row between grades
       });
 
-      // Convert to CSV format
-      const csvContent = workbookData.map(row => 
-        row.map((cell: any) => `"${String(cell).replace(/"/g, '""')}"`).join(",")
-      ).join("\n");
+      // Build XLSX worksheet from AoA
+      const ws = XLSXUtils.aoa_to_sheet(workbookData);
 
-      // Create and download file
-      const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-      const link = document.createElement("a");
-      const url = URL.createObjectURL(blob);
-      link.setAttribute("href", url);
-      link.setAttribute("download", `session-progress-${selectedSchool?.name?.replace(/\s+/g, '-') || 'school'}-${new Date().toISOString().split('T')[0]}.csv`);
-      link.style.visibility = "hidden";
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+      // Compute dynamic column widths to avoid #### in Excel
+      const colCount = workbookData.reduce((max, row) => Math.max(max, row.length), 0);
+      const colWidths = new Array(colCount).fill(0).map((_, colIdx) => {
+        let maxLen = 0;
+        for (const row of workbookData) {
+          const cell = row[colIdx];
+          const str = cell == null ? "" : String(cell);
+          if (str.length > maxLen) maxLen = str.length;
+        }
+        const min = 12; // minimum width chars
+        const max = 40; // cap overly long
+        const wch = Math.min(Math.max(maxLen + 2, min), max);
+        return { wch };
+      });
+      (ws as any)["!cols"] = colWidths;
+
+      // Create workbook and save as .xlsx
+      const wb = XLSXUtils.book_new();
+      XLSXUtils.book_append_sheet(wb, ws, "Session Progress");
+      writeXlsx(
+        wb,
+        `session-progress-${selectedSchool?.name?.replace(/\s+/g, '-') || 'school'}-${new Date().toISOString().split('T')[0]}.xlsx`
+      );
       
       toast.success("Session progress exported successfully");
     } catch (error) {
