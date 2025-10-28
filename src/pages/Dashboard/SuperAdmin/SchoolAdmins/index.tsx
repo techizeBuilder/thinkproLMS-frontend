@@ -93,8 +93,19 @@ export default function SchoolAdminsPage() {
     }
   };
 
-  const handleDelete = async (id: string, name: string) => {
+  const handleDelete = (id: string, name: string) => {
+    setConfirmDialog({
+      isOpen: true,
+      title: 'Delete School Admin',
+      message: `Are you sure you want to delete ${name}? This action cannot be undone.`,
+      adminName: name,
+      onConfirm: () => performDelete(id, name)
+    });
+  };
+
+  const performDelete = async (id: string, name: string) => {
     setDeleteLoading(id);
+    setConfirmDialog(null);
     try {
       const response = await schoolAdminService.delete(id);
       if (response.success) {
@@ -293,9 +304,7 @@ export default function SchoolAdminsPage() {
                               email: admin.user!.email,
                             });
                           } : undefined}
-                          onDelete={() =>
-                            handleDelete(admin._id, admin.user?.name || 'Unknown User')
-                          }
+                          onDelete={() => handleDelete(admin._id, admin.user?.name || 'Unknown User')}
                           onToggleStatus={() =>
                             handleToggleStatus(admin._id, admin.user?.name || 'Unknown User', admin.isActive)
                           }
@@ -338,9 +347,19 @@ export default function SchoolAdminsPage() {
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction
               onClick={confirmDialog?.onConfirm}
-              className={confirmDialog?.title?.includes('Deactivate') ? 'bg-orange-600 hover:bg-orange-700' : 'bg-green-600 hover:bg-green-700'}
+              className={
+                confirmDialog?.title?.includes('Delete')
+                  ? 'bg-red-600 hover:bg-red-700'
+                  : confirmDialog?.title?.includes('Deactivate')
+                  ? 'bg-orange-600 hover:bg-orange-700'
+                  : 'bg-green-600 hover:bg-green-700'
+              }
             >
-              {confirmDialog?.title?.includes('Deactivate') ? 'Deactivate' : 'Activate'}
+              {confirmDialog?.title?.includes('Delete')
+                ? 'Delete'
+                : confirmDialog?.title?.includes('Deactivate')
+                ? 'Deactivate'
+                : 'Activate'}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

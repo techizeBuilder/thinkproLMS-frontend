@@ -1,5 +1,15 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -55,6 +65,12 @@ export default function MentorsPage() {
     id: string;
     name: string;
     email: string;
+  } | null>(null);
+  const [confirmDialog, setConfirmDialog] = useState<{
+    isOpen: boolean;
+    title: string;
+    message: string;
+    onConfirm: () => void;
   } | null>(null);
   const navigate = useNavigate();
 
@@ -115,15 +131,27 @@ export default function MentorsPage() {
     setFilteredMentors(filtered);
   };
 
-  const handleDelete = async (id: string) => {
-    if (!confirm("Are you sure you want to delete this mentor?")) return;
-
-    try {
-      await axiosInstance.delete(`/mentors/${id}`);
-      setMentors(mentors.filter((mentor) => mentor._id !== id));
-    } catch (error) {
-      console.error("Error deleting mentor:", error);
-    }
+  const handleDelete = (mentor: Mentor) => {
+    const assigned = Array.isArray(mentor.assignedSchools)
+      ? mentor.assignedSchools.filter((s: any) => !!s && typeof s !== "string").length
+      : 0;
+    setConfirmDialog({
+      isOpen: true,
+      title: "Delete School Mentor",
+      message:
+        assigned > 0
+          ? `${mentor.user?.name ?? "This mentor"} is assigned to ${assigned} school(s). Deleting will remove the mentor account. Consider unassigning schools first. This action cannot be undone.`
+          : `Are you sure you want to delete ${mentor.user?.name ?? "this mentor"}? This action cannot be undone.`,
+      onConfirm: async () => {
+        setConfirmDialog(null);
+        try {
+          await axiosInstance.delete(`/mentors/${mentor._id}`);
+          setMentors((prev) => prev.filter((m) => m._id !== mentor._id));
+        } catch (error) {
+          console.error("Error deleting mentor:", error);
+        }
+      },
+    });
   };
 
   if (loading) {
@@ -282,7 +310,7 @@ export default function MentorsPage() {
                     <Button
                       variant="ghost"
                       size="sm"
-                      onClick={() => handleDelete(mentor._id)}
+                      onClick={() => handleDelete(mentor)}
                       className="text-red-600 hover:text-red-700"
                     >
                       <Trash2 className="h-4 w-4" />
@@ -313,6 +341,20 @@ export default function MentorsPage() {
           userEmail={resetPasswordUser.email}
         />
       )}
+
+      {/* Confirmation Dialog */}
+      <AlertDialog open={confirmDialog?.isOpen || false} onOpenChange={(open) => !open && setConfirmDialog(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{confirmDialog?.title}</AlertDialogTitle>
+            <AlertDialogDescription>{confirmDialog?.message}</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDialog?.onConfirm} className="bg-red-600 hover:bg-red-700">Delete</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

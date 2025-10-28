@@ -1,5 +1,15 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -89,6 +99,12 @@ export default function StudentsPage() {
   const navigate = useNavigate();
   const studentsPath = useStudentsPath();
   const { user } = useAuth();
+  const [confirmDialog, setConfirmDialog] = useState<{
+    isOpen: boolean;
+    title: string;
+    message: string;
+    onConfirm: () => void;
+  } | null>(null);
 
   const grades = [
     "Grade 1",
@@ -179,20 +195,21 @@ export default function StudentsPage() {
     setFilteredStudents(filtered);
   };
 
-  const handleDelete = async (id: string) => {
-    if (
-      !confirm(
-        "Are you sure you want to delete this student? This action cannot be undone."
-      )
-    )
-      return;
-
-    try {
-      await studentService.delete(id);
-      setStudents(students.filter((student) => student._id !== id));
-    } catch (error) {
-      console.error("Error deleting student:", error);
-    }
+  const handleDelete = (id: string, name?: string) => {
+    setConfirmDialog({
+      isOpen: true,
+      title: "Delete Student",
+      message: `Are you sure you want to delete ${name ? name : "this student"}? This action cannot be undone.`,
+      onConfirm: async () => {
+        setConfirmDialog(null);
+        try {
+          await studentService.delete(id);
+          setStudents((prev) => prev.filter((student) => student._id !== id));
+        } catch (error) {
+          console.error("Error deleting student:", error);
+        }
+      },
+    });
   };
 
   const handleDeactivate = async (id: string) => {
@@ -548,11 +565,7 @@ export default function StudentsPage() {
                               email: student.user.email,
                             })
                           }
-                          onDelete={
-                            user?.role === "superadmin"
-                              ? () => handleDelete(student._id)
-                              : undefined
-                          }
+                          onDelete={user?.role === "superadmin" ? () => handleDelete(student._id, student.user.name) : undefined}
                           onToggleStatus={student.isActive ? () => handleDeactivate(student._id) : () => handleActivate(student._id)}
                           isActive={student.isActive}
                           isSuperAdmin={user?.role === "superadmin"}
@@ -617,11 +630,7 @@ export default function StudentsPage() {
                         email: student.user.email,
                       })
                     }
-                    onDelete={
-                      user?.role === "superadmin"
-                        ? () => handleDelete(student._id)
-                        : undefined
-                    }
+                    onDelete={user?.role === "superadmin" ? () => handleDelete(student._id, student.user.name) : undefined}
                     onToggleStatus={student.isActive ? () => handleDeactivate(student._id) : () => handleActivate(student._id)}
                     isActive={student.isActive}
                     isSuperAdmin={user?.role === "superadmin"}
@@ -725,6 +734,22 @@ export default function StudentsPage() {
           userEmail={resetPasswordUser.email}
         />
       )}
+
+      {/* Confirmation Dialog */}
+      <AlertDialog open={confirmDialog?.isOpen || false} onOpenChange={(open) => !open && setConfirmDialog(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{confirmDialog?.title}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {confirmDialog?.message}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDialog?.onConfirm} className="bg-red-600 hover:bg-red-700">Delete</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
