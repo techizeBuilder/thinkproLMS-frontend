@@ -67,9 +67,7 @@ export default function SchoolsPage() {
     { value: "above-5000", label: "Above 5000" },
   ];
 
-  // Count active and inactive schools
-  const activeCount = schools.filter((school) => school.isActive).length;
-  const inactiveCount = schools.filter((school) => !school.isActive).length;
+  // (Removed unused active/inactive counts)
 
   useEffect(() => {
     fetchSchools();

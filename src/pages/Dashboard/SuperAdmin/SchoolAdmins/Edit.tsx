@@ -47,7 +47,7 @@ export default function EditSchoolAdminPage() {
         if (admin) {
           setSchoolAdmin(admin);
           setFormData({
-            name: admin.user.name || "",
+            name: admin.user?.name || "",
             phoneNumber: admin.phoneNumber || "",
             assignedSchool: admin.assignedSchool._id,
             isActive: admin.isActive,
@@ -151,7 +151,7 @@ export default function EditSchoolAdminPage() {
         <CardHeader>
           <CardTitle>School Admin Information</CardTitle>
           <p className="text-sm text-gray-600">
-            Editing: {schoolAdmin.user.name} ({schoolAdmin.user.email})
+            Editing: {schoolAdmin.user?.name || "Unknown"} ({schoolAdmin.user?.email || "No email"})
           </p>
         </CardHeader>
         <CardContent>

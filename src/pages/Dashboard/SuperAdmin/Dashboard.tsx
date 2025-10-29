@@ -39,7 +39,7 @@ export default function SuperAdminDashboard() {
     try {
       const [schoolsRes, schoolsAllRes, schoolAdminsRes, leadMentorsRes, mentorsRes, studentsRes] = await Promise.all([
         schoolService.getAll(), // Active schools only
-        schoolService.getAll({ includeInactive: true }), // All schools (active + inactive)
+        schoolService.getAll({ statusFilter: 'all' }), // All schools (active + inactive)
         schoolAdminService.getAll(),
         leadMentorService.getAll(),
         mentorService.getAll(),
