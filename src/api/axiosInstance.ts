@@ -8,6 +8,20 @@ const axiosInstance = axios.create({
 
 console.log("API_URL:", API_URL);
 
+// Request interceptor to add auth token
+axiosInstance.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
+);
+
 // Interceptor to check if any request returned 401 or 403 and logout the user by clearing localStorage
 axiosInstance.interceptors.response.use(
   (response) => response,

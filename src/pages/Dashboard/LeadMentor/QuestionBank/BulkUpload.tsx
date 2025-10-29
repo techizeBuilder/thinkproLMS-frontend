@@ -96,9 +96,9 @@ const BulkUploadPage: React.FC = () => {
   const downloadTemplate = () => {
     // Create sample data for Excel template
     const data = [
-      ['Question Text', 'Session Name', 'Answer Type', 'Answer Choice 1', 'Answer Choice 2', 'Answer Choice 3', 'Answer Choice 4', 'Answer Choice 5', 'Answer Choice 6', 'Answer Choice 7', 'Answer Choice 8', 'Answer Choice 9', 'Answer Choice 10', 'Correct Answer(s)', 'Difficulty', 'Explanation'],
-      ['What is the capital of India?', 'Introduction to Indian Geography', 'radio', 'Mumbai', 'Delhi', 'Kolkata', 'Chennai', '', '', '', '', '', '', '2', 'Easy', 'Delhi is the capital of India and serves as the seat of the Government of India.'],
-      ['Which of the following are programming languages?', 'Introduction to Programming', 'checkbox', 'Python', 'HTML', 'JavaScript', 'CSS', 'Java', '', '', '', '', '', '1,3,5', 'Medium', 'Python, JavaScript, and Java are programming languages. HTML and CSS are markup and styling languages respectively.']
+      ['Question Text', 'Session ID', 'Answer Type', 'Answer Choice 1', 'Answer Choice 2', 'Answer Choice 3', 'Answer Choice 4', 'Answer Choice 5', 'Answer Choice 6', 'Answer Choice 7', 'Answer Choice 8', 'Answer Choice 9', 'Answer Choice 10', 'Correct Answer(s)', 'Difficulty', 'Explanation'],
+      ['What is the capital of India?', '507f1f77bcf86cd799439011', 'radio', 'Mumbai', 'Delhi', 'Kolkata', 'Chennai', '', '', '', '', '', '', '2', 'Easy', 'Delhi is the capital of India and serves as the seat of the Government of India.'],
+      ['Which of the following are programming languages?', '507f1f77bcf86cd799439012', 'checkbox', 'Python', 'HTML', 'JavaScript', 'CSS', 'Java', '', '', '', '', '', '1,3,5', 'Medium', 'Python, JavaScript, and Java are programming languages. HTML and CSS are markup and styling languages respectively.']
     ];
 
     // Create workbook
@@ -152,7 +152,7 @@ const BulkUploadPage: React.FC = () => {
               <ul className="list-disc list-inside space-y-1 text-sm text-gray-600">
                 <li>File must be in Excel (.xlsx) or CSV format</li>
                 <li>First row must contain column headers</li>
-                <li>Required columns: Question Text, Session Name, Answer Type, Answer Choice 1, Answer Choice 2, Correct Answer(s), Difficulty</li>
+                <li>Required columns: Question Text, Session ID, Answer Type, Answer Choice 1, Answer Choice 2, Correct Answer(s), Difficulty</li>
                 <li>Optional columns: Answer Choice 3-10, Explanation</li>
                 <li>Answer Type: "radio" for single choice, "checkbox" for multiple choice</li>
                 <li>Correct Answer(s): Comma-separated numbers (e.g., "2" for single choice, "1,3,5" for multiple choice)</li>

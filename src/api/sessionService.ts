@@ -62,4 +62,17 @@ export const sessionService = {
   deleteSession: async (id: string): Promise<void> => {
     await axiosInstance.delete(`/sessions/${id}`);
   },
+
+  // Get session IDs for bulk upload
+  getSessionIdsForBulkUpload: async (): Promise<Array<{
+    id: string;
+    name: string;
+    grade: number;
+    sessionNumber: number;
+    moduleName: string;
+    displayName: string;
+  }>> => {
+    const response = await axiosInstance.get('/sessions/bulk-upload-ids');
+    return response.data.data;
+  },
 };

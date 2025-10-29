@@ -245,15 +245,32 @@ export const questionRecommendationService = {
 export const bulkUploadService = {
   // Parse file
   parseFile: async (file: File) => {
+    console.log('Preparing file upload:', {
+      fileName: file.name,
+      fileSize: file.size,
+      fileType: file.type,
+    });
+    
     const formData = new FormData();
     formData.append('file', file);
     
-    const response = await axiosInstance.post('/question-bank/bulk-upload/parse', formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-    });
-    return response.data;
+    console.log('FormData entries:');
+    for (let [key, value] of formData.entries()) {
+      console.log(key, value);
+    }
+    
+    try {
+      const response = await axiosInstance.post('/question-bank/bulk-upload/parse', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+        timeout: 30000, // 30 second timeout
+      });
+      return response.data;
+    } catch (error) {
+      console.error('File upload error:', error);
+      throw error;
+    }
   },
 
   // Save bulk questions

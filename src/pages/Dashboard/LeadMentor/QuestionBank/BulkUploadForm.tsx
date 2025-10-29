@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -7,8 +7,9 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Upload, Download, CheckCircle, XCircle, AlertCircle, FileSpreadsheet } from 'lucide-react';
+import { Upload, Download, CheckCircle, XCircle, AlertCircle, FileSpreadsheet, Copy, Check } from 'lucide-react';
 import { bulkUploadService, type BulkQuestionData } from '@/api/questionBankService';
+import { sessionService } from '@/api/sessionService';
 import { toast } from 'sonner';
 import * as XLSX from 'xlsx';
 
@@ -33,6 +34,47 @@ const BulkUploadForm: React.FC<BulkUploadFormProps> = ({
     errors: number;
     errorDetails: any[];
   } | null>(null);
+  const [sessionIds, setSessionIds] = useState<Array<{
+    id: string;
+    name: string;
+    grade: number;
+    sessionNumber: number;
+    moduleName: string;
+    displayName: string;
+  }>>([]);
+  const [loadingSessionIds, setLoadingSessionIds] = useState(false);
+  const [copiedId, setCopiedId] = useState<string | null>(null);
+
+  // Load session IDs when component mounts
+  useEffect(() => {
+    const loadSessionIds = async () => {
+      try {
+        setLoadingSessionIds(true);
+        const data = await sessionService.getSessionIdsForBulkUpload();
+        setSessionIds(data);
+      } catch (error) {
+        console.error('Error loading session IDs:', error);
+        toast.error('Failed to load session IDs');
+      } finally {
+        setLoadingSessionIds(false);
+      }
+    };
+
+    if (open) {
+      loadSessionIds();
+    }
+  }, [open]);
+
+  const copyToClipboard = async (text: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopiedId(text);
+      toast.success('Session ID copied to clipboard');
+      setTimeout(() => setCopiedId(null), 2000);
+    } catch (error) {
+      toast.error('Failed to copy to clipboard');
+    }
+  };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0];
@@ -154,7 +196,7 @@ const BulkUploadForm: React.FC<BulkUploadFormProps> = ({
                 <p className="mb-2">Required columns:</p>
                 <ul className="list-disc list-inside space-y-1 ml-4">
                   <li>Question Text</li>
-                  <li>Session Name (must match an existing session name in the system)</li>
+                  <li>Session ID (must be a valid MongoDB ObjectId of an existing session)</li>
                   <li>Answer Type (radio, checkbox)</li>
                   <li>Answer Choice 1, Answer Choice 2 (minimum required)</li>
                   <li>Answer Choice 3, Answer Choice 4, ... (optional, up to 15 total)</li>
@@ -163,7 +205,7 @@ const BulkUploadForm: React.FC<BulkUploadFormProps> = ({
                   <li>Explanation (optional explanation for the correct answer)</li>
                 </ul>
                 <p className="mt-2 text-amber-600 font-medium">
-                  ⚠️ Important: The Session Name must exactly match an existing session name in the system. 
+                  ⚠️ Important: The Session ID must be a valid MongoDB ObjectId (24 character hex string) of an existing session in the system. 
                   If the session doesn't exist, the question will be skipped with an error.
                 </p>
               </div>
@@ -175,6 +217,73 @@ const BulkUploadForm: React.FC<BulkUploadFormProps> = ({
                 <Download className="h-4 w-4" />
                 Download Template
               </Button>
+            </CardContent>
+          </Card>
+
+          {/* Session ID Helper */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <FileSpreadsheet className="h-5 w-5" />
+                Available Session IDs
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="text-sm text-gray-600">
+                <p className="mb-2">Copy the Session ID from the table below and use it in your Excel file:</p>
+              </div>
+              
+              {loadingSessionIds ? (
+                <div className="text-center py-4">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+                  <p className="text-sm text-gray-600 mt-2">Loading session IDs...</p>
+                </div>
+              ) : (
+                <div className="max-h-60 overflow-y-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Session ID</TableHead>
+                        <TableHead>Display Name</TableHead>
+                        <TableHead>Module</TableHead>
+                        <TableHead>Grade</TableHead>
+                        <TableHead>Action</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {sessionIds.map((session) => (
+                        <TableRow key={session.id}>
+                          <TableCell className="font-mono text-xs">
+                            <div className="flex items-center gap-2">
+                              <span className="truncate max-w-32">{session.id}</span>
+                            </div>
+                          </TableCell>
+                          <TableCell className="text-sm">{session.displayName}</TableCell>
+                          <TableCell className="text-sm">{session.moduleName}</TableCell>
+                          <TableCell>
+                            <Badge variant="outline">Grade {session.grade}</Badge>
+                          </TableCell>
+                          <TableCell>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => copyToClipboard(session.id)}
+                              className="flex items-center gap-1"
+                            >
+                              {copiedId === session.id ? (
+                                <Check className="h-3 w-3 text-green-600" />
+                              ) : (
+                                <Copy className="h-3 w-3" />
+                              )}
+                              {copiedId === session.id ? 'Copied!' : 'Copy'}
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              )}
             </CardContent>
           </Card>
 
