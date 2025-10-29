@@ -8,6 +8,7 @@ import {
   Search,
   BookOpen,
   GraduationCap,
+  Copy,
 } from "lucide-react";
 import { sessionService, type Session } from "@/api/sessionService";
 import { useAuth } from "@/contexts/AuthContext";
@@ -204,6 +205,7 @@ export default function Sessions() {
                   <TableHead>Module</TableHead>
                   <TableHead>Grade</TableHead>
                   <TableHead>Created at</TableHead>
+                  <TableHead className="text-right">Session ID</TableHead>
                   {hasPermission && (
                     <TableHead className="text-right">Actions</TableHead>
                   )}
@@ -244,6 +246,22 @@ export default function Sessions() {
                       {session.createdAt
                         ? new Date(session.createdAt).toLocaleDateString()
                         : "-"}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <Button
+                        variant="ghost"
+                        className="text-blue-600 hover:text-blue-700 text-sm"
+                        size="sm"
+                        onClick={() => {
+                          navigator.clipboard.writeText(session._id!);
+                          toast.success(
+                            `Session ID: ${session._id} copied to clipboard!`
+                          );
+                        }}
+                      >
+                        <Copy className="h-2 w-2 text-blue-600" />{" "}
+                        {session._id?.slice(-4)}...
+                      </Button>
                     </TableCell>
                     {hasPermission && (
                       <TableCell className="text-right">
