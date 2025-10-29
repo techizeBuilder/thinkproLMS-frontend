@@ -8,6 +8,7 @@ import GuestLogin from "../pages/Auth/GuestLogin";
 import GuestRegister from "../pages/Auth/GuestRegister";
 import NotFound from "../pages/NotFound";
 import SuperAdmin from "../pages/Dashboard/SuperAdmin";
+import CRM from "../pages/CRM";
 import Admin from "../pages/Dashboard/Admin";
 import LeadMentor from "../pages/Dashboard/LeadMentor";
 import SchoolAdmin from "../pages/Dashboard/SchoolAdmin";
@@ -198,6 +199,16 @@ export default function AppRouter() {
         <Route path="/setup/:token" element={<Setup />} />
         <Route path="/guest/login" element={<GuestLogin />} />
         <Route path="/guest/register" element={<GuestRegister />} />
+
+        {/* CRM - SuperAdmin only */}
+        <Route
+          path="/crm"
+          element={
+            <ProtectedRoute role="superadmin">
+              <CRM />
+            </ProtectedRoute>
+          }
+        />
 
         {/* SuperAdmin */}
         <Route

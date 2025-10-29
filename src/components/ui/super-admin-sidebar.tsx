@@ -14,6 +14,8 @@ import {
 } from "@/components/ui/collapsible-sidebar"
 import { Building2, HomeIcon, Users, User, School, UserCheck, Crown, BookOpen, FileText, Layers, Award, Calendar, BarChart3, MessageSquare, Bell, Activity } from "lucide-react"
 import { LogoutButton } from "@/components/ui/logout-button"
+import { Button } from "@/components/ui/button"
+import { Link } from "react-router-dom"
 import { Badge } from "@/components/ui/badge"
 import { useUnreadMessageCount } from "@/hooks/useUnreadMessageCount"
 import { useNotifications } from "@/contexts/NotificationContext"
@@ -170,18 +172,41 @@ export function SuperAdminSidebar({ className }: SuperAdminSidebarProps) {
       <SidebarFooter>
         <div className="space-y-1">
           {!isCollapsed ? (
-            <LogoutButton 
-              variant="ghost" 
-              className="w-full justify-start text-sm" 
-              isCollapsed={false}
-            />
+            <>
+              <Link to="/crm">
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start text-sm"
+                >
+                  <Building2 className="mr-3 h-4 w-4" />
+                  <span>Enter CRM</span>
+                </Button>
+              </Link>
+              <LogoutButton 
+                variant="ghost" 
+                className="w-full justify-start text-sm" 
+                isCollapsed={false}
+              />
+            </>
           ) : (
-            <LogoutButton 
-              variant="ghost" 
-              size="icon" 
-              className="w-full" 
-              isCollapsed={true}
-            />
+            <>
+              <Link to="/crm">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="w-full"
+                >
+                  <Building2 className="h-4 w-4" />
+                  <span className="sr-only">Enter CRM</span>
+                </Button>
+              </Link>
+              <LogoutButton 
+                variant="ghost" 
+                size="icon" 
+                className="w-full" 
+                isCollapsed={true}
+              />
+            </>
           )}
         </div>
       </SidebarFooter>
