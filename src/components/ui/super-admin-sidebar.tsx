@@ -173,7 +173,7 @@ export function SuperAdminSidebar({ className }: SuperAdminSidebarProps) {
         <div className="space-y-1">
           {!isCollapsed ? (
             <>
-              <Link to="/crm">
+              <Link to="/crm/superadmin">
                 <Button
                   variant="ghost"
                   className="w-full justify-start text-sm"
@@ -190,7 +190,7 @@ export function SuperAdminSidebar({ className }: SuperAdminSidebarProps) {
             </>
           ) : (
             <>
-              <Link to="/crm">
+              <Link to="/crm/superadmin">
                 <Button
                   variant="ghost"
                   size="icon"

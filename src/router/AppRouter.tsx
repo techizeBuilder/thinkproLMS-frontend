@@ -8,7 +8,12 @@ import GuestLogin from "../pages/Auth/GuestLogin";
 import GuestRegister from "../pages/Auth/GuestRegister";
 import NotFound from "../pages/NotFound";
 import SuperAdmin from "../pages/Dashboard/SuperAdmin";
-import CRM from "../pages/CRM";
+import CRMSuperAdminLayout from "../pages/CRM/SuperAdmin/Layout";
+import SalesManagersPage from "../pages/CRM/SuperAdmin/SalesManagers";
+import AddSalesManagerPage from "../pages/CRM/SuperAdmin/SalesManagers/Add";
+import SalesExecutivesPage from "../pages/CRM/SuperAdmin/SalesExecutives";
+import AddSalesExecutivePage from "../pages/CRM/SuperAdmin/SalesExecutives/Add";
+import { SidebarProvider } from "@/components/ui/collapsible-sidebar";
 import Admin from "../pages/Dashboard/Admin";
 import LeadMentor from "../pages/Dashboard/LeadMentor";
 import SchoolAdmin from "../pages/Dashboard/SchoolAdmin";
@@ -187,6 +192,22 @@ function RootRoute() {
   return <Navigate to={route} replace />;
 }
 
+function CRMRootRoute() {
+  const { user, loading } = useAuth();
+
+  if (loading) return <div>Loading...</div>;
+  if (!user) return <Navigate to="/login" replace />;
+
+  const roleRouteMap: { [key: string]: string } = {
+    superadmin: "/crm/superadmin",
+    "sales-manager": "/crm/sales-manager",
+    "sales-executive": "/crm/sales-executive",
+  };
+
+  const route = roleRouteMap[user.role] || "/login";
+  return <Navigate to={route} replace />;
+}
+
 export default function AppRouter() {
   return (
     <BrowserRouter>
@@ -200,15 +221,24 @@ export default function AppRouter() {
         <Route path="/guest/login" element={<GuestLogin />} />
         <Route path="/guest/register" element={<GuestRegister />} />
 
-        {/* CRM - SuperAdmin only */}
+        {/* CRM - Role-based routing */}
+        <Route path="/crm" element={<CRMRootRoute />} />
         <Route
-          path="/crm"
+          path="/crm/superadmin/*"
           element={
             <ProtectedRoute role="superadmin">
-              <CRM />
+              <SidebarProvider defaultCollapsed={false}>
+                <CRMSuperAdminLayout />
+              </SidebarProvider>
             </ProtectedRoute>
           }
-        />
+        >
+          <Route index element={<Navigate to="sales-managers" replace />} />
+          <Route path="sales-managers" element={<SalesManagersPage />} />
+          <Route path="sales-managers/add" element={<AddSalesManagerPage />} />
+          <Route path="sales-executives" element={<SalesExecutivesPage />} />
+          <Route path="sales-executives/add" element={<AddSalesExecutivePage />} />
+        </Route>
 
         {/* SuperAdmin */}
         <Route
