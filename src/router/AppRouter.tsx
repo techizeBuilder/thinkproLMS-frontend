@@ -230,19 +230,21 @@ export default function AppRouter() {
           element={
             <ProtectedRoute role="superadmin">
               <SidebarProvider defaultCollapsed={false}>
-                <CRMSuperAdminLayout />
+                <CRMSuperAdminLayout>
+                  <Routes>
+                    <Route index element={<Navigate to="sales-managers" replace />} />
+                    <Route path="sales-managers" element={<SalesManagersPage />} />
+                    <Route path="sales-managers/add" element={<AddSalesManagerPage />} />
+                    <Route path="sales-managers/:id/edit" element={<EditSalesManagerPage />} />
+                    <Route path="sales-executives" element={<SalesExecutivesPage />} />
+                    <Route path="sales-executives/add" element={<AddSalesExecutivePage />} />
+                    <Route path="sales-executives/:id/edit" element={<EditSalesExecutivePage />} />
+                  </Routes>
+                </CRMSuperAdminLayout>
               </SidebarProvider>
             </ProtectedRoute>
           }
-        >
-          <Route index element={<Navigate to="sales-managers" replace />} />
-          <Route path="sales-managers" element={<SalesManagersPage />} />
-          <Route path="sales-managers/add" element={<AddSalesManagerPage />} />
-          <Route path="sales-managers/:id/edit" element={<EditSalesManagerPage />} />
-          <Route path="sales-executives" element={<SalesExecutivesPage />} />
-          <Route path="sales-executives/add" element={<AddSalesExecutivePage />} />
-          <Route path="sales-executives/:id/edit" element={<EditSalesExecutivePage />} />
-        </Route>
+        />
 
         {/* SuperAdmin */}
         <Route

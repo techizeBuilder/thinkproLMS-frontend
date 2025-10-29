@@ -11,6 +11,7 @@ interface PhoneInputProps {
   placeholder?: string;
   id?: string;
   name?: string;
+  disabled?: boolean;
 }
 
 export function PhoneInput({
@@ -20,7 +21,8 @@ export function PhoneInput({
   required = false,
   placeholder = "e.g., 9876543210 or +919876543210",
   id = "phoneNumber",
-  name = "phoneNumber"
+  name = "phoneNumber",
+  disabled = false
 }: PhoneInputProps) {
   const [error, setError] = useState<string | null>(null);
 
@@ -46,6 +48,7 @@ export function PhoneInput({
         onChange={handleChange}
         placeholder={placeholder}
         required={required}
+        disabled={disabled}
         className={error ? "border-red-500" : ""}
       />
       {error && (

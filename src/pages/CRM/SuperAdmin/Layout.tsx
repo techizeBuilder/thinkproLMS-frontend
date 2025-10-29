@@ -1,5 +1,4 @@
-import React from "react";
-import { Outlet, useLocation } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { 
   Sidebar,
@@ -17,7 +16,11 @@ import { Users, UserCheck, Building2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 
-export default function CRMSuperAdminLayout() {
+interface CRMSuperAdminLayoutProps {
+  children: React.ReactNode;
+}
+
+export default function CRMSuperAdminLayout({ children }: CRMSuperAdminLayoutProps) {
   const { isCollapsed } = useSidebar();
   const location = useLocation();
 
@@ -98,7 +101,7 @@ export default function CRMSuperAdminLayout() {
         </header>
         
         <main className="flex-1 overflow-auto">
-          <Outlet />
+          {children}
         </main>
       </div>
     </div>
