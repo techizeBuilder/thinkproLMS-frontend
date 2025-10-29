@@ -14,6 +14,8 @@ import AddSalesManagerPage from "../pages/CRM/SuperAdmin/SalesManagers/Add";
 import SalesExecutivesPage from "../pages/CRM/SuperAdmin/SalesExecutives";
 import AddSalesExecutivePage from "../pages/CRM/SuperAdmin/SalesExecutives/Add";
 import { SidebarProvider } from "@/components/ui/collapsible-sidebar";
+import EditSalesManagerPage from "../pages/CRM/SuperAdmin/SalesManagers/Edit";
+import EditSalesExecutivePage from "../pages/CRM/SuperAdmin/SalesExecutives/Edit";
 import Admin from "../pages/Dashboard/Admin";
 import LeadMentor from "../pages/Dashboard/LeadMentor";
 import SchoolAdmin from "../pages/Dashboard/SchoolAdmin";
@@ -236,8 +238,10 @@ export default function AppRouter() {
           <Route index element={<Navigate to="sales-managers" replace />} />
           <Route path="sales-managers" element={<SalesManagersPage />} />
           <Route path="sales-managers/add" element={<AddSalesManagerPage />} />
+          <Route path="sales-managers/:id/edit" element={<EditSalesManagerPage />} />
           <Route path="sales-executives" element={<SalesExecutivesPage />} />
           <Route path="sales-executives/add" element={<AddSalesExecutivePage />} />
+          <Route path="sales-executives/:id/edit" element={<EditSalesExecutivePage />} />
         </Route>
 
         {/* SuperAdmin */}
