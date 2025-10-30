@@ -119,7 +119,7 @@ export default function Login() {
             </div>
           </div>
           <h1 className="text-4xl font-bold text-white mb-4">
-            Welcome to ThinkPro LMS
+            Welcome to ThinkPro
           </h1>
           <p className="text-xl text-white/90 mb-8 max-w-md">
             Empowering education through innovative learning management
