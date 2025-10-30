@@ -9,10 +9,15 @@ import GuestRegister from "../pages/Auth/GuestRegister";
 import NotFound from "../pages/NotFound";
 import SuperAdmin from "../pages/Dashboard/SuperAdmin";
 import CRMSuperAdminLayout from "../pages/CRM/SuperAdmin/Layout";
+import CRMSalesManagerLayout from "../pages/CRM/SalesManager/Layout";
+import CRMSalesExecutiveLayout from "../pages/CRM/SalesExecutive/Layout";
 import SalesManagersPage from "../pages/CRM/SuperAdmin/SalesManagers";
 import AddSalesManagerPage from "../pages/CRM/SuperAdmin/SalesManagers/Add";
 import SalesExecutivesPage from "../pages/CRM/SuperAdmin/SalesExecutives";
 import AddSalesExecutivePage from "../pages/CRM/SuperAdmin/SalesExecutives/Add";
+import SMSalesExecutivesPage from "../pages/CRM/SalesManager/SalesExecutives";
+import SMAddSalesExecutivePage from "../pages/CRM/SalesManager/SalesExecutives/Add";
+import SMEditSalesExecutivePage from "../pages/CRM/SalesManager/SalesExecutives/Edit";
 import { SidebarProvider } from "@/components/ui/collapsible-sidebar";
 import EditSalesManagerPage from "../pages/CRM/SuperAdmin/SalesManagers/Edit";
 import EditSalesExecutivePage from "../pages/CRM/SuperAdmin/SalesExecutives/Edit";
@@ -160,7 +165,9 @@ function ProtectedRoute({
       admin: "/admin",
       mentor: "/mentor",
       student: "/student",
-      guest: "/guest"
+      guest: "/guest",
+      "sales-manager": "/crm/sales-manager",
+      "sales-executive": "/crm/sales-executive",
     };
     
     const route = roleRouteMap[user.role] || "/login";
@@ -187,7 +194,9 @@ function RootRoute() {
     admin: "/admin",
     mentor: "/mentor",
     student: "/student",
-    guest: "/guest"
+    guest: "/guest",
+    "sales-manager": "/crm/sales-manager",
+    "sales-executive": "/crm/sales-executive",
   };
 
   const route = roleRouteMap[user.role] || "/login";
@@ -241,6 +250,33 @@ export default function AppRouter() {
                     <Route path="sales-executives/:id/edit" element={<EditSalesExecutivePage />} />
                   </Routes>
                 </CRMSuperAdminLayout>
+              </SidebarProvider>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/crm/sales-manager/*"
+          element={
+            <ProtectedRoute role="sales-manager">
+              <SidebarProvider defaultCollapsed={false}>
+                <CRMSalesManagerLayout>
+                  <Routes>
+                    <Route index element={<Navigate to="sales-executives" replace />} />
+                    <Route path="sales-executives" element={<SMSalesExecutivesPage />} />
+                    <Route path="sales-executives/add" element={<SMAddSalesExecutivePage />} />
+                    <Route path="sales-executives/:id/edit" element={<SMEditSalesExecutivePage />} />
+                  </Routes>
+                </CRMSalesManagerLayout>
+              </SidebarProvider>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/crm/sales-executive/*"
+          element={
+            <ProtectedRoute role="sales-executive">
+              <SidebarProvider defaultCollapsed={false}>
+                <CRMSalesExecutiveLayout />
               </SidebarProvider>
             </ProtectedRoute>
           }

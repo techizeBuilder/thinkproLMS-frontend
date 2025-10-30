@@ -15,6 +15,7 @@ import {
 import { Users, UserCheck, Building2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
+import { LogoutButton } from "@/components/ui/logout-button";
 
 interface CRMSuperAdminLayoutProps {
   children: React.ReactNode;
@@ -89,6 +90,7 @@ export default function CRMSuperAdminLayout({ children }: CRMSuperAdminLayoutPro
                 </Button>
               </Link>
             )}
+            <LogoutButton variant="ghost" size={isCollapsed ? "icon" : "default"} className="w-full justify-start" isCollapsed={isCollapsed} />
           </div>
         </SidebarFooter>
       </Sidebar>

@@ -28,6 +28,8 @@ export default function Login() {
         mentor: "/mentor",
         student: "/student",
         guest: "/guest",
+        "sales-manager": "/crm/sales-manager",
+        "sales-executive": "/crm/sales-executive",
       };
 
       const route = roleRouteMap[user.role] || "/login";
@@ -46,7 +48,19 @@ export default function Login() {
         password,
       });
       login(res.data.user, res.data.token); // save user + token
-      navigate(`/${res.data.user.role}`); // redirect based on role
+      const roleRouteMap: { [key: string]: string } = {
+        superadmin: "/superadmin",
+        leadmentor: "/leadmentor",
+        schooladmin: "/schooladmin",
+        admin: "/admin",
+        mentor: "/mentor",
+        student: "/student",
+        guest: "/guest",
+        "sales-manager": "/crm/sales-manager",
+        "sales-executive": "/crm/sales-executive",
+      };
+      const dest = roleRouteMap[res.data.user.role] || "/login";
+      navigate(dest, { replace: true });
     } catch (err: any) {
       setError(err.response?.data?.message || "Login failed");
     } finally {
