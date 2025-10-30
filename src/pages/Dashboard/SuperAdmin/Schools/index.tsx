@@ -53,7 +53,7 @@ export default function SchoolsPage() {
 
   // Strength filter options
   const strengthOptions = [
-    { value: "all", label: "All Strengths" },
+    { value: "all", label: "Select All" },
     { value: "upto-500", label: "Up to 500" },
     { value: "501-1000", label: "501-1000" },
     { value: "1001-1500", label: "1001-1500" },

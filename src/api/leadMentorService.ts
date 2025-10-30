@@ -42,8 +42,12 @@ export interface UpdateLeadMentorData {
 // Lead Mentor API functions
 export const leadMentorService = {
   // Get all lead mentors
-  getAll: async (): Promise<{ success: boolean; data: LeadMentor[] }> => {
-    const response = await axiosInstance.get("/lead-mentors");
+  getAll: async (
+    options?: { includeInactive?: boolean }
+  ): Promise<{ success: boolean; data: LeadMentor[] }> => {
+    const params: any = {};
+    if (options?.includeInactive) params.includeInactive = true;
+    const response = await axiosInstance.get("/lead-mentors", { params });
     return response.data;
   },
 

@@ -9,12 +9,21 @@ import { MobileActions } from "@/components/ui/mobile-actions";
 import { leadMentorService, type LeadMentor } from "@/api/leadMentorService";
 import { toast } from "sonner";
 import { ResetPasswordDialog } from "@/components/ResetPasswordDialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 export default function LeadMentorsPage() {
   const location = useLocation();
   const [leadMentors, setLeadMentors] = useState<LeadMentor[]>([]);
   const [loading, setLoading] = useState(true);
   const [deleteLoading, setDeleteLoading] = useState<string | null>(null);
+  const [toggleLoading, setToggleLoading] = useState<string | null>(null);
+  const [statusFilter, setStatusFilter] = useState<string>("active");
   const [resetPasswordUser, setResetPasswordUser] = useState<{
     id: string;
     name: string;
@@ -27,13 +36,21 @@ export default function LeadMentorsPage() {
 
   useEffect(() => {
     fetchLeadMentors();
-  }, []);
+  }, [statusFilter]);
 
   const fetchLeadMentors = async () => {
     try {
-      const response = await leadMentorService.getAll();
+      setLoading(true);
+      const includeInactive = statusFilter === "all" || statusFilter === "inactive";
+      const response = await leadMentorService.getAll({ includeInactive });
       if (response.success) {
-        setLeadMentors(response.data);
+        let data = response.data;
+        if (statusFilter === "active") {
+          data = data.filter((lm) => lm.isActive);
+        } else if (statusFilter === "inactive") {
+          data = data.filter((lm) => !lm.isActive);
+        }
+        setLeadMentors(data);
       }
     } catch (error: any) {
       toast.error(error.response?.data?.message || "Failed to fetch lead mentors");
@@ -54,6 +71,21 @@ export default function LeadMentorsPage() {
       toast.error(error.response?.data?.message || "Failed to delete lead mentor");
     } finally {
       setDeleteLoading(null);
+    }
+  };
+
+  const handleToggleStatus = async (id: string, name: string, isActive: boolean) => {
+    setToggleLoading(id);
+    try {
+      const response = await leadMentorService.update(id, { isActive: !isActive });
+      if (response.success) {
+        toast.success(`${name} ${isActive ? "deactivated" : "activated"} successfully`);
+        fetchLeadMentors();
+      }
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || `Failed to ${isActive ? "deactivate" : "activate"} lead mentor`);
+    } finally {
+      setToggleLoading(null);
     }
   };
 
@@ -78,6 +110,21 @@ export default function LeadMentorsPage() {
             Add Lead Mentor
           </Button>
         </Link>
+      </div>
+
+      {/* Filter */}
+      <div className="flex items-center gap-2">
+        <span className="text-sm font-medium">Filter:</span>
+        <Select value={statusFilter} onValueChange={setStatusFilter}>
+          <SelectTrigger className="w-32">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All</SelectItem>
+            <SelectItem value="active">Active</SelectItem>
+            <SelectItem value="inactive">Inactive</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
 
       {leadMentors.length === 0 ? (
@@ -114,7 +161,7 @@ export default function LeadMentorsPage() {
                 </TableHeader>
                 <TableBody>
               {leadMentors.map((mentor) => (
-                <TableRow key={mentor._id}>
+                <TableRow key={mentor._id} className={!mentor.isActive ? "opacity-60" : ""}>
                   <TableCell className="font-medium sticky left-0 bg-background z-10 min-w-[150px]">
                     <div className="flex items-center gap-2">
                       <Crown className="h-4 w-4 text-yellow-600" />
@@ -181,6 +228,9 @@ export default function LeadMentorsPage() {
                       onDelete={() => handleDelete(mentor._id, mentor.user.name)}
                       deleteLoading={deleteLoading === mentor._id}
                       isSuperAdmin={true}
+                      onToggleStatus={() => handleToggleStatus(mentor._id, mentor.user.name, mentor.isActive)}
+                      isActive={mentor.isActive}
+                      toggleLoading={toggleLoading === mentor._id}
                     />
                   </TableCell>
                 </TableRow>
