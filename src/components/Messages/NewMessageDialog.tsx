@@ -115,7 +115,7 @@ const NewMessageDialog: React.FC<NewMessageDialogProps> = ({ onSelectUser }) => 
     // Filter by role (always applied since we're using tabs)
     filtered = filtered.filter((user) => user.role === selectedRole);
 
-    // Role-based restrictions for students and mentors
+    // Role-based restrictions for students, mentors, and school admins
     if (currentUser) {
       // If logged-in user is a student, only show mentors from their school
       if (currentUser.role === "student" && selectedRole === "mentor" && currentUser.schoolId) {
@@ -126,12 +126,17 @@ const NewMessageDialog: React.FC<NewMessageDialogProps> = ({ onSelectUser }) => 
       if (currentUser.role === "mentor" && selectedRole === "student" && currentUser.schoolId) {
         filtered = filtered.filter((user) => user.school?._id === currentUser.schoolId);
       }
+
+      // If logged-in user is a school admin, only show mentors from their assigned school
+      if (currentUser.role === "schooladmin" && selectedRole === "mentor" && currentUser.schoolId) {
+        filtered = filtered.filter((user) => user.school?._id === currentUser.schoolId);
+      }
     }
 
     // Filter by school (only if role is not superadmin and user is not restricted by their role)
     if (selectedSchool !== "all" && selectedRole !== "superadmin") {
       // Don't apply school filter if current user is student or mentor (they're already restricted)
-      if (currentUser && (currentUser.role === "student" || currentUser.role === "mentor")) {
+      if (currentUser && (currentUser.role === "student" || currentUser.role === "mentor" || currentUser.role === "schooladmin")) {
         // Already filtered above, don't apply additional filter
       } else {
         filtered = filtered.filter((user) => user.school?._id === selectedSchool);
