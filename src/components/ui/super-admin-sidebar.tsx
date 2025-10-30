@@ -1,6 +1,6 @@
-import * as React from "react"
-import { cn } from "@/lib/utils"
-import { 
+import * as React from "react";
+import { cn } from "@/lib/utils";
+import {
   Sidebar,
   SidebarContent,
   SidebarHeader,
@@ -10,37 +10,54 @@ import {
   SidebarToggle,
   SidebarGroup,
   SidebarFooter,
-  useSidebar
-} from "@/components/ui/collapsible-sidebar"
-import { Building2, HomeIcon, Users, User, School, UserCheck, Crown, BookOpen, FileText, Layers, Award, Calendar, BarChart3, MessageSquare, Bell, Activity } from "lucide-react"
-import { LogoutButton } from "@/components/ui/logout-button"
-import { Button } from "@/components/ui/button"
-import { Link } from "react-router-dom"
-import { Badge } from "@/components/ui/badge"
-import { useUnreadMessageCount } from "@/hooks/useUnreadMessageCount"
-import { useNotifications } from "@/contexts/NotificationContext"
+  useSidebar,
+} from "@/components/ui/collapsible-sidebar";
+import {
+  Building2,
+  HomeIcon,
+  Users,
+  User,
+  School,
+  UserCheck,
+  Crown,
+  BookOpen,
+  FileText,
+  Layers,
+  Award,
+  Calendar,
+  BarChart3,
+  MessageSquare,
+  Bell,
+  Activity,
+} from "lucide-react";
+import { LogoutButton } from "@/components/ui/logout-button";
+import { Button } from "@/components/ui/button";
+import { Link } from "react-router-dom";
+import { Badge } from "@/components/ui/badge";
+import { useUnreadMessageCount } from "@/hooks/useUnreadMessageCount";
+import { useNotifications } from "@/contexts/NotificationContext";
 
 interface SuperAdminSidebarProps extends React.HTMLAttributes<HTMLDivElement> {}
 
 export function SuperAdminSidebar({ className }: SuperAdminSidebarProps) {
-  const { isCollapsed } = useSidebar()
-  const unreadCount = useUnreadMessageCount()
-  const { counts } = useNotifications()
+  const { isCollapsed } = useSidebar();
+  const unreadCount = useUnreadMessageCount();
+  const { counts } = useNotifications();
 
   return (
     <Sidebar className={cn("h-screen", className)}>
       <SidebarHeader>
         <div className="flex items-center gap-2">
-          <img 
-            src="/fancy-logo.jpg" 
-            alt="ThinkPro Logo" 
+          <img
+            src="/fancy-logo.jpg"
+            alt="ThinkPro Logo"
             className="h-8 w-8 object-contain"
           />
           <SidebarTitle>ThinkPro LMS</SidebarTitle>
         </div>
         <SidebarToggle />
       </SidebarHeader>
-      
+
       <SidebarContent className="space-y-4">
         <SidebarGroup label="Dashboard">
           <SidebarNav>
@@ -56,7 +73,10 @@ export function SuperAdminSidebar({ className }: SuperAdminSidebarProps) {
               <div className="flex items-center justify-between w-full">
                 <span>Messages</span>
                 {unreadCount > 0 && !isCollapsed && (
-                  <Badge variant="default" className="ml-auto text-xs px-1.5 py-0 h-5">
+                  <Badge
+                    variant="default"
+                    className="ml-auto text-xs px-1.5 py-0 h-5"
+                  >
                     {unreadCount}
                   </Badge>
                 )}
@@ -129,7 +149,10 @@ export function SuperAdminSidebar({ className }: SuperAdminSidebarProps) {
                 )}
               </div>
             </SidebarNavItem>
-            <SidebarNavItem to="/superadmin/assessment-reports" icon={BarChart3}>
+            <SidebarNavItem
+              to="/superadmin/assessment-reports"
+              icon={BarChart3}
+            >
               Assessment Reports
             </SidebarNavItem>
             <SidebarNavItem to="/superadmin/certificates" icon={Award}>
@@ -176,15 +199,15 @@ export function SuperAdminSidebar({ className }: SuperAdminSidebarProps) {
               <Link to="/crm/superadmin">
                 <Button
                   variant="ghost"
-                  className="w-full justify-start text-sm"
+                  className="w-full justify-start text-sm bg-[#333A47] hover:bg-[#20252d]"
                 >
-                  <Building2 className="mr-3 h-4 w-4" />
-                  <span>Enter CRM</span>
+                  <Building2 className="mr-3 h-4 w-4 text-white" />
+                  <span className="text-white">Enter CRM</span>
                 </Button>
               </Link>
-              <LogoutButton 
-                variant="ghost" 
-                className="w-full justify-start text-sm" 
+              <LogoutButton
+                variant="ghost"
+                className="w-full justify-start text-sm"
                 isCollapsed={false}
               />
             </>
@@ -194,16 +217,16 @@ export function SuperAdminSidebar({ className }: SuperAdminSidebarProps) {
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="w-full"
+                  className="w-full bg-blue-400"
                 >
-                  <Building2 className="h-4 w-4" />
-                  <span className="sr-only">Enter CRM</span>
+                  <Building2 className="h-4 w-4 text-white" />
+                  <span className="sr-only text-white">Enter CRM</span>
                 </Button>
               </Link>
-              <LogoutButton 
-                variant="ghost" 
-                size="icon" 
-                className="w-full" 
+              <LogoutButton
+                variant="ghost"
+                size="icon"
+                className="w-full"
                 isCollapsed={true}
               />
             </>
@@ -211,5 +234,5 @@ export function SuperAdminSidebar({ className }: SuperAdminSidebarProps) {
         </div>
       </SidebarFooter>
     </Sidebar>
-  )
+  );
 }

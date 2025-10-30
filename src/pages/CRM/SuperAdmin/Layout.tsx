@@ -1,6 +1,6 @@
 import { useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
-import { 
+import {
   Sidebar,
   SidebarContent,
   SidebarHeader,
@@ -10,7 +10,7 @@ import {
   SidebarToggle,
   SidebarGroup,
   useSidebar,
-  SidebarFooter
+  SidebarFooter,
 } from "@/components/ui/collapsible-sidebar";
 import { Users, UserCheck, Building2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -21,7 +21,9 @@ interface CRMSuperAdminLayoutProps {
   children: React.ReactNode;
 }
 
-export default function CRMSuperAdminLayout({ children }: CRMSuperAdminLayoutProps) {
+export default function CRMSuperAdminLayout({
+  children,
+}: CRMSuperAdminLayoutProps) {
   const { isCollapsed } = useSidebar();
   const location = useLocation();
 
@@ -32,33 +34,35 @@ export default function CRMSuperAdminLayout({ children }: CRMSuperAdminLayoutPro
       <Sidebar className="h-screen">
         <SidebarHeader>
           <div className="flex items-center gap-2">
-            <img 
-              src="/fancy-logo.jpg" 
-              alt="ThinkPro Logo" 
+            <img
+              src="/fancy-logo.jpg"
+              alt="ThinkPro Logo"
               className="h-8 w-8 object-contain"
             />
             <SidebarTitle>CRM Portal</SidebarTitle>
           </div>
           <SidebarToggle />
         </SidebarHeader>
-        
+
         <SidebarContent className="space-y-4">
           <SidebarGroup label="Management">
             <SidebarNav>
-              <SidebarNavItem 
-                to="/crm/superadmin/sales-managers" 
+              <SidebarNavItem
+                to="/crm/superadmin/sales-managers"
                 icon={UserCheck}
                 className={cn(
-                  isActive("/crm/superadmin/sales-managers") && "bg-green-100 text-green-700 border border-green-200"
+                  isActive("/crm/superadmin/sales-managers") &&
+                    "bg-green-100 text-green-700 border border-green-200"
                 )}
               >
                 Sales Managers
               </SidebarNavItem>
-              <SidebarNavItem 
-                to="/crm/superadmin/sales-executives" 
+              <SidebarNavItem
+                to="/crm/superadmin/sales-executives"
                 icon={Users}
                 className={cn(
-                  isActive("/crm/superadmin/sales-executives") && "bg-green-100 text-green-700 border border-green-200"
+                  isActive("/crm/superadmin/sales-executives") &&
+                    "bg-green-100 text-green-700 border border-green-200"
                 )}
               >
                 Sales Executives
@@ -67,15 +71,15 @@ export default function CRMSuperAdminLayout({ children }: CRMSuperAdminLayoutPro
           </SidebarGroup>
         </SidebarContent>
         <SidebarFooter>
-          <div className="space-y-1">
+          <div className="space-y-2">
             {!isCollapsed ? (
               <Link to="/superadmin">
                 <Button
                   variant="ghost"
-                  className="w-full justify-start text-sm"
+                  className="w-full justify-start text-sm bg-[#333A47] hover:bg-[#20252d]"
                 >
-                  <Building2 className="mr-3 h-4 w-4" />
-                  <span>Back to LMS</span>
+                  <Building2 className="mr-3 h-4 w-4 text-white" />
+                  <span className="text-white">Back to LMS</span>
                 </Button>
               </Link>
             ) : (
@@ -83,14 +87,19 @@ export default function CRMSuperAdminLayout({ children }: CRMSuperAdminLayoutPro
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="w-full"
+                  className="w-full bg-[#333A47] hover:bg-[#20252d]"
                 >
-                  <Building2 className="h-4 w-4" />
+                  <Building2 className="h-4 w-4 text-white" />
                   <span className="sr-only">Back to LMS</span>
                 </Button>
               </Link>
             )}
-            <LogoutButton variant="ghost" size={isCollapsed ? "icon" : "default"} className="w-full justify-start" isCollapsed={isCollapsed} />
+            <LogoutButton
+              variant="ghost"
+              size={isCollapsed ? "icon" : "default"}
+              className="w-full justify-start"
+              isCollapsed={isCollapsed}
+            />
           </div>
         </SidebarFooter>
       </Sidebar>
@@ -98,13 +107,13 @@ export default function CRMSuperAdminLayout({ children }: CRMSuperAdminLayoutPro
       <div className="flex-1 flex flex-col overflow-hidden">
         <header className="bg-white border-b border-gray-200 px-6 py-4">
           <div className="flex items-center justify-between">
-            <h1 className="text-2xl font-semibold text-gray-900">CRM Management</h1>
+            <h1 className="text-2xl font-semibold text-gray-900">
+              CRM Management
+            </h1>
           </div>
         </header>
-        
-        <main className="flex-1 overflow-auto">
-          {children}
-        </main>
+
+        <main className="flex-1 overflow-auto">{children}</main>
       </div>
     </div>
   );
