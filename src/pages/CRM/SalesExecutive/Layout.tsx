@@ -1,8 +1,17 @@
-import { Sidebar, SidebarContent, SidebarHeader, SidebarTitle, SidebarToggle, SidebarFooter, useSidebar } from "@/components/ui/collapsible-sidebar";
+import { Sidebar, SidebarContent, SidebarHeader, SidebarTitle, SidebarToggle, SidebarFooter, useSidebar, SidebarGroup, SidebarNav, SidebarNavItem } from "@/components/ui/collapsible-sidebar";
 import { LogoutButton } from "@/components/ui/logout-button";
+import { NotebookPen } from "lucide-react";
+import { useLocation } from "react-router-dom";
+import { cn } from "@/lib/utils";
 
-export default function CRMSalesExecutiveLayout() {
+interface CRMSalesExecutiveLayoutProps {
+  children?: React.ReactNode;
+}
+
+export default function CRMSalesExecutiveLayout({ children }: CRMSalesExecutiveLayoutProps) {
   const { isCollapsed } = useSidebar();
+  const location = useLocation();
+  const isActive = (path: string) => location.pathname === path;
   return (
     <div className="flex h-screen">
       <Sidebar className="h-screen">
@@ -13,7 +22,22 @@ export default function CRMSalesExecutiveLayout() {
           </div>
           <SidebarToggle />
         </SidebarHeader>
-        <SidebarContent />
+        <SidebarContent>
+          <SidebarGroup label="Management">
+            <SidebarNav>
+              <SidebarNavItem
+                to="/crm/sales-executive/leads"
+                icon={NotebookPen}
+                className={cn(
+                  isActive("/crm/sales-executive/leads") &&
+                    "bg-green-100 text-green-700 border border-green-200"
+                )}
+              >
+                Leads
+              </SidebarNavItem>
+            </SidebarNav>
+          </SidebarGroup>
+        </SidebarContent>
         <SidebarFooter>
           <div className="p-3">
             <LogoutButton variant="ghost" size={isCollapsed ? "icon" : "default"} className="w-full justify-start" isCollapsed={isCollapsed} />
@@ -21,12 +45,7 @@ export default function CRMSalesExecutiveLayout() {
         </SidebarFooter>
       </Sidebar>
 
-      <main className="flex-1 overflow-auto bg-gray-50">
-        <div className="p-6">
-          <h1 className="text-2xl font-semibold">Sales Executive</h1>
-          <p className="text-gray-600 mt-2">Welcome to your CRM area.</p>
-        </div>
-      </main>
+      <main className="flex-1 overflow-auto bg-gray-50">{children}</main>
     </div>
   );
 }

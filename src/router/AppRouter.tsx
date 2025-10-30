@@ -11,11 +11,17 @@ import SuperAdmin from "../pages/Dashboard/SuperAdmin";
 import CRMSuperAdminLayout from "../pages/CRM/SuperAdmin/Layout";
 import CRMSalesManagerLayout from "../pages/CRM/SalesManager/Layout";
 import CRMSalesExecutiveLayout from "../pages/CRM/SalesExecutive/Layout";
+import SESalesLeadsPage from "../pages/CRM/SalesExecutive/Leads";
+import SEAddLeadPage from "../pages/CRM/SalesExecutive/Leads/Add";
+import SEEditLeadPage from "../pages/CRM/SalesExecutive/Leads/Edit";
 import SalesManagersPage from "../pages/CRM/SuperAdmin/SalesManagers";
 import AddSalesManagerPage from "../pages/CRM/SuperAdmin/SalesManagers/Add";
 import SalesExecutivesPage from "../pages/CRM/SuperAdmin/SalesExecutives";
 import AddSalesExecutivePage from "../pages/CRM/SuperAdmin/SalesExecutives/Add";
 import SMSalesExecutivesPage from "../pages/CRM/SalesManager/SalesExecutives";
+import SMSalesLeadsPage from "../pages/CRM/SalesManager/Leads";
+import SMAddLeadPage from "../pages/CRM/SalesManager/Leads/Add";
+import SMEditLeadPage from "../pages/CRM/SalesManager/Leads/Edit";
 import SMAddSalesExecutivePage from "../pages/CRM/SalesManager/SalesExecutives/Add";
 import SMEditSalesExecutivePage from "../pages/CRM/SalesManager/SalesExecutives/Edit";
 import { SidebarProvider } from "@/components/ui/collapsible-sidebar";
@@ -265,6 +271,9 @@ export default function AppRouter() {
                     <Route path="sales-executives" element={<SMSalesExecutivesPage />} />
                     <Route path="sales-executives/add" element={<SMAddSalesExecutivePage />} />
                     <Route path="sales-executives/:id/edit" element={<SMEditSalesExecutivePage />} />
+                    <Route path="leads" element={<SMSalesLeadsPage />} />
+                    <Route path="leads/add" element={<SMAddLeadPage />} />
+                    <Route path="leads/:id/edit" element={<SMEditLeadPage />} />
                   </Routes>
                 </CRMSalesManagerLayout>
               </SidebarProvider>
@@ -276,7 +285,14 @@ export default function AppRouter() {
           element={
             <ProtectedRoute role="sales-executive">
               <SidebarProvider defaultCollapsed={false}>
-                <CRMSalesExecutiveLayout />
+                <CRMSalesExecutiveLayout>
+                  <Routes>
+                    <Route index element={<Navigate to="leads" replace />} />
+                    <Route path="leads" element={<SESalesLeadsPage />} />
+                    <Route path="leads/add" element={<SEAddLeadPage />} />
+                    <Route path="leads/:id/edit" element={<SEEditLeadPage />} />
+                  </Routes>
+                </CRMSalesExecutiveLayout>
               </SidebarProvider>
             </ProtectedRoute>
           }
