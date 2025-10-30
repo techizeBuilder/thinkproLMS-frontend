@@ -69,6 +69,7 @@ export default function SessionProgressViewer({
   const [availableMentors, setAvailableMentors] = useState<Mentor[]>([]);
   const [selectedMentorId, setSelectedMentorId] = useState<string>("");
   const [selectedSchoolId, setSelectedSchoolId] = useState<string>("");
+  const [schoolAdminAssignedSchoolId, setSchoolAdminAssignedSchoolId] = useState<string>("");
   const [searchTerm, setSearchTerm] = useState<string>("");
 
   // Loading states for filters
@@ -298,6 +299,9 @@ export default function SessionProgressViewer({
             }
           }));
           setAvailableMentors(mappedMentors);
+          // Capture the school admin's assigned school id for later intersection
+          const adminSchoolId = response.data?.schoolAdmin?.assignedSchool?._id || "";
+          setSchoolAdminAssignedSchoolId(adminSchoolId);
           // Auto-select first mentor on initial load
           if (mappedMentors.length > 0) {
             setSelectedMentorId(mappedMentors[0]._id);
@@ -372,13 +376,18 @@ export default function SessionProgressViewer({
       if (user?.role === 'schooladmin') {
         // For school admin, get schools from the selected mentor
         const selectedMentor: any = availableMentors.find(mentor => mentor._id === mentorId);
-        const schools: School[] = selectedMentor
+        const mentorSchools: School[] = selectedMentor
           ? (Array.isArray((selectedMentor as any).assignedSchools)
               ? (selectedMentor as any).assignedSchools
               : selectedMentor.assignedSchool
               ? [selectedMentor.assignedSchool]
               : [])
           : [];
+
+        // Restrict to the school admin's assigned school
+        const schools: School[] = schoolAdminAssignedSchoolId
+          ? mentorSchools.filter((s) => s._id === schoolAdminAssignedSchoolId)
+          : mentorSchools;
 
         setAvailableSchools(schools);
         setSelectedSchoolId(schools[0]?._id || "");
