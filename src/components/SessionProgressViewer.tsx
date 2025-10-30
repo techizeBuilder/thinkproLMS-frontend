@@ -26,6 +26,7 @@ import {
 } from "@/api/sessionProgressService";
 import { schoolService, type AvailableGrade } from "@/api/schoolService";
 import { mentorService, type Mentor } from "@/api/mentorService";
+import { leadMentorService } from "@/api/leadMentorService";
 import { schoolAdminService } from "@/api/schoolAdminService";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
@@ -302,12 +303,55 @@ export default function SessionProgressViewer({
             setSelectedMentorId(mappedMentors[0]._id);
           }
         }
+      } else if (user?.role === 'leadmentor') {
+        // For lead mentor, restrict mentors to assigned schools unless global access
+        const [mentorsRes, leadRes] = await Promise.all([
+          mentorService.getAll(),
+          user.leadMentorId
+            ? leadMentorService.getById(user.leadMentorId)
+            : leadMentorService.getMySchools().then((r) => ({ success: true, data: { assignedSchools: r.data, hasAccessToAllSchools: false } as any }))
+        ]);
+
+        if (mentorsRes.success) {
+          let mentors = mentorsRes.data;
+
+          // Determine access scope
+          let hasAllAccess = false;
+          let allowedSchoolIds: string[] = [];
+
+          if ((leadRes as any).success) {
+            const leadData: any = (leadRes as any).data;
+            if (Array.isArray(leadData)) {
+              // Fallback shape shouldn't happen here
+              allowedSchoolIds = [];
+            } else if (leadData?.hasAccessToAllSchools) {
+              hasAllAccess = true;
+            } else if (Array.isArray(leadData?.assignedSchools)) {
+              allowedSchoolIds = leadData.assignedSchools.map((s: any) => s._id);
+            } else if (Array.isArray(leadData)) {
+              allowedSchoolIds = leadData.map((s: any) => s._id);
+            }
+          }
+
+          if (!hasAllAccess && allowedSchoolIds.length > 0) {
+            mentors = mentors.filter((m) =>
+              Array.isArray(m.assignedSchools) &&
+              m.assignedSchools.some((s) => allowedSchoolIds.includes(s._id))
+            );
+          }
+
+          setAvailableMentors(mentors);
+          if (mentors.length > 0) {
+            setSelectedMentorId(mentors[0]._id);
+          } else {
+            setSelectedMentorId("");
+          }
+        }
       } else {
-        // For superadmin and leadmentor roles
+        // For superadmin and other roles, show all mentors
         const response = await mentorService.getAll();
         if (response.success) {
           setAvailableMentors(response.data);
-          // Auto-select first mentor on initial load
           if (response.data.length > 0) {
             setSelectedMentorId(response.data[0]._id);
           }
@@ -338,12 +382,46 @@ export default function SessionProgressViewer({
 
         setAvailableSchools(schools);
         setSelectedSchoolId(schools[0]?._id || "");
+      } else if (user?.role === 'leadmentor') {
+        // For lead mentor, restrict schools to intersection with their assigned schools (unless global access)
+        const [mentorRes, leadRes] = await Promise.all([
+          mentorService.getById(mentorId),
+          user.leadMentorId
+            ? leadMentorService.getById(user.leadMentorId)
+            : leadMentorService.getMySchools().then((r) => ({ success: true, data: { assignedSchools: r.data, hasAccessToAllSchools: false } as any }))
+        ]);
+
+        if (mentorRes.success) {
+          const mentor: any = mentorRes.data;
+          const mentorSchools: School[] = Array.isArray(mentor.assignedSchools)
+            ? mentor.assignedSchools
+            : mentor.assignedSchool
+            ? [mentor.assignedSchool]
+            : [];
+
+          let allowedSchools: School[] = mentorSchools;
+          if ((leadRes as any).success) {
+            const leadData: any = (leadRes as any).data;
+            if (leadData?.hasAccessToAllSchools) {
+              // keep mentorSchools as is
+            } else {
+              const leadSchoolIds = Array.isArray(leadData?.assignedSchools)
+                ? leadData.assignedSchools.map((s: any) => s._id)
+                : Array.isArray(leadData)
+                ? leadData.map((s: any) => s._id)
+                : [];
+              allowedSchools = mentorSchools.filter((s) => leadSchoolIds.includes(s._id));
+            }
+          }
+
+          setAvailableSchools(allowedSchools);
+          setSelectedSchoolId(allowedSchools[0]?._id || "");
+        }
       } else {
-        // For superadmin and leadmentor roles
+        // For superadmin and other roles, show mentor's assigned schools
         const response = await mentorService.getById(mentorId);
         if (response.success) {
           const mentor: any = response.data;
-          // Support both single assignedSchool and multiple assignedSchools
           const schools: School[] = Array.isArray(mentor.assignedSchools)
             ? mentor.assignedSchools
             : mentor.assignedSchool
