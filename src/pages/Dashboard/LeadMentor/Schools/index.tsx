@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -120,6 +121,16 @@ export default function LeadMentorSchoolsPage() {
     { value: "above-5000", label: "Above 5000" },
   ];
 
+  const clearFilters = () => {
+    setSearchTerm("");
+    setSelectedState("all");
+    setSelectedCity("all");
+    setIncludeInactive(false);
+    setSearchName("");
+    setSearchBoard("");
+    setSelectedStrength("all");
+  };
+
   // Filter schools based on search and filters
   const filteredSchools = schools.filter(school => {
     const matchesSearch = school.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -238,7 +249,7 @@ export default function LeadMentorSchoolsPage() {
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
               <Input
@@ -289,6 +300,12 @@ export default function LeadMentorSchoolsPage() {
                 </SelectItem>
               </SelectContent>
             </Select>
+
+            <div className="flex items-end">
+              <Button variant="outline" onClick={clearFilters} className="w-full">
+                Clear Filters
+              </Button>
+            </div>
           </div>
 
           {/* Additional Filters Row */}
