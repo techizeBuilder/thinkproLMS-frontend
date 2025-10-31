@@ -117,8 +117,18 @@ export default function LeadPageForm({
       actionDueDate: lead.actionDueDate
         ? lead.actionDueDate.substring(0, 10)
         : "",
-      salesExecutive: (lead as any).salesExecutive || "none",
-      salesManager: (lead as any).salesManager || "none",
+      salesExecutive:
+        (lead as any).salesExecutive && typeof (lead as any).salesExecutive === "object" && "_id" in (lead as any).salesExecutive
+          ? (lead as any).salesExecutive._id
+          : (typeof (lead as any).salesExecutive === "string" && (lead as any).salesExecutive)
+          ? (lead as any).salesExecutive
+          : "none",
+      salesManager:
+        (lead as any).salesManager && typeof (lead as any).salesManager === "object" && "_id" in (lead as any).salesManager
+          ? (lead as any).salesManager._id
+          : (typeof (lead as any).salesManager === "string" && (lead as any).salesManager)
+          ? (lead as any).salesManager
+          : "none",
       // Handle actionOn: if it's an object (populated), extract _id; otherwise use as is
       actionOn:
         lead.actionOn &&
