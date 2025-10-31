@@ -53,9 +53,19 @@ export interface CreateLeadPayload extends Partial<Lead> {
 	schoolName: string;
 }
 
+export interface LeadPhaseSummaryItem {
+  order: number;
+  phase: string;
+  count: number;
+}
+
 export const leadService = {
 	list: async (params: any = {}): Promise<LeadListResponse> => {
 		const res = await axiosInstance.get("/leads", { params });
+		return res.data;
+	},
+	getPhaseSummary: async (): Promise<{ success: boolean; data: LeadPhaseSummaryItem[] }> => {
+		const res = await axiosInstance.get("/leads/summary");
 		return res.data;
 	},
 	getById: async (id: string): Promise<{ success: boolean; data: Lead }> => {

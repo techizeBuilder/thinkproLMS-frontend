@@ -11,6 +11,7 @@ import SuperAdmin from "../pages/Dashboard/SuperAdmin";
 import CRMSuperAdminLayout from "../pages/CRM/SuperAdmin/Layout";
 import CRMSalesManagerLayout from "../pages/CRM/SalesManager/Layout";
 import CRMSalesExecutiveLayout from "../pages/CRM/SalesExecutive/Layout";
+import CRMSummaryPage from "../pages/CRM/Summary";
 import SESalesLeadsPage from "../pages/CRM/SalesExecutive/Leads";
 import SEAddLeadPage from "../pages/CRM/SalesExecutive/Leads/Add";
 import SEEditLeadPage from "../pages/CRM/SalesExecutive/Leads/Edit";
@@ -267,7 +268,8 @@ export default function AppRouter() {
               <SidebarProvider defaultCollapsed={false}>
                 <CRMSalesManagerLayout>
                   <Routes>
-                    <Route index element={<Navigate to="sales-executives" replace />} />
+                    <Route index element={<Navigate to="summary" replace />} />
+                    <Route path="summary" element={<CRMSummaryPage />} />
                     <Route path="sales-executives" element={<SMSalesExecutivesPage />} />
                     <Route path="sales-executives/add" element={<SMAddSalesExecutivePage />} />
                     <Route path="sales-executives/:id/edit" element={<SMEditSalesExecutivePage />} />
@@ -287,7 +289,8 @@ export default function AppRouter() {
               <SidebarProvider defaultCollapsed={false}>
                 <CRMSalesExecutiveLayout>
                   <Routes>
-                    <Route index element={<Navigate to="leads" replace />} />
+                    <Route index element={<Navigate to="summary" replace />} />
+                    <Route path="summary" element={<CRMSummaryPage />} />
                     <Route path="leads" element={<SESalesLeadsPage />} />
                     <Route path="leads/add" element={<SEAddLeadPage />} />
                     <Route path="leads/:id/edit" element={<SEEditLeadPage />} />

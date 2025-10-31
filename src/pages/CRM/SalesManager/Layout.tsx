@@ -12,7 +12,7 @@ import {
   useSidebar,
   SidebarFooter,
 } from "@/components/ui/collapsible-sidebar";
-import { Users, NotebookPen } from "lucide-react";
+import { Users, NotebookPen, Table } from "lucide-react";
 import { LogoutButton } from "@/components/ui/logout-button";
 
 interface CRMSalesManagerLayoutProps {
@@ -39,6 +39,16 @@ export default function CRMSalesManagerLayout({ children }: CRMSalesManagerLayou
         <SidebarContent className="space-y-4">
           <SidebarGroup label="Management">
             <SidebarNav>
+              <SidebarNavItem
+                to="/crm/sales-manager/summary"
+                icon={Table}
+                className={cn(
+                  isActive("/crm/sales-manager/summary") &&
+                    "bg-green-100 text-green-700 border border-green-200"
+                )}
+              >
+                Summary
+              </SidebarNavItem>
               <SidebarNavItem
                 to="/crm/sales-manager/sales-executives"
                 icon={Users}

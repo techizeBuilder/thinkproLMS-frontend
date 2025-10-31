@@ -1,6 +1,6 @@
 import { Sidebar, SidebarContent, SidebarHeader, SidebarTitle, SidebarToggle, SidebarFooter, useSidebar, SidebarGroup, SidebarNav, SidebarNavItem } from "@/components/ui/collapsible-sidebar";
 import { LogoutButton } from "@/components/ui/logout-button";
-import { NotebookPen } from "lucide-react";
+import { NotebookPen, Table } from "lucide-react";
 import { useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
 
@@ -25,6 +25,16 @@ export default function CRMSalesExecutiveLayout({ children }: CRMSalesExecutiveL
         <SidebarContent>
           <SidebarGroup label="Management">
             <SidebarNav>
+              <SidebarNavItem
+                to="/crm/sales-executive/summary"
+                icon={Table}
+                className={cn(
+                  isActive("/crm/sales-executive/summary") &&
+                    "bg-green-100 text-green-700 border border-green-200"
+                )}
+              >
+                Summary
+              </SidebarNavItem>
               <SidebarNavItem
                 to="/crm/sales-executive/leads"
                 icon={NotebookPen}
