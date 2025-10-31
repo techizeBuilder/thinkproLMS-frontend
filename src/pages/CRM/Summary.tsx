@@ -77,12 +77,12 @@ export default function CRMSummaryPage() {
         actionDueDateTo: actionDueDateTo ? endOfDay(new Date(actionDueDateTo)).toISOString() : undefined,
         actionDueDate: actionDueDateExact || undefined,
       });
-      setRows(res.data || []);
-    } catch (e) {
-      setError("Failed to load summary");
-    } finally {
-      setLoading(false);
-    }
+        setRows(res.data || []);
+      } catch (e) {
+        setError("Failed to load summary");
+      } finally {
+        setLoading(false);
+      }
   };
 
   useEffect(() => {
@@ -146,9 +146,53 @@ export default function CRMSummaryPage() {
 
   return (
     <div className="p-6 space-y-4">
-      <div>
-        <h1 className="text-2xl font-semibold">Summary</h1>
-        <p className="text-gray-600">Phase-wise count of filtered leads</p>
+      <div className="flex items-center justify-between gap-3 flex-wrap">
+        <div>
+          <h1 className="text-2xl font-semibold">Summary</h1>
+          <p className="text-gray-600">Phase-wise count of filtered leads</p>
+        </div>
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            onClick={async () => {
+              const params: any = {
+                search: debouncedSearch || undefined,
+                state: stateFilter && stateFilter !== "all" ? stateFilter : undefined,
+                district: districtFilter || undefined,
+                city: cityFilter || undefined,
+                phase: phaseFilter !== "all" ? phaseFilter : undefined,
+                quality: qualityFilter !== "all" ? qualityFilter : undefined,
+                programType: programFilter !== "all" ? programFilter : undefined,
+                leadSource: leadSourceFilter !== "all" ? leadSourceFilter : undefined,
+                deliveryModel: deliveryModelFilter !== "all" ? deliveryModelFilter : undefined,
+                salesCycle: salesCycleFilter !== "all" ? salesCycleFilter : undefined,
+                boardAffiliated: boardFilter !== "all" ? boardFilter : undefined,
+                pocRole: pocRoleFilter !== "all" ? pocRoleFilter : undefined,
+                actionOn: actionOnFilter !== "all" ? actionOnFilter : undefined,
+                actionDueDateFrom: actionDueDateFrom ? startOfDay(new Date(actionDueDateFrom)).toISOString() : undefined,
+                actionDueDateTo: actionDueDateTo ? endOfDay(new Date(actionDueDateTo)).toISOString() : undefined,
+                actionDueDate: actionDueDateExact || undefined,
+              };
+              const query = new URLSearchParams(
+                Object.entries(params).reduce((acc: any, [k, v]) => {
+                  if (v !== undefined && v !== "") acc[k] = String(v);
+                  return acc;
+                }, {})
+              ).toString();
+              const url = `/leads/summary/export${query ? `?${query}` : ""}`;
+              const resp = await axiosInstance.get(url, { responseType: "blob" });
+              const blob = new Blob([resp.data], { type: resp.headers["content-type"] || "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+              const link = document.createElement("a");
+              link.href = URL.createObjectURL(blob);
+              link.download = "phase-summary.xlsx";
+              document.body.appendChild(link);
+              link.click();
+              link.remove();
+            }}
+          >
+            Export Excel
+          </Button>
+        </div>
       </div>
 
       {/* Filters (same as LeadsTable) */}
