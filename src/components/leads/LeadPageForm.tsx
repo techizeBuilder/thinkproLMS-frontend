@@ -118,15 +118,21 @@ export default function LeadPageForm({
         ? lead.actionDueDate.substring(0, 10)
         : "",
       salesExecutive:
-        (lead as any).salesExecutive && typeof (lead as any).salesExecutive === "object" && "_id" in (lead as any).salesExecutive
+        (lead as any).salesExecutive &&
+        typeof (lead as any).salesExecutive === "object" &&
+        "_id" in (lead as any).salesExecutive
           ? (lead as any).salesExecutive._id
-          : (typeof (lead as any).salesExecutive === "string" && (lead as any).salesExecutive)
+          : typeof (lead as any).salesExecutive === "string" &&
+            (lead as any).salesExecutive
           ? (lead as any).salesExecutive
           : "none",
       salesManager:
-        (lead as any).salesManager && typeof (lead as any).salesManager === "object" && "_id" in (lead as any).salesManager
+        (lead as any).salesManager &&
+        typeof (lead as any).salesManager === "object" &&
+        "_id" in (lead as any).salesManager
           ? (lead as any).salesManager._id
-          : (typeof (lead as any).salesManager === "string" && (lead as any).salesManager)
+          : typeof (lead as any).salesManager === "string" &&
+            (lead as any).salesManager
           ? (lead as any).salesManager
           : "none",
       // Handle actionOn: if it's an object (populated), extract _id; otherwise use as is
@@ -244,12 +250,12 @@ export default function LeadPageForm({
 
   const dateField = (label: string, name: string) => (
     <div className="space-y-2">
-      <Label>{label}</Label>
+      <Label className="block">{label}</Label>
       <Popover>
         <PopoverTrigger asChild>
           <Button variant="outline" className="justify-start">
             <CalendarIcon className="h-4 w-4 mr-2" />
-            {form[name] ? format(new Date(form[name]), "PPP") : "Pick a date"}
+            {form[name] ? format(new Date(form[name]), "PPP") : `Pick ${label}`}
           </Button>
         </PopoverTrigger>
         <PopoverContent className="p-0">
@@ -662,6 +668,24 @@ export default function LeadPageForm({
                 </Select>
               </div>
               <div className="space-y-2">
+                <Label>Delivery Model</Label>
+                <Select
+                  value={form.deliveryModel}
+                  onValueChange={(v) => handleSelect("deliveryModel", v)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Delivery Model" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {["TPA Managed", "School Managed", "Hybrid"].map((d) => (
+                      <SelectItem key={d} value={d}>
+                        {d}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
                 <Label>Quality Of Lead</Label>
                 <Select
                   value={form.qualityOfLead}
@@ -676,12 +700,6 @@ export default function LeadPageForm({
                     <SelectItem value="Hot">Hot</SelectItem>
                   </SelectContent>
                 </Select>
-              </div>
-              <div className="space-y-2">
-                {dateField("Sales Start Date", "salesStartDate")}
-              </div>
-              <div className="space-y-2">
-                {dateField("Sales Closed Date", "salesClosedDate")}
               </div>
               <div className="space-y-2">
                 <Label>Sales Cycle</Label>
@@ -700,6 +718,13 @@ export default function LeadPageForm({
                     ))}
                   </SelectContent>
                 </Select>
+              </div>
+
+              <div className="space-y-2">
+                {dateField("Sales Start Date", "salesStartDate")}
+              </div>
+              <div className="space-y-2">
+                {dateField("Sales Closed Date", "salesClosedDate")}
               </div>
             </div>
 

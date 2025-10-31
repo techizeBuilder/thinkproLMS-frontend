@@ -126,9 +126,15 @@ export default function LeadForm({
         ? lead.actionDueDate.substring(0, 10)
         : "",
       // Handle actionOn: if it's an object (populated), extract _id; otherwise use as is
-      actionOn: (lead.actionOn && typeof lead.actionOn === 'object' && '_id' in lead.actionOn && 'name' in lead.actionOn)
-        ? lead.actionOn._id
-        : (typeof lead.actionOn === 'string' ? lead.actionOn : "none"),
+      actionOn:
+        lead.actionOn &&
+        typeof lead.actionOn === "object" &&
+        "_id" in lead.actionOn &&
+        "name" in lead.actionOn
+          ? lead.actionOn._id
+          : typeof lead.actionOn === "string"
+          ? lead.actionOn
+          : "none",
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [lead?._id]);
@@ -554,6 +560,24 @@ export default function LeadForm({
                     <SelectContent>
                       <SelectItem value="Pilot">Pilot</SelectItem>
                       <SelectItem value="Full">Full</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label>Delivery Model</Label>
+                  <Select
+                    value={form.deliveryModel}
+                    onValueChange={(v) => handleSelect("deliveryModel", v)}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Delivery Model" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {["TPA Managed", "School Managed", "Hybrid"].map((d) => (
+                        <SelectItem key={d} value={d}>
+                          {d}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>
