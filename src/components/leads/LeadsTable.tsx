@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { leadService, type Lead } from "@/api/leadService";
+import axiosInstance from "@/api/axiosInstance";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -63,12 +64,15 @@ export default function LeadsTable({ onAddNew, onEdit }: LeadsTableProps) {
   const [boardFilter, setBoardFilter] = useState("all");
   const [pocRoleFilter, setPocRoleFilter] = useState("all");
   const [actionOnModelFilter, setActionOnModelFilter] = useState("all");
+  const [actionOnFilter, setActionOnFilter] = useState<string>("all");
   const [actionDueDateFrom, setActionDueDateFrom] = useState<string>("");
   const [actionDueDateTo, setActionDueDateTo] = useState<string>("");
   const [actionDueDateExact, setActionDueDateExact] = useState<string>("");
   const [actionDueOpen, setActionDueOpen] = useState(false);
   const [actionDueRange, setActionDueRange] = useState<{ from?: Date; to?: Date }>({});
   const [indiaStates, setIndiaStates] = useState<IndiaState[]>([]);
+  const [managers, setManagers] = useState<Array<{ _id: string; name: string }>>([]);
+  const [executives, setExecutives] = useState<Array<{ _id: string; name: string }>>([]);
   const [confirmDelete, setConfirmDelete] = useState<Lead | null>(null);
 
   const debouncedSearch = useDebounce(search, 400);
@@ -95,6 +99,7 @@ export default function LeadsTable({ onAddNew, onEdit }: LeadsTableProps) {
     boardFilter,
     pocRoleFilter,
     actionOnModelFilter,
+    actionOnFilter,
     actionDueDateFrom,
     actionDueDateTo,
     actionDueDateExact,
@@ -137,6 +142,21 @@ export default function LeadsTable({ onAddNew, onEdit }: LeadsTableProps) {
     loadStates();
   }, []);
 
+  useEffect(() => {
+    (async () => {
+      try {
+        const [mgrRes, execRes] = await Promise.all([
+          axiosInstance.get("/sales/managers"),
+          axiosInstance.get("/sales/executives"),
+        ]);
+        setManagers((mgrRes.data?.data || []).map((m: any) => ({ _id: m._id, name: m.name })));
+        setExecutives((execRes.data?.data || []).map((e: any) => ({ _id: e._id, name: e.name })));
+      } catch {
+        // noop
+      }
+    })();
+  }, []);
+
   const fetchLeads = async (initial = false) => {
     try {
       if (initial) setLoading(true);
@@ -155,6 +175,7 @@ export default function LeadsTable({ onAddNew, onEdit }: LeadsTableProps) {
         boardAffiliated: boardFilter !== "all" ? boardFilter : undefined,
         pocRole: pocRoleFilter !== "all" ? pocRoleFilter : undefined,
         actionOnModel: actionOnModelFilter !== "all" ? actionOnModelFilter : undefined,
+        actionOn: actionOnFilter !== "all" ? actionOnFilter : undefined,
         actionDueDateFrom: actionDueDateFrom ? startOfDay(new Date(actionDueDateFrom)).toISOString() : undefined,
         actionDueDateTo: actionDueDateTo ? endOfDay(new Date(actionDueDateTo)).toISOString() : undefined,
         actionDueDate: actionDueDateExact || undefined,
@@ -207,7 +228,8 @@ export default function LeadsTable({ onAddNew, onEdit }: LeadsTableProps) {
       </div>
 
       <div className="flex flex-col gap-2 items-start">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-3 sm:gap-4">
+        {/* Row 1: Search, State, District, City */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 w-full">
           <div className="space-y-1 sm:space-y-2">
             <Label>Search by Name</Label>
             <Input
@@ -216,6 +238,40 @@ export default function LeadsTable({ onAddNew, onEdit }: LeadsTableProps) {
               onChange={(e) => setSearch(e.target.value)}
             />
           </div>
+          <div className="space-y-1 sm:space-y-2">
+            <Label>State</Label>
+            <Select value={stateFilter} onValueChange={setStateFilter}>
+              <SelectTrigger className="h-10">
+                <SelectValue placeholder="State" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All</SelectItem>
+                {states.map((s) => (
+                  <SelectItem key={s} value={s}>{s}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="space-y-1 sm:space-y-2">
+            <Label>District</Label>
+            <Input
+              placeholder="District"
+              value={districtFilter}
+              onChange={(e) => setDistrictFilter(e.target.value)}
+            />
+          </div>
+          <div className="space-y-1 sm:space-y-2">
+            <Label>City</Label>
+            <Input
+              placeholder="City"
+              value={cityFilter}
+              onChange={(e) => setCityFilter(e.target.value)}
+            />
+          </div>
+        </div>
+
+        {/* Row 2: Remaining filters */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-3 sm:gap-4 w-full">
           <div className="space-y-1 sm:space-y-2">
             <Label>Action Due Date</Label>
             <Popover open={actionDueOpen} onOpenChange={setActionDueOpen}>
@@ -288,14 +344,24 @@ export default function LeadsTable({ onAddNew, onEdit }: LeadsTableProps) {
           </div>
           <div className="space-y-1 sm:space-y-2">
             <Label>Action On</Label>
-            <Select value={actionOnModelFilter} onValueChange={setActionOnModelFilter}>
+            <Select value={actionOnFilter} onValueChange={setActionOnFilter}>
               <SelectTrigger className="h-10">
                 <SelectValue placeholder="Action On" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All</SelectItem>
-                <SelectItem value="SalesManager">Manager</SelectItem>
-                <SelectItem value="SalesExecutive">Executive</SelectItem>
+                <SelectItem value="none" disabled>Managers</SelectItem>
+                {managers.map((m) => (
+                  <SelectItem key={`manager-${m._id}`} value={m._id}>
+                    {m.name}
+                  </SelectItem>
+                ))}
+                <SelectItem value="none2" disabled>Executives</SelectItem>
+                {executives.map((e) => (
+                  <SelectItem key={`exec-${e._id}`} value={e._id}>
+                    {e.name}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
@@ -429,36 +495,6 @@ export default function LeadsTable({ onAddNew, onEdit }: LeadsTableProps) {
                 ))}
               </SelectContent>
             </Select>
-          </div>
-          <div className="space-y-1 sm:space-y-2">
-            <Label>State</Label>
-            <Select value={stateFilter} onValueChange={setStateFilter}>
-              <SelectTrigger className="h-10">
-                <SelectValue placeholder="State" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All</SelectItem>
-                {states.map((s) => (
-                  <SelectItem key={s} value={s}>{s}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="space-y-1 sm:space-y-2">
-            <Label>District</Label>
-            <Input
-              placeholder="District"
-              value={districtFilter}
-              onChange={(e) => setDistrictFilter(e.target.value)}
-            />
-          </div>
-          <div className="space-y-1 sm:space-y-2">
-            <Label>City</Label>
-            <Input
-              placeholder="City"
-              value={cityFilter}
-              onChange={(e) => setCityFilter(e.target.value)}
-            />
           </div>
           <div className="space-y-1 sm:space-y-2">
             <Label>Board Affiliated</Label>
