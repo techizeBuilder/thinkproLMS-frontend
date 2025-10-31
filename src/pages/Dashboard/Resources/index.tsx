@@ -69,6 +69,9 @@ export default function ResourcesPage() {
   const [searchTerm, setSearchTerm] = useState(
     searchParams.get("search") || ""
   );
+  const [selectedGrade, setSelectedGrade] = useState<string | "all">(
+    (searchParams.get("grade") as string | null) || "all"
+  );
   const [sortBy, setSortBy] = useState<"title" | "createdAt" | "viewCount">(
     "createdAt"
   );
@@ -113,6 +116,11 @@ export default function ResourcesPage() {
         filters.type = selectedBucket === "videos" ? "video" : "document";
       }
 
+      // Add grade filter if selected
+      if (selectedGrade !== "all") {
+        filters.grade = String(selectedGrade);
+      }
+
       let response;
       if (selectedUserType === "all") {
         // Fetch all resources regardless of category
@@ -138,7 +146,7 @@ export default function ResourcesPage() {
   // Fetch resources when filters change
   useEffect(() => {
     fetchResources(1);
-  }, [selectedUserType, selectedBucket, searchTerm]);
+  }, [selectedUserType, selectedBucket, searchTerm, selectedGrade]);
 
   // Listen for upload completion and refetch resources
   useUploadCompletion(() => {
@@ -151,8 +159,9 @@ export default function ResourcesPage() {
       category: selectedUserType,
       type: selectedBucket,
       search: searchTerm,
+      grade: selectedGrade,
     });
-  }, [selectedUserType, selectedBucket, searchTerm]);
+  }, [selectedUserType, selectedBucket, searchTerm, selectedGrade]);
 
   const handleAddResource = () => {
     const basePath =
@@ -216,6 +225,8 @@ export default function ResourcesPage() {
   const handleFilterChange = (field: "category" | "type", value: string) => {
     if (field === "category") {
       setSelectedUserType(value as UserType | "all");
+      // Reset grade filter when switching category
+      setSelectedGrade("all");
     } else {
       setSelectedBucket(value as BucketType | "all");
     }
@@ -353,6 +364,22 @@ export default function ResourcesPage() {
                   Videos
                 </div>
               </SelectItem>
+            </SelectContent>
+          </Select>
+
+          {/* Grade Filter (always visible) */}
+          <Select
+            value={selectedGrade}
+            onValueChange={(value) => setSelectedGrade(value as string | "all")}
+          >
+            <SelectTrigger className="w-[160px]">
+              <SelectValue placeholder="Select grade" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Grades</SelectItem>
+              {Array.from({ length: 10 }, (_, i) => String(i + 1)).map((g) => (
+                <SelectItem key={g} value={g}>Grade {g}</SelectItem>
+              ))}
             </SelectContent>
           </Select>
         </div>
