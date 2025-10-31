@@ -66,14 +66,12 @@ export default function CRMSalesExecutiveLayout({
           </SidebarGroup>
         </SidebarContent>
         <SidebarFooter>
-          <div className="p-3">
-            <LogoutButton
-              variant="ghost"
-              size={isCollapsed ? "icon" : "default"}
-              className="w-full justify-start"
-              isCollapsed={isCollapsed}
-            />
-          </div>
+          <LogoutButton
+            variant="ghost"
+            size={isCollapsed ? "icon" : "default"}
+            className="w-full justify-start"
+            isCollapsed={isCollapsed}
+          />
         </SidebarFooter>
       </Sidebar>
 
