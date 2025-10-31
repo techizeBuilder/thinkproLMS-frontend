@@ -32,7 +32,8 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
-import { format } from "date-fns";
+import { format, startOfDay, endOfDay } from "date-fns";
+import { locationService, type State as IndiaState } from "@/api/locationService";
 
 interface LeadsTableProps {
   onAddNew?: () => void;
@@ -43,12 +44,27 @@ export default function LeadsTable({ onAddNew, onEdit }: LeadsTableProps) {
   const [loading, setLoading] = useState(true);
   const [tableLoading, setTableLoading] = useState(false);
   const [leads, setLeads] = useState<Lead[]>([]);
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+  const [total, setTotal] = useState(0);
+  const [pages, setPages] = useState(1);
   const [search, setSearch] = useState("");
   const [stateFilter, setStateFilter] = useState("all");
-  const [districtFilter, setDistrictFilter] = useState("all");
+  const [districtFilter, setDistrictFilter] = useState("");
+  const [cityFilter, setCityFilter] = useState("");
   const [phaseFilter, setPhaseFilter] = useState("all");
   const [qualityFilter, setQualityFilter] = useState("all");
   const [programFilter, setProgramFilter] = useState("all");
+  const [leadSourceFilter, setLeadSourceFilter] = useState("all");
+  const [deliveryModelFilter, setDeliveryModelFilter] = useState("all");
+  const [salesCycleFilter, setSalesCycleFilter] = useState("all");
+  const [boardFilter, setBoardFilter] = useState("all");
+  const [pocRoleFilter, setPocRoleFilter] = useState("all");
+  const [actionOnModelFilter, setActionOnModelFilter] = useState("all");
+  const [actionDueDateFrom, setActionDueDateFrom] = useState<string>("");
+  const [actionDueDateTo, setActionDueDateTo] = useState<string>("");
+  const [actionDueDateExact, setActionDueDateExact] = useState<string>("");
+  const [indiaStates, setIndiaStates] = useState<IndiaState[]>([]);
   const [confirmDelete, setConfirmDelete] = useState<Lead | null>(null);
 
   const debouncedSearch = useDebounce(search, 400);
@@ -65,10 +81,57 @@ export default function LeadsTable({ onAddNew, onEdit }: LeadsTableProps) {
     debouncedSearch,
     stateFilter,
     districtFilter,
+    cityFilter,
     phaseFilter,
     qualityFilter,
     programFilter,
+    leadSourceFilter,
+    deliveryModelFilter,
+    salesCycleFilter,
+    boardFilter,
+    pocRoleFilter,
+    actionOnModelFilter,
+    actionDueDateFrom,
+    actionDueDateTo,
+    actionDueDateExact,
+    page,
+    pageSize,
   ]);
+
+  // Reset to page 1 when filters (except page/pageSize) change
+  useEffect(() => {
+    setPage(1);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    debouncedSearch,
+    stateFilter,
+    districtFilter,
+    cityFilter,
+    phaseFilter,
+    qualityFilter,
+    programFilter,
+    leadSourceFilter,
+    deliveryModelFilter,
+    salesCycleFilter,
+    boardFilter,
+    pocRoleFilter,
+    actionOnModelFilter,
+    actionDueDateFrom,
+    actionDueDateTo,
+    actionDueDateExact,
+  ]);
+
+  useEffect(() => {
+    const loadStates = async () => {
+      try {
+        const states = await locationService.getStates();
+        setIndiaStates(states);
+      } catch (e) {
+        // ignore toast here to avoid noise; filters still usable
+      }
+    };
+    loadStates();
+  }, []);
 
   const fetchLeads = async (initial = false) => {
     try {
@@ -76,14 +139,27 @@ export default function LeadsTable({ onAddNew, onEdit }: LeadsTableProps) {
       else setTableLoading(true);
       const res = await leadService.list({
         search: debouncedSearch || undefined,
-        state: stateFilter,
-        district: districtFilter,
-        phase: phaseFilter,
-        quality: qualityFilter,
-        programType: programFilter,
-        limit: 50,
+        state: stateFilter && stateFilter !== "all" ? stateFilter : undefined,
+        district: districtFilter || undefined,
+        city: cityFilter || undefined,
+        phase: phaseFilter !== "all" ? phaseFilter : undefined,
+        quality: qualityFilter !== "all" ? qualityFilter : undefined,
+        programType: programFilter !== "all" ? programFilter : undefined,
+        leadSource: leadSourceFilter !== "all" ? leadSourceFilter : undefined,
+        deliveryModel: deliveryModelFilter !== "all" ? deliveryModelFilter : undefined,
+        salesCycle: salesCycleFilter !== "all" ? salesCycleFilter : undefined,
+        boardAffiliated: boardFilter !== "all" ? boardFilter : undefined,
+        pocRole: pocRoleFilter !== "all" ? pocRoleFilter : undefined,
+        actionOnModel: actionOnModelFilter !== "all" ? actionOnModelFilter : undefined,
+        actionDueDateFrom: actionDueDateFrom ? startOfDay(new Date(actionDueDateFrom)).toISOString() : undefined,
+        actionDueDateTo: actionDueDateTo ? endOfDay(new Date(actionDueDateTo)).toISOString() : undefined,
+        actionDueDate: actionDueDateExact || undefined,
+        page,
+        limit: pageSize,
       });
       setLeads(res.data || []);
+      setTotal(res.total || 0);
+      setPages(res.pages || 1);
     } finally {
       if (initial) setLoading(false);
       else setTableLoading(false);
@@ -106,18 +182,8 @@ export default function LeadsTable({ onAddNew, onEdit }: LeadsTableProps) {
   };
 
   const states = useMemo(
-    () =>
-      Array.from(
-        new Set(leads.map((l) => l.state).filter(Boolean))
-      ).sort() as string[],
-    [leads]
-  );
-  const districts = useMemo(
-    () =>
-      Array.from(
-        new Set(leads.map((l) => l.district).filter(Boolean))
-      ).sort() as string[],
-    [leads]
+    () => (indiaStates.map((s) => s.name).sort()),
+    [indiaStates]
   );
 
   return (
@@ -137,45 +203,62 @@ export default function LeadsTable({ onAddNew, onEdit }: LeadsTableProps) {
       </div>
 
       <div className="flex flex-col gap-2 items-start">
-        {/* <h1 className="font-medium text-sm sm:text-base lg:text-lg">Filters</h1> */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-3 sm:gap-4">
           <div className="space-y-1 sm:space-y-2">
-            <Label>Search</Label>
+            <Label>Search by Name</Label>
             <Input
-              placeholder="Lead No / School / City"
+              placeholder="Lead No / School Name / City"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
             />
           </div>
           <div className="space-y-1 sm:space-y-2">
-            <Label>State</Label>
-            <Select value={stateFilter} onValueChange={setStateFilter}>
+            <Label>Action Due Date (Exact)</Label>
+            <Input
+              type="date"
+              value={actionDueDateExact}
+              onChange={(e) => setActionDueDateExact(e.target.value)}
+            />
+          </div>
+          <div className="space-y-1 sm:space-y-2">
+            <Label>Action Due Date From</Label>
+            <Input
+              type="date"
+              value={actionDueDateFrom}
+              onChange={(e) => setActionDueDateFrom(e.target.value)}
+            />
+          </div>
+          <div className="space-y-1 sm:space-y-2">
+            <Label>Action Due Date To</Label>
+            <Input
+              type="date"
+              value={actionDueDateTo}
+              onChange={(e) => setActionDueDateTo(e.target.value)}
+            />
+          </div>
+          <div className="space-y-1 sm:space-y-2">
+            <Label>Action On</Label>
+            <Select value={actionOnModelFilter} onValueChange={setActionOnModelFilter}>
               <SelectTrigger className="h-10">
-                <SelectValue placeholder="State" />
+                <SelectValue placeholder="Action On" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All</SelectItem>
-                {states.map((s) => (
-                  <SelectItem key={s} value={s}>
-                    {s}
-                  </SelectItem>
-                ))}
+                <SelectItem value="SalesManager">Manager</SelectItem>
+                <SelectItem value="SalesExecutive">Executive</SelectItem>
               </SelectContent>
             </Select>
           </div>
           <div className="space-y-1 sm:space-y-2">
-            <Label>District</Label>
-            <Select value={districtFilter} onValueChange={setDistrictFilter}>
+            <Label>TPA Sales POC</Label>
+            <Select value={pocRoleFilter} onValueChange={setPocRoleFilter}>
               <SelectTrigger className="h-10">
-                <SelectValue placeholder="District" />
+                <SelectValue placeholder="POC Role" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All</SelectItem>
-                {districts.map((d) => (
-                  <SelectItem key={d} value={d}>
-                    {d}
-                  </SelectItem>
-                ))}
+                <SelectItem value="Manager">Manager</SelectItem>
+                <SelectItem value="Executive">Executive</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -224,17 +307,15 @@ export default function LeadsTable({ onAddNew, onEdit }: LeadsTableProps) {
             </Select>
           </div>
           <div className="space-y-1 sm:space-y-2">
-            <Label>Quality</Label>
-            <Select value={qualityFilter} onValueChange={setQualityFilter}>
+            <Label>Lead Source</Label>
+            <Select value={leadSourceFilter} onValueChange={setLeadSourceFilter}>
               <SelectTrigger className="h-10">
-                <SelectValue placeholder="Quality" />
+                <SelectValue placeholder="Lead Source" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All</SelectItem>
-                {["Cold", "Warm", "Hot"].map((q) => (
-                  <SelectItem key={q} value={q}>
-                    {q}
-                  </SelectItem>
+                {['Internal','Channel Partner'].map((s) => (
+                  <SelectItem key={s} value={s}>{s}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
@@ -251,6 +332,94 @@ export default function LeadsTable({ onAddNew, onEdit }: LeadsTableProps) {
                   <SelectItem key={v} value={v}>
                     {v}
                   </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="space-y-1 sm:space-y-2">
+            <Label>Quality Of Lead</Label>
+            <Select value={qualityFilter} onValueChange={setQualityFilter}>
+              <SelectTrigger className="h-10">
+                <SelectValue placeholder="Quality" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All</SelectItem>
+                {["Cold", "Warm", "Hot"].map((q) => (
+                  <SelectItem key={q} value={q}>
+                    {q}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="space-y-1 sm:space-y-2">
+            <Label>Delivery Model</Label>
+            <Select value={deliveryModelFilter} onValueChange={setDeliveryModelFilter}>
+              <SelectTrigger className="h-10">
+                <SelectValue placeholder="Delivery Model" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All</SelectItem>
+                {["TPA Managed","School Managed","Hybrid"].map((m) => (
+                  <SelectItem key={m} value={m}>{m}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="space-y-1 sm:space-y-2">
+            <Label>Sales Cycle</Label>
+            <Select value={salesCycleFilter} onValueChange={setSalesCycleFilter}>
+              <SelectTrigger className="h-10">
+                <SelectValue placeholder="Sales Cycle" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All</SelectItem>
+                {["2025-2026","2026-2027"].map((c) => (
+                  <SelectItem key={c} value={c}>{c}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="space-y-1 sm:space-y-2">
+            <Label>State</Label>
+            <Select value={stateFilter} onValueChange={setStateFilter}>
+              <SelectTrigger className="h-10">
+                <SelectValue placeholder="State" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All</SelectItem>
+                {states.map((s) => (
+                  <SelectItem key={s} value={s}>{s}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="space-y-1 sm:space-y-2">
+            <Label>District</Label>
+            <Input
+              placeholder="District"
+              value={districtFilter}
+              onChange={(e) => setDistrictFilter(e.target.value)}
+            />
+          </div>
+          <div className="space-y-1 sm:space-y-2">
+            <Label>City</Label>
+            <Input
+              placeholder="City"
+              value={cityFilter}
+              onChange={(e) => setCityFilter(e.target.value)}
+            />
+          </div>
+          <div className="space-y-1 sm:space-y-2">
+            <Label>Board Affiliated</Label>
+            <Select value={boardFilter} onValueChange={setBoardFilter}>
+              <SelectTrigger className="h-10">
+                <SelectValue placeholder="Board" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All</SelectItem>
+                {["CBSE","ICSE","State Board","IGCSE","IB","Other"].map((b) => (
+                  <SelectItem key={b} value={b}>{b}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
@@ -463,6 +632,44 @@ export default function LeadsTable({ onAddNew, onEdit }: LeadsTableProps) {
           </div>
         </CardContent>
       </Card>
+
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
+        <div className="text-sm text-gray-600">
+          Showing {leads.length ? (page - 1) * pageSize + 1 : 0} - {Math.min(page * pageSize, total)} of {total}
+        </div>
+        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
+            <Label>Rows per page</Label>
+            <Select value={String(pageSize)} onValueChange={(v) => setPageSize(Number(v))}>
+              <SelectTrigger className="h-9 w-[90px]">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {[10,20,30,40,50].map((n) => (
+                  <SelectItem key={n} value={String(n)}>{n}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              disabled={page <= 1 || loading || tableLoading}
+              onClick={() => setPage((p) => Math.max(1, p - 1))}
+            >
+              Prev
+            </Button>
+            <div className="text-sm">Page {page} of {Math.max(1, pages)}</div>
+            <Button
+              variant="outline"
+              disabled={page >= pages || loading || tableLoading}
+              onClick={() => setPage((p) => Math.min(pages, p + 1))}
+            >
+              Next
+            </Button>
+          </div>
+        </div>
+      </div>
 
       <AlertDialog
         open={!!confirmDelete}
