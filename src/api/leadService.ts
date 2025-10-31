@@ -65,8 +65,8 @@ export const leadService = {
 		const res = await axiosInstance.get("/leads", { params });
 		return res.data;
 	},
-	getPhaseSummary: async (): Promise<{ success: boolean; data: LeadPhaseSummaryItem[] }> => {
-		const res = await axiosInstance.get("/leads/summary");
+		getPhaseSummary: async (params: any = {}): Promise<{ success: boolean; data: LeadPhaseSummaryItem[] }> => {
+			const res = await axiosInstance.get("/leads/summary", { params });
 		return res.data;
 	},
 	getById: async (id: string): Promise<{ success: boolean; data: Lead }> => {
