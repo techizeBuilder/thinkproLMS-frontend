@@ -40,15 +40,21 @@ export default function CRMSummaryPage() {
             <tr>
               <th className="text-left px-4 py-2 border-b w-16">#</th>
               <th className="text-left px-4 py-2 border-b">Phase</th>
-              <th className="text-right px-4 py-2 border-b w-40">No of Schools</th>
+              <th className="text-right px-4 py-2 border-b w-40">
+                No of Schools
+              </th>
             </tr>
           </thead>
           <tbody>
             {rows.map((r) => (
               <tr key={r.order} className="odd:bg-white even:bg-gray-50">
-                <td className="px-4 py-2 border-b align-top">{r.order}.</td>
+                <td className="px-4 py-2 border-b align-top">
+                  {r.order < 10 ? `0${r.order}` : r.order}
+                </td>
                 <td className="px-4 py-2 border-b align-top">{r.phase}</td>
-                <td className="px-4 py-2 border-b text-right align-top">{r.count}</td>
+                <td className="px-4 py-2 border-b text-right align-top">
+                  {r.count}
+                </td>
               </tr>
             ))}
           </tbody>
@@ -57,5 +63,3 @@ export default function CRMSummaryPage() {
     </div>
   );
 }
-
-
