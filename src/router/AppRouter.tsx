@@ -124,7 +124,10 @@ import StudentDashboard from "../pages/Dashboard/Student/Dashboard";
 import StudentNotificationsPage from "../pages/Dashboard/Student/Notifications";
 
 // Certificate Routes
-import { certificateRoutes, studentCertificateRoutes } from "./certificateRoutes";
+import {
+  certificateRoutes,
+  studentCertificateRoutes,
+} from "./certificateRoutes";
 
 // Dashboard Components
 import SuperAdminDashboard from "../pages/Dashboard/SuperAdmin/Dashboard";
@@ -162,12 +165,12 @@ function ProtectedRoute({
 
   if (loading) return <div>Loading...</div>;
   if (!user) return <Navigate to="/login" replace />;
-  
+
   if (role && user.role !== role) {
     // Map roles to their appropriate routes for redirection
     const roleRouteMap: { [key: string]: string } = {
       superadmin: "/superadmin",
-      leadmentor: "/leadmentor", 
+      leadmentor: "/leadmentor",
       schooladmin: "/schooladmin",
       admin: "/admin",
       mentor: "/mentor",
@@ -176,11 +179,11 @@ function ProtectedRoute({
       "sales-manager": "/crm/sales-manager",
       "sales-executive": "/crm/sales-executive",
     };
-    
+
     const route = roleRouteMap[user.role] || "/login";
     return <Navigate to={route} replace />;
   }
-  
+
   return children;
 }
 
@@ -188,7 +191,7 @@ function RootRoute() {
   const { user, loading } = useAuth();
 
   if (loading) return <div>Loading...</div>;
-  
+
   if (!user) {
     return <Navigate to="/login" replace />;
   }
@@ -196,7 +199,7 @@ function RootRoute() {
   // Redirect to user's role-based dashboard
   const roleRouteMap: { [key: string]: string } = {
     superadmin: "/superadmin",
-    leadmentor: "/leadmentor", 
+    leadmentor: "/leadmentor",
     schooladmin: "/schooladmin",
     admin: "/admin",
     mentor: "/mentor",
@@ -232,7 +235,7 @@ export default function AppRouter() {
       <Routes>
         {/* Root Route - Authentication Check */}
         <Route path="/" element={<RootRoute />} />
-        
+
         {/* Public */}
         <Route path="/login" element={<Login />} />
         <Route path="/setup/:token" element={<Setup />} />
@@ -248,13 +251,34 @@ export default function AppRouter() {
               <SidebarProvider defaultCollapsed={false}>
                 <CRMSuperAdminLayout>
                   <Routes>
-                    <Route index element={<Navigate to="sales-managers" replace />} />
-                    <Route path="sales-managers" element={<SalesManagersPage />} />
-                    <Route path="sales-managers/add" element={<AddSalesManagerPage />} />
-                    <Route path="sales-managers/:id/edit" element={<EditSalesManagerPage />} />
-                    <Route path="sales-executives" element={<SalesExecutivesPage />} />
-                    <Route path="sales-executives/add" element={<AddSalesExecutivePage />} />
-                    <Route path="sales-executives/:id/edit" element={<EditSalesExecutivePage />} />
+                    <Route
+                      index
+                      element={<Navigate to="sales-managers" replace />}
+                    />
+                    <Route
+                      path="sales-managers"
+                      element={<SalesManagersPage />}
+                    />
+                    <Route
+                      path="sales-managers/add"
+                      element={<AddSalesManagerPage />}
+                    />
+                    <Route
+                      path="sales-managers/:id/edit"
+                      element={<EditSalesManagerPage />}
+                    />
+                    <Route
+                      path="sales-executives"
+                      element={<SalesExecutivesPage />}
+                    />
+                    <Route
+                      path="sales-executives/add"
+                      element={<AddSalesExecutivePage />}
+                    />
+                    <Route
+                      path="sales-executives/:id/edit"
+                      element={<EditSalesExecutivePage />}
+                    />
                   </Routes>
                 </CRMSuperAdminLayout>
               </SidebarProvider>
@@ -268,14 +292,23 @@ export default function AppRouter() {
               <SidebarProvider defaultCollapsed={false}>
                 <CRMSalesManagerLayout>
                   <Routes>
-                    <Route index element={<Navigate to="summary" replace />} />
-                    <Route path="summary" element={<CRMSummaryPage />} />
-                    <Route path="sales-executives" element={<SMSalesExecutivesPage />} />
-                    <Route path="sales-executives/add" element={<SMAddSalesExecutivePage />} />
-                    <Route path="sales-executives/:id/edit" element={<SMEditSalesExecutivePage />} />
+                    <Route index element={<Navigate to="leads" replace />} />
                     <Route path="leads" element={<SMSalesLeadsPage />} />
                     <Route path="leads/add" element={<SMAddLeadPage />} />
                     <Route path="leads/:id/edit" element={<SMEditLeadPage />} />
+                    <Route path="summary" element={<CRMSummaryPage />} />
+                    <Route
+                      path="sales-executives"
+                      element={<SMSalesExecutivesPage />}
+                    />
+                    <Route
+                      path="sales-executives/add"
+                      element={<SMAddSalesExecutivePage />}
+                    />
+                    <Route
+                      path="sales-executives/:id/edit"
+                      element={<SMEditSalesExecutivePage />}
+                    />
                   </Routes>
                 </CRMSalesManagerLayout>
               </SidebarProvider>
@@ -289,11 +322,11 @@ export default function AppRouter() {
               <SidebarProvider defaultCollapsed={false}>
                 <CRMSalesExecutiveLayout>
                   <Routes>
-                    <Route index element={<Navigate to="summary" replace />} />
-                    <Route path="summary" element={<CRMSummaryPage />} />
+                    <Route index element={<Navigate to="leads" replace />} />
                     <Route path="leads" element={<SESalesLeadsPage />} />
                     <Route path="leads/add" element={<SEAddLeadPage />} />
                     <Route path="leads/:id/edit" element={<SEEditLeadPage />} />
+                    <Route path="summary" element={<CRMSummaryPage />} />
                   </Routes>
                 </CRMSalesExecutiveLayout>
               </SidebarProvider>
@@ -314,142 +347,178 @@ export default function AppRouter() {
           <Route path="profile" element={<SuperAdminProfile />} />
           <Route path="admins" element={<AdminsPage />} />
           <Route path="admins/create" element={<CreateAdminPage />} />
-          
+
           {/* School Management Routes */}
           <Route path="schools" element={<SchoolsPage />} />
           <Route path="schools/create" element={<CreateSchoolPage />} />
           <Route path="schools/:id/edit" element={<EditSchoolPage />} />
-          
+
           <Route path="school-admins" element={<SchoolAdminsPage />} />
-          <Route path="school-admins/create" element={<CreateSchoolAdminPage />} />
-          <Route path="school-admins/:id/edit" element={<EditSchoolAdminPage />} />
-          
+          <Route
+            path="school-admins/create"
+            element={<CreateSchoolAdminPage />}
+          />
+          <Route
+            path="school-admins/:id/edit"
+            element={<EditSchoolAdminPage />}
+          />
+
           <Route path="lead-mentors" element={<LeadMentorsPage />} />
-          <Route path="lead-mentors/create" element={<CreateLeadMentorPage />} />
-          <Route path="lead-mentors/:id/edit" element={<EditLeadMentorPage />} />
-          
+          <Route
+            path="lead-mentors/create"
+            element={<CreateLeadMentorPage />}
+          />
+          <Route
+            path="lead-mentors/:id/edit"
+            element={<EditLeadMentorPage />}
+          />
+
           {/* Mentor Management */}
           <Route path="mentors" element={<SuperAdminMentorsPage />} />
-          <Route path="mentors/create" element={<CreateSuperAdminMentorPage />} />
-          <Route path="mentors/:id/edit" element={<EditSuperAdminMentorPage />} />
-          
+          <Route
+            path="mentors/create"
+            element={<CreateSuperAdminMentorPage />}
+          />
+          <Route
+            path="mentors/:id/edit"
+            element={<EditSuperAdminMentorPage />}
+          />
+
           {/* Student Management */}
           <Route path="students" element={<StudentsPage />} />
           <Route path="students/create" element={<CreateStudentPage />} />
           <Route path="students/:id/edit" element={<EditStudentPage />} />
-          <Route path="students/bulk-upload" element={<BulkUploadStudentsPage />} />
+          <Route
+            path="students/bulk-upload"
+            element={<BulkUploadStudentsPage />}
+          />
           <Route path="students/promote" element={<PromoteGradePage />} />
-          
+
           {/* Question Bank */}
           <Route path="question-bank" element={<QuestionBankPage />} />
           <Route path="question-bank/add" element={<AddQuestionPage />} />
-          <Route path="question-bank/recommendations" element={<ViewRecommendationsPage />} />
-          <Route path="question-bank/bulk-upload" element={<BulkUploadPage />} />
-          
+          <Route
+            path="question-bank/recommendations"
+            element={<ViewRecommendationsPage />}
+          />
+          <Route
+            path="question-bank/bulk-upload"
+            element={<BulkUploadPage />}
+          />
+
           {/* Session Progress */}
-          <Route path="session-progress" element={<SuperAdminSessionProgressPage />} />
-          
+          <Route
+            path="session-progress"
+            element={<SuperAdminSessionProgressPage />}
+          />
+
           {/* Assessment Management */}
           <Route path="assessments" element={<MentorAssessmentsPage />} />
           <Route path="assessments/create" element={<CreateAssessmentPage />} />
           <Route path="assessments/:id" element={<ViewAssessmentPage />} />
           <Route path="assessments/:id/edit" element={<EditAssessmentPage />} />
-          <Route path="assessments/:id/analytics" element={<AssessmentAnalyticsPage />} />
-          <Route path="assessment-reports" element={<SuperAdminAssessmentReportsPage />} />
-          
+          <Route
+            path="assessments/:id/analytics"
+            element={<AssessmentAnalyticsPage />}
+          />
+          <Route
+            path="assessment-reports"
+            element={<SuperAdminAssessmentReportsPage />}
+          />
+
           {/* Certificate Management */}
           {certificateRoutes}
-          
+
           {/* Resources Management */}
-          <Route 
-            path="resources" 
+          <Route
+            path="resources"
             element={
               <PermissionProtectedRoute requiredPermission="add_resources">
                 <ResourcesPage />
               </PermissionProtectedRoute>
-            } 
+            }
           />
-          <Route 
-            path="resources/add" 
+          <Route
+            path="resources/add"
             element={
               <PermissionProtectedRoute requiredPermission="add_resources">
                 <AddResourcePage />
               </PermissionProtectedRoute>
-            } 
+            }
           />
-          <Route 
-            path="resources/:id/edit" 
+          <Route
+            path="resources/:id/edit"
             element={
               <PermissionProtectedRoute requiredPermission="add_resources">
                 <EditResourcePage />
               </PermissionProtectedRoute>
-            } 
+            }
           />
-          <Route 
-            path="resources/:id/view" 
+          <Route
+            path="resources/:id/view"
             element={
               <PermissionProtectedRoute requiredPermission="add_resources">
                 <ViewResourcePage />
               </PermissionProtectedRoute>
-            } 
+            }
           />
-          
+
           {/* Modules & Sessions Management */}
-          <Route 
-            path="modules" 
+          <Route
+            path="modules"
             element={
               <PermissionProtectedRoute requiredPermission="add_modules">
                 <ModulesPage />
               </PermissionProtectedRoute>
-            } 
+            }
           />
-          <Route 
-            path="modules/create" 
+          <Route
+            path="modules/create"
             element={
               <PermissionProtectedRoute requiredPermission="add_modules">
                 <CreateModulePage />
               </PermissionProtectedRoute>
-            } 
+            }
           />
-          <Route 
-            path="modules/:id/edit" 
+          <Route
+            path="modules/:id/edit"
             element={
               <PermissionProtectedRoute requiredPermission="add_modules">
                 <EditModulePage />
               </PermissionProtectedRoute>
-            } 
+            }
           />
-          <Route 
-            path="sessions" 
+          <Route
+            path="sessions"
             element={
               <PermissionProtectedRoute requiredPermission="add_modules">
                 <SessionsPage />
               </PermissionProtectedRoute>
-            } 
+            }
           />
-          <Route 
-            path="sessions/create" 
+          <Route
+            path="sessions/create"
             element={
               <PermissionProtectedRoute requiredPermission="add_modules">
                 <CreateSessionPage />
               </PermissionProtectedRoute>
-            } 
+            }
           />
-          <Route 
-            path="sessions/:id/edit" 
+          <Route
+            path="sessions/:id/edit"
             element={
               <PermissionProtectedRoute requiredPermission="add_modules">
                 <EditSessionPage />
               </PermissionProtectedRoute>
-            } 
+            }
           />
-          
+
           {/* Messaging */}
           <Route path="messages" element={<Messages />} />
-          
+
           {/* Notifications */}
           <Route path="notifications" element={<SuperAdminNotifications />} />
-          
+
           {/* Activity Logs */}
           <Route path="activity-logs" element={<ActivityLogsPage />} />
         </Route>
@@ -477,12 +546,21 @@ export default function AppRouter() {
           <Route path="profile" element={<SchoolAdminProfile />} />
           <Route path="mentors" element={<SchoolAdminMentorsPage />} />
           <Route path="students" element={<SchoolAdminStudentsPage />} />
-          <Route path="session-progress" element={<SchoolAdminSessionProgressPage />} />
+          <Route
+            path="session-progress"
+            element={<SchoolAdminSessionProgressPage />}
+          />
           <Route path="schools" element={<SchoolAdminSchoolsPage />} />
           <Route path="settings" element={<SchoolAdminSettingsPage />} />
-          <Route path="assessment-reports" element={<SchoolAdminAssessmentReportsPage />} />
-          <Route path="assessments/:id/analytics" element={<AssessmentAnalyticsPage />} />
-          
+          <Route
+            path="assessment-reports"
+            element={<SchoolAdminAssessmentReportsPage />}
+          />
+          <Route
+            path="assessments/:id/analytics"
+            element={<AssessmentAnalyticsPage />}
+          />
+
           {/* Messaging */}
           <Route path="messages" element={<Messages />} />
         </Route>
@@ -499,133 +577,160 @@ export default function AppRouter() {
           <Route index element={<LeadMentorDashboard />} />
           <Route path="profile" element={<LeadMentorProfile />} />
           <Route path="school-admins" element={<SchoolAdminsPage />} />
-          <Route path="school-admins/create" element={<CreateSchoolAdminPage />} />
-          <Route path="school-admins/:id/edit" element={<LeadMentorEditSchoolAdminPage />} />
+          <Route
+            path="school-admins/create"
+            element={<CreateSchoolAdminPage />}
+          />
+          <Route
+            path="school-admins/:id/edit"
+            element={<LeadMentorEditSchoolAdminPage />}
+          />
           <Route path="schools" element={<LeadMentorSchoolsPage />} />
           {/* Lead mentors management is not available to leadmentor role */}
-          
+
           {/* Mentor Management */}
           <Route path="mentors" element={<MentorsPage />} />
           <Route path="mentors/create" element={<CreateMentorPage />} />
           <Route path="mentors/:id/edit" element={<EditMentorPage />} />
-          
+
           {/* Student Management */}
           <Route path="students" element={<StudentsPage />} />
           <Route path="students/create" element={<CreateStudentPage />} />
           <Route path="students/:id/edit" element={<EditStudentPage />} />
-          <Route path="students/bulk-upload" element={<BulkUploadStudentsPage />} />
+          <Route
+            path="students/bulk-upload"
+            element={<BulkUploadStudentsPage />}
+          />
           <Route path="students/promote" element={<PromoteGradePage />} />
-          
+
           {/* Question Bank */}
           <Route path="question-bank" element={<QuestionBankPage />} />
           <Route path="question-bank/add" element={<AddQuestionPage />} />
-          <Route path="question-bank/recommendations" element={<ViewRecommendationsPage />} />
-          <Route path="question-bank/bulk-upload" element={<BulkUploadPage />} />
-          
+          <Route
+            path="question-bank/recommendations"
+            element={<ViewRecommendationsPage />}
+          />
+          <Route
+            path="question-bank/bulk-upload"
+            element={<BulkUploadPage />}
+          />
+
           {/* Session Progress */}
-          <Route path="session-progress" element={<LeadMentorSessionProgressPage />} />
-          
+          <Route
+            path="session-progress"
+            element={<LeadMentorSessionProgressPage />}
+          />
+
           {/* Assessment Management */}
           <Route path="assessments" element={<MentorAssessmentsPage />} />
           <Route path="assessments/create" element={<CreateAssessmentPage />} />
           <Route path="assessments/:id" element={<ViewAssessmentPage />} />
           <Route path="assessments/:id/edit" element={<EditAssessmentPage />} />
-          <Route path="assessments/:id/analytics" element={<AssessmentAnalyticsPage />} />
-          <Route path="assessment-reports" element={<LeadMentorAssessmentReportsPage />} />
-          
+          <Route
+            path="assessments/:id/analytics"
+            element={<AssessmentAnalyticsPage />}
+          />
+          <Route
+            path="assessment-reports"
+            element={<LeadMentorAssessmentReportsPage />}
+          />
+
           {/* Certificate Management */}
           {certificateRoutes}
-          
+
           {/* Resources Management */}
-          <Route 
-            path="resources" 
+          <Route
+            path="resources"
             element={
               <PermissionProtectedRoute requiredPermission="add_resources">
                 <ResourcesPage />
               </PermissionProtectedRoute>
-            } 
+            }
           />
-          <Route 
-            path="resources/add" 
+          <Route
+            path="resources/add"
             element={
               <PermissionProtectedRoute requiredPermission="add_resources">
                 <AddResourcePage />
               </PermissionProtectedRoute>
-            } 
+            }
           />
-          <Route 
-            path="resources/:id/edit" 
+          <Route
+            path="resources/:id/edit"
             element={
               <PermissionProtectedRoute requiredPermission="add_resources">
                 <EditResourcePage />
               </PermissionProtectedRoute>
-            } 
+            }
           />
-          <Route 
-            path="resources/:id/view" 
+          <Route
+            path="resources/:id/view"
             element={
               <PermissionProtectedRoute requiredPermission="add_resources">
                 <ViewResourcePage />
               </PermissionProtectedRoute>
-            } 
+            }
           />
-          
+
           {/* Modules & Sessions Management */}
-          <Route 
-            path="modules" 
+          <Route
+            path="modules"
             element={
               <PermissionProtectedRoute requiredPermission="add_modules">
                 <ModulesPage />
               </PermissionProtectedRoute>
-            } 
+            }
           />
-          <Route 
-            path="modules/create" 
+          <Route
+            path="modules/create"
             element={
               <PermissionProtectedRoute requiredPermission="add_modules">
                 <CreateModulePage />
               </PermissionProtectedRoute>
-            } 
+            }
           />
-          <Route 
-            path="modules/:id/edit" 
+          <Route
+            path="modules/:id/edit"
             element={
               <PermissionProtectedRoute requiredPermission="add_modules">
                 <EditModulePage />
               </PermissionProtectedRoute>
-            } 
+            }
           />
-          <Route 
-            path="sessions" 
+          <Route
+            path="sessions"
             element={
               <PermissionProtectedRoute requiredPermission="add_modules">
                 <SessionsPage />
               </PermissionProtectedRoute>
-            } 
+            }
           />
-          <Route 
-            path="sessions/create" 
+          <Route
+            path="sessions/create"
             element={
               <PermissionProtectedRoute requiredPermission="add_modules">
                 <CreateSessionPage />
               </PermissionProtectedRoute>
-            } 
+            }
           />
-          <Route 
-            path="sessions/:id/edit" 
+          <Route
+            path="sessions/:id/edit"
             element={
               <PermissionProtectedRoute requiredPermission="add_modules">
                 <EditSessionPage />
               </PermissionProtectedRoute>
-            } 
+            }
           />
-          
+
           {/* Module Completion Reports */}
-          <Route path="module-completion-reports" element={<LeadMentorModuleCompletionReportsPage />} />
-          
+          <Route
+            path="module-completion-reports"
+            element={<LeadMentorModuleCompletionReportsPage />}
+          />
+
           {/* Messaging */}
           <Route path="messages" element={<Messages />} />
-          
+
           {/* Notifications */}
           <Route path="notifications" element={<LeadMentorNotifications />} />
         </Route>
@@ -643,26 +748,41 @@ export default function AppRouter() {
           <Route path="profile" element={<MentorProfile />} />
           <Route path="students" element={<MentorStudentsPage />} />
           <Route path="resources" element={<MentorResourcesPage />} />
-          <Route path="resources/:id/view" element={<MentorResourceViewPage />} />
-          
+          <Route
+            path="resources/:id/view"
+            element={<MentorResourceViewPage />}
+          />
+
           {/* Question Bank */}
           <Route path="question-bank" element={<MentorQuestionBankPage />} />
-          <Route path="question-bank/recommend" element={<AddRecommendationPage />} />
-          <Route path="question-bank/my-recommendations" element={<MyRecommendationsPage />} />
-          
+          <Route
+            path="question-bank/recommend"
+            element={<AddRecommendationPage />}
+          />
+          <Route
+            path="question-bank/my-recommendations"
+            element={<MyRecommendationsPage />}
+          />
+
           {/* Assessment Management */}
           <Route path="assessments" element={<MentorAssessmentsPage />} />
           <Route path="assessments/create" element={<CreateAssessmentPage />} />
           <Route path="assessments/:id" element={<ViewAssessmentPage />} />
           <Route path="assessments/:id/edit" element={<EditAssessmentPage />} />
-          <Route path="assessments/:id/analytics" element={<AssessmentAnalyticsPage />} />
-          
+          <Route
+            path="assessments/:id/analytics"
+            element={<AssessmentAnalyticsPage />}
+          />
+
           {/* Session Progress Management */}
-          <Route path="session-progress" element={<MentorSessionProgressPage />} />
-          
+          <Route
+            path="session-progress"
+            element={<MentorSessionProgressPage />}
+          />
+
           {/* Messaging */}
           <Route path="messages" element={<Messages />} />
-          
+
           {/* Notifications */}
           <Route path="notifications" element={<MentorNotifications />} />
         </Route>
@@ -679,20 +799,29 @@ export default function AppRouter() {
           <Route index element={<StudentDashboard />} />
           <Route path="profile" element={<StudentProfile />} />
           <Route path="resources" element={<StudentResourcesPage />} />
-          <Route path="resources/:id/view" element={<StudentResourceViewPage />} />
-          
+          <Route
+            path="resources/:id/view"
+            element={<StudentResourceViewPage />}
+          />
+
           {/* Assessment Routes */}
           <Route path="assessments" element={<StudentAssessmentsPage />} />
           <Route path="assessments/:id/take" element={<TakeAssessmentPage />} />
-          <Route path="assessments/results" element={<StudentAssessmentResultsPage />} />
-          <Route path="assessments/results/:id" element={<DetailedAssessmentResultsPage />} />
-          
+          <Route
+            path="assessments/results"
+            element={<StudentAssessmentResultsPage />}
+          />
+          <Route
+            path="assessments/results/:id"
+            element={<DetailedAssessmentResultsPage />}
+          />
+
           {/* Notification Routes */}
           <Route path="notifications" element={<StudentNotificationsPage />} />
-          
+
           {/* Certificate Routes */}
           {studentCertificateRoutes}
-          
+
           {/* Messaging */}
           <Route path="messages" element={<Messages />} />
         </Route>
