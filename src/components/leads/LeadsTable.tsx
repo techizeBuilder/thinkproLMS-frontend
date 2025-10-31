@@ -316,7 +316,7 @@ export default function LeadsTable({ onAddNew, onEdit }: LeadsTableProps) {
                   <TableHead className="min-w-[120px]">Lead Source</TableHead>
                   <TableHead className="min-w-[150px]">Lead Remarks</TableHead>
                   <TableHead className="min-w-[150px]">Team Remarks</TableHead>
-                  <TableHead className="text-right min-w-[100px]">
+                  <TableHead className="text-right min-w-[100px] sticky right-0 bg-white z-10">
                     Actions
                   </TableHead>
                 </TableRow>
@@ -436,7 +436,7 @@ export default function LeadsTable({ onAddNew, onEdit }: LeadsTableProps) {
                       <TableCell className="whitespace-nowrap max-w-[200px] truncate">
                         {l.teamRemarks || "-"}
                       </TableCell>
-                      <TableCell className="text-right">
+                      <TableCell className="text-right sticky right-0 bg-white z-10">
                         <div className="flex items-center justify-end gap-1">
                           <Button
                             variant="ghost"
