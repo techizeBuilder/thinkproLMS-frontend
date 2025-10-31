@@ -20,7 +20,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Loader2, Plus, Pencil, Trash2, Calendar as CalendarIcon } from "lucide-react";
+import {
+  Loader2,
+  Plus,
+  Pencil,
+  Trash2,
+  Calendar as CalendarIcon,
+} from "lucide-react";
 import { useDebounce } from "@/hooks/useDebounce";
 import {
   AlertDialog,
@@ -34,8 +40,15 @@ import {
 } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
 import { format, startOfDay, endOfDay } from "date-fns";
-import { locationService, type State as IndiaState } from "@/api/locationService";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import {
+  locationService,
+  type State as IndiaState,
+} from "@/api/locationService";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 
 interface LeadsTableProps {
@@ -63,16 +76,22 @@ export default function LeadsTable({ onAddNew, onEdit }: LeadsTableProps) {
   const [salesCycleFilter, setSalesCycleFilter] = useState("all");
   const [boardFilter, setBoardFilter] = useState("all");
   const [pocRoleFilter, setPocRoleFilter] = useState("all");
-  const [actionOnModelFilter, setActionOnModelFilter] = useState("all");
   const [actionOnFilter, setActionOnFilter] = useState<string>("all");
   const [actionDueDateFrom, setActionDueDateFrom] = useState<string>("");
   const [actionDueDateTo, setActionDueDateTo] = useState<string>("");
   const [actionDueDateExact, setActionDueDateExact] = useState<string>("");
   const [actionDueOpen, setActionDueOpen] = useState(false);
-  const [actionDueRange, setActionDueRange] = useState<{ from?: Date; to?: Date }>({});
+  const [actionDueRange, setActionDueRange] = useState<{
+    from?: Date;
+    to?: Date;
+  }>({});
   const [indiaStates, setIndiaStates] = useState<IndiaState[]>([]);
-  const [managers, setManagers] = useState<Array<{ _id: string; name: string }>>([]);
-  const [executives, setExecutives] = useState<Array<{ _id: string; name: string }>>([]);
+  const [managers, setManagers] = useState<
+    Array<{ _id: string; name: string }>
+  >([]);
+  const [executives, setExecutives] = useState<
+    Array<{ _id: string; name: string }>
+  >([]);
   const [confirmDelete, setConfirmDelete] = useState<Lead | null>(null);
 
   const debouncedSearch = useDebounce(search, 400);
@@ -98,7 +117,6 @@ export default function LeadsTable({ onAddNew, onEdit }: LeadsTableProps) {
     salesCycleFilter,
     boardFilter,
     pocRoleFilter,
-    actionOnModelFilter,
     actionOnFilter,
     actionDueDateFrom,
     actionDueDateTo,
@@ -124,7 +142,6 @@ export default function LeadsTable({ onAddNew, onEdit }: LeadsTableProps) {
     salesCycleFilter,
     boardFilter,
     pocRoleFilter,
-    actionOnModelFilter,
     actionDueDateFrom,
     actionDueDateTo,
     actionDueDateExact,
@@ -149,8 +166,18 @@ export default function LeadsTable({ onAddNew, onEdit }: LeadsTableProps) {
           axiosInstance.get("/sales/managers"),
           axiosInstance.get("/sales/executives"),
         ]);
-        setManagers((mgrRes.data?.data || []).map((m: any) => ({ _id: m._id, name: m.name })));
-        setExecutives((execRes.data?.data || []).map((e: any) => ({ _id: e._id, name: e.name })));
+        setManagers(
+          (mgrRes.data?.data || []).map((m: any) => ({
+            _id: m._id,
+            name: m.name,
+          }))
+        );
+        setExecutives(
+          (execRes.data?.data || []).map((e: any) => ({
+            _id: e._id,
+            name: e.name,
+          }))
+        );
       } catch {
         // noop
       }
@@ -170,14 +197,18 @@ export default function LeadsTable({ onAddNew, onEdit }: LeadsTableProps) {
         quality: qualityFilter !== "all" ? qualityFilter : undefined,
         programType: programFilter !== "all" ? programFilter : undefined,
         leadSource: leadSourceFilter !== "all" ? leadSourceFilter : undefined,
-        deliveryModel: deliveryModelFilter !== "all" ? deliveryModelFilter : undefined,
+        deliveryModel:
+          deliveryModelFilter !== "all" ? deliveryModelFilter : undefined,
         salesCycle: salesCycleFilter !== "all" ? salesCycleFilter : undefined,
         boardAffiliated: boardFilter !== "all" ? boardFilter : undefined,
         pocRole: pocRoleFilter !== "all" ? pocRoleFilter : undefined,
-        actionOnModel: actionOnModelFilter !== "all" ? actionOnModelFilter : undefined,
         actionOn: actionOnFilter !== "all" ? actionOnFilter : undefined,
-        actionDueDateFrom: actionDueDateFrom ? startOfDay(new Date(actionDueDateFrom)).toISOString() : undefined,
-        actionDueDateTo: actionDueDateTo ? endOfDay(new Date(actionDueDateTo)).toISOString() : undefined,
+        actionDueDateFrom: actionDueDateFrom
+          ? startOfDay(new Date(actionDueDateFrom)).toISOString()
+          : undefined,
+        actionDueDateTo: actionDueDateTo
+          ? endOfDay(new Date(actionDueDateTo)).toISOString()
+          : undefined,
         actionDueDate: actionDueDateExact || undefined,
         page,
         limit: pageSize,
@@ -207,7 +238,7 @@ export default function LeadsTable({ onAddNew, onEdit }: LeadsTableProps) {
   };
 
   const states = useMemo(
-    () => (indiaStates.map((s) => s.name).sort()),
+    () => indiaStates.map((s) => s.name).sort(),
     [indiaStates]
   );
 
@@ -247,7 +278,9 @@ export default function LeadsTable({ onAddNew, onEdit }: LeadsTableProps) {
               <SelectContent>
                 <SelectItem value="all">All</SelectItem>
                 {states.map((s) => (
-                  <SelectItem key={s} value={s}>{s}</SelectItem>
+                  <SelectItem key={s} value={s}>
+                    {s}
+                  </SelectItem>
                 ))}
               </SelectContent>
             </Select>
@@ -276,19 +309,34 @@ export default function LeadsTable({ onAddNew, onEdit }: LeadsTableProps) {
             <Label>Action Due Date</Label>
             <Popover open={actionDueOpen} onOpenChange={setActionDueOpen}>
               <PopoverTrigger asChild>
-                <Button variant="outline" className="w-full justify-start text-left font-normal">
+                <Button
+                  variant="outline"
+                  className="w-full justify-start text-left font-normal"
+                >
                   <CalendarIcon className="mr-2 h-4 w-4" />
                   {(() => {
                     if (actionDueDateExact) {
-                      return `${format(new Date(actionDueDateExact), "MMM dd, yyyy")}`
+                      return `${format(
+                        new Date(actionDueDateExact),
+                        "MMM dd, yyyy"
+                      )}`;
                     }
                     if (actionDueDateFrom && actionDueDateTo) {
-                      return `${format(new Date(actionDueDateFrom), "MMM dd, yyyy")} - ${format(new Date(actionDueDateTo), "MMM dd, yyyy")}`
+                      return `${format(
+                        new Date(actionDueDateFrom),
+                        "MMM dd, yyyy"
+                      )} - ${format(
+                        new Date(actionDueDateTo),
+                        "MMM dd, yyyy"
+                      )}`;
                     }
                     if (actionDueDateFrom && !actionDueDateTo) {
-                      return `${format(new Date(actionDueDateFrom), "MMM dd, yyyy")} -`
+                      return `${format(
+                        new Date(actionDueDateFrom),
+                        "MMM dd, yyyy"
+                      )} -`;
                     }
-                    return "Select date or range"
+                    return "Select date or range";
                   })()}
                 </Button>
               </PopoverTrigger>
@@ -303,7 +351,8 @@ export default function LeadsTable({ onAddNew, onEdit }: LeadsTableProps) {
                       const to = range?.to;
                       setActionDueRange({ from: from, to: to });
                       if (from && to) {
-                        const sameDay = from.toDateString() === to.toDateString();
+                        const sameDay =
+                          from.toDateString() === to.toDateString();
                         if (sameDay) {
                           setActionDueDateExact(from.toISOString());
                           setActionDueDateFrom("");
@@ -336,7 +385,9 @@ export default function LeadsTable({ onAddNew, onEdit }: LeadsTableProps) {
                     >
                       Clear
                     </Button>
-                    <Button onClick={() => setActionDueOpen(false)}>Apply</Button>
+                    <Button onClick={() => setActionDueOpen(false)}>
+                      Apply
+                    </Button>
                   </div>
                 </div>
               </PopoverContent>
@@ -350,13 +401,17 @@ export default function LeadsTable({ onAddNew, onEdit }: LeadsTableProps) {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All</SelectItem>
-                <SelectItem value="none" disabled>Managers</SelectItem>
+                <SelectItem value="none" disabled>
+                  Managers
+                </SelectItem>
                 {managers.map((m) => (
                   <SelectItem key={`manager-${m._id}`} value={m._id}>
                     {m.name}
                   </SelectItem>
                 ))}
-                <SelectItem value="none2" disabled>Executives</SelectItem>
+                <SelectItem value="none2" disabled>
+                  Executives
+                </SelectItem>
                 {executives.map((e) => (
                   <SelectItem key={`exec-${e._id}`} value={e._id}>
                     {e.name}
@@ -424,14 +479,19 @@ export default function LeadsTable({ onAddNew, onEdit }: LeadsTableProps) {
           </div>
           <div className="space-y-1 sm:space-y-2">
             <Label>Lead Source</Label>
-            <Select value={leadSourceFilter} onValueChange={setLeadSourceFilter}>
+            <Select
+              value={leadSourceFilter}
+              onValueChange={setLeadSourceFilter}
+            >
               <SelectTrigger className="h-10">
                 <SelectValue placeholder="Lead Source" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All</SelectItem>
-                {['Internal','Channel Partner'].map((s) => (
-                  <SelectItem key={s} value={s}>{s}</SelectItem>
+                {["Internal", "Channel Partner"].map((s) => (
+                  <SelectItem key={s} value={s}>
+                    {s}
+                  </SelectItem>
                 ))}
               </SelectContent>
             </Select>
@@ -470,28 +530,38 @@ export default function LeadsTable({ onAddNew, onEdit }: LeadsTableProps) {
           </div>
           <div className="space-y-1 sm:space-y-2">
             <Label>Delivery Model</Label>
-            <Select value={deliveryModelFilter} onValueChange={setDeliveryModelFilter}>
+            <Select
+              value={deliveryModelFilter}
+              onValueChange={setDeliveryModelFilter}
+            >
               <SelectTrigger className="h-10">
                 <SelectValue placeholder="Delivery Model" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All</SelectItem>
-                {["TPA Managed","School Managed","Hybrid"].map((m) => (
-                  <SelectItem key={m} value={m}>{m}</SelectItem>
+                {["TPA Managed", "School Managed", "Hybrid"].map((m) => (
+                  <SelectItem key={m} value={m}>
+                    {m}
+                  </SelectItem>
                 ))}
               </SelectContent>
             </Select>
           </div>
           <div className="space-y-1 sm:space-y-2">
             <Label>Sales Cycle</Label>
-            <Select value={salesCycleFilter} onValueChange={setSalesCycleFilter}>
+            <Select
+              value={salesCycleFilter}
+              onValueChange={setSalesCycleFilter}
+            >
               <SelectTrigger className="h-10">
                 <SelectValue placeholder="Sales Cycle" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All</SelectItem>
-                {["2025-2026","2026-2027"].map((c) => (
-                  <SelectItem key={c} value={c}>{c}</SelectItem>
+                {["2025-2026", "2026-2027"].map((c) => (
+                  <SelectItem key={c} value={c}>
+                    {c}
+                  </SelectItem>
                 ))}
               </SelectContent>
             </Select>
@@ -504,9 +574,13 @@ export default function LeadsTable({ onAddNew, onEdit }: LeadsTableProps) {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All</SelectItem>
-                {["CBSE","ICSE","State Board","IGCSE","IB","Other"].map((b) => (
-                  <SelectItem key={b} value={b}>{b}</SelectItem>
-                ))}
+                {["CBSE", "ICSE", "State Board", "IGCSE", "IB", "Other"].map(
+                  (b) => (
+                    <SelectItem key={b} value={b}>
+                      {b}
+                    </SelectItem>
+                  )
+                )}
               </SelectContent>
             </Select>
           </div>
@@ -599,13 +673,32 @@ export default function LeadsTable({ onAddNew, onEdit }: LeadsTableProps) {
                       <TableCell className="whitespace-nowrap min-w-[150px]">
                         {(() => {
                           if (typeof l.actionOn === "object" && l.actionOn) {
-                            const name = (l.actionOn as any).name as string | undefined;
-                            const byModel = l.actionOnModel === "SalesManager" ? "Manager" : l.actionOnModel === "SalesExecutive" ? "Executive" : undefined;
+                            const name = (l.actionOn as any).name as
+                              | string
+                              | undefined;
+                            const byModel =
+                              l.actionOnModel === "SalesManager"
+                                ? "Manager"
+                                : l.actionOnModel === "SalesExecutive"
+                                ? "Executive"
+                                : undefined;
                             // Fallback to legacy type if present
-                            const legacyType = (typeof (l.actionOn as any).type === "string") ? (l.actionOn as any).type : undefined;
-                            const byLegacy = legacyType === "manager" ? "Manager" : legacyType === "executive" ? "Executive" : undefined;
+                            const legacyType =
+                              typeof (l.actionOn as any).type === "string"
+                                ? (l.actionOn as any).type
+                                : undefined;
+                            const byLegacy =
+                              legacyType === "manager"
+                                ? "Manager"
+                                : legacyType === "executive"
+                                ? "Executive"
+                                : undefined;
                             const role = byModel || byLegacy;
-                            return name ? (role ? `${name} (${role})` : name) : "-";
+                            return name
+                              ? role
+                                ? `${name} (${role})`
+                                : name
+                              : "-";
                           }
                           return "-";
                         })()}
@@ -721,18 +814,24 @@ export default function LeadsTable({ onAddNew, onEdit }: LeadsTableProps) {
 
       <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
         <div className="text-sm text-gray-600">
-          Showing {leads.length ? (page - 1) * pageSize + 1 : 0} - {Math.min(page * pageSize, total)} of {total}
+          Showing {leads.length ? (page - 1) * pageSize + 1 : 0} -{" "}
+          {Math.min(page * pageSize, total)} of {total}
         </div>
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-2">
             <Label>Rows per page</Label>
-            <Select value={String(pageSize)} onValueChange={(v) => setPageSize(Number(v))}>
+            <Select
+              value={String(pageSize)}
+              onValueChange={(v) => setPageSize(Number(v))}
+            >
               <SelectTrigger className="h-9 w-[90px]">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                {[10,20,30,40,50].map((n) => (
-                  <SelectItem key={n} value={String(n)}>{n}</SelectItem>
+                {[10, 20, 30, 40, 50].map((n) => (
+                  <SelectItem key={n} value={String(n)}>
+                    {n}
+                  </SelectItem>
                 ))}
               </SelectContent>
             </Select>
@@ -745,7 +844,9 @@ export default function LeadsTable({ onAddNew, onEdit }: LeadsTableProps) {
             >
               Prev
             </Button>
-            <div className="text-sm">Page {page} of {Math.max(1, pages)}</div>
+            <div className="text-sm">
+              Page {page} of {Math.max(1, pages)}
+            </div>
             <Button
               variant="outline"
               disabled={page >= pages || loading || tableLoading}
