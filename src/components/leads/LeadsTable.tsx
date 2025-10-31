@@ -19,7 +19,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Loader2, Plus, Pencil, Trash2 } from "lucide-react";
+import { Loader2, Plus, Pencil, Trash2, Calendar as CalendarIcon } from "lucide-react";
 import { useDebounce } from "@/hooks/useDebounce";
 import {
   AlertDialog,
@@ -34,6 +34,8 @@ import {
 import { toast } from "sonner";
 import { format, startOfDay, endOfDay } from "date-fns";
 import { locationService, type State as IndiaState } from "@/api/locationService";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
 
 interface LeadsTableProps {
   onAddNew?: () => void;
@@ -64,6 +66,8 @@ export default function LeadsTable({ onAddNew, onEdit }: LeadsTableProps) {
   const [actionDueDateFrom, setActionDueDateFrom] = useState<string>("");
   const [actionDueDateTo, setActionDueDateTo] = useState<string>("");
   const [actionDueDateExact, setActionDueDateExact] = useState<string>("");
+  const [actionDueOpen, setActionDueOpen] = useState(false);
+  const [actionDueRange, setActionDueRange] = useState<{ from?: Date; to?: Date }>({});
   const [indiaStates, setIndiaStates] = useState<IndiaState[]>([]);
   const [confirmDelete, setConfirmDelete] = useState<Lead | null>(null);
 
@@ -213,28 +217,74 @@ export default function LeadsTable({ onAddNew, onEdit }: LeadsTableProps) {
             />
           </div>
           <div className="space-y-1 sm:space-y-2">
-            <Label>Action Due Date (Exact)</Label>
-            <Input
-              type="date"
-              value={actionDueDateExact}
-              onChange={(e) => setActionDueDateExact(e.target.value)}
-            />
-          </div>
-          <div className="space-y-1 sm:space-y-2">
-            <Label>Action Due Date From</Label>
-            <Input
-              type="date"
-              value={actionDueDateFrom}
-              onChange={(e) => setActionDueDateFrom(e.target.value)}
-            />
-          </div>
-          <div className="space-y-1 sm:space-y-2">
-            <Label>Action Due Date To</Label>
-            <Input
-              type="date"
-              value={actionDueDateTo}
-              onChange={(e) => setActionDueDateTo(e.target.value)}
-            />
+            <Label>Action Due Date</Label>
+            <Popover open={actionDueOpen} onOpenChange={setActionDueOpen}>
+              <PopoverTrigger asChild>
+                <Button variant="outline" className="w-full justify-start text-left font-normal">
+                  <CalendarIcon className="mr-2 h-4 w-4" />
+                  {(() => {
+                    if (actionDueDateExact) {
+                      return `${format(new Date(actionDueDateExact), "MMM dd, yyyy")}`
+                    }
+                    if (actionDueDateFrom && actionDueDateTo) {
+                      return `${format(new Date(actionDueDateFrom), "MMM dd, yyyy")} - ${format(new Date(actionDueDateTo), "MMM dd, yyyy")}`
+                    }
+                    if (actionDueDateFrom && !actionDueDateTo) {
+                      return `${format(new Date(actionDueDateFrom), "MMM dd, yyyy")} -`
+                    }
+                    return "Select date or range"
+                  })()}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <div className="p-2">
+                  <Calendar
+                    mode="range"
+                    numberOfMonths={2}
+                    selected={actionDueRange as any}
+                    onSelect={(range) => {
+                      const from = range?.from;
+                      const to = range?.to;
+                      setActionDueRange({ from: from, to: to });
+                      if (from && to) {
+                        const sameDay = from.toDateString() === to.toDateString();
+                        if (sameDay) {
+                          setActionDueDateExact(from.toISOString());
+                          setActionDueDateFrom("");
+                          setActionDueDateTo("");
+                        } else {
+                          setActionDueDateExact("");
+                          setActionDueDateFrom(from.toISOString());
+                          setActionDueDateTo(to.toISOString());
+                        }
+                      } else if (from && !to) {
+                        setActionDueDateExact("");
+                        setActionDueDateFrom(from.toISOString());
+                        setActionDueDateTo("");
+                      } else {
+                        setActionDueDateExact("");
+                        setActionDueDateFrom("");
+                        setActionDueDateTo("");
+                      }
+                    }}
+                  />
+                  <div className="flex items-center justify-between gap-2 p-2 pt-0">
+                    <Button
+                      variant="ghost"
+                      onClick={() => {
+                        setActionDueRange({});
+                        setActionDueDateExact("");
+                        setActionDueDateFrom("");
+                        setActionDueDateTo("");
+                      }}
+                    >
+                      Clear
+                    </Button>
+                    <Button onClick={() => setActionDueOpen(false)}>Apply</Button>
+                  </div>
+                </div>
+              </PopoverContent>
+            </Popover>
           </div>
           <div className="space-y-1 sm:space-y-2">
             <Label>Action On</Label>
