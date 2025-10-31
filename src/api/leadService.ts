@@ -35,7 +35,8 @@ export interface Lead {
 	salesCycle?: "2025-2026" | "2026-2027";
 	teamRemarks?: string;
 	actionNeeded?: string;
-	actionOn?: string;
+	actionOn?: string | { _id: string; name: string; email: string; type?: "manager" | "executive" } | null;
+	actionOnModel?: "SalesManager" | "SalesExecutive" | null;
 	actionDueDate?: string | null;
 	annualContractValue?: number | null;
 	createdAt: string;

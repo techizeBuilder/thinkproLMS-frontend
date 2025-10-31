@@ -12,7 +12,9 @@ import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
+  SelectGroup,
   SelectItem,
+  SelectLabel,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
@@ -123,6 +125,10 @@ export default function LeadForm({
       actionDueDate: lead.actionDueDate
         ? lead.actionDueDate.substring(0, 10)
         : "",
+      // Handle actionOn: if it's an object (populated), extract _id; otherwise use as is
+      actionOn: (lead.actionOn && typeof lead.actionOn === 'object' && '_id' in lead.actionOn && 'name' in lead.actionOn)
+        ? lead.actionOn._id
+        : (typeof lead.actionOn === 'string' ? lead.actionOn : "none"),
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [lead?._id]);
@@ -157,6 +163,7 @@ export default function LeadForm({
         salesClosedDate: form.salesClosedDate || null,
         actionDueDate: form.actionDueDate || null,
       };
+      if (payload.actionOn === "none") payload.actionOn = null;
       let res;
       if (isEdit && lead?._id)
         res = await leadService.update(lead._id, payload);
@@ -626,12 +633,33 @@ export default function LeadForm({
                   </div>
                   <div className="space-y-2 md:col-span-3">
                     <Label>Action On</Label>
-                    <Input
-                      name="actionOn"
-                      value={form.actionOn}
-                      onChange={handleChange}
-                      placeholder="e.g. Principal / Key Person / School"
-                    />
+                    <Select
+                      value={form.actionOn || "none"}
+                      onValueChange={(v) => handleSelect("actionOn", v)}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select Sales Manager or Executive" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="none">None</SelectItem>
+                        <SelectGroup>
+                          <SelectLabel>Managers</SelectLabel>
+                          {managers.map((m) => (
+                            <SelectItem key={`manager-${m._id}`} value={m._id}>
+                              {m.name}
+                            </SelectItem>
+                          ))}
+                        </SelectGroup>
+                        <SelectGroup>
+                          <SelectLabel>Executives</SelectLabel>
+                          {executives.map((e) => (
+                            <SelectItem key={`exec-${e._id}`} value={e._id}>
+                              {e.name}
+                            </SelectItem>
+                          ))}
+                        </SelectGroup>
+                      </SelectContent>
+                    </Select>
                   </div>
                   <div className="space-y-2 md:col-span-3">
                     <Label>Annual Contract Value (INR)</Label>
