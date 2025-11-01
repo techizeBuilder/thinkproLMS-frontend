@@ -1,5 +1,3 @@
-import { useLocation } from "react-router-dom";
-import { cn } from "@/lib/utils";
 import {
   Sidebar,
   SidebarContent,
@@ -25,10 +23,7 @@ export default function CRMSalesManagerLayout({
   children,
 }: CRMSalesManagerLayoutProps) {
   const { isCollapsed } = useSidebar();
-  const location = useLocation();
   const { unreadCount } = useCRMNotifications();
-
-  const isActive = (path: string) => location.pathname === path;
 
   return (
     <div className="flex h-screen">
@@ -48,49 +43,27 @@ export default function CRMSalesManagerLayout({
         <SidebarContent className="space-y-4">
           <SidebarGroup label="Management">
             <SidebarNav>
-              <SidebarNavItem
-                to="/crm/sales-manager/leads"
-                icon={NotebookPen}
-                className={cn(
-                  isActive("/crm/sales-manager/leads") &&
-                    "bg-green-100 text-green-700 border border-green-200"
-                )}
-              >
+              <SidebarNavItem to="/crm/sales-manager/leads" icon={NotebookPen}>
                 Leads
               </SidebarNavItem>
-              <SidebarNavItem
-                to="/crm/sales-manager/summary"
-                icon={Table}
-                className={cn(
-                  isActive("/crm/sales-manager/summary") &&
-                    "bg-green-100 text-green-700 border border-green-200"
-                )}
-              >
+              <SidebarNavItem to="/crm/sales-manager/summary" icon={Table}>
                 Summary
               </SidebarNavItem>
 
               <SidebarNavItem
                 to="/crm/sales-manager/sales-executives"
                 icon={Users}
-                className={cn(
-                  isActive("/crm/sales-manager/sales-executives") &&
-                    "bg-green-100 text-green-700 border border-green-200"
-                )}
               >
                 Sales Executives
               </SidebarNavItem>
-              <SidebarNavItem
-                to="/crm/sales-manager/notifications"
-                icon={Bell}
-                className={cn(
-                  isActive("/crm/sales-manager/notifications") &&
-                    "bg-green-100 text-green-700 border border-green-200"
-                )}
-              >
-                <div className="flex items-center justify-between w-full">
+              <SidebarNavItem to="/crm/sales-manager/notifications" icon={Bell}>
+                <div className="flex gap-2 items-center justify-between w-full">
                   <span>Notifications</span>
                   {unreadCount > 0 && !isCollapsed && (
-                    <Badge variant="destructive" className="ml-auto text-xs px-1.5 py-0 h-5">
+                    <Badge
+                      variant="destructive"
+                      className="ml-auto text-xs px-1.5 py-0 h-5"
+                    >
                       {unreadCount}
                     </Badge>
                   )}
