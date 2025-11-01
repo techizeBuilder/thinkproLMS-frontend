@@ -27,27 +27,28 @@ export default function CRMSalesExecutiveLayout({
   const isActive = (path: string) => location.pathname === path;
   return (
     <div className="flex h-screen">
-      <Sidebar className="h-screen">
-        <SidebarHeader>
+      <Sidebar className="h-screen bg-[#333A47] text-white border-r-0">
+        <SidebarHeader className="bg-[#333A47] border-[#7F91AA]/20">
           <div className="flex items-center gap-2">
             <img
               src="/fancy-logo.jpg"
               alt="ThinkPro Logo"
               className="h-8 w-8 object-contain"
             />
-            <SidebarTitle>CRM Portal</SidebarTitle>
+            <SidebarTitle className="text-[#FF944E]">CRM Portal</SidebarTitle>
           </div>
           <SidebarToggle />
         </SidebarHeader>
-        <SidebarContent>
-          <SidebarGroup label="Management">
+        <SidebarContent className="bg-[#333A47]">
+          <SidebarGroup label="Management" className="[&>h3]:text-[#C9C9C9]">
             <SidebarNav>
               <SidebarNavItem
                 to="/crm/sales-executive/leads"
                 icon={NotebookPen}
                 className={cn(
+                  "text-[#C9C9C9] hover:bg-white/5 hover:text-white",
                   isActive("/crm/sales-executive/leads") &&
-                    "bg-green-100 text-green-700 border border-green-200"
+                    "bg-[#FF944E] text-[#0C0C0C] border border-[#FF944E] hover:text-[#0C0C0C]"
                 )}
               >
                 Leads
@@ -56,8 +57,9 @@ export default function CRMSalesExecutiveLayout({
                 to="/crm/sales-executive/summary"
                 icon={Table}
                 className={cn(
+                  "text-[#C9C9C9] hover:bg-white/5 hover:text-white",
                   isActive("/crm/sales-executive/summary") &&
-                    "bg-green-100 text-green-700 border border-green-200"
+                    "bg-[#FF944E] text-[#0C0C0C] border border-[#FF944E] hover:text-[#0C0C0C]"
                 )}
               >
                 Summary
@@ -65,13 +67,15 @@ export default function CRMSalesExecutiveLayout({
             </SidebarNav>
           </SidebarGroup>
         </SidebarContent>
-        <SidebarFooter>
-          <LogoutButton
-            variant="ghost"
-            size={isCollapsed ? "icon" : "default"}
-            className="w-full justify-start"
-            isCollapsed={isCollapsed}
-          />
+        <SidebarFooter className="bg-[#333A47] border-[#7F91AA]/20">
+          <div className="p-3">
+            <LogoutButton
+              variant="ghost"
+              size={isCollapsed ? "icon" : "default"}
+              className="w-full justify-start text-[#C9C9C9] hover:text-white hover:bg-white/5"
+              isCollapsed={isCollapsed}
+            />
+          </div>
         </SidebarFooter>
       </Sidebar>
 

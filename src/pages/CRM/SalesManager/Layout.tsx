@@ -29,7 +29,7 @@ export default function CRMSalesManagerLayout({
 
   return (
     <div className="flex h-screen">
-      <Sidebar className="h-screen">
+      <Sidebar className="h-screen bg-[#333A47] text-white">
         <SidebarHeader>
           <div className="flex items-center gap-2">
             <img
@@ -37,7 +37,7 @@ export default function CRMSalesManagerLayout({
               alt="ThinkPro Logo"
               className="h-8 w-8 object-contain"
             />
-            <SidebarTitle>CRM Portal</SidebarTitle>
+            <SidebarTitle className="text-white">CRM Portal</SidebarTitle>
           </div>
           <SidebarToggle />
         </SidebarHeader>
@@ -50,7 +50,8 @@ export default function CRMSalesManagerLayout({
                 icon={NotebookPen}
                 className={cn(
                   isActive("/crm/sales-manager/leads") &&
-                    "bg-green-100 text-green-700 border border-green-200"
+                  "bg-[#0C0C0C]",
+                  "text-white"
                 )}
               >
                 Leads
@@ -60,7 +61,8 @@ export default function CRMSalesManagerLayout({
                 icon={Table}
                 className={cn(
                   isActive("/crm/sales-manager/summary") &&
-                    "bg-green-100 text-green-700 border border-green-200"
+                    "bg-[#0C0C0C]",
+                  "text-white"
                 )}
               >
                 Summary
@@ -71,7 +73,8 @@ export default function CRMSalesManagerLayout({
                 icon={Users}
                 className={cn(
                   isActive("/crm/sales-manager/sales-executives") &&
-                    "bg-green-100 text-green-700 border border-green-200"
+                  "bg-[#0C0C0C]",
+                  "text-white"
                 )}
               >
                 Sales Executives

@@ -148,12 +148,13 @@ export default function CRMSummaryPage() {
     <div className="p-6 space-y-4">
       <div className="flex items-center justify-between gap-3 flex-wrap">
         <div>
-          <h1 className="text-2xl font-semibold">Summary</h1>
-          <p className="text-gray-600">Phase-wise count of filtered leads</p>
+          <h1 className="text-2xl font-semibold text-[#333A47]">Summary</h1>
+          <p className="text-[#6D6D6D]">Phase-wise count of filtered leads</p>
         </div>
         <div className="flex items-center gap-2">
           <Button
             variant="outline"
+            className="bg-[#BB3B17] text-white border-[#BB3B17] hover:bg-[#FF944E] hover:border-[#FF944E]"
             onClick={async () => {
               const params: any = {
                 search: debouncedSearch || undefined,
@@ -200,7 +201,7 @@ export default function CRMSummaryPage() {
         {/* Row 1 */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 w-full">
           <div className="space-y-1 sm:space-y-2">
-            <Label>Search by Name</Label>
+            <Label className="text-[#6D6D6D]">Search by Name</Label>
             <Input
               placeholder="Lead No / School Name / City"
               value={search}
@@ -208,7 +209,7 @@ export default function CRMSummaryPage() {
             />
           </div>
           <div className="space-y-1 sm:space-y-2">
-            <Label>State</Label>
+            <Label className="text-[#6D6D6D]">State</Label>
             <Select value={stateFilter} onValueChange={setStateFilter}>
               <SelectTrigger className="h-10">
                 <SelectValue placeholder="State" />
@@ -224,7 +225,7 @@ export default function CRMSummaryPage() {
             </Select>
           </div>
           <div className="space-y-1 sm:space-y-2">
-            <Label>District</Label>
+            <Label className="text-[#6D6D6D]">District</Label>
             <Input
               placeholder="District"
               value={districtFilter}
@@ -232,7 +233,7 @@ export default function CRMSummaryPage() {
             />
           </div>
           <div className="space-y-1 sm:space-y-2">
-            <Label>City</Label>
+            <Label className="text-[#6D6D6D]">City</Label>
             <Input
               placeholder="City"
               value={cityFilter}
@@ -244,10 +245,10 @@ export default function CRMSummaryPage() {
         {/* Row 2 */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-3 sm:gap-4 w-full">
           <div className="space-y-1 sm:space-y-2">
-            <Label>Action Due Date</Label>
+            <Label className="text-[#6D6D6D]">Action Due Date</Label>
             <Popover open={actionDueOpen} onOpenChange={setActionDueOpen}>
               <PopoverTrigger asChild>
-                <Button variant="outline" className="w-full justify-start text-left font-normal">
+                <Button variant="outline" className="w-full justify-start text-left font-normal border-[#C9C9C9] hover:bg-[#7F91AA]/10">
                   <CalendarIcon className="mr-2 h-4 w-4" />
                   {(() => {
                     if (actionDueDateExact) {
@@ -298,6 +299,7 @@ export default function CRMSummaryPage() {
                   <div className="flex items-center justify-between gap-2 p-2 pt-0">
                     <Button
                       variant="ghost"
+                      className="text-[#333A47] hover:bg-[#7F91AA]/10"
                       onClick={() => {
                         setActionDueRange({});
                         setActionDueDateExact("");
@@ -307,14 +309,14 @@ export default function CRMSummaryPage() {
                     >
                       Clear
                     </Button>
-                    <Button onClick={() => setActionDueOpen(false)}>Apply</Button>
+                    <Button className="bg-[#333A47] text-white hover:bg-[#7F91AA]" onClick={() => setActionDueOpen(false)}>Apply</Button>
                   </div>
                 </div>
               </PopoverContent>
             </Popover>
           </div>
           <div className="space-y-1 sm:space-y-2">
-            <Label>Action On</Label>
+            <Label className="text-[#6D6D6D]">Action On</Label>
             <Select value={actionOnFilter} onValueChange={setActionOnFilter}>
               <SelectTrigger className="h-10">
                 <SelectValue placeholder="Action On" />
@@ -341,7 +343,7 @@ export default function CRMSummaryPage() {
             </Select>
           </div>
           <div className="space-y-1 sm:space-y-2">
-            <Label>TPA Sales POC</Label>
+            <Label className="text-[#6D6D6D]">TPA Sales POC</Label>
             <Select value={pocRoleFilter} onValueChange={setPocRoleFilter}>
               <SelectTrigger className="h-10">
                 <SelectValue placeholder="POC Role" />
@@ -354,7 +356,7 @@ export default function CRMSummaryPage() {
             </Select>
           </div>
           <div className="space-y-1 sm:space-y-2">
-            <Label>Phase</Label>
+            <Label className="text-[#6D6D6D]">Phase</Label>
             <Select value={phaseFilter} onValueChange={setPhaseFilter}>
               <SelectTrigger className="h-10">
                 <SelectValue placeholder="Phase" />
@@ -398,7 +400,7 @@ export default function CRMSummaryPage() {
             </Select>
           </div>
           <div className="space-y-1 sm:space-y-2">
-            <Label>Lead Source</Label>
+            <Label className="text-[#6D6D6D]">Lead Source</Label>
             <Select value={leadSourceFilter} onValueChange={setLeadSourceFilter}>
               <SelectTrigger className="h-10">
                 <SelectValue placeholder="Lead Source" />
@@ -414,7 +416,7 @@ export default function CRMSummaryPage() {
             </Select>
           </div>
           <div className="space-y-1 sm:space-y-2">
-            <Label>Program</Label>
+            <Label className="text-[#6D6D6D]">Program</Label>
             <Select value={programFilter} onValueChange={setProgramFilter}>
               <SelectTrigger className="h-10">
                 <SelectValue placeholder="Program" />
@@ -430,7 +432,7 @@ export default function CRMSummaryPage() {
             </Select>
           </div>
           <div className="space-y-1 sm:space-y-2">
-            <Label>Quality Of Lead</Label>
+            <Label className="text-[#6D6D6D]">Quality Of Lead</Label>
             <Select value={qualityFilter} onValueChange={setQualityFilter}>
               <SelectTrigger className="h-10">
                 <SelectValue placeholder="Quality" />
@@ -446,7 +448,7 @@ export default function CRMSummaryPage() {
             </Select>
           </div>
           <div className="space-y-1 sm:space-y-2">
-            <Label>Delivery Model</Label>
+            <Label className="text-[#6D6D6D]">Delivery Model</Label>
             <Select value={deliveryModelFilter} onValueChange={setDeliveryModelFilter}>
               <SelectTrigger className="h-10">
                 <SelectValue placeholder="Delivery Model" />
@@ -462,7 +464,7 @@ export default function CRMSummaryPage() {
             </Select>
           </div>
           <div className="space-y-1 sm:space-y-2">
-            <Label>Sales Cycle</Label>
+            <Label className="text-[#6D6D6D]">Sales Cycle</Label>
             <Select value={salesCycleFilter} onValueChange={setSalesCycleFilter}>
               <SelectTrigger className="h-10">
                 <SelectValue placeholder="Sales Cycle" />
@@ -478,7 +480,7 @@ export default function CRMSummaryPage() {
             </Select>
           </div>
           <div className="space-y-1 sm:space-y-2">
-            <Label>Board Affiliated</Label>
+            <Label className="text-[#6D6D6D]">Board Affiliated</Label>
             <Select value={boardFilter} onValueChange={setBoardFilter}>
               <SelectTrigger className="h-10">
                 <SelectValue placeholder="Board" />
@@ -496,26 +498,27 @@ export default function CRMSummaryPage() {
         </div>
       </div>
 
-      {/* Summary Table */}
-      <div className="overflow-x-auto bg-white border rounded-md">
-        <table className="min-w-full text-sm">
-          <thead className="bg-gray-50">
-            <tr>
-              <th className="text-left px-4 py-2 border-b w-16">#</th>
-              <th className="text-left px-4 py-2 border-b">Phase</th>
-              <th className="text-right px-4 py-2 border-b w-40">No of Schools</th>
-            </tr>
-          </thead>
-          <tbody>
-            {rows.map((r) => (
-              <tr key={r.order} className="odd:bg-white even:bg-gray-50">
-                <td className="px-4 py-2 border-b align-top">{r.order < 10 ? `0${r.order}` : r.order}</td>
-                <td className="px-4 py-2 border-b align-top">{r.phase}</td>
-                <td className="px-4 py-2 border-b text-right align-top">{r.count}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+      {/* Summary Tiles */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2">
+        {rows.map((r) => (
+          <div
+            key={r.order}
+            className="rounded-md border border-[#C9C9C9] bg-white p-3 flex flex-col gap-1.5 hover:shadow-sm transition-shadow"
+          >
+            <div className="flex items-start justify-between">
+              <div className="inline-flex items-center gap-2">
+                <span className="text-[10px] font-medium text-white bg-[#7F91AA] px-1.5 py-0.5 rounded">
+                  {r.order < 10 ? `0${r.order}` : r.order}
+                </span>
+                <h3 className="text-sm font-semibold leading-tight text-[#333A47]">{r.phase}</h3>
+              </div>
+            </div>
+            <div className="mt-0.5">
+              <div className="text-2xl font-bold text-[#BB3B17]">{r.count}</div>
+              <div className="text-[11px] text-[#6D6D6D]">No. of Schools</div>
+            </div>
+          </div>
+        ))}
       </div>
     </div>
   );

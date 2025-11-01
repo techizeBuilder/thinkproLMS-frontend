@@ -246,12 +246,12 @@ export default function LeadsTable({ onAddNew, onEdit }: LeadsTableProps) {
     <div className="space-y-4">
       <div className="flex items-center justify-between gap-3 flex-wrap">
         <div>
-          <h1 className="text-2xl font-semibold">Leads</h1>
-          <p className="text-gray-600">Manage and track school leads</p>
+          <h1 className="text-2xl font-semibold text-[#333A47]">Leads</h1>
+          <p className="text-[#6D6D6D]">Manage and track school leads</p>
         </div>
         <div className="flex items-center gap-2">
           {onAddNew && (
-            <Button onClick={onAddNew}>
+            <Button className="bg-[#BB3B17] text-white border-[#BB3B17] hover:bg-[#FF944E] hover:border-[#FF944E]" onClick={onAddNew}>
               <Plus className="h-4 w-4 mr-2" /> New Lead
             </Button>
           )}
@@ -262,7 +262,7 @@ export default function LeadsTable({ onAddNew, onEdit }: LeadsTableProps) {
         {/* Row 1: Search, State, District, City */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 w-full">
           <div className="space-y-1 sm:space-y-2">
-            <Label>Search by Name</Label>
+            <Label className="text-[#6D6D6D]">Search by Name</Label>
             <Input
               placeholder="Lead No / School Name / City"
               value={search}
@@ -270,7 +270,7 @@ export default function LeadsTable({ onAddNew, onEdit }: LeadsTableProps) {
             />
           </div>
           <div className="space-y-1 sm:space-y-2">
-            <Label>State</Label>
+            <Label className="text-[#6D6D6D]">State</Label>
             <Select value={stateFilter} onValueChange={setStateFilter}>
               <SelectTrigger className="h-10">
                 <SelectValue placeholder="State" />
@@ -286,7 +286,7 @@ export default function LeadsTable({ onAddNew, onEdit }: LeadsTableProps) {
             </Select>
           </div>
           <div className="space-y-1 sm:space-y-2">
-            <Label>District</Label>
+            <Label className="text-[#6D6D6D]">District</Label>
             <Input
               placeholder="District"
               value={districtFilter}
@@ -294,7 +294,7 @@ export default function LeadsTable({ onAddNew, onEdit }: LeadsTableProps) {
             />
           </div>
           <div className="space-y-1 sm:space-y-2">
-            <Label>City</Label>
+            <Label className="text-[#6D6D6D]">City</Label>
             <Input
               placeholder="City"
               value={cityFilter}
@@ -306,12 +306,12 @@ export default function LeadsTable({ onAddNew, onEdit }: LeadsTableProps) {
         {/* Row 2: Remaining filters */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-3 sm:gap-4 w-full">
           <div className="space-y-1 sm:space-y-2">
-            <Label>Action Due Date</Label>
+            <Label className="text-[#6D6D6D]">Action Due Date</Label>
             <Popover open={actionDueOpen} onOpenChange={setActionDueOpen}>
               <PopoverTrigger asChild>
                 <Button
                   variant="outline"
-                  className="w-full justify-start text-left font-normal"
+                  className="w-full justify-start text-left font-normal border-[#C9C9C9] hover:bg-[#7F91AA]/10"
                 >
                   <CalendarIcon className="mr-2 h-4 w-4" />
                   {(() => {
@@ -376,6 +376,7 @@ export default function LeadsTable({ onAddNew, onEdit }: LeadsTableProps) {
                   <div className="flex items-center justify-between gap-2 p-2 pt-0">
                     <Button
                       variant="ghost"
+                      className="text-[#333A47] hover:bg-[#7F91AA]/10"
                       onClick={() => {
                         setActionDueRange({});
                         setActionDueDateExact("");
@@ -385,7 +386,7 @@ export default function LeadsTable({ onAddNew, onEdit }: LeadsTableProps) {
                     >
                       Clear
                     </Button>
-                    <Button onClick={() => setActionDueOpen(false)}>
+                    <Button className="bg-[#333A47] text-white hover:bg-[#7F91AA]" onClick={() => setActionDueOpen(false)}>
                       Apply
                     </Button>
                   </div>
@@ -394,7 +395,7 @@ export default function LeadsTable({ onAddNew, onEdit }: LeadsTableProps) {
             </Popover>
           </div>
           <div className="space-y-1 sm:space-y-2">
-            <Label>Action On</Label>
+            <Label className="text-[#6D6D6D]">Action On</Label>
             <Select value={actionOnFilter} onValueChange={setActionOnFilter}>
               <SelectTrigger className="h-10">
                 <SelectValue placeholder="Action On" />
@@ -421,7 +422,7 @@ export default function LeadsTable({ onAddNew, onEdit }: LeadsTableProps) {
             </Select>
           </div>
           <div className="space-y-1 sm:space-y-2">
-            <Label>TPA Sales POC</Label>
+            <Label className="text-[#6D6D6D]">TPA Sales POC</Label>
             <Select value={pocRoleFilter} onValueChange={setPocRoleFilter}>
               <SelectTrigger className="h-10">
                 <SelectValue placeholder="POC Role" />
@@ -434,7 +435,7 @@ export default function LeadsTable({ onAddNew, onEdit }: LeadsTableProps) {
             </Select>
           </div>
           <div className="space-y-1 sm:space-y-2">
-            <Label>Phase</Label>
+            <Label className="text-[#6D6D6D]">Phase</Label>
             <Select value={phaseFilter} onValueChange={setPhaseFilter}>
               <SelectTrigger className="h-10">
                 <SelectValue placeholder="Phase" />
@@ -478,7 +479,7 @@ export default function LeadsTable({ onAddNew, onEdit }: LeadsTableProps) {
             </Select>
           </div>
           <div className="space-y-1 sm:space-y-2">
-            <Label>Lead Source</Label>
+            <Label className="text-[#6D6D6D]">Lead Source</Label>
             <Select
               value={leadSourceFilter}
               onValueChange={setLeadSourceFilter}
@@ -497,7 +498,7 @@ export default function LeadsTable({ onAddNew, onEdit }: LeadsTableProps) {
             </Select>
           </div>
           <div className="space-y-1 sm:space-y-2">
-            <Label>Program</Label>
+            <Label className="text-[#6D6D6D]">Program</Label>
             <Select value={programFilter} onValueChange={setProgramFilter}>
               <SelectTrigger className="h-10">
                 <SelectValue placeholder="Program" />
@@ -513,7 +514,7 @@ export default function LeadsTable({ onAddNew, onEdit }: LeadsTableProps) {
             </Select>
           </div>
           <div className="space-y-1 sm:space-y-2">
-            <Label>Quality Of Lead</Label>
+            <Label className="text-[#6D6D6D]">Quality Of Lead</Label>
             <Select value={qualityFilter} onValueChange={setQualityFilter}>
               <SelectTrigger className="h-10">
                 <SelectValue placeholder="Quality" />
@@ -529,7 +530,7 @@ export default function LeadsTable({ onAddNew, onEdit }: LeadsTableProps) {
             </Select>
           </div>
           <div className="space-y-1 sm:space-y-2">
-            <Label>Delivery Model</Label>
+            <Label className="text-[#6D6D6D]">Delivery Model</Label>
             <Select
               value={deliveryModelFilter}
               onValueChange={setDeliveryModelFilter}
@@ -548,7 +549,7 @@ export default function LeadsTable({ onAddNew, onEdit }: LeadsTableProps) {
             </Select>
           </div>
           <div className="space-y-1 sm:space-y-2">
-            <Label>Sales Cycle</Label>
+            <Label className="text-[#6D6D6D]">Sales Cycle</Label>
             <Select
               value={salesCycleFilter}
               onValueChange={setSalesCycleFilter}
@@ -567,7 +568,7 @@ export default function LeadsTable({ onAddNew, onEdit }: LeadsTableProps) {
             </Select>
           </div>
           <div className="space-y-1 sm:space-y-2">
-            <Label>Board Affiliated</Label>
+            <Label className="text-[#6D6D6D]">Board Affiliated</Label>
             <Select value={boardFilter} onValueChange={setBoardFilter}>
               <SelectTrigger className="h-10">
                 <SelectValue placeholder="Board" />
@@ -587,7 +588,7 @@ export default function LeadsTable({ onAddNew, onEdit }: LeadsTableProps) {
         </div>
       </div>
 
-      <Card className="p-0">
+      <Card className="p-0 border-[#C9C9C9]">
         <CardContent className="p-0">
           <div className="overflow-x-auto">
             <Table>
@@ -654,7 +655,7 @@ export default function LeadsTable({ onAddNew, onEdit }: LeadsTableProps) {
                 {(loading || tableLoading) && (
                   <TableRow>
                     <TableCell colSpan={28}>
-                      <div className="flex items-center justify-center py-10 text-gray-600">
+                      <div className="flex items-center justify-center py-10 text-[#6D6D6D]">
                         <Loader2 className="h-4 w-4 animate-spin mr-2" />{" "}
                         Loading...
                       </div>
@@ -788,6 +789,7 @@ export default function LeadsTable({ onAddNew, onEdit }: LeadsTableProps) {
                         <div className="flex items-center justify-end gap-1">
                           <Button
                             variant="ghost"
+                            className="text-[#333A47] hover:bg-[#7F91AA]/10"
                             size="icon"
                             onClick={() => onEdit && onEdit(l)}
                             aria-label="Edit lead"
@@ -796,6 +798,7 @@ export default function LeadsTable({ onAddNew, onEdit }: LeadsTableProps) {
                           </Button>
                           <Button
                             variant="ghost"
+                            className="hover:bg-red-50"
                             size="icon"
                             onClick={() => handleDelete(l)}
                             aria-label="Delete lead"
@@ -813,13 +816,13 @@ export default function LeadsTable({ onAddNew, onEdit }: LeadsTableProps) {
       </Card>
 
       <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
-        <div className="text-sm text-gray-600">
+        <div className="text-sm text-[#6D6D6D]">
           Showing {leads.length ? (page - 1) * pageSize + 1 : 0} -{" "}
           {Math.min(page * pageSize, total)} of {total}
         </div>
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-2">
-            <Label>Rows per page</Label>
+            <Label className="text-[#6D6D6D]">Rows per page</Label>
             <Select
               value={String(pageSize)}
               onValueChange={(v) => setPageSize(Number(v))}
@@ -839,6 +842,7 @@ export default function LeadsTable({ onAddNew, onEdit }: LeadsTableProps) {
           <div className="flex items-center gap-2">
             <Button
               variant="outline"
+              className="border-[#C9C9C9] text-[#333A47] hover:bg-[#7F91AA]/10"
               disabled={page <= 1 || loading || tableLoading}
               onClick={() => setPage((p) => Math.max(1, p - 1))}
             >
@@ -849,6 +853,7 @@ export default function LeadsTable({ onAddNew, onEdit }: LeadsTableProps) {
             </div>
             <Button
               variant="outline"
+              className="border-[#C9C9C9] text-[#333A47] hover:bg-[#7F91AA]/10"
               disabled={page >= pages || loading || tableLoading}
               onClick={() => setPage((p) => Math.min(pages, p + 1))}
             >
