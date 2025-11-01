@@ -148,12 +148,13 @@ export default function CRMSummaryPage() {
     <div className="p-6 space-y-4">
       <div className="flex items-center justify-between gap-3 flex-wrap">
         <div>
-          <h1 className="text-2xl font-semibold">Summary</h1>
-          <p className="text-gray-600">Phase-wise count of filtered leads</p>
+          <h1 className="text-2xl font-semibold text-[var(--foreground)]">Summary</h1>
+          <p className="text-[var(--muted-foreground)]">Phase-wise count of filtered leads</p>
         </div>
         <div className="flex items-center gap-2">
           <Button
             variant="outline"
+            className="bg-[var(--stem-science)] text-white border-[var(--stem-science)] hover:bg-[var(--stem-mathematics)] hover:border-[var(--stem-mathematics)]"
             onClick={async () => {
               const params: any = {
                 search: debouncedSearch || undefined,
@@ -496,26 +497,35 @@ export default function CRMSummaryPage() {
         </div>
       </div>
 
-      {/* Summary Table */}
-      <div className="overflow-x-auto bg-white border rounded-md">
-        <table className="min-w-full text-sm">
-          <thead className="bg-gray-50">
-            <tr>
-              <th className="text-left px-4 py-2 border-b w-16">#</th>
-              <th className="text-left px-4 py-2 border-b">Phase</th>
-              <th className="text-right px-4 py-2 border-b w-40">No of Schools</th>
-            </tr>
-          </thead>
-          <tbody>
-            {rows.map((r) => (
-              <tr key={r.order} className="odd:bg-white even:bg-gray-50">
-                <td className="px-4 py-2 border-b align-top">{r.order < 10 ? `0${r.order}` : r.order}</td>
-                <td className="px-4 py-2 border-b align-top">{r.phase}</td>
-                <td className="px-4 py-2 border-b text-right align-top">{r.count}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+      {/* Summary Tiles */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+        {rows.map((r) => (
+          <div
+            key={r.order}
+            className="rounded-lg border bg-card border-[var(--border)] p-4 hover:shadow-md transition-all duration-200 hover:border-[var(--stem-engineering)]"
+          >
+            <div className="flex items-start justify-between gap-2 mb-3">
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-bold text-white bg-[var(--stem-engineering)] px-2 py-1 rounded-md min-w-[2rem] text-center">
+                  {r.order < 10 ? `0${r.order}` : r.order}
+                </span>
+                <h3 className="text-sm font-semibold text-[var(--foreground)] leading-tight line-clamp-2">
+                  {r.phase}
+                </h3>
+              </div>
+            </div>
+            <div className="flex items-baseline justify-between gap-2">
+              <div>
+                <div className="text-2xl font-bold text-[var(--stem-science)]">
+                  {r.count}
+                </div>
+                <div className="text-xs text-[var(--muted-foreground)] mt-0.5">
+                  Schools
+                </div>
+              </div>
+            </div>
+          </div>
+        ))}
       </div>
     </div>
   );

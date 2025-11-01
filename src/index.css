@@ -44,33 +44,71 @@
   --color-sidebar-title: var(--sidebar-title);
   --color-sidebar-text-muted: var(--sidebar-text-muted);
   --color-sidebar-hover-bg: var(--sidebar-hover-bg);
+  
+  /* STEM Theme Color Variables for Tailwind */
+  --color-stem-science: var(--stem-science);
+  --color-stem-technology: var(--stem-technology);
+  --color-stem-engineering: var(--stem-engineering);
+  --color-stem-mathematics: var(--stem-mathematics);
+  --color-mono-black: var(--mono-black);
+  --color-mono-gray: var(--mono-gray);
+  --color-mono-light-gray: var(--mono-light-gray);
 }
 
 :root {
   --radius: 0.625rem;
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.646 0.222 41.116);
-  --chart-2: oklch(0.6 0.118 184.704);
-  --chart-3: oklch(0.398 0.07 227.392);
-  --chart-4: oklch(0.828 0.189 84.429);
-  --chart-5: oklch(0.769 0.188 70.08);
+  
+  /* STEM Theme Color Palette */
+  --stem-science: #BB3B17;
+  --stem-technology: #333A47;
+  --stem-engineering: #7F91AA;
+  --stem-mathematics: #FF944E;
+  --mono-black: #0C0C0C;
+  --mono-gray: #6D6D6D;
+  --mono-light-gray: #C9C9C9;
+  
+  /* Background Colors - Using very light gray for subtle differentiation */
+  --background: #fafafa;
+  --card: #ffffff;
+  --popover: #ffffff;
+  
+  /* Foreground Text Colors */
+  --foreground: #0C0C0C;
+  --card-foreground: #0C0C0C;
+  --popover-foreground: #0C0C0C;
+  
+  /* Primary Colors (Science - Red/Orange) */
+  --primary: #BB3B17;
+  --primary-foreground: #ffffff;
+  
+  /* Secondary Colors */
+  --secondary: #f5f5f5;
+  --secondary-foreground: #0C0C0C;
+  
+  /* Muted Colors */
+  --muted: #f9f9f9;
+  --muted-foreground: #6D6D6D;
+  
+  /* Accent Colors (Mathematics - Orange) */
+  --accent: #FF944E;
+  --accent-foreground: #0C0C0C;
+  
+  /* Destructive (using Science color) */
+  --destructive: #BB3B17;
+  
+  /* Borders & Inputs */
+  --border: #C9C9C9;
+  --input: #C9C9C9;
+  --ring: #7F91AA;
+  
+  /* Chart Colors using STEM palette */
+  --chart-1: #BB3B17;
+  --chart-2: #FF944E;
+  --chart-3: #7F91AA;
+  --chart-4: #333A47;
+  --chart-5: #6D6D6D;
+  
+  /* Sidebar Colors (already using theme) */
   --sidebar: #333A47;
   --sidebar-foreground: #ffffff;
   --sidebar-primary: #FF944E;
@@ -85,29 +123,48 @@
 }
 
 .dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
-  --chart-1: oklch(0.488 0.243 264.376);
-  --chart-2: oklch(0.696 0.17 162.48);
-  --chart-3: oklch(0.769 0.188 70.08);
-  --chart-4: oklch(0.627 0.265 303.9);
-  --chart-5: oklch(0.645 0.246 16.439);
+  /* Background Colors */
+  --background: #1a1a1a;
+  --card: #262626;
+  --popover: #262626;
+  
+  /* Foreground Text Colors */
+  --foreground: #ffffff;
+  --card-foreground: #ffffff;
+  --popover-foreground: #ffffff;
+  
+  /* Primary Colors */
+  --primary: #FF944E;
+  --primary-foreground: #0C0C0C;
+  
+  /* Secondary Colors */
+  --secondary: #333333;
+  --secondary-foreground: #ffffff;
+  
+  /* Muted Colors */
+  --muted: #333333;
+  --muted-foreground: #C9C9C9;
+  
+  /* Accent Colors */
+  --accent: #FF944E;
+  --accent-foreground: #0C0C0C;
+  
+  /* Destructive */
+  --destructive: #BB3B17;
+  
+  /* Borders & Inputs */
+  --border: rgba(201, 201, 201, 0.2);
+  --input: rgba(201, 201, 201, 0.3);
+  --ring: #7F91AA;
+  
+  /* Chart Colors */
+  --chart-1: #BB3B17;
+  --chart-2: #FF944E;
+  --chart-3: #7F91AA;
+  --chart-4: #333A47;
+  --chart-5: #6D6D6D;
+  
+  /* Sidebar Colors (consistent with light mode) */
   --sidebar: #333A47;
   --sidebar-foreground: #ffffff;
   --sidebar-primary: #FF944E;
@@ -127,12 +184,73 @@
   }
   body {
     @apply bg-background text-foreground overflow-hidden h-screen;
+    background-color: var(--background);
+    color: var(--foreground);
   }
   html, #root {
     height: 100%;
+    background-color: var(--background);
   }
   button {
     @apply hover:cursor-pointer;
+  }
+  
+  /* Override common hardcoded classes with theme colors */
+  .bg-gray-50,
+  .bg-gray-100,
+  .bg-slate-50 {
+    background-color: var(--background) !important;
+  }
+  
+  .text-gray-900,
+  .text-gray-800,
+  .text-slate-800 {
+    color: var(--foreground) !important;
+  }
+  
+  /* Apply theme color to headings outside sidebar */
+  h1, h2, h3, h4, h5, h6 {
+    color: var(--foreground) !important;
+  }
+  
+  /* Override for sidebar headings - must come after the general rule */
+  [data-sidebar] h1,
+  [data-sidebar] h2,
+  [data-sidebar] h3,
+  [data-sidebar] h4,
+  [data-sidebar] h5,
+  [data-sidebar] h6 {
+    color: inherit !important;
+  }
+  
+  .text-gray-600,
+  .text-gray-700,
+  .text-slate-600,
+  .text-slate-700,
+  .text-gray-500,
+  .text-slate-500 {
+    color: var(--muted-foreground) !important;
+  }
+  
+  .bg-white {
+    background-color: var(--card) !important;
+  }
+  
+  .border-gray-200,
+  .border-slate-200,
+  .border-gray-300 {
+    border-color: var(--border) !important;
+  }
+  
+  /* Ensure main content areas use theme background */
+  main {
+    background-color: var(--background) !important;
+    color: var(--foreground) !important;
+  }
+  
+  /* Ensure default text uses theme color */
+  p, span, div, a {
+    color: inherit;
   }
 }
 

@@ -329,7 +329,7 @@ export function SidebarGroup({
   return (
     <div className={cn("space-y-1", className)} {...props}>
       {label && !isCollapsed && (
-        <h3 className="px-3 text-xs font-medium text-[var(--sidebar-text-muted)] uppercase tracking-wider">
+        <h3 className="px-3 text-xs font-medium !text-[var(--sidebar-foreground)] uppercase tracking-wider opacity-80">
           {label}
         </h3>
       )}

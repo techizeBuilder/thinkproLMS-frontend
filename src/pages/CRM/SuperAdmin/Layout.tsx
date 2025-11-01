@@ -53,35 +53,23 @@ export default function CRMSuperAdminLayout({
               <SidebarNavItem
                 to="/crm/superadmin/sales-managers"
                 icon={UserCheck}
-                className={cn(
-                  isActive("/crm/superadmin/sales-managers") &&
-                    "bg-green-100 text-green-700 border border-green-200"
-                )}
               >
                 Sales Managers
               </SidebarNavItem>
               <SidebarNavItem
                 to="/crm/superadmin/sales-executives"
                 icon={Users}
-                className={cn(
-                  isActive("/crm/superadmin/sales-executives") &&
-                    "bg-green-100 text-green-700 border border-green-200"
-                )}
               >
                 Sales Executives
               </SidebarNavItem>
-              <SidebarNavItem
-                to="/crm/superadmin/notifications"
-                icon={Bell}
-                className={cn(
-                  isActive("/crm/superadmin/notifications") &&
-                    "bg-green-100 text-green-700 border border-green-200"
-                )}
-              >
+              <SidebarNavItem to="/crm/superadmin/notifications" icon={Bell}>
                 <div className="flex items-center justify-between w-full">
                   <span>Notifications</span>
                   {unreadCount > 0 && !isCollapsed && (
-                    <Badge variant="destructive" className="ml-auto text-xs px-1.5 py-0 h-5">
+                    <Badge
+                      variant="destructive"
+                      className="ml-auto text-xs px-1.5 py-0 h-5"
+                    >
                       {unreadCount}
                     </Badge>
                   )}

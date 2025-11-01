@@ -79,7 +79,7 @@ export default function CRMSalesExecutiveLayout({
         </SidebarFooter>
       </Sidebar>
 
-      <main className="flex-1 overflow-auto bg-gray-50">{children}</main>
+      <main className="flex-1 overflow-auto bg-background">{children}</main>
     </div>
   );
 }
