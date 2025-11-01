@@ -1,5 +1,3 @@
-import { useLocation } from "react-router-dom";
-import { cn } from "@/lib/utils";
 import {
   Sidebar,
   SidebarContent,
@@ -27,10 +25,7 @@ export default function CRMSuperAdminLayout({
   children,
 }: CRMSuperAdminLayoutProps) {
   const { isCollapsed } = useSidebar();
-  const location = useLocation();
   const { unreadCount } = useCRMNotifications();
-
-  const isActive = (path: string) => location.pathname === path;
 
   return (
     <div className="flex h-screen">
