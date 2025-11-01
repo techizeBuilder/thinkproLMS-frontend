@@ -12,10 +12,12 @@ import {
   useSidebar,
   SidebarFooter,
 } from "@/components/ui/collapsible-sidebar";
-import { Users, UserCheck, Building2 } from "lucide-react";
+import { Users, UserCheck, Building2, Bell } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { LogoutButton } from "@/components/ui/logout-button";
+import { Badge } from "@/components/ui/badge";
+import { useCRMNotifications } from "@/hooks/useCRMNotifications";
 
 interface CRMSuperAdminLayoutProps {
   children: React.ReactNode;
@@ -26,6 +28,7 @@ export default function CRMSuperAdminLayout({
 }: CRMSuperAdminLayoutProps) {
   const { isCollapsed } = useSidebar();
   const location = useLocation();
+  const { unreadCount } = useCRMNotifications();
 
   const isActive = (path: string) => location.pathname === path;
 
@@ -66,6 +69,23 @@ export default function CRMSuperAdminLayout({
                 )}
               >
                 Sales Executives
+              </SidebarNavItem>
+              <SidebarNavItem
+                to="/crm/superadmin/notifications"
+                icon={Bell}
+                className={cn(
+                  isActive("/crm/superadmin/notifications") &&
+                    "bg-green-100 text-green-700 border border-green-200"
+                )}
+              >
+                <div className="flex items-center justify-between w-full">
+                  <span>Notifications</span>
+                  {unreadCount > 0 && !isCollapsed && (
+                    <Badge variant="destructive" className="ml-auto text-xs px-1.5 py-0 h-5">
+                      {unreadCount}
+                    </Badge>
+                  )}
+                </div>
               </SidebarNavItem>
             </SidebarNav>
           </SidebarGroup>

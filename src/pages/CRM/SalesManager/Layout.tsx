@@ -12,8 +12,10 @@ import {
   useSidebar,
   SidebarFooter,
 } from "@/components/ui/collapsible-sidebar";
-import { Users, NotebookPen, Table } from "lucide-react";
+import { Users, NotebookPen, Table, Bell } from "lucide-react";
 import { LogoutButton } from "@/components/ui/logout-button";
+import { Badge } from "@/components/ui/badge";
+import { useCRMNotifications } from "@/hooks/useCRMNotifications";
 
 interface CRMSalesManagerLayoutProps {
   children: React.ReactNode;
@@ -24,6 +26,7 @@ export default function CRMSalesManagerLayout({
 }: CRMSalesManagerLayoutProps) {
   const { isCollapsed } = useSidebar();
   const location = useLocation();
+  const { unreadCount } = useCRMNotifications();
 
   const isActive = (path: string) => location.pathname === path;
 
@@ -75,6 +78,23 @@ export default function CRMSalesManagerLayout({
                 )}
               >
                 Sales Executives
+              </SidebarNavItem>
+              <SidebarNavItem
+                to="/crm/sales-manager/notifications"
+                icon={Bell}
+                className={cn(
+                  isActive("/crm/sales-manager/notifications") &&
+                    "bg-green-100 text-green-700 border border-green-200"
+                )}
+              >
+                <div className="flex items-center justify-between w-full">
+                  <span>Notifications</span>
+                  {unreadCount > 0 && !isCollapsed && (
+                    <Badge variant="destructive" className="ml-auto text-xs px-1.5 py-0 h-5">
+                      {unreadCount}
+                    </Badge>
+                  )}
+                </div>
               </SidebarNavItem>
             </SidebarNav>
           </SidebarGroup>

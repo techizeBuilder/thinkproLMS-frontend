@@ -15,6 +15,7 @@ import CRMSummaryPage from "../pages/CRM/Summary";
 import SESalesLeadsPage from "../pages/CRM/SalesExecutive/Leads";
 import SEAddLeadPage from "../pages/CRM/SalesExecutive/Leads/Add";
 import SEEditLeadPage from "../pages/CRM/SalesExecutive/Leads/Edit";
+import CRMNotificationsPage from "../pages/CRM/Notifications";
 import SalesManagersPage from "../pages/CRM/SuperAdmin/SalesManagers";
 import AddSalesManagerPage from "../pages/CRM/SuperAdmin/SalesManagers/Add";
 import SalesExecutivesPage from "../pages/CRM/SuperAdmin/SalesExecutives";
@@ -279,6 +280,10 @@ export default function AppRouter() {
                       path="sales-executives/:id/edit"
                       element={<EditSalesExecutivePage />}
                     />
+                    <Route
+                      path="notifications"
+                      element={<CRMNotificationsPage />}
+                    />
                   </Routes>
                 </CRMSuperAdminLayout>
               </SidebarProvider>
@@ -309,6 +314,10 @@ export default function AppRouter() {
                       path="sales-executives/:id/edit"
                       element={<SMEditSalesExecutivePage />}
                     />
+                    <Route
+                      path="notifications"
+                      element={<CRMNotificationsPage />}
+                    />
                   </Routes>
                 </CRMSalesManagerLayout>
               </SidebarProvider>
@@ -327,6 +336,10 @@ export default function AppRouter() {
                     <Route path="leads/add" element={<SEAddLeadPage />} />
                     <Route path="leads/:id/edit" element={<SEEditLeadPage />} />
                     <Route path="summary" element={<CRMSummaryPage />} />
+                    <Route
+                      path="notifications"
+                      element={<CRMNotificationsPage />}
+                    />
                   </Routes>
                 </CRMSalesExecutiveLayout>
               </SidebarProvider>

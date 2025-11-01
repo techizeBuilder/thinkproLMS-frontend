@@ -11,9 +11,11 @@ import {
   SidebarNavItem,
 } from "@/components/ui/collapsible-sidebar";
 import { LogoutButton } from "@/components/ui/logout-button";
-import { NotebookPen, Table } from "lucide-react";
+import { NotebookPen, Table, Bell } from "lucide-react";
 import { useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
+import { Badge } from "@/components/ui/badge";
+import { useCRMNotifications } from "@/hooks/useCRMNotifications";
 
 interface CRMSalesExecutiveLayoutProps {
   children?: React.ReactNode;
@@ -24,6 +26,7 @@ export default function CRMSalesExecutiveLayout({
 }: CRMSalesExecutiveLayoutProps) {
   const { isCollapsed } = useSidebar();
   const location = useLocation();
+  const { unreadCount } = useCRMNotifications();
   const isActive = (path: string) => location.pathname === path;
   return (
     <div className="flex h-screen">
@@ -61,6 +64,23 @@ export default function CRMSalesExecutiveLayout({
                 )}
               >
                 Summary
+              </SidebarNavItem>
+              <SidebarNavItem
+                to="/crm/sales-executive/notifications"
+                icon={Bell}
+                className={cn(
+                  isActive("/crm/sales-executive/notifications") &&
+                    "bg-green-100 text-green-700 border border-green-200"
+                )}
+              >
+                <div className="flex items-center justify-between w-full">
+                  <span>Notifications</span>
+                  {unreadCount > 0 && !isCollapsed && (
+                    <Badge variant="destructive" className="ml-auto text-xs px-1.5 py-0 h-5">
+                      {unreadCount}
+                    </Badge>
+                  )}
+                </div>
               </SidebarNavItem>
             </SidebarNav>
           </SidebarGroup>
