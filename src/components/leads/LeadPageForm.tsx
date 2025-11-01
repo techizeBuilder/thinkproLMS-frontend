@@ -371,7 +371,7 @@ export default function LeadPageForm({
               </div>
             </div>
             <div className="space-y-2">
-              <Label>Board Affiliated</Label>
+              <Label className="text-gray-500">Board Affiliated (Optional)</Label>
               <Select
                 value={form.boardAffiliated}
                 onValueChange={(v) => handleSelect("boardAffiliated", v)}
@@ -391,7 +391,7 @@ export default function LeadPageForm({
               </Select>
             </div>
             <div className="space-y-2">
-              <Label>School Website</Label>
+              <Label className="text-gray-500">School Website (Optional)</Label>
               <Input
                 name="schoolWebsite"
                 placeholder="https://example.edu"
@@ -406,7 +406,7 @@ export default function LeadPageForm({
             <h3 className="font-semibold">Contacts</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label>Principal Name</Label>
+                <Label className="text-gray-500">Principal Name (Optional)</Label>
                 <Input
                   name="principalName"
                   placeholder="e.g. Dr. A. Sharma"
@@ -415,7 +415,7 @@ export default function LeadPageForm({
                 />
               </div>
               <div className="space-y-2">
-                <Label>Principal Contact</Label>
+                <Label className="text-gray-500">Principal Contact (Optional)</Label>
                 <Input
                   name="principalContact"
                   placeholder="e.g. +91 98xxxxxxx"
@@ -432,7 +432,7 @@ export default function LeadPageForm({
                 )}
               </div>
               <div className="space-y-2 md:col-span-2">
-                <Label>Principal Email</Label>
+                <Label className="text-gray-500">Principal Email (Optional)</Label>
                 <Input
                   name="principalEmail"
                   placeholder="principal@school.edu"
@@ -442,7 +442,7 @@ export default function LeadPageForm({
                 />
               </div>
               <div className="space-y-2 md:col-span-2">
-                <Label>School Email</Label>
+                <Label className="text-gray-500">School Email (Optional)</Label>
                 <Input
                   name="schoolEmail"
                   placeholder="info@school.edu"
@@ -452,7 +452,7 @@ export default function LeadPageForm({
                 />
               </div>
               <div className="space-y-2">
-                <Label>Key Person Name</Label>
+                <Label className="text-gray-500">Key Person Name (Optional)</Label>
                 <Input
                   name="keyPersonName"
                   placeholder="e.g. Ms. K. Rao"
@@ -461,7 +461,7 @@ export default function LeadPageForm({
                 />
               </div>
               <div className="space-y-2">
-                <Label>Key Person Contact</Label>
+                <Label className="text-gray-500">Key Person Contact (Optional)</Label>
                 <Input
                   name="keyPersonContact"
                   placeholder="e.g. +91 9xxxxxxxxx"
@@ -478,7 +478,7 @@ export default function LeadPageForm({
                 )}
               </div>
               <div className="space-y-2 md:col-span-2">
-                <Label>Key Person Email</Label>
+                <Label className="text-gray-500">Key Person Email (Optional)</Label>
                 <Input
                   name="keyPersonEmail"
                   placeholder="key.person@school.edu"
@@ -492,7 +492,7 @@ export default function LeadPageForm({
             <h3 className="font-semibold">Qualification</h3>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="space-y-2">
-                <Label>Robotics / ATL Present?</Label>
+                <Label className="text-gray-500">Robotics / ATL Present? (Optional)</Label>
                 <Select
                   value={form.roboticsAtlPresent}
                   onValueChange={(v) => handleSelect("roboticsAtlPresent", v)}
@@ -507,7 +507,7 @@ export default function LeadPageForm({
                 </Select>
               </div>
               <div className="space-y-2">
-                <Label>No of Students</Label>
+                <Label className="text-gray-500">No of Students (Optional)</Label>
                 <Input
                   name="noOfStudents"
                   placeholder="e.g. 500"
@@ -518,7 +518,7 @@ export default function LeadPageForm({
                 />
               </div>
               <div className="space-y-2">
-                <Label>Avg Fees Per Year</Label>
+                <Label className="text-gray-500">Avg Fees Per Year (Optional)</Label>
                 <Input
                   name="avgFeesPerYear"
                   placeholder="e.g. 45000"
@@ -529,7 +529,7 @@ export default function LeadPageForm({
                 />
               </div>
               <div className="space-y-2">
-                <Label>Qualified?</Label>
+                <Label className="text-gray-500">Qualified? (Optional)</Label>
                 <Select
                   value={form.qualified}
                   onValueChange={(v) => handleSelect("qualified", v)}
@@ -653,7 +653,7 @@ export default function LeadPageForm({
                 </Select>
               </div>
               <div className="space-y-2">
-                <Label>Pilot / Full Program</Label>
+                <Label className="text-gray-500">Pilot / Full Program (Optional)</Label>
                 <Select
                   value={form.programType}
                   onValueChange={(v) => handleSelect("programType", v)}
@@ -668,7 +668,7 @@ export default function LeadPageForm({
                 </Select>
               </div>
               <div className="space-y-2">
-                <Label>Delivery Model</Label>
+                <Label className="text-gray-500">Delivery Model (Optional)</Label>
                 <Select
                   value={form.deliveryModel}
                   onValueChange={(v) => handleSelect("deliveryModel", v)}
@@ -686,7 +686,7 @@ export default function LeadPageForm({
                 </Select>
               </div>
               <div className="space-y-2">
-                <Label>Quality Of Lead</Label>
+                <Label className="text-gray-500">Quality Of Lead (Optional)</Label>
                 <Select
                   value={form.qualityOfLead}
                   onValueChange={(v) => handleSelect("qualityOfLead", v)}
@@ -721,6 +721,7 @@ export default function LeadPageForm({
               </div>
 
               <div className="space-y-2">
+                <Label className="text-gray-500">Sales Start Date (Optional)</Label>
                 {dateField("Sales Start Date", "salesStartDate")}
               </div>
               <div className="space-y-2">
@@ -741,7 +742,7 @@ export default function LeadPageForm({
                 />
               </div>
               <div className="space-y-2">
-                <Label>Remarks - From Team</Label>
+                <Label className="text-gray-500">Remarks - From Team (Optional)</Label>
                 <Textarea
                   name="teamRemarks"
                   placeholder="e.g. Follow-up notes, meeting minutes..."
@@ -794,7 +795,7 @@ export default function LeadPageForm({
                   </Select>
                 </div>
                 <div className="space-y-2 md:col-span-3">
-                  <Label>Annual Contract Value (INR)</Label>
+                  <Label className="text-gray-500">Annual Contract Value (INR) (Optional)</Label>
                   <Input
                     name="annualContractValue"
                     placeholder="e.g. 250000"
