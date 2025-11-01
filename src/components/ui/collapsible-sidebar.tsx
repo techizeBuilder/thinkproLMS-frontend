@@ -120,7 +120,8 @@ export function Sidebar({ children, className, ...props }: SidebarProps) {
       <div
         data-sidebar
         className={cn(
-          "relative flex h-screen flex-col border-r bg-background transition-all duration-300 ease-in-out",
+          "relative flex h-screen flex-col border-r transition-all duration-300 ease-in-out",
+          "bg-[var(--sidebar)] text-[var(--sidebar-foreground)] border-[var(--sidebar-border)]",
           // Desktop behavior
           "lg:relative lg:translate-x-0",
           // Mobile/Tablet behavior
@@ -156,6 +157,7 @@ export function SidebarHeader({
     <div
       className={cn(
         "flex items-center border-b px-3 py-4",
+        "border-[var(--sidebar-border)]",
         isCollapsed ? "justify-center" : "justify-between",
         className
       )}
@@ -198,6 +200,7 @@ export function SidebarToggle({ className, ...props }: SidebarToggleProps) {
       data-sidebar-toggle
       className={cn(
         "h-8 w-8 rounded-md",
+        "text-[var(--sidebar-foreground)] hover:bg-[var(--sidebar-hover-bg)]",
         className
       )}
       {...props}
@@ -239,6 +242,7 @@ export function SidebarTitle({
     <h2
       className={cn(
         "text-lg font-semibold tracking-tight truncate",
+        "text-[var(--sidebar-title)]",
         className
       )}
       {...props}
@@ -278,19 +282,21 @@ export function SidebarNavItem({
 }: SidebarNavItemProps) {
   const { isCollapsed } = useSidebar()
   const location = useLocation()
-  const isActive = location.pathname === to || 
-    (to !== "/" && location.pathname.startsWith(to))
+  
+  // Only match exact path to prevent parent routes from matching child routes
+  // e.g., "/superadmin" should NOT match "/superadmin/messages"
+  const isActive = location.pathname === to
 
   return (
     <NavLink
       to={to}
+      end={true}
       className={({ isActive: linkActive }) =>
         cn(
           "flex items-center rounded-md px-3 py-2 text-sm font-medium transition-colors",
-          "hover:bg-accent hover:text-accent-foreground",
-          (isActive || linkActive) 
-            ? "bg-accent text-accent-foreground" 
-            : "text-muted-foreground",
+          (isActive || linkActive)
+            ? "bg-[var(--sidebar-accent)] text-[var(--sidebar-accent-foreground)] border border-[var(--sidebar-accent)]"
+            : "text-[var(--sidebar-text-muted)] hover:bg-[var(--sidebar-hover-bg)] hover:text-[var(--sidebar-foreground)]",
           isCollapsed && "justify-center px-2",
           className
         )
@@ -323,7 +329,7 @@ export function SidebarGroup({
   return (
     <div className={cn("space-y-1", className)} {...props}>
       {label && !isCollapsed && (
-        <h3 className="px-3 text-xs font-medium text-muted-foreground uppercase tracking-wider">
+        <h3 className="px-3 text-xs font-medium text-[var(--sidebar-text-muted)] uppercase tracking-wider">
           {label}
         </h3>
       )}
@@ -343,7 +349,11 @@ export function SidebarFooter({
 }: SidebarFooterProps) {
   return (
     <div
-      className={cn("border-t p-3", className)}
+      className={cn(
+        "border-t p-3",
+        "border-[var(--sidebar-border)]",
+        className
+      )}
       {...props}
     >
       {children}
