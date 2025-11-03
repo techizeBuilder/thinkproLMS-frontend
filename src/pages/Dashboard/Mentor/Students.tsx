@@ -16,7 +16,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Search, User, GraduationCap, MapPin } from "lucide-react";
+import { Search, User, GraduationCap } from "lucide-react";
 import { studentService } from "@/api/studentService";
 import { mentorService } from "@/api/mentorService";
 import { schoolService } from "@/api/schoolService";

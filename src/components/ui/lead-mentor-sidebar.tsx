@@ -30,7 +30,6 @@ import {
 } from "lucide-react";
 import { LogoutButton } from "@/components/ui/logout-button";
 import { Badge } from "@/components/ui/badge";
-import { useAuth } from "@/contexts/AuthContext";
 import { useUnreadMessageCount } from "@/hooks/useUnreadMessageCount";
 import { useNotifications } from "@/contexts/NotificationContext";
 
@@ -38,7 +37,6 @@ interface LeadMentorSidebarProps extends React.HTMLAttributes<HTMLDivElement> {}
 
 export function LeadMentorSidebar({ className }: LeadMentorSidebarProps) {
   const { isCollapsed } = useSidebar();
-  const { user } = useAuth();
   const unreadCount = useUnreadMessageCount();
   const { counts } = useNotifications();
 

@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { leadService, type Lead } from "@/api/leadService";
 import axiosInstance from "@/api/axiosInstance";
-import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import {
