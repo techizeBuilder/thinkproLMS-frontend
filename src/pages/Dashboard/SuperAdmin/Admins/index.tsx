@@ -121,34 +121,25 @@ const SuperAdminsPage = () => {
         </Button>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Users className="h-5 w-5" />
-            SuperAdmins Management
-          </CardTitle>
-          <CardDescription>
-            A list of all superadmins in the system. System superadmin cannot be deleted.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="p-0">
-          {superAdmins.length === 0 ? (
-            <div className="text-center py-12 px-6">
-              <Users className="mx-auto h-12 w-12 text-muted-foreground" />
-              <h3 className="mt-4 text-lg font-semibold">No superadmins found</h3>
-              <p className="text-muted-foreground">
-                Get started by creating your first superadmin.
-              </p>
-              <Button asChild className="mt-4">
-                <Link to="/superadmin/admins/create">
-                  <Plus className="mr-2 h-4 w-4" />
-                  Add SuperAdmin
-                </Link>
-              </Button>
-            </div>
-          ) : (
-            <div className="overflow-x-auto">
-              <Table>
+      {superAdmins.length === 0 ? (
+        <Card>
+          <CardContent className="text-center py-12 px-6">
+            <Users className="mx-auto h-12 w-12 text-muted-foreground" />
+            <h3 className="mt-4 text-lg font-semibold">No superadmins found</h3>
+            <p className="text-muted-foreground">
+              Get started by creating your first superadmin.
+            </p>
+            <Button asChild className="mt-4">
+              <Link to="/superadmin/admins/create">
+                <Plus className="mr-2 h-4 w-4" />
+                Add SuperAdmin
+              </Link>
+            </Button>
+          </CardContent>
+        </Card>
+      ) : (
+        <div className="overflow-x-auto">
+          <Table>
                 <TableHeader>
                   <TableRow>
                     <TableHead className="sticky left-0 bg-background z-10 min-w-[150px]">Name</TableHead>
@@ -197,10 +188,8 @@ const SuperAdminsPage = () => {
                 ))}
               </TableBody>
             </Table>
-            </div>
-          )}
-        </CardContent>
-      </Card>
+        </div>
+      )}
 
       {/* Delete Confirmation Dialog */}
       <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>

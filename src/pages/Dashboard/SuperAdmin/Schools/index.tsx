@@ -371,136 +371,130 @@ export default function SchoolsPage() {
           </CardContent>
         </Card>
       ) : (
-        <Card>
-          <CardContent className="p-0">
-            <div className="overflow-x-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="sticky left-0 bg-background z-10 min-w-[200px]">
-                      School Name
-                    </TableHead>
-                    <TableHead className="min-w-[120px]">School ID</TableHead>
-                    <TableHead className="min-w-[120px]">Board</TableHead>
-                    <TableHead className="min-w-[180px]">Location</TableHead>
-                    <TableHead className="min-w-[200px]">Address</TableHead>
-                    <TableHead className="min-w-[100px]">Students</TableHead>
-                    <TableHead className="min-w-[100px]">Status</TableHead>
-                    <TableHead className="min-w-[120px]">Branch</TableHead>
-                    <TableHead className="min-w-[150px]">Affiliation</TableHead>
-                    <TableHead className="text-right min-w-[120px]">
-                      Actions
-                    </TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {tableLoading ? (
-                    <TableRow>
-                      <TableCell colSpan={10} className="text-center py-8">
-                        <div className="flex items-center justify-center space-x-2">
-                          <Loader2 className="h-4 w-4 animate-spin" />
-                          <span>Loading schools...</span>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ) : (
-                    schools.map((school) => (
-                    <TableRow
-                      key={school._id}
-                      className={!school.isActive ? "opacity-75" : ""}
-                    >
-                      <TableCell className="font-medium sticky left-0 bg-background z-10 min-w-[200px]">
-                        {school.name}
-                      </TableCell>
-                      <TableCell>
-                        <span className="text-xs text-gray-600 font-mono">
-                          {school._id}
-                        </span>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex flex-wrap gap-1">
-                          {school.boards && school.boards.length > 0 ? (
-                            school.boards.map((board) => (
-                              <Badge
-                                key={board}
-                                className={getBoardColor(board)}
-                              >
-                                {board}
-                              </Badge>
-                            ))
-                          ) : (
-                            <span className="text-sm text-gray-500">
-                              No boards
-                            </span>
-                          )}
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center text-sm">
-                          <MapPin className="mr-1 h-3 w-3" />
-                          {school.city}, {school.state}
-                        </div>
-                      </TableCell>
-                      <TableCell className="max-w-xs">
-                        <p className="text-sm truncate" title={school.address}>
-                          {school.address}
-                        </p>
-                      </TableCell>
-                      <TableCell>
-                        <span className="text-sm font-medium">
-                          {school.students_strength?.toLocaleString() || "N/A"}
-                        </span>
-                      </TableCell>
-                      <TableCell>
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead className="sticky left-0 bg-background z-10 min-w-[200px]">
+                School Name
+              </TableHead>
+              <TableHead className="min-w-[120px]">School ID</TableHead>
+              <TableHead className="min-w-[120px]">Board</TableHead>
+              <TableHead className="min-w-[180px]">Location</TableHead>
+              <TableHead className="min-w-[200px]">Address</TableHead>
+              <TableHead className="min-w-[100px]">Students</TableHead>
+              <TableHead className="min-w-[100px]">Status</TableHead>
+              <TableHead className="min-w-[120px]">Branch</TableHead>
+              <TableHead className="min-w-[150px]">Affiliation</TableHead>
+              <TableHead className="text-right min-w-[120px]">
+                Actions
+              </TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {tableLoading ? (
+              <TableRow>
+                <TableCell colSpan={10} className="text-center py-8">
+                  <div className="flex items-center justify-center space-x-2">
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    <span>Loading schools...</span>
+                  </div>
+                </TableCell>
+              </TableRow>
+            ) : (
+              schools.map((school) => (
+              <TableRow
+                key={school._id}
+                className={!school.isActive ? "opacity-75" : ""}
+              >
+                <TableCell className="font-medium sticky left-0 bg-background z-10 min-w-[200px]">
+                  {school.name}
+                </TableCell>
+                <TableCell>
+                  <span className="text-xs text-gray-600 font-mono">
+                    {school._id}
+                  </span>
+                </TableCell>
+                <TableCell>
+                  <div className="flex flex-wrap gap-1">
+                    {school.boards && school.boards.length > 0 ? (
+                      school.boards.map((board) => (
                         <Badge
-                          variant={school.isActive ? "default" : "secondary"}
+                          key={board}
+                          className={getBoardColor(board)}
                         >
-                          {school.isActive ? "Active" : "Inactive"}
+                          {board}
                         </Badge>
-                      </TableCell>
-                      <TableCell>
-                        {school.branchName ? (
-                          <span className="text-sm font-medium text-blue-600">
-                            {school.branchName}
-                          </span>
-                        ) : (
-                          <span className="text-gray-400">-</span>
-                        )}
-                      </TableCell>
-                      <TableCell>
-                        {school.affiliatedTo ? (
-                          <span className="text-xs text-gray-500">
-                            {school.affiliatedTo}
-                          </span>
-                        ) : (
-                          <span className="text-gray-400">-</span>
-                        )}
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <MobileActions
-                          editUrl={`/superadmin/schools/${school._id}/edit`}
-                          onToggleStatus={() =>
-                            handleToggleStatus(
-                              school._id,
-                              school.name,
-                              school.isActive
-                            )
-                          }
-                          onDelete={() => handleDelete(school._id, school.name)}
-                          isActive={school.isActive}
-                          isSuperAdmin={true}
-                          deleteLoading={deleteLoading === school._id}
-                          toggleLoading={toggleLoading === school._id}
-                        />
-                      </TableCell>
-                    </TableRow>
-                    ))
+                      ))
+                    ) : (
+                      <span className="text-sm text-gray-500">
+                        No boards
+                      </span>
+                    )}
+                  </div>
+                </TableCell>
+                <TableCell>
+                  <div className="flex items-center text-sm">
+                    <MapPin className="mr-1 h-3 w-3" />
+                    {school.city}, {school.state}
+                  </div>
+                </TableCell>
+                <TableCell className="max-w-xs">
+                  <p className="text-sm truncate" title={school.address}>
+                    {school.address}
+                  </p>
+                </TableCell>
+                <TableCell>
+                  <span className="text-sm font-medium">
+                    {school.students_strength?.toLocaleString() || "N/A"}
+                  </span>
+                </TableCell>
+                <TableCell>
+                  <Badge
+                    variant={school.isActive ? "default" : "secondary"}
+                  >
+                    {school.isActive ? "Active" : "Inactive"}
+                  </Badge>
+                </TableCell>
+                <TableCell>
+                  {school.branchName ? (
+                    <span className="text-sm font-medium text-blue-600">
+                      {school.branchName}
+                    </span>
+                  ) : (
+                    <span className="text-gray-400">-</span>
                   )}
-                </TableBody>
-              </Table>
-            </div>
-          </CardContent>
-        </Card>
+                </TableCell>
+                <TableCell>
+                  {school.affiliatedTo ? (
+                    <span className="text-xs text-gray-500">
+                      {school.affiliatedTo}
+                    </span>
+                  ) : (
+                    <span className="text-gray-400">-</span>
+                  )}
+                </TableCell>
+                <TableCell className="text-right">
+                  <MobileActions
+                    editUrl={`/superadmin/schools/${school._id}/edit`}
+                    onToggleStatus={() =>
+                      handleToggleStatus(
+                        school._id,
+                        school.name,
+                        school.isActive
+                      )
+                    }
+                    onDelete={() => handleDelete(school._id, school.name)}
+                    isActive={school.isActive}
+                    isSuperAdmin={true}
+                    deleteLoading={deleteLoading === school._id}
+                    toggleLoading={toggleLoading === school._id}
+                  />
+                </TableCell>
+              </TableRow>
+              ))
+            )}
+          </TableBody>
+        </Table>
       )}
     </div>
   );

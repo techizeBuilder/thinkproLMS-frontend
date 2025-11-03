@@ -69,7 +69,7 @@
   
   /* Background Colors - Using very light gray for subtle differentiation */
   --background: #fafafa;
-  --card: #ffffff;
+  --card: #F1F4F8; /* light tint towards Engineering (#7F91AA) */
   --popover: #ffffff;
   
   /* Foreground Text Colors */
@@ -125,7 +125,7 @@
 .dark {
   /* Background Colors */
   --background: #1a1a1a;
-  --card: #262626;
+  --card: #2B313A; /* darker tint towards Technology/Engineering */
   --popover: #262626;
   
   /* Foreground Text Colors */
@@ -198,12 +198,18 @@
   /* Override common hardcoded classes with theme colors */
   .bg-gray-50,
   .bg-gray-100,
+  .bg-gray-200,
+  .bg-slate-100,
+  .bg-slate-200,
   .bg-slate-50 {
     background-color: var(--background) !important;
   }
   
   .text-gray-900,
   .text-gray-800,
+  .text-gray-700,
+  .text-gray-500,
+  .text-gray-400,
   .text-slate-800 {
     color: var(--foreground) !important;
   }
@@ -224,10 +230,9 @@
   }
   
   .text-gray-600,
-  .text-gray-700,
   .text-slate-600,
   .text-slate-700,
-  .text-gray-500,
+  .text-gray-300,
   .text-slate-500 {
     color: var(--muted-foreground) !important;
   }
@@ -237,8 +242,10 @@
   }
   
   .border-gray-200,
+  .border-gray-300,
+  .border-gray-400,
   .border-slate-200,
-  .border-gray-300 {
+  .border-slate-300 {
     border-color: var(--border) !important;
   }
   
@@ -251,6 +258,53 @@
   /* Ensure default text uses theme color */
   p, span, div, a {
     color: inherit;
+  }
+
+  /* Links */
+  a {
+    color: var(--primary);
+  }
+  a:hover {
+    color: var(--accent);
+  }
+
+  /* Tables - default theming */
+  table {
+    color: var(--foreground);
+    border-color: var(--border);
+  }
+  thead {
+    background-color: var(--muted);
+  }
+  th, td {
+    border-color: var(--border);
+  }
+  tbody tr:nth-child(even) {
+    background-color: var(--muted);
+  }
+
+  /* Forms - inputs/selects/textareas */
+  input, select, textarea {
+    background-color: var(--card);
+    color: var(--foreground);
+    border-color: var(--input);
+  }
+  input::placeholder,
+  textarea::placeholder {
+    color: var(--muted-foreground);
+  }
+  input:focus, select:focus, textarea:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px color-mix(in oklab, var(--ring) 30%, transparent);
+    border-color: var(--ring);
+  }
+
+  /* Buttons (generic fallbacks when not using variants) */
+  button {
+    border-color: var(--border);
+  }
+  button:hover {
+    filter: brightness(0.98);
   }
 }
 

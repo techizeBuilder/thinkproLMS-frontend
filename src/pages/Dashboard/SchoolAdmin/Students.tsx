@@ -228,85 +228,81 @@ export default function SchoolAdminStudentsPage() {
       </div>
 
       {/* Students Table */}
-      <Card>
-        <CardContent className="p-0">
-          {filteredStudents.length === 0 ? (
-            <div className="p-6 md:p-8 text-center">
-              <User className="h-10 w-10 md:h-12 md:w-12 text-muted-foreground mx-auto mb-4" />
-              <h3 className="text-base md:text-lg font-semibold mb-2">No students found</h3>
-              <p className="text-sm md:text-base text-muted-foreground">
-                {students.length === 0
-                  ? "No students are enrolled in your assigned school yet."
-                  : "No students match your current filters."}
-              </p>
-            </div>
-          ) : (
-            <div className="overflow-x-auto">
-              <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Student Name</TableHead>
-                  <TableHead>Student ID</TableHead>
-                  <TableHead>Email</TableHead>
-                  <TableHead>Grade - Section</TableHead>
-                  <TableHead>School</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Enrolled Date</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredStudents.map((student) => (
-                  <TableRow key={student._id} className="hover:bg-muted/50">
-                    <TableCell className="font-medium">
-                      <div className="flex items-center gap-2">
-                        <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                          <User className="h-4 w-4 text-blue-600" />
-                        </div>
-                        {student.user.name}
-                      </div>
-                    </TableCell>
-                    <TableCell className="font-mono text-sm">
-                      {student.studentId}
-                    </TableCell>
-                    <TableCell className="text-sm">
-                      {student.user.email}
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-1">
-                        <GraduationCap className="h-4 w-4 text-muted-foreground" />
-                        <span className="text-sm font-medium">
-                          Grade {student.grade} - {student.section || 'No Section'}
-                        </span>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="text-sm">
-                        <div className="font-medium">{student.school.name}</div>
-                        <div className="text-muted-foreground">
-                          {student.school.city}, {student.school.state}
-                        </div>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <Badge
-                        variant={
-                          student.isActive ? "default" : "secondary"
-                        }
-                      >
-                        {student.isActive ? "Active" : "Inactive"}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-sm text-muted-foreground">
-                      {new Date(student.createdAt).toLocaleDateString()}
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-              </Table>
-            </div>
-          )}
-        </CardContent>
-      </Card>
+      {filteredStudents.length === 0 ? (
+        <Card>
+          <CardContent className="p-6 md:p-8 text-center">
+            <User className="h-10 w-10 md:h-12 md:w-12 text-muted-foreground mx-auto mb-4" />
+            <h3 className="text-base md:text-lg font-semibold mb-2">No students found</h3>
+            <p className="text-sm md:text-base text-muted-foreground">
+              {students.length === 0
+                ? "No students are enrolled in your assigned school yet."
+                : "No students match your current filters."}
+            </p>
+          </CardContent>
+        </Card>
+      ) : (
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Student Name</TableHead>
+              <TableHead>Student ID</TableHead>
+              <TableHead>Email</TableHead>
+              <TableHead>Grade - Section</TableHead>
+              <TableHead>School</TableHead>
+              <TableHead>Status</TableHead>
+              <TableHead>Enrolled Date</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {filteredStudents.map((student) => (
+              <TableRow key={student._id} className="hover:bg-muted/50">
+                <TableCell className="font-medium">
+                  <div className="flex items-center gap-2">
+                    <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                      <User className="h-4 w-4 text-blue-600" />
+                    </div>
+                    {student.user.name}
+                  </div>
+                </TableCell>
+                <TableCell className="font-mono text-sm">
+                  {student.studentId}
+                </TableCell>
+                <TableCell className="text-sm">
+                  {student.user.email}
+                </TableCell>
+                <TableCell>
+                  <div className="flex items-center gap-1">
+                    <GraduationCap className="h-4 w-4 text-muted-foreground" />
+                    <span className="text-sm font-medium">
+                      Grade {student.grade} - {student.section || 'No Section'}
+                    </span>
+                  </div>
+                </TableCell>
+                <TableCell>
+                  <div className="text-sm">
+                    <div className="font-medium">{student.school.name}</div>
+                    <div className="text-muted-foreground">
+                      {student.school.city}, {student.school.state}
+                    </div>
+                  </div>
+                </TableCell>
+                <TableCell>
+                  <Badge
+                    variant={
+                      student.isActive ? "default" : "secondary"
+                    }
+                  >
+                    {student.isActive ? "Active" : "Inactive"}
+                  </Badge>
+                </TableCell>
+                <TableCell className="text-sm text-muted-foreground">
+                  {new Date(student.createdAt).toLocaleDateString()}
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      )}
     </div>
   );
 }

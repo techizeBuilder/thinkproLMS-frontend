@@ -719,24 +719,24 @@ export default function SessionProgressViewer({
 
       {/* Comprehensive Sessions Table */}
       {filtersCompleted && gradeSectionData.length > 0 && (
-        <Card>
-          <CardHeader className="p-3">
+        <div className="rounded-lg border border-[var(--border)] bg-card p-3">
+          <div className="p-0">
             <div className="flex items-center justify-between">
-              <CardTitle className="flex items-center gap-2 text-sm">
+              <div className="flex items-center gap-2 text-sm font-semibold">
                 <BookOpen className="h-4 w-4" />
                 Session Progress by Grade and Section
-              </CardTitle>
+              </div>
 
               <div className="flex items-center gap-2">
-              {/* Search Input */}
-              <div className="relative w-48">
-                <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-400 h-3 w-3" />
-                <Input
+                {/* Search Input */}
+                <div className="relative w-48">
+                  <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-400 h-3 w-3" />
+                  <Input
                     placeholder="Search sessions..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-7 h-7 text-xs"
-                />
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="pl-7 h-7 text-xs"
+                  />
                 </div>
 
                 {/* Export Button */}
@@ -751,8 +751,8 @@ export default function SessionProgressViewer({
                 </Button>
               </div>
             </div>
-          </CardHeader>
-          <CardContent className="p-3">
+          </div>
+          <div className="p-0 mt-3">
             <div className="space-y-6">
               {filteredGradeSectionData.map((gradeData) => (
                 <div key={gradeData.grade} className="space-y-2">
@@ -859,8 +859,8 @@ export default function SessionProgressViewer({
                 </div>
               ))}
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       )}
     </div>
   );

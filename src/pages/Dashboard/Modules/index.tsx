@@ -128,10 +128,9 @@ export default function Modules() {
       </div>
 
       {/* Modules Table */}
-      <Card>
-        <CardContent className="p-0">
-          {filteredModules.length === 0 ? (
-            <div className="p-8 text-center">
+      {filteredModules.length === 0 ? (
+        <Card>
+          <CardContent className="p-8 text-center">
               <FolderOpen className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
               <h3 className="text-lg font-semibold mb-2">No modules found</h3>
               <p className="text-muted-foreground mb-4">
@@ -153,9 +152,10 @@ export default function Modules() {
                   Create Module
                 </Button>
               )}
-            </div>
-          ) : (
-            <Table>
+          </CardContent>
+        </Card>
+      ) : (
+        <Table>
               <TableHeader>
                 <TableRow>
                   <TableHead>Module Name</TableHead>
@@ -224,10 +224,8 @@ export default function Modules() {
                   </TableRow>
                 ))}
               </TableBody>
-            </Table>
-          )}
-        </CardContent>
-      </Card>
+        </Table>
+      )}
     </div>
   );
 }

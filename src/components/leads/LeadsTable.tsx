@@ -587,10 +587,7 @@ export default function LeadsTable({ onAddNew, onEdit }: LeadsTableProps) {
         </div>
       </div>
 
-      <Card className="p-0">
-        <CardContent className="p-0">
-          <div className="overflow-x-auto">
-            <Table>
+      <Table>
               <TableHeader>
                 <TableRow>
                   <TableHead className="min-w-[100px]">Lead No</TableHead>
@@ -807,10 +804,7 @@ export default function LeadsTable({ onAddNew, onEdit }: LeadsTableProps) {
                     </TableRow>
                   ))}
               </TableBody>
-            </Table>
-          </div>
-        </CardContent>
-      </Card>
+      </Table>
 
       <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
         <div className="text-sm text-gray-600">

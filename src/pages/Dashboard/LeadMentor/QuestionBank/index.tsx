@@ -428,11 +428,11 @@ const QuestionBankPage: React.FC = () => {
 
       {/* Desktop Table View */}
       <div className="hidden xl:block">
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base md:text-lg">Questions ({pagination.total})</CardTitle>
-          </CardHeader>
-          <CardContent>
+        <div className="rounded-lg border border-[var(--border)] bg-card">
+          <div className="p-4 border-b border-[var(--border)]">
+            <div className="text-base md:text-lg font-semibold">Questions ({pagination.total})</div>
+          </div>
+          <div className="p-4">
             {loading ? (
               <div className="text-center py-8 text-sm md:text-base">Loading questions...</div>
             ) : error ? (
@@ -602,10 +602,10 @@ const QuestionBankPage: React.FC = () => {
                   </Button>
                 </div>
               )}
-            </div>
-          )}
-        </CardContent>
-      </Card>
+              </div>
+            )}
+          </div>
+        </div>
       </div>
 
       {/* Mobile/Tablet Card View */}

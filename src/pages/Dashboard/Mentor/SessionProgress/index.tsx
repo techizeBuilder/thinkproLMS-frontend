@@ -528,13 +528,13 @@ export default function SessionProgressPage() {
 
       {/* Sessions Table */}
       {sessions && sessions.length > 0 && (
-        <Card>
-          <CardHeader className="p-3">
+        <div className="rounded-lg border border-[var(--border)] bg-card">
+          <div className="p-3">
             <div className="flex items-center justify-between">
-              <CardTitle className="flex items-center gap-2 text-sm">
+              <div className="flex items-center gap-2 text-sm font-semibold">
                 <BookOpen className="h-4 w-4" />
                 Sessions ({filteredSessions.length})
-              </CardTitle>
+              </div>
 
               {/* Search Input */}
               <div className="relative w-48">
@@ -547,8 +547,8 @@ export default function SessionProgressPage() {
                 />
               </div>
             </div>
-          </CardHeader>
-          <CardContent className="p-3">
+          </div>
+          <div className="p-3 pt-0">
             <Table>
               <TableHeader>
                 <TableRow className="h-8">
@@ -673,8 +673,8 @@ export default function SessionProgressPage() {
                 })}
               </TableBody>
             </Table>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       )}
     </div>
   );

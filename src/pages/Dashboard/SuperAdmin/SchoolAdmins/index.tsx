@@ -217,110 +217,104 @@ export default function SchoolAdminsPage() {
           </CardContent>
         </Card>
       ) : (
-        <Card>
-          <CardContent className="p-0">
-            <div className="overflow-x-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="sticky left-0 bg-background z-10 min-w-[150px]">
-                      Name
-                    </TableHead>
-                    <TableHead className="min-w-[200px]">Email</TableHead>
-                    <TableHead className="min-w-[120px]">Phone</TableHead>
-                    <TableHead className="min-w-[150px]">School</TableHead>
-                    <TableHead className="min-w-[120px]">Status</TableHead>
-                    <TableHead className="min-w-[100px]">Created</TableHead>
-                    <TableHead className="text-right min-w-[120px]">
-                      Actions
-                    </TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {schoolAdmins.map((admin) => (
-                    <TableRow
-                      key={admin._id}
-                      className={!admin.isActive ? "opacity-60" : ""}
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead className="sticky left-0 bg-background z-10 min-w-[150px]">
+                Name
+              </TableHead>
+              <TableHead className="min-w-[200px]">Email</TableHead>
+              <TableHead className="min-w-[120px]">Phone</TableHead>
+              <TableHead className="min-w-[150px]">School</TableHead>
+              <TableHead className="min-w-[120px]">Status</TableHead>
+              <TableHead className="min-w-[100px]">Created</TableHead>
+              <TableHead className="text-right min-w-[120px]">
+                Actions
+              </TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {schoolAdmins.map((admin) => (
+              <TableRow
+                key={admin._id}
+                className={!admin.isActive ? "opacity-60" : ""}
+              >
+                <TableCell className="font-medium sticky left-0 bg-background z-10 min-w-[150px]">
+                  <div className="flex items-center gap-2">
+                    {admin.user?.name || 'Unknown User'}
+                    {!admin.isActive && (
+                      <Badge variant="outline" className="text-xs">
+                        Inactive
+                      </Badge>
+                    )}
+                  </div>
+                </TableCell>
+                <TableCell>
+                  <div className="flex items-center text-sm">
+                    <Mail className="mr-2 h-4 w-4 text-gray-500" />
+                    {admin.user?.email || 'No email'}
+                  </div>
+                </TableCell>
+                <TableCell>
+                  <div className="flex items-center text-sm">
+                    <Phone className="mr-2 h-4 w-4 text-gray-500" />
+                    {admin.phoneNumber}
+                  </div>
+                </TableCell>
+                <TableCell>
+                  {admin.assignedSchool ? (
+                    <span className="text-sm">
+                      {admin.assignedSchool.name}
+                    </span>
+                  ) : (
+                    <span className="text-gray-400">
+                      No school assigned
+                    </span>
+                  )}
+                </TableCell>
+                <TableCell>
+                  <div className="flex gap-2">
+                    <Badge
+                      variant={
+                        admin.user?.isVerified ? "default" : "secondary"
+                      }
                     >
-                      <TableCell className="font-medium sticky left-0 bg-background z-10 min-w-[150px]">
-                        <div className="flex items-center gap-2">
-                          {admin.user?.name || 'Unknown User'}
-                          {!admin.isActive && (
-                            <Badge variant="outline" className="text-xs">
-                              Inactive
-                            </Badge>
-                          )}
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center text-sm">
-                          <Mail className="mr-2 h-4 w-4 text-gray-500" />
-                          {admin.user?.email || 'No email'}
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center text-sm">
-                          <Phone className="mr-2 h-4 w-4 text-gray-500" />
-                          {admin.phoneNumber}
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        {admin.assignedSchool ? (
-                          <span className="text-sm">
-                            {admin.assignedSchool.name}
-                          </span>
-                        ) : (
-                          <span className="text-gray-400">
-                            No school assigned
-                          </span>
-                        )}
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex gap-2">
-                          <Badge
-                            variant={
-                              admin.user?.isVerified ? "default" : "secondary"
-                            }
-                          >
-                            {admin.user?.isVerified ? "Verified" : "Pending"}
-                          </Badge>
-                          <Badge
-                            variant={admin.isActive ? "default" : "destructive"}
-                          >
-                            {admin.isActive ? "Active" : "Inactive"}
-                          </Badge>
-                        </div>
-                      </TableCell>
-                      <TableCell className="text-sm text-gray-500">
-                        {new Date(admin.createdAt).toLocaleDateString()}
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <MobileActions
-                          editUrl={`${basePath}/school-admins/${admin._id}/edit`}
-                          onResetPassword={admin.user ? () => {
-                            setResetPasswordUser({
-                              id: admin.user!._id,
-                              name: admin.user!.name,
-                              email: admin.user!.email,
-                            });
-                          } : undefined}
-                          onDelete={() => handleDelete(admin._id, admin.user?.name || 'Unknown User')}
-                          onToggleStatus={() =>
-                            handleToggleStatus(admin._id, admin.user?.name || 'Unknown User', admin.isActive)
-                          }
-                          isActive={admin.isActive}
-                          isSuperAdmin={user?.role === "superadmin"}
-                          deleteLoading={deleteLoading === admin._id}
-                          toggleLoading={toggleLoading === admin._id}
-                        />
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
-          </CardContent>
-        </Card>
+                      {admin.user?.isVerified ? "Verified" : "Pending"}
+                    </Badge>
+                    <Badge
+                      variant={admin.isActive ? "default" : "destructive"}
+                    >
+                      {admin.isActive ? "Active" : "Inactive"}
+                    </Badge>
+                  </div>
+                </TableCell>
+                <TableCell className="text-sm text-gray-500">
+                  {new Date(admin.createdAt).toLocaleDateString()}
+                </TableCell>
+                <TableCell className="text-right">
+                  <MobileActions
+                    editUrl={`${basePath}/school-admins/${admin._id}/edit`}
+                    onResetPassword={admin.user ? () => {
+                      setResetPasswordUser({
+                        id: admin.user!._id,
+                        name: admin.user!.name,
+                        email: admin.user!.email,
+                      });
+                    } : undefined}
+                    onDelete={() => handleDelete(admin._id, admin.user?.name || 'Unknown User')}
+                    onToggleStatus={() =>
+                      handleToggleStatus(admin._id, admin.user?.name || 'Unknown User', admin.isActive)
+                    }
+                    isActive={admin.isActive}
+                    isSuperAdmin={user?.role === "superadmin"}
+                    deleteLoading={deleteLoading === admin._id}
+                    toggleLoading={toggleLoading === admin._id}
+                  />
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
       )}
 
       {/* Reset Password Dialog */}

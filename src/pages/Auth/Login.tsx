@@ -83,17 +83,17 @@ export default function Login() {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="flex items-center space-x-2">
-          <div className="w-6 h-6 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
-          <span className="text-gray-600">Loading...</span>
+          <div className="w-6 h-6 border-2 border-[var(--primary)] border-t-transparent rounded-full animate-spin"></div>
+          <span className="text-[var(--muted-foreground)]">Loading...</span>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen flex flex-col lg:flex-row">
+    <div className="min-h-screen flex flex-col lg:flex-row bg-[var(--background)] text-[var(--foreground)]">
       {/* Left Side - Branding */}
-      <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-blue-600 via-purple-600 to-indigo-700 relative overflow-hidden">
+      <div className="hidden lg:flex lg:w-1/2 bg-[var(--stem-technology)] relative overflow-hidden">
         {/* Background Pattern */}
         <div
           className="absolute inset-0 opacity-10"
@@ -103,14 +103,14 @@ export default function Login() {
         ></div>
 
         {/* Floating Elements */}
-        <div className="absolute top-20 left-20 w-32 h-32 bg-white/10 rounded-full blur-xl"></div>
-        <div className="absolute bottom-20 right-20 w-40 h-40 bg-white/5 rounded-full blur-2xl"></div>
-        <div className="absolute top-1/2 left-10 w-24 h-24 bg-white/15 rounded-full blur-lg"></div>
+        <div className="absolute top-20 left-20 w-32 h-32 rounded-full blur-xl bg-[var(--soft-engineering)]"></div>
+        <div className="absolute bottom-20 right-20 w-40 h-40 rounded-full blur-2xl bg-[var(--soft-science)]"></div>
+        <div className="absolute top-1/2 left-10 w-24 h-24 rounded-full blur-lg bg-[var(--soft-mathematics)]"></div>
 
         {/* Content */}
         <div className="mx-auto relative z-10 flex flex-col justify-center items-center text-center p-12">
           <div className="mb-8">
-            <div className="w-[240px] h-[240px] rounded-full bg-white/20 backdrop-blur-sm shadow-2xl flex items-center justify-center mb-6">
+            <div className="w-[240px] h-[240px] rounded-full backdrop-blur-sm shadow-2xl flex items-center justify-center mb-6 bg-[color-mix(in_srgb,_white_16%,_transparent)]">
               <img
                 src="/fancy-logo.jpg"
                 alt="ThinkPro LMS"
@@ -118,19 +118,19 @@ export default function Login() {
               />
             </div>
           </div>
-          <h1 className="text-4xl font-bold text-white mb-4">
+          <p className="text-4xl font-bold text-[var(--sidebar-foreground)] mb-4">
             Welcome to ThinkPro
-          </h1>
-          <p className="text-xl text-white/90 mb-8 max-w-md">
+          </p>
+          <p className="text-xl text-[color-mix(in_srgb,_white_88%,_transparent)] mb-8 max-w-md">
             Empowering education through innovative learning management
             solutions
           </p>
-          <div className="flex items-center space-x-4 text-white/80">
-            <div className="w-2 h-2 bg-white/60 rounded-full"></div>
+          <div className="flex items-center space-x-4 text-[color-mix(in_srgb,_white_80%,_transparent)]">
+            <div className="w-2 h-2 rounded-full bg-[color-mix(in_srgb,_white_60%,_transparent)]"></div>
             <span>Secure & Reliable</span>
-            <div className="w-2 h-2 bg-white/60 rounded-full"></div>
+            <div className="w-2 h-2 rounded-full bg-[color-mix(in_srgb,_white_60%,_transparent)]"></div>
             <span>Modern Interface</span>
-            <div className="w-2 h-2 bg-white/60 rounded-full"></div>
+            <div className="w-2 h-2 rounded-full bg-[color-mix(in_srgb,_white_60%,_transparent)]"></div>
             <span>Easy to Use</span>
           </div>
         </div>
@@ -141,26 +141,26 @@ export default function Login() {
         <div className="w-full max-w-md">
           {/* Mobile Logo */}
           <div className="lg:hidden text-center mb-6 sm:mb-8">
-            <div className="mx-auto w-16 h-16 sm:w-20 sm:h-20 mb-3 sm:mb-4 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 shadow-lg flex items-center justify-center">
+            <div className="mx-auto w-16 h-16 sm:w-20 sm:h-20 mb-3 sm:mb-4 rounded-full shadow-lg flex items-center justify-center bg-[var(--stem-technology)]">
               <img
                 src="/fancy-logo.jpg"
                 alt="ThinkPro LMS"
                 className="w-10 h-10 sm:w-12 sm:h-12 object-contain rounded-full"
               />
             </div>
-            <h1 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">
+            <h1 className="text-xl sm:text-2xl font-bold text-[var(--foreground)] mb-2">
               Welcome to ThinkPro LMS
             </h1>
-            <p className="text-sm sm:text-base text-gray-600">
+            <p className="text-sm sm:text-base text-[var(--muted-foreground)]">
               Sign in to your account
             </p>
           </div>
 
           {!showGuestForm ? (
             /* Main Login Form */
-            <Card className="shadow-xl border-0 bg-white/80 backdrop-blur-sm">
+            <Card className="shadow-xl border border-[var(--border)] bg-card">
               <CardHeader className="space-y-1 pb-4 sm:pb-6 px-4 sm:px-6 pt-4 sm:pt-6">
-                <CardTitle className="text-lg sm:text-xl lg:text-2xl font-semibold text-center text-gray-900">
+                <CardTitle className="text-lg sm:text-xl lg:text-2xl font-semibold text-center text-[var(--foreground)]">
                   Sign In
                 </CardTitle>
               </CardHeader>
@@ -169,7 +169,7 @@ export default function Login() {
                   <div className="space-y-2">
                     <Label
                       htmlFor="email"
-                      className="text-xs sm:text-sm font-medium text-gray-700"
+                      className="text-xs sm:text-sm font-medium text-[var(--muted-foreground)]"
                     >
                       Email/LoginID
                     </Label>
@@ -179,14 +179,14 @@ export default function Login() {
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       placeholder="Enter your email or login ID"
-                      className="h-10 sm:h-11 border-gray-200 focus:border-blue-500 focus:ring-blue-500 text-sm sm:text-base"
+                      className="h-10 sm:h-11 text-sm sm:text-base"
                       required
                     />
                   </div>
                   <div className="space-y-2">
                     <Label
                       htmlFor="password"
-                      className="text-xs sm:text-sm font-medium text-gray-700"
+                      className="text-xs sm:text-sm font-medium text-[var(--muted-foreground)]"
                     >
                       Password
                     </Label>
@@ -196,23 +196,23 @@ export default function Login() {
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       placeholder="Enter your password"
-                      className="h-10 sm:h-11 border-gray-200 focus:border-blue-500 focus:ring-blue-500 text-sm sm:text-base"
+                      className="h-10 sm:h-11 text-sm sm:text-base"
                       required
                     />
                   </div>
                   {error && (
-                    <div className="p-2 sm:p-3 text-xs sm:text-sm text-red-600 bg-red-50 border border-red-200 rounded-md">
+                    <div className="p-2 sm:p-3 text-xs sm:text-sm text-[var(--destructive)] bg-[color-mix(in_srgb,_var(--destructive)_12%,_white)] border border-[color-mix(in_srgb,_var(--destructive)_28%,_white)] rounded-md">
                       {error}
                     </div>
                   )}
                   <Button
                     type="submit"
-                    className="w-full h-10 sm:h-11 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-medium shadow-lg hover:shadow-xl transition-all duration-200 text-sm sm:text-base touch-manipulation"
+                    className="w-full h-10 sm:h-11 bg-[var(--primary)] hover:bg-[var(--accent)] text-[var(--primary-foreground)] font-medium shadow-lg hover:shadow-xl transition-all duration-200 text-sm sm:text-base touch-manipulation"
                     disabled={isSubmitting}
                   >
                     {isSubmitting ? (
                       <div className="flex items-center space-x-2">
-                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                        <div className="w-4 h-4 border-2 border-[var(--primary-foreground)] border-t-transparent rounded-full animate-spin"></div>
                         <span>Signing in...</span>
                       </div>
                     ) : (
@@ -224,13 +224,13 @@ export default function Login() {
                 {/* Guest Option */}
                 <div className="mt-6 pt-6 border-t border-gray-200">
                   <div className="text-center">
-                    <p className="text-sm text-gray-600 mb-3">
+                    <p className="text-sm text-[var(--muted-foreground)] mb-3">
                       Don't have an account? Enter as a guest
                     </p>
                     <Button
                       onClick={handleGuestLogin}
                       variant="outline"
-                      className="w-full h-10 sm:h-11 border-2 border-emerald-400 text-emerald-600 hover:bg-emerald-50 hover:border-emerald-500 font-medium shadow-lg hover:shadow-xl transition-all duration-200 text-sm sm:text-base touch-manipulation"
+                      className="w-full h-10 sm:h-11 font-medium shadow-lg hover:shadow-xl transition-all duration-200 text-sm sm:text-base touch-manipulation"
                     >
                       Enter as Guest
                     </Button>
@@ -240,17 +240,17 @@ export default function Login() {
             </Card>
           ) : (
             /* Guest Form */
-            <Card className="shadow-xl border-0 bg-white/80 backdrop-blur-sm">
+            <Card className="shadow-xl border border-[var(--border)] bg-card">
               <CardHeader className="space-y-1 pb-4 sm:pb-6 px-4 sm:px-6 pt-4 sm:pt-6">
                 <div className="flex items-center justify-between">
-                  <CardTitle className="text-lg sm:text-xl lg:text-2xl font-semibold text-gray-900">
+                  <CardTitle className="text-lg sm:text-xl lg:text-2xl font-semibold text-[var(--foreground)]">
                     Guest Access
                   </CardTitle>
                   <Button
                     variant="ghost"
                     size="sm"
                     onClick={handleBackToLogin}
-                    className="text-gray-500 hover:text-gray-700 text-sm sm:text-base touch-manipulation"
+                    className="text-[var(--muted-foreground)] hover:text-[var(--foreground)] text-sm sm:text-base touch-manipulation"
                   >
                     ← Back
                   </Button>
@@ -258,14 +258,14 @@ export default function Login() {
               </CardHeader>
               <CardContent className="px-4 sm:px-6 pb-4 sm:pb-6">
                 <div className="text-center space-y-4">
-                  <p className="text-sm sm:text-base text-gray-600">
+                  <p className="text-sm sm:text-base text-[var(--muted-foreground)]">
                     Register as a guest to explore our platform and access
                     promotional content.
                   </p>
                   <div className="space-y-3">
                     <Button
                       onClick={() => navigate("/guest/register")}
-                      className="w-full h-10 sm:h-11 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-medium shadow-lg hover:shadow-xl transition-all duration-200 text-sm sm:text-base touch-manipulation"
+                      className="w-full h-10 sm:h-11 bg-[var(--primary)] hover:bg-[var(--accent)] text-[var(--primary-foreground)] font-medium shadow-lg hover:shadow-xl transition-all duration-200 text-sm sm:text-base touch-manipulation"
                     >
                       Register as Guest
                     </Button>
@@ -286,7 +286,7 @@ export default function Login() {
                       Already have a guest account?{" "}
                       <button
                         onClick={() => navigate("/guest/login")}
-                        className="text-green-600 hover:text-green-700 font-medium touch-manipulation"
+                        className="text-[var(--primary)] hover:text-[var(--accent)] font-medium touch-manipulation"
                       >
                         Sign in here
                       </button>
@@ -299,7 +299,7 @@ export default function Login() {
 
           {/* Footer */}
           <div className="text-center mt-6 sm:mt-8">
-            <p className="text-xs sm:text-sm text-gray-500">
+            <p className="text-xs sm:text-sm text-[var(--muted-foreground)]">
               © 2024 ThinkPro LMS. All rights reserved.
             </p>
           </div>

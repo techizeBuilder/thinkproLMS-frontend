@@ -207,8 +207,7 @@ export default function MentorsPage() {
       </Card>
 
       {/* Mentors Table */}
-      <Card>
-        <Table>
+      <Table>
           <TableHeader>
             <TableRow>
               <TableHead>Name</TableHead>
@@ -321,7 +320,6 @@ export default function MentorsPage() {
             ))}
           </TableBody>
         </Table>
-      </Card>
 
       {filteredMentors.length === 0 && (
         <Card>

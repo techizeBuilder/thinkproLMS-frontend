@@ -423,10 +423,8 @@ export default function StudentsPage() {
 
       {/* Desktop Table View */}
       <div className="hidden xl:block">
-        <Card>
-          <CardContent className="p-0">
-            <div className="overflow-x-auto">
-              <Table>
+        <div className="overflow-x-auto rounded-lg border border-[var(--border)] bg-card">
+          <Table>
                 <TableHeader>
                   <TableRow>
                     <TableHead className="sticky left-0 bg-background z-10 min-w-[200px]">
@@ -574,10 +572,8 @@ export default function StudentsPage() {
                     </TableRow>
                   ))}
                 </TableBody>
-              </Table>
-            </div>
-          </CardContent>
-        </Card>
+          </Table>
+        </div>
       </div>
 
       {/* Mobile/Tablet Card View */}

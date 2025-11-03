@@ -144,102 +144,96 @@ export default function LeadMentorsPage() {
           </CardContent>
         </Card>
       ) : (
-        <Card>
-          <CardContent className="p-0">
-            <div className="overflow-x-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="sticky left-0 bg-background z-10 min-w-[150px]">Name</TableHead>
-                    <TableHead className="min-w-[200px]">Email</TableHead>
-                    <TableHead className="min-w-[120px]">Phone</TableHead>
-                    <TableHead className="min-w-[150px]">School Access</TableHead>
-                    <TableHead className="min-w-[120px]">Status</TableHead>
-                    <TableHead className="min-w-[100px]">Created</TableHead>
-                    <TableHead className="text-right min-w-[120px]">Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-              {leadMentors.map((mentor) => (
-                <TableRow key={mentor._id} className={!mentor.isActive ? "opacity-60" : ""}>
-                  <TableCell className="font-medium sticky left-0 bg-background z-10 min-w-[150px]">
-                    <div className="flex items-center gap-2">
-                      <Crown className="h-4 w-4 text-yellow-600" />
-                      {mentor.user.name}
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex items-center text-sm">
-                      <Mail className="mr-2 h-4 w-4 text-gray-500" />
-                      {mentor.user.email}
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex items-center text-sm">
-                      <Phone className="mr-2 h-4 w-4 text-gray-500" />
-                      {mentor.phoneNumber}
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    {mentor.hasAccessToAllSchools ? (
-                      <Badge variant="outline" className="text-blue-600 border-blue-600">
-                        <Globe className="h-3 w-3 mr-1" />
-                        All Schools
-                      </Badge>
-                    ) : mentor.assignedSchools.length === 0 ? (
-                      <span className="text-gray-400">No schools assigned</span>
-                    ) : (
-                      <div>
-                        <span className="text-sm">{mentor.assignedSchools.length} schools</span>
-                        <div className="text-xs text-gray-500 mt-1">
-                          {mentor.assignedSchools.slice(0, 2).map((school) => (
-                            <div key={school._id}>• {school.name}</div>
-                          ))}
-                          {mentor.assignedSchools.length > 2 && (
-                            <div>+{mentor.assignedSchools.length - 2} more</div>
-                          )}
-                        </div>
-                      </div>
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead className="sticky left-0 bg-background z-10 min-w-[150px]">Name</TableHead>
+              <TableHead className="min-w-[200px]">Email</TableHead>
+              <TableHead className="min-w-[120px]">Phone</TableHead>
+              <TableHead className="min-w-[150px]">School Access</TableHead>
+              <TableHead className="min-w-[120px]">Status</TableHead>
+              <TableHead className="min-w-[100px]">Created</TableHead>
+              <TableHead className="text-right min-w-[120px]">Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+        {leadMentors.map((mentor) => (
+          <TableRow key={mentor._id} className={!mentor.isActive ? "opacity-60" : ""}>
+            <TableCell className="font-medium sticky left-0 bg-background z-10 min-w-[150px]">
+              <div className="flex items-center gap-2">
+                <Crown className="h-4 w-4 text-yellow-600" />
+                {mentor.user.name}
+              </div>
+            </TableCell>
+            <TableCell>
+              <div className="flex items-center text-sm">
+                <Mail className="mr-2 h-4 w-4 text-gray-500" />
+                {mentor.user.email}
+              </div>
+            </TableCell>
+            <TableCell>
+              <div className="flex items-center text-sm">
+                <Phone className="mr-2 h-4 w-4 text-gray-500" />
+                {mentor.phoneNumber}
+              </div>
+            </TableCell>
+            <TableCell>
+              {mentor.hasAccessToAllSchools ? (
+                <Badge variant="outline" className="text-blue-600 border-blue-600">
+                  <Globe className="h-3 w-3 mr-1" />
+                  All Schools
+                </Badge>
+              ) : mentor.assignedSchools.length === 0 ? (
+                <span className="text-gray-400">No schools assigned</span>
+              ) : (
+                <div>
+                  <span className="text-sm">{mentor.assignedSchools.length} schools</span>
+                  <div className="text-xs text-gray-500 mt-1">
+                    {mentor.assignedSchools.slice(0, 2).map((school) => (
+                      <div key={school._id}>• {school.name}</div>
+                    ))}
+                    {mentor.assignedSchools.length > 2 && (
+                      <div>+{mentor.assignedSchools.length - 2} more</div>
                     )}
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex gap-2">
-                      <Badge variant={mentor.user.isVerified ? "default" : "secondary"}>
-                        {mentor.user.isVerified ? "Verified" : "Pending"}
-                      </Badge>
-                      <Badge variant={mentor.isActive ? "default" : "destructive"}>
-                        {mentor.isActive ? "Active" : "Inactive"}
-                      </Badge>
-                    </div>
-                  </TableCell>
-                  <TableCell className="text-sm text-gray-500">
-                    {new Date(mentor.createdAt).toLocaleDateString()}
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <MobileActions
-                      editUrl={`${basePath}/lead-mentors/${mentor._id}/edit`}
-                      onResetPassword={() =>
-                        setResetPasswordUser({
-                          id: mentor.user._id,
-                          name: mentor.user.name,
-                          email: mentor.user.email,
-                        })
-                      }
-                      onDelete={() => handleDelete(mentor._id, mentor.user.name)}
-                      deleteLoading={deleteLoading === mentor._id}
-                      isSuperAdmin={true}
-                      onToggleStatus={() => handleToggleStatus(mentor._id, mentor.user.name, mentor.isActive)}
-                      isActive={mentor.isActive}
-                      toggleLoading={toggleLoading === mentor._id}
-                    />
-                  </TableCell>
-                </TableRow>
-              ))}
-              </TableBody>
-            </Table>
-            </div>
-          </CardContent>
-        </Card>
+                  </div>
+                </div>
+              )}
+            </TableCell>
+            <TableCell>
+              <div className="flex gap-2">
+                <Badge variant={mentor.user.isVerified ? "default" : "secondary"}>
+                  {mentor.user.isVerified ? "Verified" : "Pending"}
+                </Badge>
+                <Badge variant={mentor.isActive ? "default" : "destructive"}>
+                  {mentor.isActive ? "Active" : "Inactive"}
+                </Badge>
+              </div>
+            </TableCell>
+            <TableCell className="text-sm text-gray-500">
+              {new Date(mentor.createdAt).toLocaleDateString()}
+            </TableCell>
+            <TableCell className="text-right">
+              <MobileActions
+                editUrl={`${basePath}/lead-mentors/${mentor._id}/edit`}
+                onResetPassword={() =>
+                  setResetPasswordUser({
+                    id: mentor.user._id,
+                    name: mentor.user.name,
+                    email: mentor.user.email,
+                  })
+                }
+                onDelete={() => handleDelete(mentor._id, mentor.user.name)}
+                deleteLoading={deleteLoading === mentor._id}
+                isSuperAdmin={true}
+                onToggleStatus={() => handleToggleStatus(mentor._id, mentor.user.name, mentor.isActive)}
+                isActive={mentor.isActive}
+                toggleLoading={toggleLoading === mentor._id}
+              />
+            </TableCell>
+          </TableRow>
+        ))}
+        </TableBody>
+      </Table>
       )}
 
       {/* Reset Password Dialog */}
