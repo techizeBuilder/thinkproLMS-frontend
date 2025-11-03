@@ -45,6 +45,8 @@ import ProfilePictureDisplay from "@/components/ProfilePictureDisplay";
 import { MobileActions } from "@/components/ui/mobile-actions";
 import { useAuth } from "@/contexts/AuthContext";
 import { studentService } from "@/api/studentService";
+import { useHasPermission } from "@/hooks/usePermission";
+import { PERMISSIONS } from "@/constants/permissions";
 
 interface School {
   _id: string;
@@ -99,6 +101,7 @@ export default function StudentsPage() {
   const navigate = useNavigate();
   const studentsPath = useStudentsPath();
   const { user } = useAuth();
+  const { hasPermission } = useHasPermission();
   const [confirmDialog, setConfirmDialog] = useState<{
     isOpen: boolean;
     title: string;
@@ -337,15 +340,17 @@ export default function StudentsPage() {
             <span className="hidden xs:inline">Download List</span>
             <span className="xs:hidden">Download</span>
           </Button>
-          <Button
-            size="sm"
-            onClick={() => navigate(studentsPath + "/create")}
-            className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm touch-manipulation h-8 sm:h-9"
-          >
-            <Plus className="h-3 w-3 sm:h-4 sm:w-4" />
-            <span className="hidden xs:inline">Add Student</span>
-            <span className="xs:hidden">Add</span>
-          </Button>
+          {hasPermission(PERMISSIONS.ADD_STUDENTS) && (
+            <Button
+              size="sm"
+              onClick={() => navigate(studentsPath + "/create")}
+              className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm touch-manipulation h-8 sm:h-9"
+            >
+              <Plus className="h-3 w-3 sm:h-4 sm:w-4" />
+              <span className="hidden xs:inline">Add Student</span>
+              <span className="xs:hidden">Add</span>
+            </Button>
+          )}
         </div>
 
         {/* Summary Stats */}
@@ -555,7 +560,7 @@ export default function StudentsPage() {
                       </TableCell>
                       <TableCell className="text-right">
                         <MobileActions
-                          editUrl={studentsPath + "/" + student._id + "/edit"}
+                          editUrl={hasPermission(PERMISSIONS.ADD_STUDENTS) ? (studentsPath + "/" + student._id + "/edit") : undefined}
                           onResetPassword={() =>
                             setResetPasswordUser({
                               id: student.user._id,
@@ -618,7 +623,7 @@ export default function StudentsPage() {
                     </div>
                   </div>
                   <MobileActions
-                    editUrl={studentsPath + "/" + student._id + "/edit"}
+                    editUrl={hasPermission(PERMISSIONS.ADD_STUDENTS) ? (studentsPath + "/" + student._id + "/edit") : undefined}
                     onResetPassword={() =>
                       setResetPasswordUser({
                         id: student.user._id,

@@ -22,9 +22,12 @@ import { resourceService } from '@/api/resourceService';
 import { getResourceDisplayUrl, getFileTypeBadgeColor, formatFileSize } from '@/utils/resourceUtils';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
+import { useHasPermission } from '@/hooks/usePermission';
+import { PERMISSIONS } from '@/constants/permissions';
 
 export default function ResourcesWithAPIPage() {
   const { user } = useAuth();
+  const { hasPermission } = useHasPermission();
   const navigate = useNavigate();
   const [selectedUserType, setSelectedUserType] = useState<UserType>('student');
   const [selectedBucket, setSelectedBucket] = useState<BucketType>('documents');
@@ -200,7 +203,7 @@ export default function ResourcesWithAPIPage() {
             <TabsContent value="documents">
               <div className="flex justify-between items-center mb-4">
                 <h2 className="text-xl font-semibold">Student Documents</h2>
-                {user?.role === 'leadmentor' && (
+                {hasPermission(PERMISSIONS.ADD_RESOURCES) && (
                   <Button onClick={handleAddResource} className="flex items-center gap-2">
                     <Plus className="h-4 w-4" />
                     Add Document
@@ -263,7 +266,7 @@ export default function ResourcesWithAPIPage() {
                             <Eye className="h-4 w-4 mr-1" />
                             View
                           </Button>
-                          {user?.role === 'leadmentor' && (
+                          {hasPermission(PERMISSIONS.ADD_RESOURCES) && (
                             <>
                               <Button
                                 variant="outline"
@@ -317,7 +320,7 @@ export default function ResourcesWithAPIPage() {
             <TabsContent value="videos">
               <div className="flex justify-between items-center mb-4">
                 <h2 className="text-xl font-semibold">Student Videos</h2>
-                {user?.role === 'leadmentor' && (
+                {hasPermission(PERMISSIONS.ADD_RESOURCES) && (
                   <Button onClick={handleAddResource} className="flex items-center gap-2">
                     <Plus className="h-4 w-4" />
                     Add Video
@@ -514,7 +517,7 @@ export default function ResourcesWithAPIPage() {
                               <Eye className="h-4 w-4 mr-1" />
                               View
                             </Button>
-                            {user?.role === 'leadmentor' && (
+                            {hasPermission(PERMISSIONS.ADD_RESOURCES) && (
                               <>
                                 <Button
                                   variant="outline"
@@ -702,7 +705,7 @@ export default function ResourcesWithAPIPage() {
             <TabsContent value="documents">
               <div className="flex justify-between items-center mb-4">
                 <h2 className="text-xl font-semibold">Guest Documents</h2>
-                {user?.role === 'leadmentor' && (
+                  {hasPermission(PERMISSIONS.ADD_RESOURCES) && (
                   <Button onClick={handleAddResource} className="flex items-center gap-2">
                     <Plus className="h-4 w-4" />
                     Add Document
@@ -765,7 +768,7 @@ export default function ResourcesWithAPIPage() {
                             <Eye className="h-4 w-4 mr-1" />
                             View
                           </Button>
-                          {user?.role === 'leadmentor' && (
+                          {hasPermission(PERMISSIONS.ADD_RESOURCES) && (
                             <>
                               <Button
                                 variant="outline"
@@ -794,7 +797,7 @@ export default function ResourcesWithAPIPage() {
             <TabsContent value="videos">
               <div className="flex justify-between items-center mb-4">
                 <h2 className="text-xl font-semibold">Guest Videos</h2>
-                {user?.role === 'leadmentor' && (
+                {hasPermission(PERMISSIONS.ADD_RESOURCES) && (
                   <Button onClick={handleAddResource} className="flex items-center gap-2">
                     <Plus className="h-4 w-4" />
                     Add Video
@@ -857,7 +860,7 @@ export default function ResourcesWithAPIPage() {
                             <Eye className="h-4 w-4 mr-1" />
                             View
                           </Button>
-                          {user?.role === 'leadmentor' && (
+                          {hasPermission(PERMISSIONS.ADD_RESOURCES) && (
                             <>
                               <Button
                                 variant="outline"

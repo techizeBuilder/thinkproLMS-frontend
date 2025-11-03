@@ -49,10 +49,13 @@ import {
   getFileTypeBadgeColor,
 } from "@/utils/resourceUtils";
 import { useNavigate, useSearchParams } from "react-router-dom";
+import { useHasPermission } from "@/hooks/usePermission";
+import { PERMISSIONS } from "@/constants/permissions";
 import { toast } from "sonner";
 
 export default function ResourcesPage() {
   const { user } = useAuth();
+  const { hasPermission } = useHasPermission();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
 
@@ -288,7 +291,7 @@ export default function ResourcesPage() {
             Manage educational resources for mentors and students
           </p>
         </div>
-        {(user?.role === "superadmin" || user?.role === "leadmentor") && (
+        {hasPermission(PERMISSIONS.ADD_RESOURCES) && (
           <Button
             onClick={handleAddResource}
             className="flex items-center gap-2"
@@ -613,8 +616,7 @@ export default function ResourcesPage() {
                             <Download className="h-4 w-4" />
                           </Button>
                         )}
-                        {(user?.role === "superadmin" ||
-                          user?.role === "leadmentor") && (
+                        {hasPermission(PERMISSIONS.ADD_RESOURCES) && (
                           <>
                             <Button
                               variant="outline"

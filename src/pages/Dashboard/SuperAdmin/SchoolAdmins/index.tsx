@@ -34,6 +34,8 @@ import { schoolAdminService, type SchoolAdmin } from "@/api/schoolAdminService";
 import { toast } from "sonner";
 import { ResetPasswordDialog } from "@/components/ResetPasswordDialog";
 import { useAuth } from "@/contexts/AuthContext";
+import { useHasPermission } from "@/hooks/usePermission";
+import { PERMISSIONS } from "@/constants/permissions";
 
 export default function SchoolAdminsPage() {
   const location = useLocation();
@@ -54,6 +56,7 @@ export default function SchoolAdminsPage() {
     adminName: string;
   } | null>(null);
   const { user } = useAuth();
+  const { hasPermission } = useHasPermission();
   // Filter states
   const [statusFilter, setStatusFilter] = useState<string>("active");
 
@@ -169,15 +172,17 @@ export default function SchoolAdminsPage() {
             Manage school administrators
           </p>
         </div>
-        <Link
-          to={`${basePath}/school-admins/create`}
-          className="w-full sm:w-auto"
-        >
-          <Button className="w-full sm:w-auto">
-            <Plus className="mr-2 h-4 w-4" />
-            Add School Admin
-          </Button>
-        </Link>
+        {(basePath === "/superadmin" || hasPermission(PERMISSIONS.ADD_ADMINS)) && (
+          <Link
+            to={`${basePath}/school-admins/create`}
+            className="w-full sm:w-auto"
+          >
+            <Button className="w-full sm:w-auto">
+              <Plus className="mr-2 h-4 w-4" />
+              Add School Admin
+            </Button>
+          </Link>
+        )}
       </div>
 
       {/* Statistics and Filter */}
@@ -208,12 +213,14 @@ export default function SchoolAdminsPage() {
             <p className="text-gray-600 text-center mb-4">
               Get started by adding your first school administrator.
             </p>
-            <Link to={`${basePath}/school-admins/create`}>
-              <Button>
-                <Plus className="mr-2 h-4 w-4" />
-                Add School Admin
-              </Button>
-            </Link>
+            {(basePath === "/superadmin" || hasPermission(PERMISSIONS.ADD_ADMINS)) && (
+              <Link to={`${basePath}/school-admins/create`}>
+                <Button>
+                  <Plus className="mr-2 h-4 w-4" />
+                  Add School Admin
+                </Button>
+              </Link>
+            )}
           </CardContent>
         </Card>
       ) : (
@@ -293,7 +300,7 @@ export default function SchoolAdminsPage() {
                 </TableCell>
                 <TableCell className="text-right">
                   <MobileActions
-                    editUrl={`${basePath}/school-admins/${admin._id}/edit`}
+                    editUrl={(basePath === "/superadmin" || hasPermission(PERMISSIONS.ADD_ADMINS)) ? `${basePath}/school-admins/${admin._id}/edit` : undefined}
                     onResetPassword={admin.user ? () => {
                       setResetPasswordUser({
                         id: admin.user!._id,
@@ -301,9 +308,9 @@ export default function SchoolAdminsPage() {
                         email: admin.user!.email,
                       });
                     } : undefined}
-                    onDelete={() => handleDelete(admin._id, admin.user?.name || 'Unknown User')}
-                    onToggleStatus={() =>
-                      handleToggleStatus(admin._id, admin.user?.name || 'Unknown User', admin.isActive)
+                    onDelete={(basePath === "/superadmin" || hasPermission(PERMISSIONS.ADD_ADMINS)) ? () => handleDelete(admin._id, admin.user?.name || 'Unknown User') : undefined}
+                    onToggleStatus={(basePath === "/superadmin" || hasPermission(PERMISSIONS.ADD_ADMINS)) ? () =>
+                      handleToggleStatus(admin._id, admin.user?.name || 'Unknown User', admin.isActive) : undefined
                     }
                     isActive={admin.isActive}
                     isSuperAdmin={user?.role === "superadmin"}

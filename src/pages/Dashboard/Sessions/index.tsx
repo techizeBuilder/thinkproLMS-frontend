@@ -12,6 +12,8 @@ import {
 } from "lucide-react";
 import { sessionService, type Session } from "@/api/sessionService";
 import { useAuth } from "@/contexts/AuthContext";
+import { useHasPermission } from "@/hooks/usePermission";
+import { PERMISSIONS } from "@/constants/permissions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
@@ -41,9 +43,9 @@ export default function Sessions() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedGrade, setSelectedGrade] = useState("all");
 
-  // Check if user has permission to manage sessions
-  const hasPermission =
-    user?.role === "superadmin" || user?.permissions?.includes("add_modules");
+  // Check if user has permission to manage sessions (tied to modules permission)
+  const { hasPermission } = useHasPermission();
+  const canManageSessions = user?.role === "superadmin" || hasPermission(PERMISSIONS.ADD_MODULES);
 
   useEffect(() => {
     fetchSessions();
@@ -126,7 +128,7 @@ export default function Sessions() {
             Manage learning sessions across different grades
           </p>
         </div>
-        {hasPermission && (
+        {canManageSessions && (
           <Button
             onClick={() => {
               const basePath =
@@ -180,7 +182,7 @@ export default function Sessions() {
                   ? "Get started by creating your first session."
                   : "No sessions match your current filters."}
               </p>
-              {hasPermission && sessions.length === 0 && (
+              {canManageSessions && sessions.length === 0 && (
                 <Button
                   onClick={() => {
                     const basePath =
@@ -206,7 +208,7 @@ export default function Sessions() {
                   <TableHead>Grade</TableHead>
                   <TableHead>Created at</TableHead>
                   <TableHead className="text-right">Session ID</TableHead>
-                  {hasPermission && (
+                  {canManageSessions && (
                     <TableHead className="text-right">Actions</TableHead>
                   )}
                 </TableRow>
@@ -263,7 +265,7 @@ export default function Sessions() {
                         {session._id?.slice(-4)}...
                       </Button>
                     </TableCell>
-                    {hasPermission && (
+                    {canManageSessions && (
                       <TableCell className="text-right">
                         <div className="flex items-center justify-end gap-2">
                           <Button

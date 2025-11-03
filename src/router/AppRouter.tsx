@@ -477,14 +477,7 @@ export default function AppRouter() {
           />
 
           {/* Modules & Sessions Management */}
-          <Route
-            path="modules"
-            element={
-              <PermissionProtectedRoute requiredPermission="add_modules">
-                <ModulesPage />
-              </PermissionProtectedRoute>
-            }
-          />
+          <Route path="modules" element={<ModulesPage />} />
           <Route
             path="modules/create"
             element={
@@ -501,14 +494,7 @@ export default function AppRouter() {
               </PermissionProtectedRoute>
             }
           />
-          <Route
-            path="sessions"
-            element={
-              <PermissionProtectedRoute requiredPermission="add_modules">
-                <SessionsPage />
-              </PermissionProtectedRoute>
-            }
-          />
+          <Route path="sessions" element={<SessionsPage />} />
           <Route
             path="sessions/create"
             element={
@@ -686,14 +672,7 @@ export default function AppRouter() {
           />
 
           {/* Modules & Sessions Management */}
-          <Route
-            path="modules"
-            element={
-              <PermissionProtectedRoute requiredPermission="add_modules">
-                <ModulesPage />
-              </PermissionProtectedRoute>
-            }
-          />
+          <Route path="modules" element={<ModulesPage />} />
           <Route
             path="modules/create"
             element={
@@ -710,14 +689,7 @@ export default function AppRouter() {
               </PermissionProtectedRoute>
             }
           />
-          <Route
-            path="sessions"
-            element={
-              <PermissionProtectedRoute requiredPermission="add_modules">
-                <SessionsPage />
-              </PermissionProtectedRoute>
-            }
-          />
+          <Route path="sessions" element={<SessionsPage />} />
           <Route
             path="sessions/create"
             element={

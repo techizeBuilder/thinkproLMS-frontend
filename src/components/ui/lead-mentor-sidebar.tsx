@@ -43,18 +43,18 @@ export function LeadMentorSidebar({ className }: LeadMentorSidebarProps) {
   const { counts } = useNotifications();
 
   // Check if user has permission to manage modules and resources
-  const hasModulePermission =
-    user?.role === "superadmin" || user?.permissions?.includes("add_modules");
-  const hasResourcePermission =
-    user?.role === "superadmin" || user?.permissions?.includes("add_resources");
+  // const hasModulePermission =
+  //   user?.role === "superadmin" || user?.permissions?.includes("add_modules");
+  // const hasResourcePermission =
+  //   user?.role === "superadmin" || user?.permissions?.includes("add_resources");
 
   return (
     <Sidebar className={cn("h-screen", className)}>
       <SidebarHeader>
         <div className="flex items-center gap-2">
-          <img 
-            src="/fancy-logo.jpg" 
-            alt="ThinkPro Logo" 
+          <img
+            src="/fancy-logo.jpg"
+            alt="ThinkPro Logo"
             className="h-8 w-8 object-contain"
           />
           <SidebarTitle>ThinkPro LMS</SidebarTitle>
@@ -138,7 +138,10 @@ export function LeadMentorSidebar({ className }: LeadMentorSidebarProps) {
                 )}
               </div>
             </SidebarNavItem>
-            <SidebarNavItem to="/leadmentor/assessment-reports" icon={BarChart3}>
+            <SidebarNavItem
+              to="/leadmentor/assessment-reports"
+              icon={BarChart3}
+            >
               Assessment Reports
             </SidebarNavItem>
             <SidebarNavItem to="/leadmentor/certificates" icon={Award}>
@@ -147,45 +150,27 @@ export function LeadMentorSidebar({ className }: LeadMentorSidebarProps) {
           </SidebarNav>
         </SidebarGroup>
 
-        {hasModulePermission ? (
-          <SidebarGroup label="Curriculum">
-            <SidebarNav>
-              <SidebarNavItem to="/leadmentor/modules" icon={Layers}>
-                Modules
-              </SidebarNavItem>
-              <SidebarNavItem to="/leadmentor/sessions" icon={Calendar}>
-                Sessions
-              </SidebarNavItem>
-              <SidebarNavItem
-                to="/leadmentor/session-progress"
-                icon={BarChart3}
-              >
-                Session Progress
-              </SidebarNavItem>
-            </SidebarNav>
-          </SidebarGroup>
-        ) : (
-          <SidebarGroup label="Curriculum">
-            <SidebarNav>
-              <SidebarNavItem
-                to="/leadmentor/session-progress"
-                icon={BarChart3}
-              >
-                Session Progress
-              </SidebarNavItem>
-            </SidebarNav>
-          </SidebarGroup>
-        )}
+        <SidebarGroup label="Curriculum">
+          <SidebarNav>
+            <SidebarNavItem to="/leadmentor/modules" icon={Layers}>
+              Modules
+            </SidebarNavItem>
+            <SidebarNavItem to="/leadmentor/sessions" icon={Calendar}>
+              Sessions
+            </SidebarNavItem>
+            <SidebarNavItem to="/leadmentor/session-progress" icon={BarChart3}>
+              Session Progress
+            </SidebarNavItem>
+          </SidebarNav>
+        </SidebarGroup>
 
-        {hasResourcePermission && (
-          <SidebarGroup label="Resources">
-            <SidebarNav>
-              <SidebarNavItem to="/leadmentor/resources" icon={FileText}>
-                Resources
-              </SidebarNavItem>
-            </SidebarNav>
-          </SidebarGroup>
-        )}
+        <SidebarGroup label="Resources">
+          <SidebarNav>
+            <SidebarNavItem to="/leadmentor/resources" icon={FileText}>
+              Resources
+            </SidebarNavItem>
+          </SidebarNav>
+        </SidebarGroup>
 
         <SidebarGroup label="Account">
           <SidebarNav>

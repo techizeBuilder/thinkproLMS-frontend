@@ -4,6 +4,8 @@ import { toast } from "sonner";
 import { Plus, Edit, Trash2, Search, FolderOpen } from "lucide-react";
 import { moduleService, type Module } from "@/api/moduleService";
 import { useAuth } from "@/contexts/AuthContext";
+import { useHasPermission } from "@/hooks/usePermission";
+import { PERMISSIONS } from "@/constants/permissions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
@@ -25,8 +27,8 @@ export default function Modules() {
   const [searchTerm, setSearchTerm] = useState("");
 
   // Check if user has permission to manage modules
-  const hasPermission =
-    user?.role === "superadmin" || user?.permissions?.includes("add_modules");
+  const { hasPermission } = useHasPermission();
+  const canManageModules = user?.role === "superadmin" || hasPermission(PERMISSIONS.ADD_MODULES);
 
   useEffect(() => {
     fetchModules();
@@ -98,7 +100,7 @@ export default function Modules() {
             Manage learning modules and organize your curriculum
           </p>
         </div>
-        {hasPermission && (
+        {canManageModules && (
           <Button
             onClick={() => {
               const basePath =
@@ -138,7 +140,7 @@ export default function Modules() {
                   ? "Get started by creating your first module."
                   : "No modules match your current search."}
               </p>
-              {hasPermission && modules.length === 0 && (
+              {canManageModules && modules.length === 0 && (
                 <Button
                   onClick={() => {
                     const basePath =
@@ -162,7 +164,7 @@ export default function Modules() {
                   <TableHead>Description</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead>Created Date</TableHead>
-                  {hasPermission && (
+                  {canManageModules && (
                     <TableHead className="text-right">Actions</TableHead>
                   )}
                 </TableRow>
@@ -193,7 +195,7 @@ export default function Modules() {
                         ? new Date(module.createdAt).toLocaleDateString()
                         : "-"}
                     </TableCell>
-                    {hasPermission && (
+                    {canManageModules && (
                       <TableCell className="text-right">
                         <div className="flex items-center justify-end gap-2">
                           <Button

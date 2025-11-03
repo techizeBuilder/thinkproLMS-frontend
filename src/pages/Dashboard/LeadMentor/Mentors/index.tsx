@@ -10,6 +10,8 @@ import { useNavigate } from "react-router-dom";
 import axiosInstance from "@/api/axiosInstance";
 import { ResetPasswordDialog } from "@/components/ResetPasswordDialog";
 import ProfilePictureDisplay from "@/components/ProfilePictureDisplay";
+import { useHasPermission } from "@/hooks/usePermission";
+import { PERMISSIONS } from "@/constants/permissions";
 
 interface School {
   _id: string;
@@ -50,6 +52,7 @@ export default function MentorsPage() {
     email: string;
   } | null>(null);
   const navigate = useNavigate();
+  const { hasPermission } = useHasPermission();
 
   // Count active and inactive mentors
   const activeCount = mentors.filter((mentor) => mentor.isActive !== false).length;
@@ -139,13 +142,15 @@ export default function MentorsPage() {
           <h1 className="text-xl md:text-2xl lg:text-3xl font-bold text-gray-900">School Mentors</h1>
           <p className="text-sm md:text-base text-gray-600">Manage mentors assigned to schools</p>
         </div>
-        <Button 
-          onClick={() => navigate("/leadmentor/mentors/create")} 
-          className="flex items-center gap-2 w-full sm:w-auto"
-        >
-          <Plus className="h-4 w-4" />
-          <span className="text-sm md:text-base">Add School Mentor</span>
-        </Button>
+        {hasPermission(PERMISSIONS.ADD_MENTORS) && (
+          <Button 
+            onClick={() => navigate("/leadmentor/mentors/create")} 
+            className="flex items-center gap-2 w-full sm:w-auto"
+          >
+            <Plus className="h-4 w-4" />
+            <span className="text-sm md:text-base">Add School Mentor</span>
+          </Button>
+        )}
       </div>
 
       {/* Filters */}
@@ -296,23 +301,27 @@ export default function MentorsPage() {
                       >
                         <KeyRound className="h-4 w-4" />
                       </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() =>
-                          navigate(`/leadmentor/mentors/${mentor._id}/edit`)
-                        }
-                      >
-                        <Edit className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleDelete(mentor._id)}
-                        className="text-red-600 hover:text-red-700"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
+                      {hasPermission(PERMISSIONS.ADD_MENTORS) && (
+                        <>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() =>
+                              navigate(`/leadmentor/mentors/${mentor._id}/edit`)
+                            }
+                          >
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleDelete(mentor._id)}
+                            className="text-red-600 hover:text-red-700"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </>
+                      )}
                     </div>
                   </TableCell>
                 </TableRow>
@@ -375,24 +384,28 @@ export default function MentorsPage() {
                     >
                       <KeyRound className="h-4 w-4" />
                     </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() =>
-                        navigate(`/leadmentor/mentors/${mentor._id}/edit`)
-                      }
-                      className="h-8 w-8 p-0"
-                    >
-                      <Edit className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleDelete(mentor._id)}
-                      className="h-8 w-8 p-0 text-red-600 hover:text-red-700"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
+                    {hasPermission(PERMISSIONS.ADD_MENTORS) && (
+                      <>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() =>
+                            navigate(`/leadmentor/mentors/${mentor._id}/edit`)
+                          }
+                          className="h-8 w-8 p-0"
+                        >
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleDelete(mentor._id)}
+                          className="h-8 w-8 p-0 text-red-600 hover:text-red-700"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </>
+                    )}
                   </div>
                 </div>
                 
