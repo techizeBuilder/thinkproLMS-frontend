@@ -18,6 +18,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { CalendarIcon, ArrowLeft } from "lucide-react";
 import { format } from "date-fns";
 import axiosInstance from "@/api/axiosInstance";
@@ -250,7 +251,6 @@ export default function LeadPageForm({
 
   const dateField = (label: string, name: string) => (
     <div className="space-y-2">
-      <Label className="block">{label}</Label>
       <Popover>
         <PopoverTrigger asChild>
           <Button variant="outline" className="justify-start">
@@ -258,7 +258,7 @@ export default function LeadPageForm({
             {form[name] ? format(new Date(form[name]), "PPP") : `Pick ${label}`}
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="p-0">
+        <PopoverContent className="p-0 bg-card border border-[var(--border)]">
           <Calendar
             mode="single"
             selected={form[name] ? new Date(form[name]) : undefined}
@@ -272,7 +272,7 @@ export default function LeadPageForm({
   );
 
   return (
-    <div className="p-6">
+    <div className="p-4">
       <div className="mb-4 flex items-center gap-3">
         <Button variant="outline" size="icon" onClick={onCancel}>
           <ArrowLeft className="h-4 w-4" />
@@ -281,496 +281,614 @@ export default function LeadPageForm({
           <h1 className="text-2xl font-semibold">
             {isEdit ? `Edit Lead ${lead?.leadNo}` : "Create Lead"}
           </h1>
-          <p className="text-gray-600">Fill the details below.</p>
+          <p className="text-[var(--muted-foreground)]">Fill the details below.</p>
         </div>
       </div>
-      <div className="max-w-5xl mx-auto space-y-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="max-w-7xl mx-auto space-y-4">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          {/* Left Column */}
           <div className="space-y-4">
-            <h3 className="font-semibold">School Details</h3>
-            <div className="space-y-2">
-              <Label>School Name</Label>
-              <Input
-                name="schoolName"
-                placeholder="e.g. Springfield High School"
-                value={form.schoolName}
-                onChange={handleChange}
-                required
-              />
-            </div>
-            <div className="space-y-2">
-              <Label>Postal Address</Label>
-              <Input
-                name="postalAddress"
-                placeholder="Street, Area, Landmark"
-                value={form.postalAddress}
-                onChange={handleChange}
-              />
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label>City / Town</Label>
-                <Input
-                  name="city"
-                  placeholder="e.g. Bengaluru"
-                  value={form.city}
-                  onChange={handleChange}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label>District</Label>
-                <Input
-                  name="district"
-                  placeholder="e.g. Bengaluru Urban"
-                  value={form.district}
-                  onChange={handleChange}
-                />
-              </div>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label>State</Label>
-                <Select
-                  value={form.state}
-                  onValueChange={(v) => handleSelect("state", v)}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select state" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {[
-                      "Andhra Pradesh",
-                      "Bihar",
-                      "Delhi",
-                      "Gujarat",
-                      "Karnataka",
-                      "Maharashtra",
-                      "Rajasthan",
-                      "Tamil Nadu",
-                      "Telangana",
-                      "Uttar Pradesh",
-                      "West Bengal",
-                    ].map((s) => (
-                      <SelectItem key={s} value={s}>
-                        {s}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <Label>PIN Code</Label>
-                <Input
-                  name="pinCode"
-                  placeholder="6-digit PIN"
-                  inputMode="numeric"
-                  pattern="\\d*"
-                  value={form.pinCode}
-                  onChange={handleChange}
-                />
-              </div>
-            </div>
-            <div className="space-y-2">
-              <Label className="text-gray-500">Board Affiliated (Optional)</Label>
-              <Select
-                value={form.boardAffiliated}
-                onValueChange={(v) => handleSelect("boardAffiliated", v)}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select board" />
-                </SelectTrigger>
-                <SelectContent>
-                  {["CBSE", "ICSE", "State Board", "IGCSE", "IB", "Other"].map(
-                    (b) => (
-                      <SelectItem key={b} value={b}>
-                        {b}
-                      </SelectItem>
-                    )
-                  )}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-2">
-              <Label className="text-gray-500">School Website (Optional)</Label>
-              <Input
-                name="schoolWebsite"
-                placeholder="https://example.edu"
-                type="url"
-                value={form.schoolWebsite}
-                onChange={handleChange}
-              />
-            </div>
-          </div>
-
-          <div className="space-y-4">
-            <h3 className="font-semibold">Contacts</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label className="text-gray-500">Principal Name (Optional)</Label>
-                <Input
-                  name="principalName"
-                  placeholder="e.g. Dr. A. Sharma"
-                  value={form.principalName}
-                  onChange={handleChange}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label className="text-gray-500">Principal Contact (Optional)</Label>
-                <Input
-                  name="principalContact"
-                  placeholder="e.g. +91 98xxxxxxx"
-                  type="tel"
-                  value={form.principalContact}
-                  onChange={handleChange}
-                  className={principalPhoneError ? "border-red-500" : ""}
-                />
-                {principalPhoneError && (
-                  <p className="text-sm text-red-500">{principalPhoneError}</p>
-                )}
-                {!principalPhoneError && form.principalContact && (
-                  <p className="text-xs text-green-600">✓ Valid phone number</p>
-                )}
-              </div>
-              <div className="space-y-2 md:col-span-2">
-                <Label className="text-gray-500">Principal Email (Optional)</Label>
-                <Input
-                  name="principalEmail"
-                  placeholder="principal@school.edu"
-                  type="email"
-                  value={form.principalEmail}
-                  onChange={handleChange}
-                />
-              </div>
-              <div className="space-y-2 md:col-span-2">
-                <Label className="text-gray-500">School Email (Optional)</Label>
-                <Input
-                  name="schoolEmail"
-                  placeholder="info@school.edu"
-                  type="email"
-                  value={form.schoolEmail}
-                  onChange={handleChange}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label className="text-gray-500">Key Person Name (Optional)</Label>
-                <Input
-                  name="keyPersonName"
-                  placeholder="e.g. Ms. K. Rao"
-                  value={form.keyPersonName}
-                  onChange={handleChange}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label className="text-gray-500">Key Person Contact (Optional)</Label>
-                <Input
-                  name="keyPersonContact"
-                  placeholder="e.g. +91 9xxxxxxxxx"
-                  type="tel"
-                  value={form.keyPersonContact}
-                  onChange={handleChange}
-                  className={keyPersonPhoneError ? "border-red-500" : ""}
-                />
-                {keyPersonPhoneError && (
-                  <p className="text-sm text-red-500">{keyPersonPhoneError}</p>
-                )}
-                {!keyPersonPhoneError && form.keyPersonContact && (
-                  <p className="text-xs text-green-600">✓ Valid phone number</p>
-                )}
-              </div>
-              <div className="space-y-2 md:col-span-2">
-                <Label className="text-gray-500">Key Person Email (Optional)</Label>
-                <Input
-                  name="keyPersonEmail"
-                  placeholder="key.person@school.edu"
-                  type="email"
-                  value={form.keyPersonEmail}
-                  onChange={handleChange}
-                />
-              </div>
-            </div>
-
-            <h3 className="font-semibold">Qualification</h3>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="space-y-2">
-                <Label className="text-gray-500">Robotics / ATL Present? (Optional)</Label>
-                <Select
-                  value={form.roboticsAtlPresent}
-                  onValueChange={(v) => handleSelect("roboticsAtlPresent", v)}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Yes">Yes</SelectItem>
-                    <SelectItem value="No">No</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <Label className="text-gray-500">No of Students (Optional)</Label>
-                <Input
-                  name="noOfStudents"
-                  placeholder="e.g. 500"
-                  type="number"
-                  min="0"
-                  value={form.noOfStudents}
-                  onChange={handleChange}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label className="text-gray-500">Avg Fees Per Year (Optional)</Label>
-                <Input
-                  name="avgFeesPerYear"
-                  placeholder="e.g. 45000"
-                  type="number"
-                  min="0"
-                  value={form.avgFeesPerYear}
-                  onChange={handleChange}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label className="text-gray-500">Qualified? (Optional)</Label>
-                <Select
-                  value={form.qualified}
-                  onValueChange={(v) => handleSelect("qualified", v)}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Qualified" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="No">No</SelectItem>
-                    <SelectItem value="Yes">Yes</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-
-            <h3 className="font-semibold">Assignment</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label>TPA Sales POC (Executive)</Label>
-                <Select
-                  value={form.salesExecutive}
-                  onValueChange={(v) => handleSelect("salesExecutive", v)}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select Executive" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="none">None</SelectItem>
-                    {executives.map((e) => (
-                      <SelectItem key={e._id} value={e._id}>
-                        {e.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <Label>TPA Sales POC (Manager)</Label>
-                <Select
-                  value={form.salesManager}
-                  onValueChange={(v) => handleSelect("salesManager", v)}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select Manager" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="none">None</SelectItem>
-                    {managers.map((m) => (
-                      <SelectItem key={m._id} value={m._id}>
-                        {m.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-
-            <h3 className="font-semibold">Status</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label>Lead Source</Label>
-                <Select
-                  value={form.leadSource}
-                  onValueChange={(v) => handleSelect("leadSource", v)}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Lead Source" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Internal">Internal</SelectItem>
-                    <SelectItem value="Channel Partner">
-                      Channel Partner
-                    </SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <Label>Phase</Label>
-                <Select
-                  value={form.phase}
-                  onValueChange={(v) => handleSelect("phase", v)}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Phase" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {[
-                      "Lead",
-                      "Visit to be scheduled",
-                      "Visited",
-                      "Demo / PTM etc to be Scheduled",
-                      "Proposal to be shared",
-                      "Proposal Shared",
-                      "Commercial Negotiations underway",
-                      "Decision Awaited",
-                      "LOI Awaited",
-                      "LOI Received",
-                      "Contract to be shared",
-                      "Contract Shared",
-                      "Contract Review underway",
-                      "Contract Signed",
-                      "Deal Lost",
-                      "On Hold",
-                      "Pursue next AY",
-                      "Invoiced",
-                      "Payment Awaited",
-                      "Payment Received",
-                      "Kits to be Shipped",
-                      "Kits Shipped",
-                      "Training to be Scheduled",
-                      "Training Scheduled",
-                      "Training Completed",
-                      "Kickoff to be scheduded",
-                      "Kickoff Complete",
-                    ].map((p) => (
-                      <SelectItem key={p} value={p}>
-                        {p}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <Label className="text-gray-500">Pilot / Full Program (Optional)</Label>
-                <Select
-                  value={form.programType}
-                  onValueChange={(v) => handleSelect("programType", v)}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Program Type" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Pilot">Pilot</SelectItem>
-                    <SelectItem value="Full">Full</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <Label className="text-gray-500">Delivery Model (Optional)</Label>
-                <Select
-                  value={form.deliveryModel}
-                  onValueChange={(v) => handleSelect("deliveryModel", v)}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Delivery Model" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {["TPA Managed", "School Managed", "Hybrid"].map((d) => (
-                      <SelectItem key={d} value={d}>
-                        {d}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <Label className="text-gray-500">Quality Of Lead (Optional)</Label>
-                <Select
-                  value={form.qualityOfLead}
-                  onValueChange={(v) => handleSelect("qualityOfLead", v)}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Quality" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Cold">Cold</SelectItem>
-                    <SelectItem value="Warm">Warm</SelectItem>
-                    <SelectItem value="Hot">Hot</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <Label>Sales Cycle</Label>
-                <Select
-                  value={form.salesCycle}
-                  onValueChange={(v) => handleSelect("salesCycle", v)}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Sales Cycle" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {["2025-2026", "2026-2027"].map((s) => (
-                      <SelectItem key={s} value={s}>
-                        {s}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-2">
-                <Label className="text-gray-500">Sales Start Date (Optional)</Label>
-                {dateField("Sales Start Date", "salesStartDate")}
-              </div>
-              <div className="space-y-2">
-                {dateField("Sales Closed Date", "salesClosedDate")}
-              </div>
-            </div>
-
-            <h3 className="font-semibold">Notes & Actions</h3>
-            <div className="space-y-3">
-              <div className="space-y-2">
-                <Label>Lead Remarks</Label>
-                <Textarea
-                  name="leadRemarks"
-                  placeholder="Key notes about this lead..."
-                  value={form.leadRemarks}
-                  onChange={handleChange}
-                  rows={4}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label className="text-gray-500">Remarks - From Team (Optional)</Label>
-                <Textarea
-                  name="teamRemarks"
-                  placeholder="e.g. Follow-up notes, meeting minutes..."
-                  value={form.teamRemarks}
-                  onChange={handleChange}
-                  rows={6}
-                />
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="space-y-2 md:col-span-2">
-                  <Label>Action needed - From Team</Label>
+            <Card>
+              <CardHeader>
+                <CardTitle>School Details</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <Label>School Name</Label>
                   <Input
-                    name="actionNeeded"
-                    placeholder="e.g. Call Principal for demo scheduling"
-                    value={form.actionNeeded}
+                    name="schoolName"
+                    placeholder="e.g. Springfield High School"
+                    value={form.schoolName}
+                    onChange={handleChange}
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>Postal Address</Label>
+                  <Input
+                    name="postalAddress"
+                    placeholder="Street, Area, Landmark"
+                    value={form.postalAddress}
+                    onChange={handleChange}
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label>City / Town</Label>
+                    <Input
+                      name="city"
+                      placeholder="e.g. Bengaluru"
+                      value={form.city}
+                      onChange={handleChange}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>District</Label>
+                    <Input
+                      name="district"
+                      placeholder="e.g. Bengaluru Urban"
+                      value={form.district}
+                      onChange={handleChange}
+                    />
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label>State</Label>
+                    <Select
+                      value={form.state}
+                      onValueChange={(v) => handleSelect("state", v)}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select state" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {[
+                          "Andhra Pradesh",
+                          "Bihar",
+                          "Delhi",
+                          "Gujarat",
+                          "Karnataka",
+                          "Maharashtra",
+                          "Rajasthan",
+                          "Tamil Nadu",
+                          "Telangana",
+                          "Uttar Pradesh",
+                          "West Bengal",
+                        ].map((s) => (
+                          <SelectItem key={s} value={s}>
+                            {s}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>PIN Code</Label>
+                    <Input
+                      name="pinCode"
+                      placeholder="6-digit PIN"
+                      inputMode="numeric"
+                      pattern="\\d*"
+                      value={form.pinCode}
+                      onChange={handleChange}
+                    />
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label className="text-[var(--muted-foreground)]">
+                      Board Affiliated (Optional)
+                    </Label>
+                    <Select
+                      value={form.boardAffiliated}
+                      onValueChange={(v) => handleSelect("boardAffiliated", v)}
+                    >
+                      <SelectTrigger className="bg-[var(--soft-engineering)] text-[var(--foreground)] border-[var(--border)]">
+                        <SelectValue placeholder="Select board" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {[
+                          "CBSE",
+                          "ICSE",
+                          "State Board",
+                          "IGCSE",
+                          "IB",
+                          "Other",
+                        ].map((b) => (
+                          <SelectItem key={b} value={b}>
+                            {b}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-[var(--muted-foreground)]">
+                      School Website (Optional)
+                    </Label>
+                    <Input
+                      name="schoolWebsite"
+                      placeholder="https://example.edu"
+                      type="url"
+                      value={form.schoolWebsite}
+                      onChange={handleChange}
+                    />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Contacts</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label className="text-[var(--muted-foreground)]">
+                      Principal Name (Optional)
+                    </Label>
+                    <Input
+                      name="principalName"
+                      placeholder="e.g. Dr. A. Sharma"
+                      value={form.principalName}
+                      onChange={handleChange}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-[var(--muted-foreground)]">
+                      Principal Contact (Optional)
+                    </Label>
+                    <Input
+                      name="principalContact"
+                      placeholder="e.g. +91 98xxxxxxx"
+                      type="tel"
+                      value={form.principalContact}
+                      onChange={handleChange}
+                      className={principalPhoneError ? "border-red-500" : ""}
+                    />
+                    {principalPhoneError && (
+                      <p className="text-sm text-[var(--destructive)]">
+                        {principalPhoneError}
+                      </p>
+                    )}
+                    {!principalPhoneError && form.principalContact && (
+                      <p className="text-xs text-green-600">
+                        ✓ Valid phone number
+                      </p>
+                    )}
+                  </div>
+                </div>
+                <div className="space-y-2">
+                    <Label className="text-[var(--muted-foreground)]">
+                    Principal Email (Optional)
+                  </Label>
+                  <Input
+                    name="principalEmail"
+                    placeholder="principal@school.edu"
+                    type="email"
+                    value={form.principalEmail}
                     onChange={handleChange}
                   />
                 </div>
                 <div className="space-y-2">
-                  {dateField("Action Due date", "actionDueDate")}
+                    <Label className="text-[var(--muted-foreground)]">
+                    School Email (Optional)
+                  </Label>
+                  <Input
+                    name="schoolEmail"
+                    placeholder="info@school.edu"
+                    type="email"
+                    value={form.schoolEmail}
+                    onChange={handleChange}
+                  />
                 </div>
-                <div className="space-y-2 md:col-span-3">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label className="text-[var(--muted-foreground)]">
+                      Key Person Name (Optional)
+                    </Label>
+                    <Input
+                      name="keyPersonName"
+                      placeholder="e.g. Ms. K. Rao"
+                      value={form.keyPersonName}
+                      onChange={handleChange}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-[var(--muted-foreground)]">
+                      Key Person Contact (Optional)
+                    </Label>
+                    <Input
+                      name="keyPersonContact"
+                      placeholder="e.g. +91 9xxxxxxxxx"
+                      type="tel"
+                      value={form.keyPersonContact}
+                      onChange={handleChange}
+                      className={keyPersonPhoneError ? "border-red-500" : ""}
+                    />
+                    {keyPersonPhoneError && (
+                      <p className="text-sm text-[var(--destructive)]">
+                        {keyPersonPhoneError}
+                      </p>
+                    )}
+                    {!keyPersonPhoneError && form.keyPersonContact && (
+                      <p className="text-xs text-green-600">
+                        ✓ Valid phone number
+                      </p>
+                    )}
+                  </div>
+                </div>
+                <div className="space-y-2">
+                    <Label className="text-[var(--muted-foreground)]">
+                    Key Person Email (Optional)
+                  </Label>
+                  <Input
+                    name="keyPersonEmail"
+                    placeholder="key.person@school.edu"
+                    type="email"
+                    value={form.keyPersonEmail}
+                    onChange={handleChange}
+                  />
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Qualification</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label className="text-[var(--muted-foreground)]">
+                      Robotics / ATL Present? (Optional)
+                    </Label>
+                    <Select
+                      value={form.roboticsAtlPresent}
+                      onValueChange={(v) =>
+                        handleSelect("roboticsAtlPresent", v)
+                      }
+                    >
+                      <SelectTrigger className="bg-[var(--soft-engineering)] text-[var(--foreground)] border-[var(--border)]">
+                        <SelectValue placeholder="Select" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Yes">Yes</SelectItem>
+                        <SelectItem value="No">No</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-[var(--muted-foreground)]">
+                      Qualified? (Optional)
+                    </Label>
+                    <Select
+                      value={form.qualified}
+                      onValueChange={(v) => handleSelect("qualified", v)}
+                    >
+                      <SelectTrigger className="bg-[var(--soft-engineering)] text-[var(--foreground)] border-[var(--border)]">
+                        <SelectValue placeholder="Qualified" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="No">No</SelectItem>
+                        <SelectItem value="Yes">Yes</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label className="text-[var(--muted-foreground)]">
+                      No of Students (Optional)
+                    </Label>
+                    <Input
+                      name="noOfStudents"
+                      placeholder="e.g. 500"
+                      type="number"
+                      min="0"
+                      value={form.noOfStudents}
+                      onChange={handleChange}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-[var(--muted-foreground)]">
+                      Avg Fees Per Year (Optional)
+                    </Label>
+                    <Input
+                      name="avgFeesPerYear"
+                      placeholder="e.g. 45000"
+                      type="number"
+                      min="0"
+                      value={form.avgFeesPerYear}
+                      onChange={handleChange}
+                    />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Right Column */}
+          <div className="space-y-4">
+            <Card>
+              <CardHeader>
+                <CardTitle>Assignment</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label>TPA Sales POC (Executive)</Label>
+                    <Select
+                      value={form.salesExecutive}
+                      onValueChange={(v) => handleSelect("salesExecutive", v)}
+                    >
+                      <SelectTrigger className="bg-[var(--soft-engineering)] text-[var(--foreground)] border-[var(--border)]">
+                        <SelectValue placeholder="Select Executive" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="none">None</SelectItem>
+                        {executives.map((e) => (
+                          <SelectItem key={e._id} value={e._id}>
+                            {e.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>TPA Sales POC (Manager)</Label>
+                    <Select
+                      value={form.salesManager}
+                      onValueChange={(v) => handleSelect("salesManager", v)}
+                    >
+                      <SelectTrigger className="bg-[var(--soft-engineering)] text-[var(--foreground)] border-[var(--border)]">
+                        <SelectValue placeholder="Select Manager" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="none">None</SelectItem>
+                        {managers.map((m) => (
+                          <SelectItem key={m._id} value={m._id}>
+                            {m.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Status</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label>Lead Source</Label>
+                    <Select
+                      value={form.leadSource}
+                      onValueChange={(v) => handleSelect("leadSource", v)}
+                    >
+                      <SelectTrigger className="bg-[var(--soft-engineering)] text-[var(--foreground)] border-[var(--border)]">
+                        <SelectValue placeholder="Lead Source" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Internal">Internal</SelectItem>
+                        <SelectItem value="Channel Partner">
+                          Channel Partner
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Phase</Label>
+                    <Select
+                      value={form.phase}
+                      onValueChange={(v) => handleSelect("phase", v)}
+                    >
+                      <SelectTrigger className="bg-[var(--soft-engineering)] text-[var(--foreground)] border-[var(--border)]">
+                        <SelectValue placeholder="Phase" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {[
+                          "Lead",
+                          "Visit to be scheduled",
+                          "Visited",
+                          "Demo / PTM etc to be Scheduled",
+                          "Proposal to be shared",
+                          "Proposal Shared",
+                          "Commercial Negotiations underway",
+                          "Decision Awaited",
+                          "LOI Awaited",
+                          "LOI Received",
+                          "Contract to be shared",
+                          "Contract Shared",
+                          "Contract Review underway",
+                          "Contract Signed",
+                          "Deal Lost",
+                          "On Hold",
+                          "Pursue next AY",
+                          "Invoiced",
+                          "Payment Awaited",
+                          "Payment Received",
+                          "Kits to be Shipped",
+                          "Kits Shipped",
+                          "Training to be Scheduled",
+                          "Training Scheduled",
+                          "Training Completed",
+                          "Kickoff to be scheduded",
+                          "Kickoff Complete",
+                        ].map((p) => (
+                          <SelectItem key={p} value={p}>
+                            {p}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label className="text-[var(--muted-foreground)]">
+                      Pilot / Full Program (Optional)
+                    </Label>
+                    <Select
+                      value={form.programType}
+                      onValueChange={(v) => handleSelect("programType", v)}
+                    >
+                      <SelectTrigger className="bg-[var(--soft-engineering)] text-[var(--foreground)] border-[var(--border)]">
+                        <SelectValue placeholder="Program Type" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Pilot">Pilot</SelectItem>
+                        <SelectItem value="Full">Full</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-[var(--muted-foreground)]">
+                      Delivery Model (Optional)
+                    </Label>
+                    <Select
+                      value={form.deliveryModel}
+                      onValueChange={(v) => handleSelect("deliveryModel", v)}
+                    >
+                      <SelectTrigger className="bg-[var(--soft-engineering)] text-[var(--foreground)] border-[var(--border)]">
+                        <SelectValue placeholder="Delivery Model" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {["TPA Managed", "School Managed", "Hybrid"].map(
+                          (d) => (
+                            <SelectItem key={d} value={d}>
+                              {d}
+                            </SelectItem>
+                          )
+                        )}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label className="text-gray-500">
+                      Quality Of Lead (Optional)
+                    </Label>
+                    <Select
+                      value={form.qualityOfLead}
+                      onValueChange={(v) => handleSelect("qualityOfLead", v)}
+                    >
+                      <SelectTrigger className="bg-[var(--soft-engineering)] text-[var(--foreground)] border-[var(--border)]">
+                        <SelectValue placeholder="Quality" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Cold">Cold</SelectItem>
+                        <SelectItem value="Warm">Warm</SelectItem>
+                        <SelectItem value="Hot">Hot</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Sales Cycle</Label>
+                    <Select
+                      value={form.salesCycle}
+                      onValueChange={(v) => handleSelect("salesCycle", v)}
+                    >
+                      <SelectTrigger className="bg-[var(--soft-engineering)] text-[var(--foreground)] border-[var(--border)]">
+                        <SelectValue placeholder="Sales Cycle" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {["2025-2026", "2026-2027"].map((s) => (
+                          <SelectItem key={s} value={s}>
+                            {s}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label className="text-[var(--muted-foreground)]">
+                      Sales Start Date (Optional)
+                    </Label>
+                    {dateField("Sales Start Date", "salesStartDate")}
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-[var(--muted-foreground)]">
+                      Sales Closed Date (Optional)
+                    </Label>
+                    {dateField("Sales Closed Date", "salesClosedDate")}
+                  </div>
+                </div>
+                <div className="space-y-2">
+                    <Label className="text-[var(--muted-foreground)]">
+                    Annual Contract Value (INR) (Optional)
+                  </Label>
+                  <Input
+                    name="annualContractValue"
+                    placeholder="e.g. 250000"
+                    type="number"
+                    min="0"
+                    value={form.annualContractValue}
+                    onChange={handleChange}
+                  />
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Notes & Actions</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <Label>Lead Remarks</Label>
+                  <Textarea
+                    name="leadRemarks"
+                    placeholder="Key notes about this lead..."
+                    value={form.leadRemarks}
+                    onChange={handleChange}
+                    rows={3}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-[var(--muted-foreground)]">
+                    Remarks - From Team (Optional)
+                  </Label>
+                  <Textarea
+                    name="teamRemarks"
+                    placeholder="e.g. Follow-up notes, meeting minutes..."
+                    value={form.teamRemarks}
+                    onChange={handleChange}
+                    rows={3}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <div className="space-y-2 col-span-2">
+                    <Label>Action needed - From Team</Label>
+                    <Input
+                      name="actionNeeded"
+                      placeholder="e.g. Call Principal for demo scheduling"
+                      value={form.actionNeeded}
+                      onChange={handleChange}
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label className="text-[var(--muted-foreground)]">Action Due date</Label>
+                    {dateField("Action Due date", "actionDueDate")}
+                  </div>
+                </div>
+                <div className="space-y-2">
                   <Label>Action On</Label>
                   <Select
                     value={form.actionOn || "none"}
                     onValueChange={(v) => handleSelect("actionOn", v)}
                   >
-                    <SelectTrigger>
+                    <SelectTrigger className="bg-[var(--soft-engineering)] text-[var(--foreground)] border-[var(--border)]">
                       <SelectValue placeholder="Select Sales Manager or Executive" />
                     </SelectTrigger>
                     <SelectContent>
@@ -794,23 +912,12 @@ export default function LeadPageForm({
                     </SelectContent>
                   </Select>
                 </div>
-                <div className="space-y-2 md:col-span-3">
-                  <Label className="text-gray-500">Annual Contract Value (INR) (Optional)</Label>
-                  <Input
-                    name="annualContractValue"
-                    placeholder="e.g. 250000"
-                    type="number"
-                    min="0"
-                    value={form.annualContractValue}
-                    onChange={handleChange}
-                  />
-                </div>
-              </div>
-            </div>
+              </CardContent>
+            </Card>
           </div>
         </div>
 
-        <div className="flex items-center justify-end gap-3">
+        <div className="flex items-center justify-end gap-3 pt-2">
           <Button variant="outline" onClick={onCancel}>
             Cancel
           </Button>
