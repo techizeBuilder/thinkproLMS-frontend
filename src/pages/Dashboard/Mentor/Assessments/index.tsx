@@ -58,6 +58,12 @@ export default function MentorAssessmentsPage() {
     }
   };
 
+  const handleCreateNewAssessment = () => {
+    // Ensure no stale duplication payload affects a fresh create
+    sessionStorage.removeItem('duplicateAssessmentData');
+    navigate("/mentor/assessments/create");
+  };
+
   const handleDeleteAssessment = async (id: string) => {
     if (!confirm("Are you sure you want to delete this assessment?")) return;
 
@@ -197,7 +203,7 @@ export default function MentorAssessmentsPage() {
           <h1 className="text-2xl md:text-3xl font-bold">Assessments</h1>
           <p className="text-sm md:text-base text-gray-600">Manage assessments and track student progress</p>
         </div>
-        <Button onClick={() => navigate("/mentor/assessments/create")} className="text-xs md:text-sm">
+        <Button onClick={handleCreateNewAssessment} className="text-xs md:text-sm">
           <Plus className="h-3 w-3 md:h-4 md:w-4 mr-1 md:mr-2" />
           Create
         </Button>
@@ -231,7 +237,7 @@ export default function MentorAssessmentsPage() {
                 : `No "${statusFilter}" assessments`
               }
             </p>
-            <Button onClick={() => navigate("/mentor/assessments/create")} className="text-xs md:text-sm">
+            <Button onClick={handleCreateNewAssessment} className="text-xs md:text-sm">
               <Plus className="h-3 w-3 md:h-4 md:w-4 mr-1 md:mr-2" />
               Create Assessment
             </Button>

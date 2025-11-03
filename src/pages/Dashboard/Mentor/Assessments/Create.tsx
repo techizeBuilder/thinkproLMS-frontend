@@ -170,6 +170,18 @@ export default function CreateAssessmentPage() {
           setDuplicateQuestions(data.questions);
         }
         
+        // Ensure question list loads for the pre-selected grade
+        if (data.grade) {
+          setQuestionFilters(prev => ({
+            ...prev,
+            grade: data.grade.toString(),
+          }));
+        }
+
+        // Clear the duplication payload immediately after consuming it
+        // so a fresh "Create" visit does not auto-fill unintentionally
+        sessionStorage.removeItem('duplicateAssessmentData');
+
         toast.success("Assessment data loaded for duplication");
       } catch (error) {
         console.error("Error parsing duplicate data:", error);
