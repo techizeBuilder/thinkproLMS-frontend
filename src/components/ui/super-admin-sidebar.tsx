@@ -48,11 +48,13 @@ export function SuperAdminSidebar({ className }: SuperAdminSidebarProps) {
     <Sidebar className={cn("h-screen", className)}>
       <SidebarHeader>
         <div className="flex items-center gap-2">
-          <img
-            src="/fancy-logo.jpg"
-            alt="ThinkPro Logo"
-            className="h-8 w-8 object-contain"
-          />
+          {!isCollapsed && (
+            <img
+              src="/fancy-logo.jpg"
+              alt="ThinkPro Logo"
+              className="h-8 w-8 object-contain"
+            />
+          )}
           <SidebarTitle>ThinkPro LMS</SidebarTitle>
         </div>
         <SidebarToggle />
@@ -193,13 +195,13 @@ export function SuperAdminSidebar({ className }: SuperAdminSidebarProps) {
       </SidebarContent>
 
       <SidebarFooter>
-        <div className="space-y-1">
+        <div className="flex flex-col gap-1">
           {!isCollapsed ? (
             <>
               <Link to="/crm/superadmin">
                 <Button
                   variant="ghost"
-                  className="w-full justify-start text-sm bg-[#333A47] hover:bg-[#20252d]"
+                  className="w-full justify-start text-sm bg-[#5a6576] hover:bg-[#3a414c]"
                 >
                   <Building2 className="mr-3 h-4 w-4 text-white" />
                   <span className="text-white">Enter CRM</span>
@@ -207,7 +209,7 @@ export function SuperAdminSidebar({ className }: SuperAdminSidebarProps) {
               </Link>
               <LogoutButton
                 variant="ghost"
-                className="w-full justify-start text-sm"
+                className="w-full justify-start text-[var(--sidebar-text-muted)] hover:text-[var(--sidebar-foreground)] hover:bg-[var(--sidebar-hover-bg)]"
                 isCollapsed={false}
               />
             </>
@@ -217,7 +219,7 @@ export function SuperAdminSidebar({ className }: SuperAdminSidebarProps) {
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="w-full bg-blue-400"
+                  className="w-full bg-[#5a6576] hover:bg-[#3a414c]"
                 >
                   <Building2 className="h-4 w-4 text-white" />
                   <span className="sr-only text-white">Enter CRM</span>
@@ -226,7 +228,7 @@ export function SuperAdminSidebar({ className }: SuperAdminSidebarProps) {
               <LogoutButton
                 variant="ghost"
                 size="icon"
-                className="w-full"
+                className="w-full justify-start text-[var(--sidebar-text-muted)] hover:text-[var(--sidebar-foreground)] hover:bg-[var(--sidebar-hover-bg)]"
                 isCollapsed={true}
               />
             </>

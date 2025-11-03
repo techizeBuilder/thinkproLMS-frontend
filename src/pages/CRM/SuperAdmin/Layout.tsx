@@ -16,6 +16,7 @@ import { Link } from "react-router-dom";
 import { LogoutButton } from "@/components/ui/logout-button";
 import { Badge } from "@/components/ui/badge";
 import { useCRMNotifications } from "@/hooks/useCRMNotifications";
+import { cn } from "@/lib/utils";
 
 interface CRMSuperAdminLayoutProps {
   children: React.ReactNode;
@@ -32,11 +33,13 @@ export default function CRMSuperAdminLayout({
       <Sidebar className="h-screen">
         <SidebarHeader>
           <div className="flex items-center gap-2">
-            <img
-              src="/fancy-logo.jpg"
-              alt="ThinkPro Logo"
-              className="h-8 w-8 object-contain"
-            />
+            {!isCollapsed && (
+              <img
+                src="/fancy-logo.jpg"
+                alt="ThinkPro Logo"
+                className="h-8 w-8 object-contain"
+              />
+            )}
             <SidebarTitle>CRM Portal</SidebarTitle>
           </div>
           <SidebarToggle />
@@ -100,7 +103,10 @@ export default function CRMSuperAdminLayout({
             <LogoutButton
               variant="ghost"
               size={isCollapsed ? "icon" : "default"}
-              className="w-full justify-start"
+              className={cn(
+                "w-full justify-start text-[var(--sidebar-text-muted)] hover:text-[var(--sidebar-foreground)] hover:bg-[var(--sidebar-hover-bg)]",
+                isCollapsed && "justify-center"
+              )}
               isCollapsed={isCollapsed}
             />
           </div>

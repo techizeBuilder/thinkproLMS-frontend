@@ -14,6 +14,7 @@ import { LogoutButton } from "@/components/ui/logout-button";
 import { NotebookPen, Table, Bell } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { useCRMNotifications } from "@/hooks/useCRMNotifications";
+import { cn } from "@/lib/utils";
 
 interface CRMSalesExecutiveLayoutProps {
   children?: React.ReactNode;
@@ -29,11 +30,13 @@ export default function CRMSalesExecutiveLayout({
       <Sidebar className="h-screen">
         <SidebarHeader>
           <div className="flex items-center gap-2">
-            <img
-              src="/fancy-logo.jpg"
-              alt="ThinkPro Logo"
-              className="h-8 w-8 object-contain"
-            />
+            {!isCollapsed && (
+              <img
+                src="/fancy-logo.jpg"
+                alt="ThinkPro Logo"
+                className="h-8 w-8 object-contain"
+              />
+            )}
             <SidebarTitle>CRM Portal</SidebarTitle>
           </div>
           <SidebarToggle />
@@ -47,10 +50,7 @@ export default function CRMSalesExecutiveLayout({
               >
                 Leads
               </SidebarNavItem>
-              <SidebarNavItem
-                to="/crm/sales-executive/summary"
-                icon={Table}
-              >
+              <SidebarNavItem to="/crm/sales-executive/summary" icon={Table}>
                 Summary
               </SidebarNavItem>
               <SidebarNavItem
@@ -60,7 +60,10 @@ export default function CRMSalesExecutiveLayout({
                 <div className="flex gap-2 items-center justify-between w-full">
                   <span>Notifications</span>
                   {unreadCount > 0 && !isCollapsed && (
-                    <Badge variant="destructive" className="ml-auto text-xs px-1.5 py-0 h-5">
+                    <Badge
+                      variant="destructive"
+                      className="ml-auto text-xs px-1.5 py-0 h-5"
+                    >
                       {unreadCount}
                     </Badge>
                   )}
@@ -73,7 +76,10 @@ export default function CRMSalesExecutiveLayout({
           <LogoutButton
             variant="ghost"
             size={isCollapsed ? "icon" : "default"}
-            className="w-full justify-start text-[var(--sidebar-text-muted)] hover:text-[var(--sidebar-foreground)] hover:bg-[var(--sidebar-hover-bg)]"
+            className={cn(
+              "w-full justify-start text-[var(--sidebar-text-muted)] hover:text-[var(--sidebar-foreground)] hover:bg-[var(--sidebar-hover-bg)]",
+              isCollapsed && "justify-center"
+            )}
             isCollapsed={isCollapsed}
           />
         </SidebarFooter>
@@ -87,7 +93,9 @@ export default function CRMSalesExecutiveLayout({
               <div className="lg:hidden">
                 <SidebarToggle className="text-gray-700 hover:bg-gray-100" />
               </div>
-              <h1 className="text-xl sm:text-2xl font-semibold text-gray-900">CRM Portal</h1>
+              <h1 className="text-xl sm:text-2xl font-semibold text-gray-900">
+                CRM Portal
+              </h1>
             </div>
           </div>
         </header>

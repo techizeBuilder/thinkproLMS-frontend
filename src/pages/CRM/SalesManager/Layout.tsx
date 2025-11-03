@@ -14,6 +14,7 @@ import { Users, NotebookPen, Table, Bell } from "lucide-react";
 import { LogoutButton } from "@/components/ui/logout-button";
 import { Badge } from "@/components/ui/badge";
 import { useCRMNotifications } from "@/hooks/useCRMNotifications";
+import { cn } from "@/lib/utils";
 
 interface CRMSalesManagerLayoutProps {
   children: React.ReactNode;
@@ -30,11 +31,13 @@ export default function CRMSalesManagerLayout({
       <Sidebar className="h-screen">
         <SidebarHeader>
           <div className="flex items-center gap-2">
-            <img
-              src="/fancy-logo.jpg"
-              alt="ThinkPro Logo"
-              className="h-8 w-8 object-contain"
-            />
+            {!isCollapsed && (
+              <img
+                src="/fancy-logo.jpg"
+                alt="ThinkPro Logo"
+                className="h-8 w-8 object-contain"
+              />
+            )}
             <SidebarTitle>CRM Portal</SidebarTitle>
           </div>
           <SidebarToggle />
@@ -76,7 +79,10 @@ export default function CRMSalesManagerLayout({
           <LogoutButton
             variant="ghost"
             size={isCollapsed ? "icon" : "default"}
-            className="w-full justify-start"
+            className={cn(
+              "w-full justify-start text-[var(--sidebar-text-muted)] hover:text-[var(--sidebar-foreground)] hover:bg-[var(--sidebar-hover-bg)]",
+              isCollapsed && "justify-center"
+            )}
             isCollapsed={isCollapsed}
           />
         </SidebarFooter>
@@ -90,7 +96,9 @@ export default function CRMSalesManagerLayout({
               <div className="lg:hidden">
                 <SidebarToggle className="text-gray-700 hover:bg-gray-100" />
               </div>
-              <h1 className="text-xl sm:text-2xl font-semibold text-gray-900">CRM Portal</h1>
+              <h1 className="text-xl sm:text-2xl font-semibold text-gray-900">
+                CRM Portal
+              </h1>
             </div>
           </div>
         </header>
