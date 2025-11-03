@@ -82,7 +82,20 @@ export default function CRMSalesManagerLayout({
         </SidebarFooter>
       </Sidebar>
 
-      <main className="flex-1 overflow-auto bg-gray-50">{children}</main>
+      <div className="flex-1 flex flex-col overflow-hidden bg-gray-50">
+        <header className="bg-white border-b border-gray-200 px-4 sm:px-6 py-3 sm:py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              {/* Mobile menu toggle */}
+              <div className="lg:hidden">
+                <SidebarToggle className="text-gray-700 hover:bg-gray-100" />
+              </div>
+              <h1 className="text-xl sm:text-2xl font-semibold text-gray-900">CRM Portal</h1>
+            </div>
+          </div>
+        </header>
+        <main className="flex-1 overflow-auto">{children}</main>
+      </div>
     </div>
   );
 }

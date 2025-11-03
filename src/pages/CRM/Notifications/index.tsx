@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import {
   crmNotificationService,
@@ -10,6 +10,70 @@ import { useCRMNotifications } from "@/hooks/useCRMNotifications";
 import { Bell, Check, CheckCheck, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+
+function NotificationMessage({
+  message,
+  isRead,
+  isAuthorYou,
+}: {
+  message: string;
+  isRead: boolean;
+  isAuthorYou: boolean;
+}) {
+  const textRef = useRef<HTMLParagraphElement | null>(null);
+  const [isExpanded, setIsExpanded] = useState(false);
+  const [showToggle, setShowToggle] = useState(false);
+
+  useEffect(() => {
+    const el = textRef.current;
+    if (!el) return;
+
+    const checkOverflow = () => {
+      if (!el) return;
+      // When collapsed, detect if content exceeds the 3-line clamp
+      if (!isExpanded) {
+        setShowToggle(el.scrollHeight > el.clientHeight + 1);
+      } else {
+        // When expanded, always show the toggle to allow collapsing
+        setShowToggle(true);
+      }
+    };
+
+    // Use rAF to ensure styles are applied before measuring
+    const id = requestAnimationFrame(checkOverflow);
+    window.addEventListener("resize", checkOverflow);
+    return () => {
+      cancelAnimationFrame(id);
+      window.removeEventListener("resize", checkOverflow);
+    };
+  }, [message, isExpanded]);
+
+  return (
+    <div>
+      <p
+        ref={textRef}
+        className={cn(
+          "text-sm",
+          !isRead && "font-medium text-gray-900",
+          isRead && "text-gray-700",
+          !isExpanded && "line-clamp-3"
+        )}
+      >
+        <b>{isAuthorYou ? "You" : null} </b>
+        {message}
+      </p>
+      {showToggle && (
+        <button
+          type="button"
+          onClick={() => setIsExpanded((v) => !v)}
+          className="mt-1 text-xs text-blue-600 hover:underline"
+        >
+          {isExpanded ? "Show less" : "Read more"}
+        </button>
+      )}
+    </div>
+  );
+}
 
 export default function CRMNotificationsPage() {
   const { user } = useAuth();
@@ -183,18 +247,11 @@ export default function CRMNotificationsPage() {
               )}
             >
               <div className="flex-1 min-w-0">
-                <p
-                  className={cn(
-                    "text-sm",
-                    !notification.isRead && "font-medium text-gray-900",
-                    notification.isRead && "text-gray-700"
-                  )}
-                >
-                  <b>
-                    {notification.createdBy._id === user?.id ? "You" : null}{" "}
-                  </b>{" "}
-                  {notification.message}
-                </p>
+                <NotificationMessage
+                  message={notification.message}
+                  isRead={!!notification.isRead}
+                  isAuthorYou={notification.createdBy._id === user?.id}
+                />
                 <div className="flex items-center gap-2 mt-1">
                   <span className="text-xs text-gray-500">
                     {new Date(notification.createdAt).toLocaleString("en-GB", {
