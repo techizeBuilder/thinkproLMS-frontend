@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
   Select,
@@ -20,6 +19,7 @@ import {
 import { Search, User, GraduationCap, MapPin } from "lucide-react";
 import { studentService } from "@/api/studentService";
 import { mentorService } from "@/api/mentorService";
+import { schoolService } from "@/api/schoolService";
 import ProfilePictureDisplay from "@/components/ProfilePictureDisplay";
 
 interface School {
@@ -78,7 +78,9 @@ interface Mentor {
 
 export default function MentorStudentsPage() {
   const [students, setStudents] = useState<Student[]>([]);
-  const [filteredStudents, setFilteredStudents] = useState<Student[]>([]);
+  const [totalStudents, setTotalStudents] = useState(0);
+  const [page, setPage] = useState(1);
+  const [limit] = useState(20);
   const [mentor, setMentor] = useState<Mentor | null>(null);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
@@ -96,33 +98,56 @@ export default function MentorStudentsPage() {
     if (mentor && mentor.assignedSchools && mentor.assignedSchools.length > 0) {
       fetchStudents();
     }
-  }, [mentor]);
+  }, [mentor, selectedSchool, selectedGrade, selectedSection, page]);
+
+  // Removed client-side filtering; refetching from server on changes
 
   useEffect(() => {
-    filterStudents();
-  }, [students, searchTerm, selectedSchool, selectedGrade, selectedSection]);
+    const fetchServiceDetails = async () => {
+      if (!mentor?.assignedSchools || mentor.assignedSchools.length === 0) return;
 
-  useEffect(() => {
-    // Extract grades and sections from school service details
-    if (mentor?.assignedSchools && mentor.assignedSchools.length > 0) {
-      // Use the first school for now (can be enhanced to handle multiple schools)
-      const firstSchool = mentor.assignedSchools[0];
-      if (firstSchool?.serviceDetails?.grades) {
-        const gradesFromService = firstSchool.serviceDetails.grades;
-        
-        // Extract unique grades
-        const grades = gradesFromService.map(g => `Grade ${g.grade}`).sort();
-        setAvailableGrades(grades);
-        
-        // Extract all unique sections from all grades
-        const allSections = new Set<string>();
-        gradesFromService.forEach(g => {
-          g.sections?.forEach(section => allSections.add(section));
-        });
-        setAvailableSections(Array.from(allSections).sort());
+      if (selectedSchool === "all") {
+        // Show generic grades 1-10 and hide sections
+        setAvailableGrades(Array.from({ length: 10 }, (_, i) => `Grade ${i + 1}`));
+        setAvailableSections([]);
+        return;
       }
-    }
-  }, [mentor]);
+
+      const activeSchoolId = selectedSchool;
+
+      try {
+        const resp = await schoolService.getServiceDetails(activeSchoolId);
+        if (resp.success) {
+          const gradesFromService = resp.data.grades || [];
+          const grades = gradesFromService
+            .map(g => `Grade ${g.grade}`)
+            .sort();
+          setAvailableGrades(grades);
+
+          // If a grade is selected, restrict sections to that grade
+          if (selectedGrade !== "all") {
+            const gNum = parseInt(selectedGrade.replace("Grade ", ""));
+            const sel = gradesFromService.find(g => g.grade === gNum);
+            setAvailableSections((sel?.sections || []).slice().sort());
+          } else {
+            const allSections = new Set<string>();
+            gradesFromService.forEach(g => {
+              (g.sections || []).forEach(section => allSections.add(section));
+            });
+            setAvailableSections(Array.from(allSections).sort());
+          }
+        } else {
+          setAvailableGrades([]);
+          setAvailableSections([]);
+        }
+      } catch (e) {
+        setAvailableGrades([]);
+        setAvailableSections([]);
+      }
+    };
+
+    fetchServiceDetails();
+  }, [mentor, selectedSchool, selectedGrade]);
 
   const fetchMentorProfile = async () => {
     try {
@@ -144,49 +169,24 @@ export default function MentorStudentsPage() {
     }
 
     try {
-      // Fetch students - backend will automatically filter by mentor's assigned schools
-      const response = await studentService.getAll();
+      const response = await studentService.getAll({
+        schoolId: selectedSchool !== "all" ? selectedSchool : undefined,
+        grade: selectedGrade !== "all" ? selectedGrade.replace("Grade ", "") : undefined,
+        section: selectedSection !== "all" ? selectedSection : undefined,
+        page,
+        limit,
+      });
       if (response.success) {
         setStudents(response.data);
+        // @ts-ignore - pagination added on backend
+        const p = (response as any).pagination;
+        setTotalStudents(p?.total || response.data.length);
       }
     } catch (error) {
       console.error("Error fetching students:", error);
     } finally {
       setLoading(false);
     }
-  };
-
-  const filterStudents = () => {
-    let filtered = students;
-
-    // Filter by school
-    if (selectedSchool !== "all") {
-      filtered = filtered.filter((student) => student.school._id === selectedSchool);
-    }
-
-    // Filter by search term
-    if (searchTerm) {
-      filtered = filtered.filter(
-        (student) =>
-          student.user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          student.user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          student.studentId.toLowerCase().includes(searchTerm.toLowerCase())
-      );
-    }
-
-    // Filter by grade
-    if (selectedGrade !== "all") {
-      // Extract number from "Grade X" format
-      const gradeNumber = parseInt(selectedGrade.replace("Grade ", ""));
-      filtered = filtered.filter((student) => student.grade === gradeNumber);
-    }
-
-    // Filter by section
-    if (selectedSection !== "all") {
-      filtered = filtered.filter((student) => student.section === selectedSection);
-    }
-
-    setFilteredStudents(filtered);
   };
 
   if (loading) {
@@ -221,22 +221,16 @@ export default function MentorStudentsPage() {
   }
 
   return (
-    <div className="p-4 md:p-6 space-y-4 md:space-y-6">
+    <div className="p-4 md:p-6 space-y-2">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl md:text-3xl font-bold">My Students</h1>
-          <p className="text-sm md:text-base text-muted-foreground">
-            {selectedSchool === "all" 
-              ? `View students from all your assigned schools (${mentor.assignedSchools.length} schools)`
-              : `View students from ${mentor.assignedSchools.find(s => s._id === selectedSchool)?.name || 'selected school'}`
-            }
-          </p>
         </div>
       </div>
 
       {/* School Info - inline, no card */}
-      <div className="space-y-2">
+      {/* <div className="space-y-2">
         <div className="flex items-center gap-2 text-sm md:text-base text-muted-foreground">
           <MapPin className="h-4 w-4 md:h-5 md:w-5 text-primary shrink-0" />
           <span className="font-medium text-foreground">Assigned Schools ({mentor.assignedSchools.length})</span>
@@ -252,7 +246,7 @@ export default function MentorStudentsPage() {
             </div>
           ))}
         </div>
-      </div>
+      </div> */}
 
       {/* Filters */}
       <div className="flex flex-row flex-wrap items-center gap-3 md:gap-4">
@@ -268,7 +262,7 @@ export default function MentorStudentsPage() {
           </div>
         </div>
 
-        <Select value={selectedSchool} onValueChange={setSelectedSchool}>
+        <Select value={selectedSchool} onValueChange={(v) => { setSelectedSchool(v); setSelectedGrade("all"); setSelectedSection("all"); setPage(1); }}>
           <SelectTrigger className="w-[180px] text-sm">
             <SelectValue placeholder="School" />
           </SelectTrigger>
@@ -283,7 +277,7 @@ export default function MentorStudentsPage() {
           </SelectContent>
         </Select>
 
-        <Select value={selectedGrade} onValueChange={setSelectedGrade}>
+        <Select value={selectedGrade} onValueChange={(v) => { setSelectedGrade(v); setSelectedSection("all"); setPage(1); }}>
           <SelectTrigger className="w-[130px] text-sm">
             <SelectValue placeholder="Grade" />
           </SelectTrigger>
@@ -297,7 +291,8 @@ export default function MentorStudentsPage() {
           </SelectContent>
         </Select>
 
-        <Select value={selectedSection} onValueChange={setSelectedSection}>
+        {selectedSchool !== "all" && (
+        <Select value={selectedSection} onValueChange={(v) => { setSelectedSection(v); setPage(1); }}>
           <SelectTrigger className="w-[130px] text-sm">
             <SelectValue placeholder="Section" />
           </SelectTrigger>
@@ -310,6 +305,7 @@ export default function MentorStudentsPage() {
             ))}
           </SelectContent>
         </Select>
+        )}
 
         <button
           onClick={() => {
@@ -317,6 +313,7 @@ export default function MentorStudentsPage() {
             setSelectedGrade("all");
             setSelectedSection("all");
             setSearchTerm("");
+            setPage(1);
           }}
           className="px-3 py-2 text-sm border rounded-md hover:bg-muted/50 transition-colors"
         >
@@ -341,94 +338,114 @@ export default function MentorStudentsPage() {
           </div>
         </div>
         <div className="text-sm text-muted-foreground">
-          {filteredStudents.length} of {students.length} students
+          Showing {students.length} of {totalStudents} students
         </div>
       </div>
 
       {/* Students Table */}
-      <Card>
-        <CardContent className="p-0">
-          {filteredStudents.length === 0 ? (
-            <div className="p-6 md:p-8 text-center">
-              <User className="h-10 w-10 md:h-12 md:w-12 text-muted-foreground mx-auto mb-3 md:mb-4" />
-              <h3 className="text-base md:text-lg font-semibold mb-2">No students found</h3>
-              <p className="text-sm text-muted-foreground">
-                {students.length === 0
-                  ? "No students are enrolled in your assigned schools yet."
-                  : selectedSchool === "all"
-                  ? "No students match your current filters. Try adjusting your search or filter criteria."
-                  : "No students found in the selected school. Try selecting a different school or clear filters to see all students."}
-              </p>
-            </div>
-          ) : (
-            <div className="overflow-x-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="text-xs md:text-sm">Student Name</TableHead>
-                    <TableHead className="text-xs md:text-sm hidden md:table-cell">Student ID</TableHead>
-                    <TableHead className="text-xs md:text-sm hidden lg:table-cell">Email</TableHead>
-                    <TableHead className="text-xs md:text-sm">Grade - Section</TableHead>
-                    <TableHead className="text-xs md:text-sm">Status</TableHead>
-                    <TableHead className="text-xs md:text-sm hidden sm:table-cell">Added Date</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredStudents.map((student) => (
-                    <TableRow key={student._id} className="hover:bg-muted/50">
-                      <TableCell className="font-medium">
-                        <div className="flex items-center gap-2">
-                          <div className="w-7 h-7 md:w-8 md:h-8 shrink-0">
-                            <ProfilePictureDisplay
-                              profilePicture={student.user.profilePicture}
-                              name={student.user.name}
-                              size="sm"
-                            />
-                          </div>
-                          <span className="text-xs md:text-sm truncate max-w-[120px] md:max-w-none">
-                            {student.user.name}
-                          </span>
-                        </div>
-                      </TableCell>
-                      <TableCell className="font-mono text-xs md:text-sm hidden md:table-cell">
-                        {student.studentId}
-                      </TableCell>
-                      <TableCell className="text-xs md:text-sm hidden lg:table-cell truncate max-w-[180px]">
-                        {student.user.email}
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-1">
-                          <GraduationCap className="h-3 w-3 md:h-4 md:w-4 text-muted-foreground shrink-0" />
-                          <span className="text-xs md:text-sm font-medium whitespace-nowrap">
-                            {student.grade}-{student.section || 'N/A'}
-                          </span>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <Badge
-                          variant={
-                            student.user.isVerified ? "default" : "secondary"
-                          }
-                          className="text-xs"
-                        >
-                          {student.user.isVerified ? "Verified" : "Pending"}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="text-xs md:text-sm text-muted-foreground hidden sm:table-cell">
-                        {new Date(student.user.createdAt).toLocaleDateString('en-US', { 
-                          month: 'short', 
-                          day: 'numeric',
-                          year: '2-digit'
-                        })}
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
-          )}
-        </CardContent>
-      </Card>
+      {students.length === 0 ? (
+        <div className="p-6 md:p-8 text-center">
+          <User className="h-10 w-10 md:h-12 md:w-12 text-muted-foreground mx-auto mb-3 md:mb-4" />
+          <h3 className="text-base md:text-lg font-semibold mb-2">No students found</h3>
+          <p className="text-sm text-muted-foreground">
+            {totalStudents === 0
+              ? "No students are enrolled in your assigned schools yet."
+              : selectedSchool === "all"
+              ? "No students match your current filters. Try adjusting your search or filter criteria."
+              : "No students found in the selected school. Try selecting a different school or clear filters to see all students."}
+          </p>
+        </div>
+      ) : (
+        <div className="overflow-x-auto">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="text-xs md:text-sm">Student Name</TableHead>
+                <TableHead className="text-xs md:text-sm hidden md:table-cell">Student ID</TableHead>
+                <TableHead className="text-xs md:text-sm hidden lg:table-cell">Email</TableHead>
+                <TableHead className="text-xs md:text-sm">Grade - Section</TableHead>
+                <TableHead className="text-xs md:text-sm">Status</TableHead>
+                <TableHead className="text-xs md:text-sm hidden sm:table-cell">Added Date</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {students.map((student) => (
+                <TableRow key={student._id} className="hover:bg-muted/50">
+                  <TableCell className="font-medium">
+                    <div className="flex items-center gap-2">
+                      <div className="w-7 h-7 md:w-8 md:h-8 shrink-0">
+                        <ProfilePictureDisplay
+                          profilePicture={student.user.profilePicture}
+                          name={student.user.name}
+                          size="sm"
+                        />
+                      </div>
+                      <span className="text-xs md:text-sm truncate max-w-[120px] md:max-w-none">
+                        {student.user.name}
+                      </span>
+                    </div>
+                  </TableCell>
+                  <TableCell className="font-mono text-xs md:text-sm hidden md:table-cell">
+                    {student.studentId}
+                  </TableCell>
+                  <TableCell className="text-xs md:text-sm hidden lg:table-cell truncate max-w-[180px]">
+                    {student.user.email}
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex items-center gap-1">
+                      <GraduationCap className="h-3 w-3 md:h-4 md:w-4 text-muted-foreground shrink-0" />
+                      <span className="text-xs md:text-sm font-medium whitespace-nowrap">
+                        {student.grade}-{student.section || 'N/A'}
+                      </span>
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <Badge
+                      variant={
+                        student.user.isVerified ? "default" : "secondary"
+                      }
+                      className="text-xs"
+                    >
+                      {student.user.isVerified ? "Verified" : "Pending"}
+                    </Badge>
+                  </TableCell>
+                  <TableCell className="text-xs md:text-sm text-muted-foreground hidden sm:table-cell">
+                    {new Date(student.user.createdAt).toLocaleDateString('en-US', { 
+                      month: 'short', 
+                      day: 'numeric',
+                      year: '2-digit'
+                    })}
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
+      )}
+
+      {/* Pagination */}
+      <div className="flex items-center justify-between py-2">
+        <div className="text-sm text-muted-foreground">Page {page}</div>
+        <div className="flex items-center gap-2">
+          <button
+            className="px-3 py-2 text-sm border rounded-md disabled:opacity-50"
+            onClick={() => setPage((p) => Math.max(1, p - 1))}
+            disabled={page <= 1}
+          >
+            Previous
+          </button>
+          <button
+            className="px-3 py-2 text-sm border rounded-md disabled:opacity-50"
+            onClick={() => {
+              const totalPages = Math.max(1, Math.ceil(totalStudents / limit));
+              setPage((p) => Math.min(totalPages, p + 1));
+            }}
+            disabled={students.length < limit}
+          >
+            Next
+          </button>
+        </div>
+      </div>
     </div>
   );
 }

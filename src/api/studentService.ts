@@ -60,11 +60,17 @@ export const studentService = {
   getAll: async (filters?: {
     schoolId?: string;
     grade?: string;
+    section?: string;
+    page?: number;
+    limit?: number;
     includeInactive?: boolean;
-  }): Promise<{ success: boolean; data: Student[] }> => {
+  }): Promise<{ success: boolean; data: Student[]; pagination?: { total: number; page: number; limit: number; pages: number } }> => {
     const params = new URLSearchParams();
     if (filters?.schoolId) params.append("schoolId", filters.schoolId);
     if (filters?.grade) params.append("grade", filters.grade);
+    if (filters?.section) params.append("section", filters.section);
+    if (typeof filters?.page === "number") params.append("page", String(filters.page));
+    if (typeof filters?.limit === "number") params.append("limit", String(filters.limit));
     if (filters?.includeInactive) params.append("includeInactive", "true");
 
     const response = await axiosInstance.get(`/students?${params.toString()}`);
