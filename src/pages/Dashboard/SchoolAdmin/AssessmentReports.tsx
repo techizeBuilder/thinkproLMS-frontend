@@ -24,6 +24,7 @@ import {
 } from "lucide-react";
 import { assessmentService, type AssessmentReportData, type AssessmentReportFilters } from "@/api/assessmentService";
 import { schoolAdminService } from "@/api/schoolAdminService";
+import { schoolService } from "@/api/schoolService";
 import { toast } from "sonner";
 
 export default function SchoolAdminAssessmentReportsPage() {
@@ -36,7 +37,7 @@ export default function SchoolAdminAssessmentReportsPage() {
   
   // Filter options
   const [mentors, setMentors] = useState<any[]>([]);
-  const [grades] = useState([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
+  const [grades, setGrades] = useState<number[]>([]);
   const [statuses] = useState([
     { value: 'draft', label: 'Draft' },
     { value: 'published', label: 'Published' },
@@ -57,9 +58,34 @@ export default function SchoolAdminAssessmentReportsPage() {
       // Load mentors from the school admin's assigned school
       const mentorsResponse = await schoolAdminService.getMentors();
       setMentors(mentorsResponse.data.mentors || []);
+      
+      // Load grades from the school admin's assigned school's servicedetails
+      const schoolAdmin = mentorsResponse.data?.schoolAdmin;
+      if (schoolAdmin?.assignedSchool?._id) {
+        try {
+          const serviceDetailsResponse = await schoolService.getServiceDetails(schoolAdmin.assignedSchool._id);
+          if (serviceDetailsResponse.success && serviceDetailsResponse.data.grades) {
+            // Extract just the grade numbers from the service details
+            const availableGrades = serviceDetailsResponse.data.grades.map((gradeData) => gradeData.grade);
+            setGrades(availableGrades);
+          } else {
+            // Fallback to default grades if no service details
+            setGrades([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
+          }
+        } catch (error) {
+          console.error("Error loading school service details:", error);
+          // Fallback to default grades if service details fetch fails
+          setGrades([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
+        }
+      } else {
+        // Fallback to default grades if no school found
+        setGrades([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
+      }
     } catch (error) {
       console.error("Error loading filter data:", error);
       toast.error("Failed to load filter options");
+      // Fallback to default grades on error
+      setGrades([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
     } finally {
       setLoading(false);
     }
