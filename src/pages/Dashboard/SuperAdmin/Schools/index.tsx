@@ -33,6 +33,12 @@ export default function SchoolsPage() {
   const [deleteLoading, setDeleteLoading] = useState<string | null>(null);
   const [toggleLoading, setToggleLoading] = useState<string | null>(null);
 
+  // Pagination states
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+  const [total, setTotal] = useState(0);
+  const [pages, setPages] = useState(1);
+
   // Filter states
   const [selectedState, setSelectedState] = useState<string>("all");
   const [selectedCity, setSelectedCity] = useState<string>("all");
@@ -44,6 +50,9 @@ export default function SchoolsPage() {
   // Debounced search values
   const debouncedSearchName = useDebounce(searchName, 500);
   const debouncedSearchBoard = useDebounce(searchBoard, 500);
+  
+  // Store unique states and cities from current page (for filter dropdowns)
+  // Note: In a real app, you might want to fetch these separately
   const states = Array.from(
     new Set(schools.map((school) => school.state))
   ).sort();
@@ -70,6 +79,17 @@ export default function SchoolsPage() {
   // (Removed unused active/inactive counts)
 
   useEffect(() => {
+    setPage(1); // Reset to first page when filters change
+  }, [
+    selectedState,
+    selectedCity,
+    statusFilter,
+    debouncedSearchName,
+    debouncedSearchBoard,
+    selectedStrength,
+  ]);
+
+  useEffect(() => {
     fetchSchools();
   }, [
     selectedState,
@@ -78,6 +98,8 @@ export default function SchoolsPage() {
     debouncedSearchName,
     debouncedSearchBoard,
     selectedStrength,
+    page,
+    pageSize,
   ]);
 
   const fetchSchools = async () => {
@@ -96,6 +118,8 @@ export default function SchoolsPage() {
         name: debouncedSearchName,
         board: debouncedSearchBoard,
         strength: selectedStrength,
+        page,
+        limit: pageSize,
       };
 
       console.log("Fetching schools with filters:", filters);
@@ -104,6 +128,15 @@ export default function SchoolsPage() {
       if (response.success) {
         console.log("Schools received:", response.data.length);
         setSchools(response.data);
+        
+        if (response.pagination) {
+          setTotal(response.pagination.total);
+          setPages(response.pagination.pages);
+        } else {
+          // Fallback if pagination not provided
+          setTotal(response.data.length);
+          setPages(1);
+        }
       }
     } catch (error: any) {
       console.error("Error fetching schools:", error);
@@ -203,8 +236,8 @@ export default function SchoolsPage() {
             Schools
           </h1>
           <p className="text-gray-600 text-xs sm:text-sm lg:text-base">
-            Manage all schools in the system ({schools.length}{" "}
-            {schools.length === 1 ? "school" : "schools"})
+            Manage all schools in the system ({total}{" "}
+            {total === 1 ? "school" : "schools"})
           </p>
         </div>
         <Link to="/superadmin/schools/create" className="w-full sm:w-auto">
@@ -495,6 +528,58 @@ export default function SchoolsPage() {
             )}
           </TableBody>
         </Table>
+      )}
+
+      {/* Pagination */}
+      {total > 0 && (
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-3 mt-4">
+          <div className="text-sm text-gray-600">
+            Showing {schools.length ? (page - 1) * pageSize + 1 : 0} -{" "}
+            {Math.min(page * pageSize, total)} of {total}
+          </div>
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2">
+              <Label>Rows per page</Label>
+              <Select
+                value={String(pageSize)}
+                onValueChange={(v) => {
+                  setPageSize(Number(v));
+                  setPage(1);
+                }}
+              >
+                <SelectTrigger className="h-9 w-[90px]">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {[10, 20, 30, 40, 50].map((n) => (
+                    <SelectItem key={n} value={String(n)}>
+                      {n}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                disabled={page <= 1 || loading || tableLoading}
+                onClick={() => setPage((p) => Math.max(1, p - 1))}
+              >
+                Prev
+              </Button>
+              <div className="text-sm">
+                Page {page} of {Math.max(1, pages)}
+              </div>
+              <Button
+                variant="outline"
+                disabled={page >= pages || loading || tableLoading}
+                onClick={() => setPage((p) => Math.min(pages, p + 1))}
+              >
+                Next
+              </Button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

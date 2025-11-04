@@ -94,7 +94,9 @@ export const schoolService = {
     name?: string;
     board?: string;
     strength?: string;
-  }): Promise<{ success: boolean; data: School[] }> => {
+    page?: number;
+    limit?: number;
+  }): Promise<{ success: boolean; data: School[]; pagination?: { total: number; page: number; limit: number; pages: number } }> => {
     const params = new URLSearchParams();
     if (filters?.state && filters.state !== 'all') params.append('state', filters.state);
     if (filters?.city && filters.city !== 'all') params.append('city', filters.city);
@@ -110,6 +112,8 @@ export const schoolService = {
     if (filters?.name && filters.name !== '') params.append('name', filters.name);
     if (filters?.board && filters.board !== '') params.append('affiliatedTo', filters.board);
     if (filters?.strength && filters.strength !== 'all') params.append('strength', filters.strength);
+    if (filters?.page) params.append('page', String(filters.page));
+    if (filters?.limit) params.append('limit', String(filters.limit));
     
     const response = await axiosInstance.get(`/schools?${params.toString()}`);
     return response.data;

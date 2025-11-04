@@ -14,6 +14,8 @@ import { toast } from 'sonner';
 import { resourceService, type CreateResourceData } from '@/api/resourceService';
 import { moduleService, type Module } from '@/api/moduleService';
 import { schoolService } from '@/api/schoolService';
+import { usePaginatedSelect } from '@/hooks/usePaginatedSelect';
+import { Loader2 } from 'lucide-react';
 import type { School } from '@/api/schoolService';
 
 const resourceSchema = z.object({
@@ -46,7 +48,6 @@ export default function ResourceForm({ resource, onSuccess, onCancel }: Resource
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [inputTags, setInputTags] = useState('');
   const [subjects, setSubjects] = useState<Module[]>([]);
-  const [schools, setSchools] = useState<School[]>([]);
   const [isExternal, setIsExternal] = useState(false);
 
   const {
@@ -74,16 +75,12 @@ export default function ResourceForm({ resource, onSuccess, onCancel }: Resource
   const watchedType = watch('type');
   const watchedCategory = watch('category');
 
-  // Load subjects and schools
+  // Load subjects
   useEffect(() => {
     const loadData = async () => {
       try {
-        const [subjectsData, schoolsData] = await Promise.all([
-          moduleService.getAllModules(),
-          schoolService.getAllSchools(),
-        ]);
+        const subjectsData = await moduleService.getAllModules();
         setSubjects(subjectsData);
-        setSchools(schoolsData);
       } catch (error) {
         console.error('Error loading data:', error);
         toast.error('Failed to load form data');
@@ -92,6 +89,27 @@ export default function ResourceForm({ resource, onSuccess, onCancel }: Resource
 
     loadData();
   }, []);
+
+  // Load schools with pagination
+  const loadSchools = async (page: number, limit: number) => {
+    try {
+      const response = await schoolService.getAll({ page, limit });
+      return response;
+    } catch (error) {
+      console.error('Error loading schools:', error);
+      return { success: false, data: [], pagination: undefined };
+    }
+  };
+
+  const {
+    items: paginatedSchools,
+    loading: schoolsLoading,
+    hasMore: hasMoreSchools,
+    loadMore: loadMoreSchools,
+  } = usePaginatedSelect({
+    fetchFunction: loadSchools,
+    limit: 20,
+  });
 
   // Set external URL mode based on existing resource
   useEffect(() => {
@@ -295,11 +313,38 @@ export default function ResourceForm({ resource, onSuccess, onCancel }: Resource
                 <SelectValue placeholder="Select school" />
               </SelectTrigger>
               <SelectContent>
-                {schools.map((school) => (
+                {paginatedSchools.map((school) => (
                   <SelectItem key={school._id} value={school._id}>
                     {school.name} - {school.city}, {school.state}
                   </SelectItem>
                 ))}
+                {hasMoreSchools && (
+                  <div
+                    className="relative flex cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      if (!schoolsLoading && hasMoreSchools) {
+                        loadMoreSchools();
+                      }
+                    }}
+                    onMouseDown={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                    }}
+                  >
+                    <div className="flex items-center justify-center w-full py-2">
+                      {schoolsLoading ? (
+                        <>
+                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                          Loading...
+                        </>
+                      ) : (
+                        "Load More Schools"
+                      )}
+                    </div>
+                  </div>
+                )}
               </SelectContent>
             </Select>
           </div>

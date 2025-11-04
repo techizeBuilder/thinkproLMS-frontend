@@ -43,10 +43,12 @@ export interface UpdateLeadMentorData {
 export const leadMentorService = {
   // Get all lead mentors
   getAll: async (
-    options?: { includeInactive?: boolean }
-  ): Promise<{ success: boolean; data: LeadMentor[] }> => {
+    options?: { includeInactive?: boolean; page?: number; limit?: number }
+  ): Promise<{ success: boolean; data: LeadMentor[]; pagination?: { total: number; page: number; limit: number; pages: number } }> => {
     const params: any = {};
     if (options?.includeInactive) params.includeInactive = true;
+    if (options?.page) params.page = options.page;
+    if (options?.limit) params.limit = options.limit;
     const response = await axiosInstance.get("/lead-mentors", { params });
     return response.data;
   },
@@ -58,8 +60,16 @@ export const leadMentorService = {
   },
 
   // Get my schools (for lead mentors)
-  getMySchools: async (): Promise<{ success: boolean; data: School[] }> => {
-    const response = await axiosInstance.get("/lead-mentors/my-schools");
+  getMySchools: async (params?: { page?: number; limit?: number }): Promise<{ success: boolean; data: School[]; pagination?: { total: number; page: number; limit: number; pages: number } }> => {
+    const queryParams = new URLSearchParams();
+    if (params?.page) {
+      queryParams.append('page', String(params.page));
+    }
+    if (params?.limit) {
+      queryParams.append('limit', String(params.limit));
+    }
+    const url = queryParams.toString() ? `/lead-mentors/my-schools?${queryParams.toString()}` : '/lead-mentors/my-schools';
+    const response = await axiosInstance.get(url);
     return response.data;
   },
 

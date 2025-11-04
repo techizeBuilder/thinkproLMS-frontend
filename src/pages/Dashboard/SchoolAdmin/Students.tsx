@@ -9,6 +9,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Button } from "@/components/ui/button";
 import {
   Table,
   TableBody,
@@ -24,6 +25,7 @@ import {
 } from "lucide-react";
 import { schoolAdminService, type Student } from "@/api/schoolAdminService";
 import { toast } from "sonner";
+import { Label } from "@/components/ui/label";
 
 export default function SchoolAdminStudentsPage() {
   const [loading, setLoading] = useState(true);
@@ -32,6 +34,12 @@ export default function SchoolAdminStudentsPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedGrade, setSelectedGrade] = useState("all");
   const [selectedStatus, setSelectedStatus] = useState("all");
+  
+  // Pagination states
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+  const [total, setTotal] = useState(0);
+  const [pages, setPages] = useState(1);
 
   const grades = [
     "Grade 1",
@@ -47,8 +55,12 @@ export default function SchoolAdminStudentsPage() {
   ];
 
   useEffect(() => {
+    setPage(1); // Reset to first page when filters change
+  }, [selectedGrade, selectedStatus, searchTerm]);
+
+  useEffect(() => {
     loadStudents();
-  }, []);
+  }, [page, pageSize]);
 
   useEffect(() => {
     filterStudents();
@@ -57,10 +69,12 @@ export default function SchoolAdminStudentsPage() {
   const loadStudents = async () => {
     try {
       setLoading(true);
-      const response = await schoolAdminService.getStudents();
+      const response = await schoolAdminService.getStudents({ page, limit: pageSize });
       
       if (response.success) {
         setStudents(response.data.students);
+        setTotal(response.pagination?.total || response.data.students.length);
+        setPages(response.pagination?.pages || 1);
       } else {
         toast.error("Failed to load students");
       }
@@ -302,6 +316,58 @@ export default function SchoolAdminStudentsPage() {
             ))}
           </TableBody>
         </Table>
+      )}
+
+      {/* Pagination */}
+      {total > 0 && (
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-3 mt-4">
+          <div className="text-sm text-gray-600">
+            Showing {filteredStudents.length ? (page - 1) * pageSize + 1 : 0} -{" "}
+            {Math.min(page * pageSize, total)} of {total}
+          </div>
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2">
+              <Label>Rows per page</Label>
+              <Select
+                value={String(pageSize)}
+                onValueChange={(v) => {
+                  setPageSize(Number(v));
+                  setPage(1);
+                }}
+              >
+                <SelectTrigger className="h-9 w-[90px]">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {[10, 20, 30, 40, 50].map((n) => (
+                    <SelectItem key={n} value={String(n)}>
+                      {n}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                disabled={page <= 1 || loading}
+                onClick={() => setPage((p) => Math.max(1, p - 1))}
+              >
+                Prev
+              </Button>
+              <div className="text-sm">
+                Page {page} of {Math.max(1, pages)}
+              </div>
+              <Button
+                variant="outline"
+                disabled={page >= pages || loading}
+                onClick={() => setPage((p) => Math.min(pages, p + 1))}
+              >
+                Next
+              </Button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

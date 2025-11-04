@@ -36,6 +36,7 @@ import { ResetPasswordDialog } from "@/components/ResetPasswordDialog";
 import { useAuth } from "@/contexts/AuthContext";
 import { useHasPermission } from "@/hooks/usePermission";
 import { PERMISSIONS } from "@/constants/permissions";
+import { Label } from "@/components/ui/label";
 
 export default function SchoolAdminsPage() {
   const location = useLocation();
@@ -57,6 +58,13 @@ export default function SchoolAdminsPage() {
   } | null>(null);
   const { user } = useAuth();
   const { hasPermission } = useHasPermission();
+  
+  // Pagination states
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+  const [total, setTotal] = useState(0);
+  const [pages, setPages] = useState(1);
+  
   // Filter states
   const [statusFilter, setStatusFilter] = useState<string>("active");
 
@@ -65,27 +73,43 @@ export default function SchoolAdminsPage() {
   const basePath = isLeadMentor ? "/leadmentor" : "/superadmin";
 
   useEffect(() => {
-    fetchSchoolAdmins();
+    setPage(1); // Reset to first page when filters change
   }, [statusFilter]);
+
+  useEffect(() => {
+    fetchSchoolAdmins();
+  }, [statusFilter, page, pageSize]);
 
   const fetchSchoolAdmins = async () => {
     try {
       setLoading(true);
       const includeInactive =
         statusFilter === "all" || statusFilter === "inactive";
-      const response = await schoolAdminService.getAll({ includeInactive });
+      const response = await schoolAdminService.getAll({ 
+        includeInactive,
+        page,
+        limit: pageSize,
+      });
       if (response.success) {
         let filteredData = response.data;
 
-        // Apply client-side filtering based on status
+        // Apply client-side filtering based on status (if needed)
+        // Note: Backend should handle this, but keeping for compatibility
         if (statusFilter === "active") {
           filteredData = response.data.filter((admin) => admin.isActive);
         } else if (statusFilter === "inactive") {
           filteredData = response.data.filter((admin) => !admin.isActive);
         }
-        // If statusFilter === "all", show all data
 
         setSchoolAdmins(filteredData);
+        
+        if (response.pagination) {
+          setTotal(response.pagination.total);
+          setPages(response.pagination.pages);
+        } else {
+          setTotal(filteredData.length);
+          setPages(1);
+        }
       }
     } catch (error: any) {
       toast.error(
@@ -322,6 +346,58 @@ export default function SchoolAdminsPage() {
             ))}
           </TableBody>
         </Table>
+      )}
+
+      {/* Pagination */}
+      {total > 0 && (
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-3 mt-4">
+          <div className="text-sm text-gray-600">
+            Showing {schoolAdmins.length ? (page - 1) * pageSize + 1 : 0} -{" "}
+            {Math.min(page * pageSize, total)} of {total}
+          </div>
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2">
+              <Label>Rows per page</Label>
+              <Select
+                value={String(pageSize)}
+                onValueChange={(v) => {
+                  setPageSize(Number(v));
+                  setPage(1);
+                }}
+              >
+                <SelectTrigger className="h-9 w-[90px]">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {[10, 20, 30, 40, 50].map((n) => (
+                    <SelectItem key={n} value={String(n)}>
+                      {n}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                disabled={page <= 1 || loading}
+                onClick={() => setPage((p) => Math.max(1, p - 1))}
+              >
+                Prev
+              </Button>
+              <div className="text-sm">
+                Page {page} of {Math.max(1, pages)}
+              </div>
+              <Button
+                variant="outline"
+                disabled={page >= pages || loading}
+                onClick={() => setPage((p) => Math.min(pages, p + 1))}
+              >
+                Next
+              </Button>
+            </div>
+          </div>
+        </div>
       )}
 
       {/* Reset Password Dialog */}

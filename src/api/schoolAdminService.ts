@@ -129,10 +129,16 @@ export interface AssessmentReportData {
 // School Admin API functions
 export const schoolAdminService = {
   // Get all school admins
-  getAll: async (params?: { includeInactive?: boolean }): Promise<{ success: boolean; data: SchoolAdmin[] }> => {
+  getAll: async (params?: { includeInactive?: boolean; page?: number; limit?: number }): Promise<{ success: boolean; data: SchoolAdmin[]; pagination?: { total: number; page: number; limit: number; pages: number } }> => {
     const queryParams = new URLSearchParams();
     if (params?.includeInactive) {
       queryParams.append('includeInactive', 'true');
+    }
+    if (params?.page) {
+      queryParams.append('page', String(params.page));
+    }
+    if (params?.limit) {
+      queryParams.append('limit', String(params.limit));
     }
     const url = queryParams.toString() ? `/school-admins?${queryParams.toString()}` : '/school-admins';
     const response = await axiosInstance.get(url);
@@ -176,13 +182,29 @@ export const schoolAdminService = {
   },
 
   // Dashboard endpoints
-  getMentors: async (): Promise<{ success: boolean; data: { schoolAdmin: any; mentors: Mentor[] } }> => {
-    const response = await axiosInstance.get("/school-admins/mentors");
+  getMentors: async (params?: { page?: number; limit?: number }): Promise<{ success: boolean; data: { schoolAdmin: any; mentors: Mentor[] }; pagination?: { total: number; page: number; limit: number; pages: number } }> => {
+    const queryParams = new URLSearchParams();
+    if (params?.page) {
+      queryParams.append('page', String(params.page));
+    }
+    if (params?.limit) {
+      queryParams.append('limit', String(params.limit));
+    }
+    const url = queryParams.toString() ? `/school-admins/mentors?${queryParams.toString()}` : '/school-admins/mentors';
+    const response = await axiosInstance.get(url);
     return response.data;
   },
 
-  getStudents: async (): Promise<{ success: boolean; data: { schoolAdmin: any; students: Student[] } }> => {
-    const response = await axiosInstance.get("/school-admins/students");
+  getStudents: async (params?: { page?: number; limit?: number }): Promise<{ success: boolean; data: { schoolAdmin: any; students: Student[] }; pagination?: { total: number; page: number; limit: number; pages: number } }> => {
+    const queryParams = new URLSearchParams();
+    if (params?.page) {
+      queryParams.append('page', String(params.page));
+    }
+    if (params?.limit) {
+      queryParams.append('limit', String(params.limit));
+    }
+    const url = queryParams.toString() ? `/school-admins/students?${queryParams.toString()}` : '/school-admins/students';
+    const response = await axiosInstance.get(url);
     return response.data;
   },
 

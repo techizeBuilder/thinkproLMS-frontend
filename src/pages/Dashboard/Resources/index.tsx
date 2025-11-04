@@ -52,6 +52,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { useHasPermission } from "@/hooks/usePermission";
 import { PERMISSIONS } from "@/constants/permissions";
 import { toast } from "sonner";
+import { Label } from "@/components/ui/label";
 
 export default function ResourcesPage() {
   const { user } = useAuth();
@@ -84,6 +85,7 @@ export default function ResourcesPage() {
     pages: 1,
     total: 0,
   });
+  const [pageSize, setPageSize] = useState(20);
 
   // Check if user can see mentor resources
   const canViewMentorResources =
@@ -111,7 +113,7 @@ export default function ResourcesPage() {
       const filters: ResourceFilters = {
         search: searchTerm || undefined,
         page,
-        limit: 20, // Increased limit for table view
+        limit: pageSize,
       };
 
       // Only add type filter if not 'all'
@@ -146,14 +148,19 @@ export default function ResourcesPage() {
     }
   };
 
-  // Fetch resources when filters change
+  // Reset to page 1 when filters change
   useEffect(() => {
-    fetchResources(1);
+    setPagination(prev => ({ ...prev, current: 1 }));
   }, [selectedUserType, selectedBucket, searchTerm, selectedGrade]);
+
+  // Fetch resources when filters or page size change
+  useEffect(() => {
+    fetchResources(pagination.current);
+  }, [selectedUserType, selectedBucket, searchTerm, selectedGrade, pagination.current, pageSize]);
 
   // Listen for upload completion and refetch resources
   useUploadCompletion(() => {
-    fetchResources(1);
+    setPagination(prev => ({ ...prev, current: 1 }));
   });
 
   // Update URL when filters change
@@ -209,11 +216,11 @@ export default function ResourcesPage() {
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    fetchResources(1);
+    setPagination(prev => ({ ...prev, current: 1 }));
   };
 
   const handlePageChange = (page: number) => {
-    fetchResources(page);
+    setPagination(prev => ({ ...prev, current: page }));
   };
 
   const handleSort = (field: "title" | "createdAt" | "viewCount") => {
@@ -646,27 +653,56 @@ export default function ResourcesPage() {
         </div>
 
         {/* Pagination */}
-        {pagination.pages > 1 && (
-          <div className="flex justify-center items-center gap-2 mt-6">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => handlePageChange(pagination.current - 1)}
-              disabled={pagination.current === 1}
-            >
-              Previous
-            </Button>
-            <span className="text-sm text-gray-600">
-              Page {pagination.current} of {pagination.pages}
-            </span>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => handlePageChange(pagination.current + 1)}
-              disabled={pagination.current === pagination.pages}
-            >
-              Next
-            </Button>
+        {pagination.total > 0 && (
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-3 mt-6">
+            <div className="text-sm text-gray-600">
+              Showing {resources.length ? (pagination.current - 1) * pageSize + 1 : 0} -{" "}
+              {Math.min(pagination.current * pageSize, pagination.total)} of {pagination.total}
+            </div>
+            <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2">
+                <Label>Rows per page</Label>
+                <Select
+                  value={String(pageSize)}
+                  onValueChange={(v) => {
+                    setPageSize(Number(v));
+                    setPagination(prev => ({ ...prev, current: 1 }));
+                  }}
+                >
+                  <SelectTrigger className="h-9 w-[90px]">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {[10, 20, 30, 40, 50].map((n) => (
+                      <SelectItem key={n} value={String(n)}>
+                        {n}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handlePageChange(pagination.current - 1)}
+                  disabled={pagination.current === 1 || loading}
+                >
+                  Previous
+                </Button>
+                <span className="text-sm text-gray-600">
+                  Page {pagination.current} of {pagination.pages}
+                </span>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handlePageChange(pagination.current + 1)}
+                  disabled={pagination.current === pagination.pages || loading}
+                >
+                  Next
+                </Button>
+              </div>
+            </div>
           </div>
         )}
       </div>

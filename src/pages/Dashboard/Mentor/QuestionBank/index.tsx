@@ -25,6 +25,7 @@ import {
 } from "@/components/ui/popover";
 import { Check, ChevronsUpDown } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { Label } from "@/components/ui/label";
 import {
   Table,
   TableBody,
@@ -54,9 +55,10 @@ const MentorQuestionBankPage: React.FC = () => {
   const {} = useAuth();
   const [questions, setQuestions] = useState<Question[]>([]);
   const [loading, setLoading] = useState(true);
+  const [pageSizeState, setPageSizeState] = useState(10);
   const [filters, setFilters] = useState<QuestionFilters>({
     page: 1,
-    limit: 10,
+    limit: pageSizeState,
   });
   const [sessions, setSessions] = useState<{
     _id: string;
@@ -133,6 +135,7 @@ const MentorQuestionBankPage: React.FC = () => {
         ...prev,
         [key]: value === "all" ? undefined : value,
         page: 1, // Reset to first page when filtering
+        limit: pageSizeState,
       };
       
       return newFilters;
@@ -140,7 +143,12 @@ const MentorQuestionBankPage: React.FC = () => {
   };
 
   const handlePageChange = (page: number) => {
-    setFilters((prev) => ({ ...prev, page }));
+    setFilters((prev) => ({ ...prev, page, limit: pageSizeState }));
+  };
+
+  const handlePageSizeChange = (newSize: number) => {
+    setPageSizeState(newSize);
+    setFilters((prev) => ({ ...prev, page: 1, limit: newSize }));
   };
 
   const handleRecommendSuccess = () => {
@@ -446,29 +454,55 @@ const MentorQuestionBankPage: React.FC = () => {
               </div>
 
               {/* Pagination */}
-              {pagination.pages > 1 && (
-                <div className="flex justify-center items-center gap-1 sm:gap-2 mt-2 sm:mt-3">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handlePageChange(pagination.current - 1)}
-                    disabled={pagination.current === 1}
-                    className="text-xs sm:text-sm h-7 sm:h-8 px-2 sm:px-3"
-                  >
-                    Previous
-                  </Button>
-                  <span className="text-xs sm:text-sm px-2">
-                    Page {pagination.current} of {pagination.pages}
-                  </span>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handlePageChange(pagination.current + 1)}
-                    disabled={pagination.current === pagination.pages}
-                    className="text-xs sm:text-sm h-7 sm:h-8 px-2 sm:px-3"
-                  >
-                    Next
-                  </Button>
+              {pagination.total > 0 && (
+                <div className="flex flex-col sm:flex-row items-center justify-between gap-3 mt-4">
+                  <div className="text-sm text-gray-600">
+                    Showing {questions.length ? (pagination.current - 1) * pageSizeState + 1 : 0} -{" "}
+                    {Math.min(pagination.current * pageSizeState, pagination.total)} of {pagination.total}
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-2">
+                      <Label>Rows per page</Label>
+                      <Select
+                        value={String(pageSizeState)}
+                        onValueChange={(v) => handlePageSizeChange(Number(v))}
+                      >
+                        <SelectTrigger className="h-9 w-[90px]">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {[10, 20, 30, 40, 50].map((n) => (
+                            <SelectItem key={n} value={String(n)}>
+                              {n}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handlePageChange(pagination.current - 1)}
+                        disabled={pagination.current === 1 || loading}
+                        className="text-xs sm:text-sm h-7 sm:h-8 px-2 sm:px-3"
+                      >
+                        Previous
+                      </Button>
+                      <span className="text-xs sm:text-sm px-2">
+                        Page {pagination.current} of {pagination.pages}
+                      </span>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handlePageChange(pagination.current + 1)}
+                        disabled={pagination.current === pagination.pages || loading}
+                        className="text-xs sm:text-sm h-7 sm:h-8 px-2 sm:px-3"
+                      >
+                        Next
+                      </Button>
+                    </div>
+                  </div>
                 </div>
               )}
             </div>

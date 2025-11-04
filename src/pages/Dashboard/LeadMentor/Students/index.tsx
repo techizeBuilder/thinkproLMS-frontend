@@ -47,6 +47,10 @@ import { useAuth } from "@/contexts/AuthContext";
 import { studentService } from "@/api/studentService";
 import { useHasPermission } from "@/hooks/usePermission";
 import { PERMISSIONS } from "@/constants/permissions";
+import { Label } from "@/components/ui/label";
+import { usePaginatedSelect } from "@/hooks/usePaginatedSelect";
+import { schoolService } from "@/api/schoolService";
+import { Loader2 } from "lucide-react";
 
 interface School {
   _id: string;
@@ -86,7 +90,12 @@ export default function StudentsPage() {
   const [selectedSchool, setSelectedSchool] = useState("");
   const [selectedGrade, setSelectedGrade] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("active");
-  const [schools, setSchools] = useState<School[]>([]);
+  
+  // Pagination states
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+  const [total, setTotal] = useState(0);
+  const [pages, setPages] = useState(1);
   const [showPassword, setShowPassword] = useState<{ [key: string]: string }>(
     {}
   );
@@ -123,9 +132,32 @@ export default function StudentsPage() {
   ];
 
   useEffect(() => {
+    setPage(1); // Reset to first page when filters change
+  }, [statusFilter, selectedSchool, selectedGrade, searchTerm]);
+
+  useEffect(() => {
     fetchStudents();
-    fetchSchools();
-  }, [statusFilter]);
+  }, [statusFilter, selectedSchool, selectedGrade, page, pageSize]);
+
+  const loadSchools = async (page: number, limit: number) => {
+    try {
+      const response = await schoolService.getAll({ page, limit });
+      return response;
+    } catch (error) {
+      console.error("Error loading schools:", error);
+      return { success: false, data: [], pagination: undefined };
+    }
+  };
+
+  const {
+    items: paginatedSchools,
+    loading: schoolsLoading,
+    hasMore: hasMoreSchools,
+    loadMore: loadMoreSchools,
+  } = usePaginatedSelect({
+    fetchFunction: loadSchools,
+    limit: 20,
+  });
 
   useEffect(() => {
     filterStudents();
@@ -136,7 +168,13 @@ export default function StudentsPage() {
       setLoading(true);
       const includeInactive =
         statusFilter === "all" || statusFilter === "inactive";
-      const response = await studentService.getAll({ includeInactive });
+      const response = await studentService.getAll({ 
+        includeInactive,
+        page,
+        limit: pageSize,
+        schoolId: selectedSchool || undefined,
+        grade: selectedGrade ? selectedGrade.replace("Grade ", "") : undefined,
+      });
       if (response.success) {
         let filteredData = response.data;
 
@@ -146,9 +184,16 @@ export default function StudentsPage() {
         } else if (statusFilter === "inactive") {
           filteredData = response.data.filter((student) => !student.isActive);
         }
-        // If statusFilter === "all", show all data
 
         setStudents(filteredData);
+        
+        if (response.pagination) {
+          setTotal(response.pagination.total);
+          setPages(response.pagination.pages);
+        } else {
+          setTotal(filteredData.length);
+          setPages(1);
+        }
       }
     } catch (error) {
       console.error("Error fetching students:", error);
@@ -157,15 +202,6 @@ export default function StudentsPage() {
     }
   };
 
-  const fetchSchools = async () => {
-    try {
-      const response = await axiosInstance.get("/schools");
-      console.log("School result in students page: ", response.data);
-      setSchools(response.data.data);
-    } catch (error) {
-      console.error("Error fetching schools:", error);
-    }
-  };
 
   const filterStudents = () => {
     let filtered = students;
@@ -382,11 +418,38 @@ export default function StudentsPage() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Schools</SelectItem>
-                  {schools.map((school) => (
+                  {paginatedSchools.map((school) => (
                     <SelectItem key={school._id} value={school._id}>
                       {school.name} - {school.city}
                     </SelectItem>
                   ))}
+                  {hasMoreSchools && (
+                    <div
+                      className="relative flex cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        if (!schoolsLoading && hasMoreSchools) {
+                          loadMoreSchools();
+                        }
+                      }}
+                      onMouseDown={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                      }}
+                    >
+                      <div className="flex items-center justify-center w-full py-2">
+                        {schoolsLoading ? (
+                          <>
+                            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                            Loading...
+                          </>
+                        ) : (
+                          "Load More Schools"
+                        )}
+                      </div>
+                    </div>
+                  )}
                 </SelectContent>
               </Select>
             </div>
@@ -734,6 +797,58 @@ export default function StudentsPage() {
           userName={resetPasswordUser.name}
           userEmail={resetPasswordUser.email}
         />
+      )}
+
+      {/* Pagination */}
+      {total > 0 && (
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-3 mt-4">
+          <div className="text-sm text-gray-600">
+            Showing {filteredStudents.length ? (page - 1) * pageSize + 1 : 0} -{" "}
+            {Math.min(page * pageSize, total)} of {total}
+          </div>
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2">
+              <Label>Rows per page</Label>
+              <Select
+                value={String(pageSize)}
+                onValueChange={(v) => {
+                  setPageSize(Number(v));
+                  setPage(1);
+                }}
+              >
+                <SelectTrigger className="h-9 w-[90px]">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {[10, 20, 30, 40, 50].map((n) => (
+                    <SelectItem key={n} value={String(n)}>
+                      {n}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                disabled={page <= 1 || loading}
+                onClick={() => setPage((p) => Math.max(1, p - 1))}
+              >
+                Prev
+              </Button>
+              <div className="text-sm">
+                Page {page} of {Math.max(1, pages)}
+              </div>
+              <Button
+                variant="outline"
+                disabled={page >= pages || loading}
+                onClick={() => setPage((p) => Math.min(pages, p + 1))}
+              >
+                Next
+              </Button>
+            </div>
+          </div>
+        </div>
       )}
 
       {/* Confirmation Dialog */}

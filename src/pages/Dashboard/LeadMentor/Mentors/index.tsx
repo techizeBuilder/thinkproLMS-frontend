@@ -12,6 +12,9 @@ import { ResetPasswordDialog } from "@/components/ResetPasswordDialog";
 import ProfilePictureDisplay from "@/components/ProfilePictureDisplay";
 import { useHasPermission } from "@/hooks/usePermission";
 import { PERMISSIONS } from "@/constants/permissions";
+import { usePaginatedSelect } from "@/hooks/usePaginatedSelect";
+import { schoolService } from "@/api/schoolService";
+import { Loader2 } from "lucide-react";
 
 interface School {
   _id: string;
@@ -45,7 +48,6 @@ export default function MentorsPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedSchool, setSelectedSchool] = useState("");
   const [includeInactive, setIncludeInactive] = useState(false);
-  const [schools, setSchools] = useState<School[]>([]);
   const [resetPasswordUser, setResetPasswordUser] = useState<{
     id: string;
     name: string;
@@ -60,8 +62,28 @@ export default function MentorsPage() {
 
   useEffect(() => {
     fetchMentors();
-    fetchSchools();
   }, []);
+
+  // Load schools with pagination
+  const loadSchools = async (page: number, limit: number) => {
+    try {
+      const response = await schoolService.getAll({ page, limit });
+      return response;
+    } catch (error) {
+      console.error("Error loading schools:", error);
+      return { success: false, data: [], pagination: undefined };
+    }
+  };
+
+  const {
+    items: paginatedSchools,
+    loading: schoolsLoading,
+    hasMore: hasMoreSchools,
+    loadMore: loadMoreSchools,
+  } = usePaginatedSelect({
+    fetchFunction: loadSchools,
+    limit: 20,
+  });
 
   useEffect(() => {
     filterMentors();
@@ -78,14 +100,6 @@ export default function MentorsPage() {
     }
   };
 
-  const fetchSchools = async () => {
-    try {
-      const response = await axiosInstance.get("/schools");
-      setSchools(response.data.data);
-    } catch (error) {
-      console.error("Error fetching schools:", error);
-    }
-  };
 
   const filterMentors = () => {
     let filtered = mentors;
@@ -168,18 +182,49 @@ export default function MentorsPage() {
                 />
               </div>
             </div>
-            <select
-              value={selectedSchool}
-              onChange={(e) => setSelectedSchool(e.target.value)}
-              className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm md:text-base min-w-0 sm:min-w-[200px]"
+            <Select
+              value={selectedSchool || "all"}
+              onValueChange={(value) => setSelectedSchool(value === "all" ? "" : value)}
             >
-              <option value="">All Schools</option>
-              {schools.map((school) => (
-                <option key={school._id} value={school._id}>
-                  {school.name} - {school.city}
-                </option>
-              ))}
-            </select>
+              <SelectTrigger className="min-w-0 sm:min-w-[200px] text-sm md:text-base">
+                <SelectValue placeholder="All Schools" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Schools</SelectItem>
+                {paginatedSchools.map((school) => (
+                  <SelectItem key={school._id} value={school._id}>
+                    {school.name} - {school.city}
+                  </SelectItem>
+                ))}
+                {hasMoreSchools && (
+                  <div
+                    className="relative flex cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      if (!schoolsLoading && hasMoreSchools) {
+                        loadMoreSchools();
+                      }
+                    }}
+                    onMouseDown={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                    }}
+                  >
+                    <div className="flex items-center justify-center w-full py-2">
+                      {schoolsLoading ? (
+                        <>
+                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                          Loading...
+                        </>
+                      ) : (
+                        "Load More Schools"
+                      )}
+                    </div>
+                  </div>
+                )}
+              </SelectContent>
+            </Select>
             <Select
               value={includeInactive ? "all" : "active"}
               onValueChange={(value) => setIncludeInactive(value === "all")}

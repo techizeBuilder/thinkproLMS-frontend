@@ -19,10 +19,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { MessageSquarePlus, Search, X, Users, Shield, GraduationCap, BookOpen, User as UserIcon } from "lucide-react";
+import { MessageSquarePlus, Search, X, Users, Shield, GraduationCap, BookOpen, User as UserIcon, Loader2 } from "lucide-react";
 import { getAvailableUsers, type User } from "@/api/messageService";
 import { schoolService } from "@/api/schoolService";
 import { cn } from "@/lib/utils";
+import { usePaginatedSelect } from "@/hooks/usePaginatedSelect";
 
 interface NewMessageDialogProps {
   onSelectUser: (userId: string) => void;
@@ -41,7 +42,6 @@ const NewMessageDialog: React.FC<NewMessageDialogProps> = ({ onSelectUser }) => 
   const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [schools, setSchools] = useState<School[]>([]);
   const [selectedRole, setSelectedRole] = useState<string>("mentor");
   const [selectedSchool, setSelectedSchool] = useState<string>("all");
   const [currentUser, setCurrentUser] = useState<{
@@ -73,7 +73,6 @@ const NewMessageDialog: React.FC<NewMessageDialogProps> = ({ onSelectUser }) => 
   useEffect(() => {
     if (open) {
       loadUsers();
-      loadSchools();
     }
   }, [open]);
 
@@ -100,14 +99,25 @@ const NewMessageDialog: React.FC<NewMessageDialogProps> = ({ onSelectUser }) => 
     }
   };
 
-  const loadSchools = async () => {
+  const loadSchools = async (page: number, limit: number) => {
     try {
-      const response = await schoolService.getAllSchools();
-      setSchools(response);
+      const response = await schoolService.getAll({ page, limit });
+      return response;
     } catch (error) {
       console.error("Error loading schools:", error);
+      return { success: false, data: [], pagination: undefined };
     }
   };
+
+  const {
+    items: paginatedSchools,
+    loading: schoolsLoading,
+    hasMore: hasMoreSchools,
+    loadMore: loadMoreSchools,
+  } = usePaginatedSelect({
+    fetchFunction: loadSchools,
+    limit: 20,
+  });
 
   const applyFilters = () => {
     let filtered = [...users];
@@ -354,11 +364,38 @@ const NewMessageDialog: React.FC<NewMessageDialogProps> = ({ onSelectUser }) => 
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="all">All Schools</SelectItem>
-                      {schools.map((school) => (
+                      {paginatedSchools.map((school) => (
                         <SelectItem key={school._id} value={school._id}>
                           {school.name} ({school.city})
                         </SelectItem>
                       ))}
+                      {hasMoreSchools && (
+                        <div
+                          className="relative flex cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            if (!schoolsLoading && hasMoreSchools) {
+                              loadMoreSchools();
+                            }
+                          }}
+                          onMouseDown={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                          }}
+                        >
+                          <div className="flex items-center justify-center w-full py-2">
+                            {schoolsLoading ? (
+                              <>
+                                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                                Loading...
+                              </>
+                            ) : (
+                              "Load More Schools"
+                            )}
+                          </div>
+                        </div>
+                      )}
                     </SelectContent>
                   </Select>
                 </div>

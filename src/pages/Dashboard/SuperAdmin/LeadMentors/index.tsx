@@ -16,6 +16,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
 
 export default function LeadMentorsPage() {
   const location = useLocation();
@@ -30,19 +31,33 @@ export default function LeadMentorsPage() {
     email: string;
   } | null>(null);
   
+  // Pagination states
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+  const [total, setTotal] = useState(0);
+  const [pages, setPages] = useState(1);
+  
   // Determine the base path based on current route
   const isLeadMentor = location.pathname.includes('/leadmentor');
   const basePath = isLeadMentor ? '/leadmentor' : '/superadmin';
 
   useEffect(() => {
-    fetchLeadMentors();
+    setPage(1); // Reset to first page when filters change
   }, [statusFilter]);
+
+  useEffect(() => {
+    fetchLeadMentors();
+  }, [statusFilter, page, pageSize]);
 
   const fetchLeadMentors = async () => {
     try {
       setLoading(true);
       const includeInactive = statusFilter === "all" || statusFilter === "inactive";
-      const response = await leadMentorService.getAll({ includeInactive });
+      const response = await leadMentorService.getAll({ 
+        includeInactive,
+        page,
+        limit: pageSize,
+      });
       if (response.success) {
         let data = response.data;
         if (statusFilter === "active") {
@@ -51,6 +66,14 @@ export default function LeadMentorsPage() {
           data = data.filter((lm) => !lm.isActive);
         }
         setLeadMentors(data);
+        
+        if (response.pagination) {
+          setTotal(response.pagination.total);
+          setPages(response.pagination.pages);
+        } else {
+          setTotal(data.length);
+          setPages(1);
+        }
       }
     } catch (error: any) {
       toast.error(error.response?.data?.message || "Failed to fetch lead mentors");
@@ -234,6 +257,58 @@ export default function LeadMentorsPage() {
         ))}
         </TableBody>
       </Table>
+      )}
+
+      {/* Pagination */}
+      {total > 0 && (
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-3 mt-4">
+          <div className="text-sm text-gray-600">
+            Showing {leadMentors.length ? (page - 1) * pageSize + 1 : 0} -{" "}
+            {Math.min(page * pageSize, total)} of {total}
+          </div>
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2">
+              <Label>Rows per page</Label>
+              <Select
+                value={String(pageSize)}
+                onValueChange={(v) => {
+                  setPageSize(Number(v));
+                  setPage(1);
+                }}
+              >
+                <SelectTrigger className="h-9 w-[90px]">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {[10, 20, 30, 40, 50].map((n) => (
+                    <SelectItem key={n} value={String(n)}>
+                      {n}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                disabled={page <= 1 || loading}
+                onClick={() => setPage((p) => Math.max(1, p - 1))}
+              >
+                Prev
+              </Button>
+              <div className="text-sm">
+                Page {page} of {Math.max(1, pages)}
+              </div>
+              <Button
+                variant="outline"
+                disabled={page >= pages || loading}
+                onClick={() => setPage((p) => Math.min(pages, p + 1))}
+              >
+                Next
+              </Button>
+            </div>
+          </div>
+        </div>
       )}
 
       {/* Reset Password Dialog */}

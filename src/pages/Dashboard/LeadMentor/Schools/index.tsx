@@ -44,6 +44,12 @@ export default function LeadMentorSchoolsPage() {
   const [searchName, setSearchName] = useState<string>("");
   const [searchBoard, setSearchBoard] = useState<string>("");
   const [selectedStrength, setSelectedStrength] = useState<string>("all");
+  
+  // Pagination states
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+  const [total, setTotal] = useState(0);
+  const [pages, setPages] = useState(1);
 
   // Debounced search values
   const debouncedSearchName = useDebounce(searchName, 500);
@@ -53,27 +59,55 @@ export default function LeadMentorSchoolsPage() {
   const isSearching = searchName !== debouncedSearchName || searchBoard !== debouncedSearchBoard;
 
   useEffect(() => {
+    setPage(1); // Reset to first page when filters change
+  }, [selectedState, selectedCity, includeInactive, debouncedSearchName, debouncedSearchBoard, selectedStrength]);
+
+  useEffect(() => {
     fetchSchools();
-  }, []);
+  }, [page, pageSize, selectedState, selectedCity, includeInactive, debouncedSearchName, debouncedSearchBoard, selectedStrength]);
 
   const fetchSchools = async () => {
     try {
       setLoading(true);
       
       if (user?.role === "superadmin") {
-        // Superadmin gets all schools
-        const response = await schoolService.getAll();
+        // Superadmin gets all schools with filters
+        const filters = {
+          state: selectedState !== "all" ? selectedState : undefined,
+          city: selectedCity !== "all" ? selectedCity : undefined,
+          statusFilter: includeInactive ? "all" : "active",
+          name: debouncedSearchName || undefined,
+          board: debouncedSearchBoard || undefined,
+          strength: selectedStrength !== "all" ? selectedStrength : undefined,
+          page,
+          limit: pageSize,
+        };
+        const response = await schoolService.getAll(filters);
         if (response.success) {
           setSchools(response.data);
+          if (response.pagination) {
+            setTotal(response.pagination.total);
+            setPages(response.pagination.pages);
+          } else {
+            setTotal(response.data.length);
+            setPages(1);
+          }
         }
       } else if (user?.role === "leadmentor") {
         // Lead mentor gets schools based on their access level
-        const response = await leadMentorService.getMySchools();
+        const response = await leadMentorService.getMySchools({ page, limit: pageSize });
         if (response.success) {
           setSchools(response.data);
+          if (response.pagination) {
+            setTotal(response.pagination.total);
+            setPages(response.pagination.pages);
+          } else {
+            setTotal(response.data.length);
+            setPages(1);
+          }
         }
       } else {
-        // Other roles - get limited schools
+        // Other roles - get limited schools (no pagination for this endpoint yet)
         const response = await sessionProgressService.getAvailableSchools();
         // Convert sessionProgressService School format to our School format
         const convertedSchools: School[] = response.map((school: SessionProgressSchool) => ({
@@ -84,11 +118,13 @@ export default function LeadMentorSchoolsPage() {
           address: "",
           boards: [],
           branchName: "",
-          isActive: true, // Assume active for session progress schools
+          isActive: true,
           students_strength: 0,
           affiliatedTo: ""
         }));
         setSchools(convertedSchools);
+        setTotal(convertedSchools.length);
+        setPages(1);
       }
     } catch (error) {
       console.error("Error fetching schools:", error);
@@ -131,7 +167,7 @@ export default function LeadMentorSchoolsPage() {
     setSelectedStrength("all");
   };
 
-  // Filter schools based on search and filters
+  // Filter schools based on search and filters (client-side for non-superadmin or when filters not supported)
   const filteredSchools = schools.filter(school => {
     const matchesSearch = school.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          school.city.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -470,14 +506,61 @@ export default function LeadMentorSchoolsPage() {
         </CardContent>
       </Card>
 
-      {/* Summary */}
-      <div className="text-sm text-gray-600">
-        Showing {filteredSchools.length} of {schools.length} schools
-        {user?.role === "superadmin" || user?.permissions?.includes("global_school_access") 
-          ? " (Global Access)" 
-          : " (Assigned to you)"
-        }
-      </div>
+      {/* Pagination */}
+      {total > 0 && (
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-3 mt-4">
+          <div className="text-sm text-gray-600">
+            Showing {filteredSchools.length ? (page - 1) * pageSize + 1 : 0} -{" "}
+            {Math.min(page * pageSize, total)} of {total} schools
+            {user?.role === "superadmin" || user?.permissions?.includes("global_school_access") 
+              ? " (Global Access)" 
+              : " (Assigned to you)"
+            }
+          </div>
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2">
+              <Label>Rows per page</Label>
+              <Select
+                value={String(pageSize)}
+                onValueChange={(v) => {
+                  setPageSize(Number(v));
+                  setPage(1);
+                }}
+              >
+                <SelectTrigger className="h-9 w-[90px]">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {[10, 20, 30, 40, 50].map((n) => (
+                    <SelectItem key={n} value={String(n)}>
+                      {n}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                disabled={page <= 1 || loading}
+                onClick={() => setPage((p) => Math.max(1, p - 1))}
+              >
+                Prev
+              </Button>
+              <div className="text-sm">
+                Page {page} of {Math.max(1, pages)}
+              </div>
+              <Button
+                variant="outline"
+                disabled={page >= pages || loading}
+                onClick={() => setPage((p) => Math.min(pages, p + 1))}
+              >
+                Next
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

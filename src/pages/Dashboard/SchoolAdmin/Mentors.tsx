@@ -2,6 +2,15 @@ import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { UserCheck, Mail, Phone } from "lucide-react";
 import { schoolAdminService, type Mentor } from "@/api/schoolAdminService";
 import { toast } from "sonner";
@@ -10,19 +19,27 @@ export default function SchoolAdminMentorsPage() {
   const [loading, setLoading] = useState(true);
   const [mentors, setMentors] = useState<Mentor[]>([]);
   const [, setSchoolAdmin] = useState<any>(null);
+  
+  // Pagination states
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+  const [total, setTotal] = useState(0);
+  const [pages, setPages] = useState(1);
 
   useEffect(() => {
     loadMentors();
-  }, []);
+  }, [page, pageSize]);
 
   const loadMentors = async () => {
     try {
       setLoading(true);
-      const response = await schoolAdminService.getMentors();
+      const response = await schoolAdminService.getMentors({ page, limit: pageSize });
       
       if (response.success) {
         setMentors(response.data.mentors);
         setSchoolAdmin(response.data.schoolAdmin);
+        setTotal(response.pagination?.total || response.data.mentors.length);
+        setPages(response.pagination?.pages || 1);
       } else {
         toast.error("Failed to load mentors");
       }
@@ -143,6 +160,58 @@ export default function SchoolAdminMentorsPage() {
             </div>
           </CardContent>
         </Card>
+      )}
+
+      {/* Pagination */}
+      {total > 0 && (
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-3 mt-4">
+          <div className="text-sm text-gray-600">
+            Showing {mentors.length ? (page - 1) * pageSize + 1 : 0} -{" "}
+            {Math.min(page * pageSize, total)} of {total}
+          </div>
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2">
+              <Label>Rows per page</Label>
+              <Select
+                value={String(pageSize)}
+                onValueChange={(v) => {
+                  setPageSize(Number(v));
+                  setPage(1);
+                }}
+              >
+                <SelectTrigger className="h-9 w-[90px]">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {[10, 20, 30, 40, 50].map((n) => (
+                    <SelectItem key={n} value={String(n)}>
+                      {n}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                disabled={page <= 1 || loading}
+                onClick={() => setPage((p) => Math.max(1, p - 1))}
+              >
+                Prev
+              </Button>
+              <div className="text-sm">
+                Page {page} of {Math.max(1, pages)}
+              </div>
+              <Button
+                variant="outline"
+                disabled={page >= pages || loading}
+                onClick={() => setPage((p) => Math.min(pages, p + 1))}
+              >
+                Next
+              </Button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

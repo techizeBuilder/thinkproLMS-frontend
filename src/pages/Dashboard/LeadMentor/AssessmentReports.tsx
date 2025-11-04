@@ -26,6 +26,8 @@ import { assessmentService, type AssessmentReportData, type AssessmentReportFilt
 import { schoolService } from "@/api/schoolService";
 import { mentorService } from "@/api/mentorService";
 import { toast } from "sonner";
+import { usePaginatedSelect } from "@/hooks/usePaginatedSelect";
+import { Loader2 } from "lucide-react";
 
 export default function LeadMentorAssessmentReportsPage() {
   const navigate = useNavigate();
@@ -36,7 +38,6 @@ export default function LeadMentorAssessmentReportsPage() {
   const [filters, setFilters] = useState<AssessmentReportFilters>({});
   
   // Filter options
-  const [schools, setSchools] = useState<any[]>([]);
   const [mentors, setMentors] = useState<any[]>([]);
   const [grades, setGrades] = useState<number[]>([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
   const [statuses] = useState([
@@ -85,16 +86,32 @@ export default function LeadMentorAssessmentReportsPage() {
     loadGradesForSchool();
   }, [filters.school]);
 
+  // Load schools with pagination
+  const loadSchools = async (page: number, limit: number) => {
+    try {
+      const response = await schoolService.getAll({ page, limit });
+      return response;
+    } catch (error) {
+      console.error("Error loading schools:", error);
+      return { success: false, data: [], pagination: undefined };
+    }
+  };
+
+  const {
+    items: paginatedSchools,
+    loading: schoolsLoading,
+    hasMore: hasMoreSchools,
+    loadMore: loadMoreSchools,
+  } = usePaginatedSelect({
+    fetchFunction: loadSchools,
+    limit: 20,
+  });
+
   const loadData = async () => {
     try {
       setLoading(true);
-      // Load schools and mentors that the lead mentor has access to
-      const [schoolsResponse, mentorsResponse] = await Promise.all([
-        schoolService.getAllSchools(), // This should be filtered by lead mentor's assigned schools
-        mentorService.getAll() // This should be filtered by lead mentor's assigned schools
-      ]);
-      
-      setSchools(schoolsResponse || []);
+      // Load mentors that the lead mentor has access to
+      const mentorsResponse = await mentorService.getAll();
       setMentors(mentorsResponse.data || []);
     } catch (error) {
       console.error("Error loading filter data:", error);
@@ -200,11 +217,38 @@ export default function LeadMentorAssessmentReportsPage() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Schools</SelectItem>
-                  {schools.map(school => (
+                  {paginatedSchools.map(school => (
                     <SelectItem key={school._id} value={school._id}>
                       {school.name}
                     </SelectItem>
                   ))}
+                  {hasMoreSchools && (
+                    <div
+                      className="relative flex cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        if (!schoolsLoading && hasMoreSchools) {
+                          loadMoreSchools();
+                        }
+                      }}
+                      onMouseDown={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                      }}
+                    >
+                      <div className="flex items-center justify-center w-full py-2">
+                        {schoolsLoading ? (
+                          <>
+                            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                            Loading...
+                          </>
+                        ) : (
+                          "Load More Schools"
+                        )}
+                      </div>
+                    </div>
+                  )}
                 </SelectContent>
               </Select>
             </div>

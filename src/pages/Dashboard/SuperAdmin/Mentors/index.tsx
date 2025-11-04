@@ -28,6 +28,10 @@ import { useNavigate } from "react-router-dom";
 import axiosInstance from "@/api/axiosInstance";
 import { ResetPasswordDialog } from "@/components/ResetPasswordDialog";
 import ProfilePictureDisplay from "@/components/ProfilePictureDisplay";
+import { usePaginatedSelect } from "@/hooks/usePaginatedSelect";
+import { schoolService } from "@/api/schoolService";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Loader2 } from "lucide-react";
 
 interface School {
   _id: string;
@@ -60,7 +64,11 @@ export default function MentorsPage() {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedSchool, setSelectedSchool] = useState("");
-  const [schools, setSchools] = useState<School[]>([]);
+  // Table pagination
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+  const [total, setTotal] = useState(0);
+  const [pages, setPages] = useState(1);
   const [resetPasswordUser, setResetPasswordUser] = useState<{
     id: string;
     name: string;
@@ -76,8 +84,28 @@ export default function MentorsPage() {
 
   useEffect(() => {
     fetchMentors();
-    fetchSchools();
-  }, []);
+  }, [page, pageSize]);
+
+  // Load schools with pagination
+  const loadSchools = async (page: number, limit: number) => {
+    try {
+      const response = await schoolService.getAll({ page, limit });
+      return response;
+    } catch (error) {
+      console.error("Error loading schools:", error);
+      return { success: false, data: [], pagination: undefined };
+    }
+  };
+
+  const {
+    items: paginatedSchools,
+    loading: schoolsLoading,
+    hasMore: hasMoreSchools,
+    loadMore: loadMoreSchools,
+  } = usePaginatedSelect({
+    fetchFunction: loadSchools,
+    limit: 20,
+  });
 
   useEffect(() => {
     filterMentors();
@@ -85,21 +113,23 @@ export default function MentorsPage() {
 
   const fetchMentors = async () => {
     try {
-      const response = await axiosInstance.get("/mentors");
-      setMentors(response.data.data);
+      const params = new URLSearchParams();
+      params.append("page", String(page));
+      params.append("limit", String(pageSize));
+      const response = await axiosInstance.get(`/mentors?${params.toString()}`);
+      const data = response.data;
+      setMentors(data.data || []);
+      if (data.pagination) {
+        setTotal(data.pagination.total || 0);
+        setPages(data.pagination.pages || 1);
+      } else {
+        setTotal((data.data || []).length);
+        setPages(1);
+      }
     } catch (error) {
       console.error("Error fetching mentors:", error);
     } finally {
       setLoading(false);
-    }
-  };
-
-  const fetchSchools = async () => {
-    try {
-      const response = await axiosInstance.get("/schools");
-      setSchools(response.data.data);
-    } catch (error) {
-      console.error("Error fetching schools:", error);
     }
   };
 
@@ -190,21 +220,75 @@ export default function MentorsPage() {
                 />
               </div>
             </div>
-            <select
-              value={selectedSchool}
-              onChange={(e) => setSelectedSchool(e.target.value)}
-              className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            <Select
+              value={selectedSchool || "all"}
+              onValueChange={(value) => setSelectedSchool(value === "all" ? "" : value)}
             >
-              <option value="">All Schools</option>
-              {schools.map((school) => (
-                <option key={school._id} value={school._id}>
-                  {school.name} - {school.city}
-                </option>
-              ))}
-            </select>
+              <SelectTrigger className="min-w-[200px]">
+                <SelectValue placeholder="All Schools" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Schools</SelectItem>
+                {paginatedSchools.map((school) => (
+                  <SelectItem key={school._id} value={school._id}>
+                    {school.name} - {school.city}
+                  </SelectItem>
+                ))}
+                {hasMoreSchools && (
+                  <div
+                    className="relative flex cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      if (!schoolsLoading && hasMoreSchools) {
+                        loadMoreSchools();
+                      }
+                    }}
+                    onMouseDown={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                    }}
+                  >
+                    <div className="flex items-center justify-center w-full py-2">
+                      {schoolsLoading ? (
+                        <>
+                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                          Loading...
+                        </>
+                      ) : (
+                        "Load More Schools"
+                      )}
+                    </div>
+                  </div>
+                )}
+              </SelectContent>
+            </Select>
           </div>
         </CardContent>
       </Card>
+
+      {total > 0 && (
+        <div className="flex items-center justify-between gap-3 py-2">
+          <div className="text-sm text-gray-600">
+            Showing {mentors.length ? (page - 1) * pageSize + 1 : 0} - {Math.min(page * pageSize, total)} of {total}
+          </div>
+          <div className="flex items-center gap-2">
+            <Select value={String(pageSize)} onValueChange={(v) => { setPageSize(Number(v)); setPage(1); }}>
+              <SelectTrigger className="h-9 w-[110px]"><SelectValue placeholder="Rows per page" /></SelectTrigger>
+              <SelectContent>
+                {[10, 20, 30, 40, 50].map((n) => (
+                  <SelectItem key={n} value={String(n)}>
+                    {n} / page
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Button variant="outline" size="sm" disabled={page <= 1 || loading} onClick={() => setPage((p) => Math.max(1, p - 1))}>Prev</Button>
+            <div className="text-sm">Page {page} of {Math.max(1, pages)}</div>
+            <Button variant="outline" size="sm" disabled={page >= pages || loading} onClick={() => setPage((p) => Math.min(pages, p + 1))}>Next</Button>
+          </div>
+        </div>
+      )}
 
       {/* Mentors Table */}
       <Table>
@@ -321,6 +405,33 @@ export default function MentorsPage() {
           </TableBody>
         </Table>
 
+      {total > 0 && (
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-3 mt-4">
+          <div className="text-sm text-gray-600">
+            Showing {mentors.length ? (page - 1) * pageSize + 1 : 0} - {Math.min(page * pageSize, total)} of {total}
+          </div>
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2">
+              <span className="text-sm">Rows per page</span>
+              <Select value={String(pageSize)} onValueChange={(v) => { setPageSize(Number(v)); setPage(1); }}>
+                <SelectTrigger className="h-9 w-[90px]"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  {[10, 20, 30, 40, 50].map((n) => (
+                    <SelectItem key={n} value={String(n)}>
+                      {n}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex items-center gap-2">
+              <Button variant="outline" disabled={page <= 1 || loading} onClick={() => setPage((p) => Math.max(1, p - 1))}>Prev</Button>
+              <div className="text-sm">Page {page} of {Math.max(1, pages)}</div>
+              <Button variant="outline" disabled={page >= pages || loading} onClick={() => setPage((p) => Math.min(pages, p + 1))}>Next</Button>
+            </div>
+          </div>
+        </div>
+      )}
       {filteredMentors.length === 0 && (
         <Card>
           <CardContent className="text-center py-8">
