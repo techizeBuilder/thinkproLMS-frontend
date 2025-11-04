@@ -38,7 +38,7 @@ export default function LeadMentorAssessmentReportsPage() {
   // Filter options
   const [schools, setSchools] = useState<any[]>([]);
   const [mentors, setMentors] = useState<any[]>([]);
-  const [grades] = useState([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
+  const [grades, setGrades] = useState<number[]>([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
   const [statuses] = useState([
     { value: 'draft', label: 'Draft' },
     { value: 'published', label: 'Published' },
@@ -52,6 +52,38 @@ export default function LeadMentorAssessmentReportsPage() {
   useEffect(() => {
     loadAssessments();
   }, [filters]);
+
+  // Load grades based on selected school
+  useEffect(() => {
+    const loadGradesForSchool = async () => {
+      if (filters.school) {
+        try {
+          const serviceDetailsResponse = await schoolService.getServiceDetails(filters.school);
+          if (serviceDetailsResponse.success && serviceDetailsResponse.data.grades) {
+            // Extract just the grade numbers from the service details
+            const availableGrades = serviceDetailsResponse.data.grades.map((gradeData) => gradeData.grade);
+            setGrades(availableGrades);
+            // Clear grade filter if current grade is not in available grades
+            if (filters.grade && !availableGrades.includes(Number(filters.grade))) {
+              setFilters(prev => ({ ...prev, grade: undefined }));
+            }
+          } else {
+            // Fallback to default grades if no service details
+            setGrades([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
+          }
+        } catch (error) {
+          console.error("Error loading school service details:", error);
+          // Fallback to default grades if service details fetch fails
+          setGrades([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
+        }
+      } else {
+        // No school selected - show all grades
+        setGrades([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
+      }
+    };
+
+    loadGradesForSchool();
+  }, [filters.school]);
 
   const loadData = async () => {
     try {
@@ -189,7 +221,7 @@ export default function LeadMentorAssessmentReportsPage() {
                 <SelectContent>
                   <SelectItem value="all">All Mentors</SelectItem>
                   {mentors.map(mentor => (
-                    <SelectItem key={mentor._id} value={mentor._id}>
+                    <SelectItem key={mentor._id} value={mentor.user._id}>
                       {mentor.user.name} ({mentor.user.email})
                     </SelectItem>
                   ))}

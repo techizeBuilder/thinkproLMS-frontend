@@ -188,7 +188,7 @@ export default function SchoolAdminAssessmentReportsPage() {
                 <SelectContent>
                   <SelectItem value="all">All Mentors</SelectItem>
                   {mentors.map(mentor => (
-                    <SelectItem key={mentor._id} value={mentor._id}>
+                    <SelectItem key={mentor._id} value={mentor.user._id}>
                       {mentor.user.name} ({mentor.user.email})
                     </SelectItem>
                   ))}
