@@ -58,6 +58,7 @@ import EditSuperAdminMentorPage from "../pages/Dashboard/SuperAdmin/Mentors/Edit
 import SuperAdminSessionProgressPage from "../pages/Dashboard/SuperAdmin/SessionProgress";
 import ActivityLogsPage from "../pages/Dashboard/SuperAdmin/ActivityLogs";
 import SuperAdminAssessmentReportsPage from "../pages/Dashboard/SuperAdmin/AssessmentReports";
+import AccessReportsPage from "../pages/Dashboard/Reports/AccessReports";
 
 // LeadMentor Edit Components (re-exported from SuperAdmin)
 import LeadMentorEditSchoolAdminPage from "../pages/Dashboard/LeadMentor/SchoolAdmins/Edit";
@@ -520,6 +521,9 @@ export default function AppRouter() {
 
           {/* Activity Logs */}
           <Route path="activity-logs" element={<ActivityLogsPage />} />
+
+          {/* Access Reports */}
+          <Route path="access-reports" element={<AccessReportsPage />} />
         </Route>
 
         {/* Admin */}
@@ -718,6 +722,9 @@ export default function AppRouter() {
 
           {/* Notifications */}
           <Route path="notifications" element={<LeadMentorNotifications />} />
+
+          {/* Access Reports */}
+          <Route path="access-reports" element={<AccessReportsPage />} />
         </Route>
 
         {/* Mentor */}

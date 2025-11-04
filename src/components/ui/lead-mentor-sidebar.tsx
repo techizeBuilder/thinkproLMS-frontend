@@ -27,6 +27,7 @@ import {
   MessageSquare,
   Bell,
   Building2,
+  FileBarChart,
 } from "lucide-react";
 import { LogoutButton } from "@/components/ui/logout-button";
 import { Badge } from "@/components/ui/badge";
@@ -166,6 +167,14 @@ export function LeadMentorSidebar({ className }: LeadMentorSidebarProps) {
           <SidebarNav>
             <SidebarNavItem to="/leadmentor/resources" icon={FileText}>
               Resources
+            </SidebarNavItem>
+          </SidebarNav>
+        </SidebarGroup>
+
+        <SidebarGroup label="Reports">
+          <SidebarNav>
+            <SidebarNavItem to="/leadmentor/access-reports" icon={FileBarChart}>
+              Access Reports
             </SidebarNavItem>
           </SidebarNav>
         </SidebarGroup>

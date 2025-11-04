@@ -29,13 +29,6 @@ interface NewMessageDialogProps {
   onSelectUser: (userId: string) => void;
 }
 
-interface School {
-  _id: string;
-  name: string;
-  city: string;
-  state: string;
-}
-
 const NewMessageDialog: React.FC<NewMessageDialogProps> = ({ onSelectUser }) => {
   const [open, setOpen] = useState(false);
   const [users, setUsers] = useState<User[]>([]);

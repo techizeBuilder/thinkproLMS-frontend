@@ -15,10 +15,13 @@ import {
 import type { ApiResource } from '@/types/resources';
 import { useNavigate } from 'react-router-dom';
 import { resourceService } from '@/api/resourceService';
+import analyticsService from '@/api/analyticsService';
 import { toast } from 'sonner';
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function StudentResourcesPage() {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [selectedBucket, setSelectedBucket] = useState<'documents' | 'videos'>('documents');
   const [resources, setResources] = useState<ApiResource[]>([]);
   const [loading, setLoading] = useState(true);
@@ -49,11 +52,17 @@ export default function StudentResourcesPage() {
     resource => resource.type === 'video'
   );
 
-  const handleViewResource = (resource: ApiResource) => {
+  const handleViewResource = async (resource: ApiResource) => {
     if (resource.type === 'video') {
       navigate(`/student/resources/${resource._id}/view`);
     } else {
-      // For documents, open in new tab
+      // For documents, track access and then open in new tab
+      try {
+        // Track document access when clicking eye icon
+        await analyticsService.startAccess(resource._id, (user as any)?.grade, undefined);
+      } catch (e) {
+        console.error('Error tracking document access:', e);
+      }
       const url = resourceService.getResourceUrl(resource);
       window.open(url, '_blank');
     }

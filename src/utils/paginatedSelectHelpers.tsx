@@ -1,4 +1,3 @@
-import React from 'react';
 import { SelectItem } from '@/components/ui/select';
 import { Loader2 } from 'lucide-react';
 

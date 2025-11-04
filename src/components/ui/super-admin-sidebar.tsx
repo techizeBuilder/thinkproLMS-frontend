@@ -29,6 +29,7 @@ import {
   MessageSquare,
   Bell,
   Activity,
+  FileBarChart,
 } from "lucide-react";
 import { LogoutButton } from "@/components/ui/logout-button";
 import { Button } from "@/components/ui/button";
@@ -181,6 +182,14 @@ export function SuperAdminSidebar({ className }: SuperAdminSidebarProps) {
           <SidebarNav>
             <SidebarNavItem to="/superadmin/resources" icon={FileText}>
               Resources
+            </SidebarNavItem>
+          </SidebarNav>
+        </SidebarGroup>
+
+        <SidebarGroup label="Reports">
+          <SidebarNav>
+            <SidebarNavItem to="/superadmin/access-reports" icon={FileBarChart}>
+              Access Reports
             </SidebarNavItem>
           </SidebarNav>
         </SidebarGroup>

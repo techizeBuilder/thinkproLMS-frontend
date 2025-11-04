@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -16,6 +16,7 @@ import type { ApiResource } from '@/types/resources';
 import { resourceService } from '@/api/resourceService';
 import { getResourceDisplayUrl } from '@/utils/resourceUtils';
 import { toast } from 'sonner';
+import analyticsService from '@/api/analyticsService';
 
 export default function StudentResourceViewPage() {
   const navigate = useNavigate();
@@ -23,6 +24,16 @@ export default function StudentResourceViewPage() {
   
   const [resource, setResource] = useState<ApiResource | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [sessionIndex, setSessionIndex] = useState<number | null>(null);
+  const heartbeatRef = useRef<number | null>(null);
+  const videoRef = useRef<HTMLVideoElement | null>(null);
+  const iframeRef = useRef<HTMLIFrameElement | null>(null);
+  const lastProgressSentAtRef = useRef<number>(0);
+  const lastVideoPositionRef = useRef<number>(0);
+  const videoPlayStartTimeRef = useRef<number | null>(null);
+  const isVideoPlayingRef = useRef<boolean>(false);
+  const externalVideoWatchTimeRef = useRef<number>(0);
+  const externalVideoStartTimeRef = useRef<number | null>(null);
 
   useEffect(() => {
     const loadResource = async () => {
@@ -43,8 +54,133 @@ export default function StudentResourceViewPage() {
     loadResource();
   }, [id]);
 
-  const handleExternalOpen = () => {
+  // Start/stop tracking for student access
+  useEffect(() => {
+    const startTracking = async () => {
+      if (!resource) return;
+      try {
+        // For documents, always track access when page loads
+        const started = await analyticsService.startAccess(resource._id, (resource as any).grade, undefined);
+        setSessionIndex(started.sessionIndex);
+        
+        // Only start heartbeat for videos (not needed for documents)
+        if (resource.type === 'video') {
+          heartbeatRef.current = window.setInterval(() => {
+            if (started.sessionIndex != null) {
+              analyticsService.heartbeat(resource._id, started.sessionIndex, 10).catch(() => {});
+            }
+          }, 10000);
+        }
+      } catch (e) {
+        console.error('Error starting access tracking:', e);
+      }
+    };
+    startTracking();
+    return () => {
+      if (heartbeatRef.current) {
+        clearInterval(heartbeatRef.current);
+        heartbeatRef.current = null;
+      }
+      if (resource && sessionIndex != null) {
+        analyticsService.endAccess(resource._id, sessionIndex).catch(() => {});
+      }
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [resource?._id]);
+
+  // Track external video (YouTube/Vimeo) watch time
+  useEffect(() => {
+    if (!resource || !resource.content.isExternal || resource.type !== 'video' || sessionIndex == null) return;
+
+    // Track watch time for external videos using visibility and focus tracking
+    const trackExternalVideo = () => {
+      if (document.visibilityState === 'visible' && document.hasFocus()) {
+        if (!externalVideoStartTimeRef.current) {
+          externalVideoStartTimeRef.current = Date.now();
+        }
+      } else {
+        if (externalVideoStartTimeRef.current) {
+          const watched = (Date.now() - externalVideoStartTimeRef.current) / 1000;
+          externalVideoWatchTimeRef.current += watched;
+          externalVideoStartTimeRef.current = null;
+        }
+      }
+    };
+
+    // Send progress every 30 seconds for external videos
+    const progressInterval = setInterval(() => {
+      if (externalVideoWatchTimeRef.current > 0 && sessionIndex != null) {
+        const timeToSend = externalVideoWatchTimeRef.current;
+        externalVideoWatchTimeRef.current = 0;
+        
+        analyticsService.videoProgress({
+          resourceId: resource._id,
+          sessionIndex,
+          playedDeltaSeconds: timeToSend,
+          lastPositionSeconds: 0, // Can't get exact position for external videos
+          totalDurationSeconds: 0,
+          completed: false,
+        }).catch(() => {});
+      }
+    }, 30000);
+
+    document.addEventListener('visibilitychange', trackExternalVideo);
+    window.addEventListener('blur', () => {
+      if (externalVideoStartTimeRef.current) {
+        const watched = (Date.now() - externalVideoStartTimeRef.current) / 1000;
+        externalVideoWatchTimeRef.current += watched;
+        externalVideoStartTimeRef.current = null;
+      }
+    });
+    window.addEventListener('focus', () => {
+      if (document.visibilityState === 'visible') {
+        externalVideoStartTimeRef.current = Date.now();
+      }
+    });
+
+    // Start tracking when component mounts
+    if (document.visibilityState === 'visible' && document.hasFocus()) {
+      externalVideoStartTimeRef.current = Date.now();
+    }
+
+    return () => {
+      clearInterval(progressInterval);
+      document.removeEventListener('visibilitychange', trackExternalVideo);
+      // Send final watch time before cleanup
+      if (externalVideoStartTimeRef.current) {
+        const watched = (Date.now() - externalVideoStartTimeRef.current) / 1000;
+        externalVideoWatchTimeRef.current += watched;
+      }
+      if (externalVideoWatchTimeRef.current > 0 && sessionIndex != null) {
+        analyticsService.videoProgress({
+          resourceId: resource._id,
+          sessionIndex,
+          playedDeltaSeconds: externalVideoWatchTimeRef.current,
+          lastPositionSeconds: 0,
+          totalDurationSeconds: 0,
+          completed: false,
+        }).catch(() => {});
+      }
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [resource?._id, resource?.content.isExternal, resource?.type, sessionIndex]);
+
+  const handleExternalOpen = async () => {
     if (resource?.content.url) {
+      // Track document access when opened externally - this counts as an access
+      if (resource.type === 'document') {
+        try {
+          // For documents, end current session if exists, then start a new one (increments access count)
+          if (sessionIndex != null) {
+            await analyticsService.endAccess(resource._id, sessionIndex);
+          }
+          // Start new access session (this will increment accessCount in backend)
+          const started = await analyticsService.startAccess(resource._id, (resource as any).grade, undefined);
+          setSessionIndex(started.sessionIndex);
+        } catch (e) {
+          console.error('Error tracking document access:', e);
+        }
+      }
       const url = getResourceDisplayUrl(resource);
       window.open(url, '_blank');
     }
@@ -115,18 +251,92 @@ export default function StudentResourceViewPage() {
               <div className="aspect-video bg-black rounded-lg overflow-hidden">
                 {resource.content.isExternal ? (
                   <iframe
+                    ref={iframeRef}
                     src={embedUrl}
                     className="w-full h-full"
                     frameBorder="0"
                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                     allowFullScreen
                     title={resource.title}
+                    onLoad={() => {
+                      // Start tracking when iframe loads
+                      if (document.visibilityState === 'visible' && document.hasFocus()) {
+                        externalVideoStartTimeRef.current = Date.now();
+                      }
+                    }}
                   />
                 ) : (
                   <video
                     controls
                     className="w-full h-full"
                     src={resourceService.getResourceUrl(resource)}
+                    ref={videoRef}
+                    onPlay={() => {
+                      if (videoRef.current) {
+                        isVideoPlayingRef.current = true;
+                        videoPlayStartTimeRef.current = Date.now();
+                        lastVideoPositionRef.current = videoRef.current.currentTime || 0;
+                      }
+                    }}
+                    onPause={() => {
+                      if (videoRef.current && isVideoPlayingRef.current && videoPlayStartTimeRef.current) {
+                        isVideoPlayingRef.current = false;
+                        const elapsed = (Date.now() - videoPlayStartTimeRef.current) / 1000;
+                        const actualPlayed = Math.min(elapsed, videoRef.current.currentTime - lastVideoPositionRef.current);
+                        if (actualPlayed > 0 && sessionIndex != null) {
+                          analyticsService.videoProgress({
+                            resourceId: resource._id,
+                            sessionIndex,
+                            playedDeltaSeconds: actualPlayed,
+                            lastPositionSeconds: Math.floor(videoRef.current.currentTime || 0),
+                            totalDurationSeconds: Math.floor(videoRef.current.duration || 0),
+                            completed: videoRef.current.currentTime >= (videoRef.current.duration || 0) - 1,
+                          }).catch(() => {});
+                        }
+                        videoPlayStartTimeRef.current = null;
+                      }
+                    }}
+                    onTimeUpdate={() => {
+                      if (!resource || sessionIndex == null || !videoRef.current || !isVideoPlayingRef.current) return;
+                      const now = Date.now();
+                      const el = videoRef.current;
+                      
+                      // Send progress every 10 seconds or on significant position change
+                      if (now - lastProgressSentAtRef.current >= 10000 || Math.abs(el.currentTime - lastVideoPositionRef.current) >= 5) {
+                        const timeDiff = el.currentTime - lastVideoPositionRef.current;
+                        if (timeDiff > 0 && timeDiff <= 15) { // Sanity check: max 15 seconds between updates
+                          lastProgressSentAtRef.current = now;
+                          lastVideoPositionRef.current = el.currentTime;
+                          
+                          analyticsService.videoProgress({
+                            resourceId: resource._id,
+                            sessionIndex,
+                            playedDeltaSeconds: timeDiff,
+                            lastPositionSeconds: Math.floor(el.currentTime || 0),
+                            totalDurationSeconds: Math.floor(el.duration || 0),
+                            completed: el.currentTime >= (el.duration || 0) - 1,
+                          }).catch(() => {});
+                        }
+                      }
+                    }}
+                    onEnded={() => {
+                      if (videoRef.current && sessionIndex != null) {
+                        const finalPosition = videoRef.current.currentTime || 0;
+                        const timeDiff = finalPosition - lastVideoPositionRef.current;
+                        if (timeDiff > 0) {
+                          analyticsService.videoProgress({
+                            resourceId: resource._id,
+                            sessionIndex,
+                            playedDeltaSeconds: timeDiff,
+                            lastPositionSeconds: Math.floor(finalPosition),
+                            totalDurationSeconds: Math.floor(videoRef.current.duration || 0),
+                            completed: true,
+                          }).catch(() => {});
+                        }
+                        isVideoPlayingRef.current = false;
+                        videoPlayStartTimeRef.current = null;
+                      }
+                    }}
                   >
                     Your browser does not support the video tag.
                   </video>

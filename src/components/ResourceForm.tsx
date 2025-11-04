@@ -16,7 +16,6 @@ import { moduleService, type Module } from '@/api/moduleService';
 import { schoolService } from '@/api/schoolService';
 import { usePaginatedSelect } from '@/hooks/usePaginatedSelect';
 import { Loader2 } from 'lucide-react';
-import type { School } from '@/api/schoolService';
 
 const resourceSchema = z.object({
   title: z.string().min(1, 'Title is required'),
