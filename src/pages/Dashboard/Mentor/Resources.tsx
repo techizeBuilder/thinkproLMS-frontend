@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
@@ -10,32 +9,49 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 import { 
   FileText, 
   Video, 
   Users, 
   GraduationCap,
-  FolderOpen,
   Eye,
   ExternalLink,
   Download,
   Search,
-  Loader2
+  Loader2,
+  Calendar,
+  User,
+  SortAsc,
+  SortDesc,
 } from 'lucide-react';
 import type { UserType, BucketType } from '@/types/resources';
 import type { Resource as ApiResource, ResourceFilters } from '@/api/resourceService';
 import { resourceService } from '@/api/resourceService';
-import { getResourceDisplayUrl } from '@/utils/resourceUtils';
+import {
+  getResourceDisplayUrl,
+  getFileTypeBadgeColor,
+} from '@/utils/resourceUtils';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 
 export default function MentorResourcesPage() {
   const navigate = useNavigate();
   const [selectedUserType, setSelectedUserType] = useState<UserType>('student');
-  const [selectedBucket, setSelectedBucket] = useState<BucketType>('documents');
+  const [selectedBucket, setSelectedBucket] = useState<BucketType | 'all'>('all');
+  const [selectedGrade, setSelectedGrade] = useState<string | 'all'>('all');
   const [resources, setResources] = useState<ApiResource[]>([]);
   const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
+  const [sortBy, setSortBy] = useState<'title' | 'createdAt' | 'viewCount'>('createdAt');
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
   const [pagination, setPagination] = useState({
     current: 1,
     pages: 1,
@@ -47,12 +63,21 @@ export default function MentorResourcesPage() {
     setLoading(true);
     try {
       const filters: ResourceFilters = {
-        type: selectedBucket === 'videos' ? 'video' : 'document',
         category: selectedUserType,
         search: searchTerm || undefined,
         page,
-        limit: 10,
+        limit: 20, // Increased limit for table view
       };
+
+      // Only add type filter if not 'all'
+      if (selectedBucket !== 'all') {
+        filters.type = selectedBucket === 'videos' ? 'video' : 'document';
+      }
+
+      // Add grade filter if selected
+      if (selectedGrade !== 'all') {
+        filters.grade = String(selectedGrade);
+      }
 
       // Use getAll for mentors since they can access both student and mentor resources
       const response = await resourceService.getAll(filters);
@@ -69,7 +94,25 @@ export default function MentorResourcesPage() {
   // Fetch resources when filters change
   useEffect(() => {
     fetchResources(1);
-  }, [selectedUserType, selectedBucket, searchTerm]);
+  }, [selectedUserType, selectedBucket, searchTerm, selectedGrade]);
+
+  const handlePageChange = (page: number) => {
+    fetchResources(page);
+  };
+
+  const handleSort = (field: 'title' | 'createdAt' | 'viewCount') => {
+    if (sortBy === field) {
+      setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortBy(field);
+      setSortOrder('asc');
+    }
+  };
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    fetchResources(1);
+  };
 
   const handleViewResource = (resource: ApiResource) => {
     if (resource.type === 'video') {
@@ -81,41 +124,45 @@ export default function MentorResourcesPage() {
     }
   };
 
-  const handleDownloadResource = (resource: ApiResource) => {
-    if (resource.content.url) {
-      // Create a temporary link to download the file
-      const link = document.createElement('a');
-      link.href = resource.content.url;
-      link.download = resource.title;
-      link.target = '_blank';
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-    }
-  };
-
   const getResourceIcon = (type: string) => {
     return type === 'video' ? <Video className="h-5 w-5" /> : <FileText className="h-5 w-5" />;
   };
 
   const getFileTypeBadge = (resource: ApiResource) => {
-    const url = resource.content.url;
-    if (!url) return null;
-    
-    const extension = url.split('.').pop()?.toLowerCase();
-    const isLink = url.startsWith('http');
-    
-    if (isLink) {
-      if (url.includes('youtube.com') || url.includes('youtu.be')) {
-        return <Badge variant="secondary">YouTube</Badge>;
-      } else if (url.includes('vimeo.com')) {
-        return <Badge variant="secondary">Vimeo</Badge>;
+    const extension =
+      resource.content.fileName?.split('.').pop()?.toLowerCase() || '';
+    const colorClass = getFileTypeBadgeColor(resource);
+
+    if (resource.content.isExternal) {
+      if (
+        resource.content.url.includes('youtube.com') ||
+        resource.content.url.includes('youtu.be')
+      ) {
+        return <Badge className="bg-red-100 text-red-800">YouTube</Badge>;
+      } else if (resource.content.url.includes('vimeo.com')) {
+        return <Badge className="bg-blue-100 text-blue-800">Vimeo</Badge>;
       } else {
-        return <Badge variant="secondary">Link</Badge>;
+        return <Badge className="bg-gray-100 text-gray-800">Link</Badge>;
       }
     }
-    
-    return <Badge variant="outline">{extension?.toUpperCase()}</Badge>;
+
+    switch (extension) {
+      case 'pdf':
+        return <Badge className={colorClass}>PDF</Badge>;
+      case 'doc':
+      case 'docx':
+        return <Badge className={colorClass}>Word</Badge>;
+      case 'xls':
+      case 'xlsx':
+        return <Badge className={colorClass}>Excel</Badge>;
+      case 'ppt':
+      case 'pptx':
+        return <Badge className={colorClass}>PowerPoint</Badge>;
+      case 'mp4':
+        return <Badge className={colorClass}>MP4</Badge>;
+      default:
+        return <Badge className={colorClass}>{extension.toUpperCase()}</Badge>;
+    }
   };
 
   return (
@@ -130,21 +177,29 @@ export default function MentorResourcesPage() {
       </div>
 
       {/* Search Bar */}
-      <div className="flex items-center space-x-2">
+      <form onSubmit={handleSearch} className="flex items-center space-x-2">
         <div className="relative flex-1 max-w-md">
           <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
           <Input
+            type="text"
             placeholder="Search resources..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="pl-8 text-sm"
           />
         </div>
-      </div>
+        <Button type="submit" variant="outline">
+          Search
+        </Button>
+      </form>
 
       {/* Filters (dropdowns like superadmin/resources) */}
       <div className="flex flex-wrap items-center gap-2">
-        <Select value={selectedUserType} onValueChange={(v: UserType) => setSelectedUserType(v)}>
+        <Select value={selectedUserType} onValueChange={(v: UserType) => {
+          setSelectedUserType(v);
+          // Reset grade filter when switching category
+          setSelectedGrade('all');
+        }}>
           <SelectTrigger className="w-[160px] text-sm">
             <SelectValue placeholder="Audience" />
           </SelectTrigger>
@@ -158,11 +213,14 @@ export default function MentorResourcesPage() {
           </SelectContent>
         </Select>
 
-        <Select value={selectedBucket} onValueChange={(v: BucketType) => setSelectedBucket(v)}>
+        <Select value={selectedBucket} onValueChange={(v: BucketType | 'all') => setSelectedBucket(v)}>
           <SelectTrigger className="w-[160px] text-sm">
             <SelectValue placeholder="Type" />
           </SelectTrigger>
           <SelectContent>
+            <SelectItem value="all">
+              <div className="flex items-center gap-2"><FileText className="h-4 w-4" /> All Types</div>
+            </SelectItem>
             <SelectItem value="documents">
               <div className="flex items-center gap-2"><FileText className="h-4 w-4" /> Documents</div>
             </SelectItem>
@@ -171,90 +229,253 @@ export default function MentorResourcesPage() {
             </SelectItem>
           </SelectContent>
         </Select>
+
+        <Select value={selectedGrade} onValueChange={(value) => setSelectedGrade(value as string | 'all')}>
+          <SelectTrigger className="w-[160px] text-sm">
+            <SelectValue placeholder="Select grade" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Grades</SelectItem>
+            {Array.from({ length: 10 }, (_, i) => String(i + 1)).map((g) => (
+              <SelectItem key={g} value={g}>Grade {g}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
 
-      {/* Content */}
-      <div className="space-y-3 md:space-y-4">
-        <div className="flex items-center gap-2">
-          {(selectedBucket === 'videos') ? (
-            <Video className="h-4 w-4 md:h-5 md:w-5" />
-          ) : (
-            <FolderOpen className="h-4 w-4 md:h-5 md:w-5" />
-          )}
-          <h2 className="text-lg md:text-xl font-semibold">
-            {selectedUserType === 'student' ? 'Student' : 'Mentor'} {selectedBucket === 'videos' ? 'Videos' : 'Documents'}
-          </h2>
-          <Badge variant="outline" className="text-xs">{pagination.total}</Badge>
+      {/* Resources Table */}
+      <div className="space-y-4">
+        {/* Table Header with Stats */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <h2 className="text-xl font-semibold">
+              {selectedUserType === 'student' ? 'Student' : 'Mentor'} {
+                selectedBucket === 'all' 
+                  ? 'Resources' 
+                  : selectedBucket === 'videos' 
+                    ? 'Videos' 
+                    : 'Documents'
+              }
+            </h2>
+            <Badge variant="outline" className="text-sm">
+              {pagination.total} resources
+            </Badge>
+          </div>
         </div>
 
-        {loading ? (
-          <div className="flex items-center justify-center py-8">
-            <Loader2 className="h-5 w-5 md:h-6 md:w-6 animate-spin" />
-            <span className="ml-2 text-sm md:text-base">Loading...</span>
-          </div>
-        ) : (
-          <div className="grid gap-3 md:gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
-            {resources.map((resource) => (
-              <Card key={resource._id} className="hover:shadow-md transition-shadow">
-                <CardHeader className="pb-2 md:pb-3">
-                  <div className="flex items-start justify-between gap-2">
-                    <div className="flex items-center gap-2 min-w-0">
-                      {getResourceIcon(resource.type)}
-                      <CardTitle className="text-sm md:text-lg truncate">{resource.title}</CardTitle>
-                    </div>
-                    {getFileTypeBadge(resource)}
-                  </div>
-                  {resource.description && (
-                    <CardDescription className="text-xs md:text-sm line-clamp-2">{resource.description}</CardDescription>
-                  )}
-                </CardHeader>
-                <CardContent className="pt-0">
-                  <div className="flex flex-col gap-2">
-                    <div className="flex flex-wrap gap-1">
-                      {resource.tags?.slice(0, 3).map((tag) => (
-                        <Badge key={tag} variant="secondary" className="text-[10px] md:text-xs">
-                          {tag}
-                        </Badge>
+        {/* Table */}
+        <div className="border rounded-lg">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="w-[50px]">Type</TableHead>
+                <TableHead
+                  className="cursor-pointer hover:bg-gray-50"
+                  onClick={() => handleSort('title')}
+                >
+                  <div className="flex items-center gap-2">
+                    Title
+                    {sortBy === 'title' &&
+                      (sortOrder === 'asc' ? (
+                        <SortAsc className="h-4 w-4" />
+                      ) : (
+                        <SortDesc className="h-4 w-4" />
                       ))}
-                    </div>
-                    <div className="flex gap-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleViewResource(resource)}
-                        className="flex-1 text-xs md:text-sm"
+                  </div>
+                </TableHead>
+                <TableHead>Description</TableHead>
+                <TableHead>Session</TableHead>
+                <TableHead>Tags</TableHead>
+                <TableHead
+                  className="cursor-pointer hover:bg-gray-50"
+                  onClick={() => handleSort('viewCount')}
+                >
+                  <div className="flex items-center gap-2">
+                    Views
+                    {sortBy === 'viewCount' &&
+                      (sortOrder === 'asc' ? (
+                        <SortAsc className="h-4 w-4" />
+                      ) : (
+                        <SortDesc className="h-4 w-4" />
+                      ))}
+                  </div>
+                </TableHead>
+                <TableHead
+                  className="cursor-pointer hover:bg-gray-50"
+                  onClick={() => handleSort('createdAt')}
+                >
+                  <div className="flex items-center gap-2">
+                    Created
+                    {sortBy === 'createdAt' &&
+                      (sortOrder === 'asc' ? (
+                        <SortAsc className="h-4 w-4" />
+                      ) : (
+                        <SortDesc className="h-4 w-4" />
+                      ))}
+                  </div>
+                </TableHead>
+                <TableHead>Uploaded By</TableHead>
+                <TableHead className="text-right">Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {loading ? (
+                <TableRow>
+                  <TableCell colSpan={9} className="text-center py-8">
+                    <Loader2 className="h-8 w-8 animate-spin mx-auto" />
+                  </TableCell>
+                </TableRow>
+              ) : resources.length === 0 ? (
+                <TableRow>
+                  <TableCell
+                    colSpan={9}
+                    className="text-center py-8 text-gray-500"
+                  >
+                    No resources found
+                  </TableCell>
+                </TableRow>
+              ) : (
+                resources.map((resource) => (
+                  <TableRow key={resource._id} className="hover:bg-gray-50">
+                    <TableCell>
+                      <div className="flex items-center gap-2">
+                        {getResourceIcon(resource.type)}
+                        {getFileTypeBadge(resource)}
+                      </div>
+                    </TableCell>
+                    <TableCell className="font-medium">
+                      <div
+                        className="max-w-[200px] truncate"
+                        title={resource.title}
                       >
-                        <Eye className="h-3 w-3 md:h-4 md:w-4 mr-1" />
-                        View
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => {
-                          if (resource.type === 'video') {
-                            const url = getResourceDisplayUrl(resource);
-                            window.open(url, '_blank');
-                          } else {
-                            handleDownloadResource(resource);
-                          }
-                        }}
-                        className="flex-1 text-xs md:text-sm"
+                        {resource.title}
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div
+                        className="max-w-[250px] truncate text-sm text-gray-600"
+                        title={resource.description}
                       >
-                        {(resource.type === 'video') ? (
-                          <ExternalLink className="h-3 w-3 md:h-4 md:w-4 mr-1" />
+                        {resource.description || 'No description'}
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="max-w-[150px] truncate text-sm text-gray-600">
+                        {resource.session ? (
+                          <div className="flex flex-col">
+                            <span className="font-medium">
+                              {resource.session.displayName}
+                            </span>
+                          </div>
                         ) : (
-                          <Download className="h-3 w-3 md:h-4 md:w-4 mr-1" />
+                          <span className="text-gray-400">No session</span>
                         )}
-                        {(resource.type === 'video') ? 'Open' : 'Download'}
-                      </Button>
-                    </div>
-                  </div>
-                  <div className="text-[10px] md:text-xs text-muted-foreground mt-2 truncate">
-                    By {resource.uploadedBy?.name || 'Unknown'} • {new Date(resource.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex flex-wrap gap-1 max-w-[150px]">
+                        {resource.tags
+                          .slice(0, 2)
+                          .map((tag: string, index: number) => (
+                            <Badge
+                              key={index}
+                              variant="secondary"
+                              className="text-xs"
+                            >
+                              {tag}
+                            </Badge>
+                          ))}
+                        {resource.tags.length > 2 && (
+                          <Badge variant="outline" className="text-xs">
+                            +{resource.tags.length - 2}
+                          </Badge>
+                        )}
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-1 text-sm text-gray-600">
+                        <Eye className="h-4 w-4" />
+                        {resource.viewCount}
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-1 text-sm text-gray-600">
+                        <Calendar className="h-4 w-4" />
+                        {new Date(resource.createdAt).toLocaleDateString()}
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-1 text-sm text-gray-600">
+                        <User className="h-4 w-4" />
+                        {resource.uploadedBy?.name || 'Unknown'}
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <div className="flex items-center justify-end gap-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleViewResource(resource)}
+                          className="h-8 w-8 p-0"
+                        >
+                          <Eye className="h-4 w-4" />
+                        </Button>
+                        {resource.content.isExternal ? (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                              const url = getResourceDisplayUrl(resource);
+                              window.open(url, '_blank');
+                            }}
+                            className="h-8 w-8 p-0"
+                          >
+                            <ExternalLink className="h-4 w-4" />
+                          </Button>
+                        ) : (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                              const url = getResourceDisplayUrl(resource);
+                              window.open(url, '_blank');
+                            }}
+                            className="h-8 w-8 p-0"
+                          >
+                            <Download className="h-4 w-4" />
+                          </Button>
+                        )}
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
+            </TableBody>
+          </Table>
+        </div>
+
+        {/* Pagination */}
+        {pagination.pages > 1 && (
+          <div className="flex justify-center items-center gap-2 mt-6">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => handlePageChange(pagination.current - 1)}
+              disabled={pagination.current === 1}
+            >
+              Previous
+            </Button>
+            <span className="text-sm text-gray-600">
+              Page {pagination.current} of {pagination.pages}
+            </span>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => handlePageChange(pagination.current + 1)}
+              disabled={pagination.current === pagination.pages}
+            >
+              Next
+            </Button>
           </div>
         )}
       </div>
