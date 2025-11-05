@@ -589,7 +589,7 @@ export default function SessionProgressViewer({
   const filtersCompleted = selectedMentorId && selectedSchoolId;
 
   return (
-    <div className="p-4 space-y-3">
+    <div className="p-4 space-y-3 max-w-full overflow-x-hidden">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-xl font-bold">{title}</h1>
@@ -720,21 +720,21 @@ export default function SessionProgressViewer({
       {filtersCompleted && gradeSectionData.length > 0 && (
         <div className="rounded-lg border border-[var(--border)] bg-card p-3">
           <div className="p-0">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
               <div className="flex items-center gap-2 text-sm font-semibold">
                 <BookOpen className="h-4 w-4" />
                 Session Progress by Grade and Section
               </div>
 
-              <div className="flex items-center gap-2">
+              <div className="w-full sm:w-auto flex flex-wrap items-center gap-2 justify-between sm:justify-end">
                 {/* Search Input */}
-                <div className="relative w-48">
+                <div className="relative w-full sm:w-60">
                   <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-400 h-3 w-3" />
                   <Input
                     placeholder="Search sessions..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pl-7 h-7 text-xs"
+                    className="pl-7 h-9 sm:h-7 text-xs"
                   />
                 </div>
 
@@ -743,7 +743,7 @@ export default function SessionProgressViewer({
                   variant="outline"
                   size="sm"
                   onClick={() => exportToExcel()}
-                  className="h-7 text-xs"
+                  className="h-9 sm:h-7 text-xs w-full sm:w-auto"
                 >
                   <Download className="h-3 w-3 mr-1" />
                   Export Excel

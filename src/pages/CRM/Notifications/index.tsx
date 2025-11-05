@@ -201,7 +201,7 @@ export default function CRMNotificationsPage() {
 
   return (
     <div className="p-6">
-      <div className="mb-6 flex items-center justify-between">
+      <div className="mb-6 flex items-center justify-between flex-wrap gap-2">
         <div className="flex items-center gap-3">
           <Bell className="h-6 w-6 text-gray-700" />
           <h1 className="text-2xl font-semibold text-gray-900">

@@ -289,9 +289,9 @@ export default function ResourcesPage() {
   };
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
+    <div className="container mx-auto p-6 space-y-6 max-w-full overflow-x-hidden">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-3xl font-bold">Resources Management</h1>
           <p className="text-muted-foreground">
@@ -301,7 +301,7 @@ export default function ResourcesPage() {
         {hasPermission(PERMISSIONS.ADD_RESOURCES) && (
           <Button
             onClick={handleAddResource}
-            className="flex items-center gap-2"
+            className="flex items-center gap-2 w-full sm:w-auto"
           >
             <Plus className="h-4 w-4" />
             Add Resource
@@ -311,7 +311,7 @@ export default function ResourcesPage() {
 
       {/* Filters and Search */}
       <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
-        <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
+        <div className="flex w-full sm:w-auto flex-col sm:flex-row gap-4 items-start sm:items-center">
           {/* Category Filter */}
           <div className="flex items-center gap-2">
             <Filter className="h-4 w-4" />
@@ -319,7 +319,7 @@ export default function ResourcesPage() {
               value={selectedUserType}
               onValueChange={(value) => handleFilterChange("category", value)}
             >
-              <SelectTrigger className="w-[180px]">
+              <SelectTrigger className="w-full sm:w-[180px]">
                 <SelectValue placeholder="Select category" />
               </SelectTrigger>
               <SelectContent>
@@ -352,7 +352,7 @@ export default function ResourcesPage() {
             value={selectedBucket}
             onValueChange={(value) => handleFilterChange("type", value)}
           >
-            <SelectTrigger className="w-[180px]">
+            <SelectTrigger className="w-full sm:w-[180px]">
               <SelectValue placeholder="Select type" />
             </SelectTrigger>
             <SelectContent>
@@ -382,7 +382,7 @@ export default function ResourcesPage() {
             value={selectedGrade}
             onValueChange={(value) => setSelectedGrade(value as string | "all")}
           >
-            <SelectTrigger className="w-[160px]">
+            <SelectTrigger className="w-full sm:w-[160px]">
               <SelectValue placeholder="Select grade" />
             </SelectTrigger>
             <SelectContent>
@@ -395,18 +395,18 @@ export default function ResourcesPage() {
         </div>
 
         {/* Search Bar */}
-        <form onSubmit={handleSearch} className="flex items-center gap-2">
-          <div className="relative">
+        <form onSubmit={handleSearch} className="flex w-full sm:w-auto items-center gap-2">
+          <div className="relative w-full sm:w-auto">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
             <Input
               type="text"
               placeholder="Search resources..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10 w-[300px]"
+              className="pl-10 w-full sm:w-[300px]"
             />
           </div>
-          <Button type="submit" variant="outline">
+          <Button type="submit" variant="outline" className="whitespace-nowrap">
             Search
           </Button>
         </form>
@@ -439,7 +439,7 @@ export default function ResourcesPage() {
         </div>
 
         {/* Table */}
-        <div className="border rounded-lg">
+        <div className="border rounded-lg overflow-x-auto">
           <Table>
             <TableHeader>
               <TableRow>
