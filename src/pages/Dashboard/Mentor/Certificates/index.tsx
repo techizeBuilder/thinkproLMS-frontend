@@ -148,18 +148,6 @@ export default function CertificatesPage() {
     navigate(`${getBasePath()}/certificates/${certificateId}`);
   };
 
-  const handlePreviewCertificate = async (certificateId: string) => {
-    try {
-      const response = await certificateService.preview(certificateId);
-      navigate(`${getBasePath()}/certificates/${certificateId}/preview`, { 
-        state: { previewData: response.data } 
-      });
-    } catch (error) {
-      console.error('Error previewing certificate:', error);
-      toast.error('Failed to preview certificate');
-    }
-  };
-
   const handleGenerateCertificates = async (certificateId: string) => {
     try {
       await certificateService.generateAndSend(certificateId);
