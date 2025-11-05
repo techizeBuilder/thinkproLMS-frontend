@@ -190,7 +190,7 @@ export default function ViewCertificate() {
 
       {/* Tabs: Overview / Recipients */}
       <Tabs defaultValue="overview">
-        <TabsList>
+        <TabsList className="bg-secondary">
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="recipients">Recipients</TabsTrigger>
         </TabsList>

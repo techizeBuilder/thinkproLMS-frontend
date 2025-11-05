@@ -97,7 +97,7 @@ function MentorContent() {
             {isMobile && (
               <button
                 onClick={toggle}
-                className="p-2 rounded-md hover:bg-accent md:hidden"
+                className="p-2 rounded-md hover:bg-accent"
                 aria-label="Open menu"
               >
                 <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -135,7 +135,7 @@ function MentorContent() {
           {isMobile && (
             <button
               onClick={toggle}
-              className="p-2 rounded-md hover:bg-accent md:hidden"
+              className="p-2 rounded-md hover:bg-accent"
               aria-label="Open menu"
             >
               <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
