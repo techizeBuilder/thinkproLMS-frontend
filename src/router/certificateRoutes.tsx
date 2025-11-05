@@ -1,10 +1,9 @@
-import { Route } from "react-router-dom";
+import { Route, Navigate } from "react-router-dom";
 import { ProtectedRoute as PermissionProtectedRoute } from "../components/ProtectedRoute";
 
 // Certificate Components
 import CertificatesPage from "../pages/Dashboard/Mentor/Certificates";
 import CreateCertificatePage from "../pages/Dashboard/Mentor/Certificates/CreateCertificate";
-import CertificatePreviewPage from "../pages/Dashboard/Mentor/Certificates/CertificatePreview";
 import ViewCertificatePage from "../pages/Dashboard/Mentor/Certificates/ViewCertificate";
 import StudentCertificatesPage from "../pages/Dashboard/Student/Certificates";
 import StudentCertificateViewPage from "../pages/Dashboard/Student/Certificates/ViewCertificate";
@@ -36,21 +35,14 @@ export const certificateRoutes = (
         </PermissionProtectedRoute>
       } 
     />
+    {/* Deprecated preview routes -> redirect to current pages */}
     <Route 
       path="certificates/preview" 
-      element={
-        <PermissionProtectedRoute requiredPermission="certificate_manage">
-          <CertificatePreviewPage />
-        </PermissionProtectedRoute>
-      } 
+      element={<Navigate to="../certificates" replace />} 
     />
     <Route 
       path="certificates/:id/preview" 
-      element={
-        <PermissionProtectedRoute requiredPermission="certificate_manage">
-          <CertificatePreviewPage />
-        </PermissionProtectedRoute>
-      } 
+      element={<Navigate to="../certificates/:id" replace />} 
     />
   </>
 );

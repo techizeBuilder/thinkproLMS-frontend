@@ -410,14 +410,6 @@ export default function CertificatesPage() {
                       <Eye className="h-4 w-4 mr-2" />
                       View
                     </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handlePreviewCertificate(certificate._id)}
-                    >
-                      <Eye className="h-4 w-4 mr-2" />
-                      Preview
-                    </Button>
                     {certificate.recipients.some(r => r.status === 'generated') && (
                       <Button
                         variant="outline"

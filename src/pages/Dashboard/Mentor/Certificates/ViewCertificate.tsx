@@ -5,7 +5,6 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { 
   ArrowLeft, 
-  Eye, 
   Download, 
   Send,
   FileText,
@@ -14,6 +13,7 @@ import {
   Award,
   User
 } from 'lucide-react';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { certificateService, type Certificate } from '@/api/certificateService';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
@@ -52,17 +52,7 @@ export default function ViewCertificate() {
     }
   };
 
-  const handlePreviewCertificate = async () => {
-    try {
-      const response = await certificateService.preview(id!);
-      navigate(`${getBasePath()}/certificates/${id}/preview`, { 
-        state: { previewData: response.data } 
-      });
-    } catch (error) {
-      console.error('Error previewing certificate:', error);
-      toast.error('Failed to preview certificate');
-    }
-  };
+  
 
   const handleGenerateCertificates = async () => {
     try {
@@ -198,59 +188,125 @@ export default function ViewCertificate() {
         </div>
       </div>
 
-      {/* Certificate Details */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Main Info */}
-        <div className="lg:col-span-2 space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Certificate Details</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="flex items-center gap-2">
-                  <FileText className="h-4 w-4 text-muted-foreground" />
-                  <span className="text-sm text-muted-foreground">School:</span>
-                  <span className="text-sm font-medium">{certificate.school?.name}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Users className="h-4 w-4 text-muted-foreground" />
-                  <span className="text-sm text-muted-foreground">Grade:</span>
-                  <span className="text-sm font-medium">{certificate.grade}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Calendar className="h-4 w-4 text-muted-foreground" />
-                  <span className="text-sm text-muted-foreground">Created:</span>
-                  <span className="text-sm font-medium">
-                    {new Date(certificate.createdAt).toLocaleDateString()}
-                  </span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Award className="h-4 w-4 text-muted-foreground" />
-                  <span className="text-sm text-muted-foreground">Recipients:</span>
-                  <span className="text-sm font-medium">{totalRecipients}</span>
-                </div>
-              </div>
+      {/* Tabs: Overview / Recipients */}
+      <Tabs defaultValue="overview">
+        <TabsList>
+          <TabsTrigger value="overview">Overview</TabsTrigger>
+          <TabsTrigger value="recipients">Recipients</TabsTrigger>
+        </TabsList>
 
-              {certificate.description && (
-                <div>
-                  <span className="text-sm text-muted-foreground">Description:</span>
-                  <p className="text-sm mt-1">{certificate.description}</p>
-                </div>
-              )}
+        <TabsContent value="overview">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Main Info */}
+            <div className="lg:col-span-2 space-y-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Certificate Details</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="flex items-center gap-2">
+                      <FileText className="h-4 w-4 text-muted-foreground" />
+                      <span className="text-sm text-muted-foreground">School:</span>
+                      <span className="text-sm font-medium">{certificate.school?.name}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Users className="h-4 w-4 text-muted-foreground" />
+                      <span className="text-sm text-muted-foreground">Grade:</span>
+                      <span className="text-sm font-medium">{certificate.grade}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Calendar className="h-4 w-4 text-muted-foreground" />
+                      <span className="text-sm text-muted-foreground">Created:</span>
+                      <span className="text-sm font-medium">
+                        {new Date(certificate.createdAt).toLocaleDateString()}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Award className="h-4 w-4 text-muted-foreground" />
+                      <span className="text-sm text-muted-foreground">Recipients:</span>
+                      <span className="text-sm font-medium">{totalRecipients}</span>
+                    </div>
+                  </div>
 
-              {certificate.signature && (
-                <div>
-                  <span className="text-sm text-muted-foreground">Signature:</span>
-                  <p className="text-sm mt-1">
-                    {certificate.signature.name} - {certificate.signature.designation}
-                  </p>
-                </div>
-              )}
-            </CardContent>
-          </Card>
+                  {certificate.description && (
+                    <div>
+                      <span className="text-sm text-muted-foreground">Description:</span>
+                      <p className="text-sm mt-1">{certificate.description}</p>
+                    </div>
+                  )}
 
-          {/* Recipients List */}
+                  {certificate.signature && (
+                    <div>
+                      <span className="text-sm text-muted-foreground">Signature:</span>
+                      <p className="text-sm mt-1">
+                        {certificate.signature.name} - {certificate.signature.designation}
+                      </p>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Actions + Status Summary */}
+            <div className="space-y-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Actions</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  {certificate.recipients.some(r => r.status === 'generated') ? (
+                    <Button
+                      variant="outline"
+                      className="w-full"
+                      onClick={handleGenerateCertificates}
+                    >
+                      <Send className="h-4 w-4 mr-2" />
+                      Resend Certificates
+                    </Button>
+                  ) : (
+                    <Button
+                      className="w-full"
+                      onClick={handleGenerateCertificates}
+                    >
+                      <Download className="h-4 w-4 mr-2" />
+                      Generate Certificates
+                    </Button>
+                  )}
+
+                  {certificate.recipients.some(r => r.status === 'generated' || r.status === 'sent' || r.status === 'downloaded') && (
+                    <Button
+                      variant="outline"
+                      className="w-full"
+                      onClick={handleDownloadAllCertificates}
+                    >
+                      <Download className="h-4 w-4 mr-2" />
+                      Download All Certificates
+                    </Button>
+                  )}
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle>Status Summary</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-2">
+                    {Object.entries(statusCounts).map(([status, count]) => (
+                      <div key={status} className="flex items-center justify-between">
+                        <span className="text-sm text-muted-foreground capitalize">{status}:</span>
+                        <Badge variant="outline">{String(count)}</Badge>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+        </TabsContent>
+
+        <TabsContent value="recipients">
           <Card>
             <CardHeader>
               <CardTitle>Recipients ({totalRecipients})</CardTitle>
@@ -297,74 +353,8 @@ export default function ViewCertificate() {
               </div>
             </CardContent>
           </Card>
-        </div>
-
-        {/* Actions Sidebar */}
-        <div className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Actions</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <Button
-                variant="outline"
-                className="w-full"
-                onClick={handlePreviewCertificate}
-              >
-                <Eye className="h-4 w-4 mr-2" />
-                Preview Certificate
-              </Button>
-              
-              {certificate.recipients.some(r => r.status === 'generated') ? (
-                <Button
-                  variant="outline"
-                  className="w-full"
-                  onClick={handleGenerateCertificates}
-                >
-                  <Send className="h-4 w-4 mr-2" />
-                  Resend Certificates
-                </Button>
-              ) : (
-                <Button
-                  className="w-full"
-                  onClick={handleGenerateCertificates}
-                >
-                  <Download className="h-4 w-4 mr-2" />
-                  Generate Certificates
-                </Button>
-              )}
-
-              {certificate.recipients.some(r => r.status === 'generated' || r.status === 'sent' || r.status === 'downloaded') && (
-                <Button
-                  variant="outline"
-                  className="w-full"
-                  onClick={handleDownloadAllCertificates}
-                >
-                  <Download className="h-4 w-4 mr-2" />
-                  Download All Certificates
-                </Button>
-              )}
-            </CardContent>
-          </Card>
-
-          {/* Status Summary */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Status Summary</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-2">
-                {Object.entries(statusCounts).map(([status, count]) => (
-                  <div key={status} className="flex items-center justify-between">
-                    <span className="text-sm text-muted-foreground capitalize">{status}:</span>
-                    <Badge variant="outline">{String(count)}</Badge>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }
