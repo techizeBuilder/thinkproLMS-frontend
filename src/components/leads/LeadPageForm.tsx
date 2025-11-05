@@ -51,6 +51,7 @@ export default function LeadPageForm({
   const [keyPersonPhoneError, setKeyPersonPhoneError] = useState<string | null>(
     null
   );
+  const [openDatePopovers, setOpenDatePopovers] = useState<Record<string, boolean>>({});
   const [form, setForm] = useState<any>({
     schoolName: "",
     postalAddress: "",
@@ -250,27 +251,42 @@ export default function LeadPageForm({
     await onSubmit(payload);
   };
 
-  const dateField = (label: string, name: string) => (
-    <div className="space-y-2">
-      <Popover>
-        <PopoverTrigger asChild>
-          <Button variant="outline" className="justify-start">
-            <CalendarIcon className="h-4 w-4 mr-2" />
-            {form[name] ? format(new Date(form[name]), "PPP") : `Pick ${label}`}
-          </Button>
-        </PopoverTrigger>
-        <PopoverContent className="p-0 bg-card border border-[var(--border)]">
-          <Calendar
-            mode="single"
-            selected={form[name] ? new Date(form[name]) : undefined}
-            onSelect={(d: any) =>
-              handleSelect(name, d ? d.toISOString().slice(0, 10) : "")
-            }
-          />
-        </PopoverContent>
-      </Popover>
-    </div>
-  );
+  const dateField = (label: string, name: string) => {
+    const formatDateToLocal = (date: Date): string => {
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, "0");
+      const day = String(date.getDate()).padStart(2, "0");
+      return `${year}-${month}-${day}`;
+    };
+
+    return (
+      <div className="space-y-2">
+        <Popover
+          open={openDatePopovers[name] || false}
+          onOpenChange={(open) =>
+            setOpenDatePopovers((prev) => ({ ...prev, [name]: open }))
+          }
+        >
+          <PopoverTrigger asChild>
+            <Button variant="outline" className="justify-start">
+              <CalendarIcon className="h-4 w-4 mr-2" />
+              {form[name] ? format(new Date(form[name]), "PPP") : `Pick ${label}`}
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="p-0 bg-card border border-[var(--border)]">
+            <Calendar
+              mode="single"
+              selected={form[name] ? new Date(form[name]) : undefined}
+              onSelect={(d: any) => {
+                handleSelect(name, d ? formatDateToLocal(d) : "");
+                setOpenDatePopovers((prev) => ({ ...prev, [name]: false }));
+              }}
+            />
+          </PopoverContent>
+        </Popover>
+      </div>
+    );
+  };
 
   return (
     <div className="p-4">
