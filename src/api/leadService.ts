@@ -85,6 +85,13 @@ export const leadService = {
 		const res = await axiosInstance.delete(`/leads/${id}`);
 		return res.data;
 	},
+	exportToExcel: async (params: any = {}): Promise<Blob> => {
+		const res = await axiosInstance.get("/leads/export", {
+			params,
+			responseType: "blob",
+		});
+		return res.data;
+	},
 };
 
 
