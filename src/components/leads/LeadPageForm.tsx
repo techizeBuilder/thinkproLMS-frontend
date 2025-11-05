@@ -24,6 +24,7 @@ import { format } from "date-fns";
 import axiosInstance from "@/api/axiosInstance";
 import { type Lead } from "@/api/leadService";
 import { isValidPhoneNumber, getPhoneNumberError } from "@/utils/validation";
+import StateCitySelector from "@/components/StateCitySelector";
 
 type SalesManager = { _id: string; name: string; email: string };
 type SalesExecutive = { _id: string; name: string; email: string };
@@ -312,16 +313,13 @@ export default function LeadPageForm({
                     onChange={handleChange}
                   />
                 </div>
+                <StateCitySelector
+                  selectedState={form.state || ""}
+                  selectedCity={form.city || ""}
+                  onStateChange={(v) => handleSelect("state", v)}
+                  onCityChange={(v) => handleSelect("city", v)}
+                />
                 <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label>City / Town</Label>
-                    <Input
-                      name="city"
-                      placeholder="e.g. Bengaluru"
-                      value={form.city}
-                      onChange={handleChange}
-                    />
-                  </div>
                   <div className="space-y-2">
                     <Label>District</Label>
                     <Input
@@ -330,38 +328,6 @@ export default function LeadPageForm({
                       value={form.district}
                       onChange={handleChange}
                     />
-                  </div>
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label>State</Label>
-                    <Select
-                      value={form.state}
-                      onValueChange={(v) => handleSelect("state", v)}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select state" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {[
-                          "Andhra Pradesh",
-                          "Bihar",
-                          "Delhi",
-                          "Gujarat",
-                          "Karnataka",
-                          "Maharashtra",
-                          "Rajasthan",
-                          "Tamil Nadu",
-                          "Telangana",
-                          "Uttar Pradesh",
-                          "West Bengal",
-                        ].map((s) => (
-                          <SelectItem key={s} value={s}>
-                            {s}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
                   </div>
                   <div className="space-y-2">
                     <Label>PIN Code</Label>

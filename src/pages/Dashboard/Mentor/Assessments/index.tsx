@@ -3,7 +3,13 @@ import { useNavigate } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   Table,
   TableBody,
@@ -12,23 +18,24 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { 
-  Plus, 
-  Eye, 
-  Edit, 
-  Trash2, 
-  BarChart3, 
+import {
+  Plus,
+  Eye,
+  Edit,
+  Trash2,
+  BarChart3,
   BookOpen,
   Send,
   XCircle,
-  Copy
+  Copy,
 } from "lucide-react";
 import { assessmentService, type Assessment } from "@/api/assessmentService";
 import { toast } from "sonner";
+import { cn } from "@/lib/utils";
 
 export default function MentorAssessmentsPage() {
   const navigate = useNavigate();
-  
+
   const [assessments, setAssessments] = useState<Assessment[]>([]);
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState<string>("all");
@@ -41,13 +48,13 @@ export default function MentorAssessmentsPage() {
     try {
       setLoading(true);
       const filters: any = {};
-      
+
       if (statusFilter === "expired") {
         filters.status = "expired";
       } else if (statusFilter !== "all") {
         filters.status = statusFilter;
       }
-      
+
       const response = await assessmentService.getAssessments(filters);
       setAssessments(response.data || []);
     } catch (error) {
@@ -60,7 +67,7 @@ export default function MentorAssessmentsPage() {
 
   const handleCreateNewAssessment = () => {
     // Ensure no stale duplication payload affects a fresh create
-    sessionStorage.removeItem('duplicateAssessmentData');
+    sessionStorage.removeItem("duplicateAssessmentData");
     navigate("/mentor/assessments/create");
   };
 
@@ -78,15 +85,17 @@ export default function MentorAssessmentsPage() {
   };
 
   const handlePublishAssessment = async (id: string) => {
-    const notificationMessage = prompt("Enter notification message for students (optional):");
-    
+    const notificationMessage = prompt(
+      "Enter notification message for students (optional):"
+    );
+
     try {
       if (notificationMessage) {
         await assessmentService.publishAssessment(id, notificationMessage);
       } else {
         await assessmentService.publishAssessment(id);
       }
-      
+
       toast.success("Assessment published successfully");
       loadAssessments();
     } catch (error) {
@@ -96,9 +105,15 @@ export default function MentorAssessmentsPage() {
   };
 
   const handleCancelAssessment = async (id: string) => {
-    const reason = prompt("Enter reason for cancelling the assessment (optional):");
-    
-    if (!confirm("Are you sure you want to cancel this assessment? Students will be notified.")) {
+    const reason = prompt(
+      "Enter reason for cancelling the assessment (optional):"
+    );
+
+    if (
+      !confirm(
+        "Are you sure you want to cancel this assessment? Students will be notified."
+      )
+    ) {
       return;
     }
 
@@ -123,15 +138,19 @@ export default function MentorAssessmentsPage() {
         sections: assessment.sections,
         session: assessment.session?._id || "",
         duration: assessment.duration,
-        questions: assessment.questions.map(q => ({
-          questionId: typeof q.questionId === 'string' ? q.questionId : q.questionId._id,
+        questions: assessment.questions.map((q) => ({
+          questionId:
+            typeof q.questionId === "string" ? q.questionId : q.questionId._id,
           order: q.order,
           marks: q.marks,
         })),
       };
-      
+
       // Store the duplicate data in sessionStorage to be picked up by create page
-      sessionStorage.setItem('duplicateAssessmentData', JSON.stringify(duplicateData));
+      sessionStorage.setItem(
+        "duplicateAssessmentData",
+        JSON.stringify(duplicateData)
+      );
       navigate("/mentor/assessments/create");
       toast.success("Assessment data loaded for duplication");
     } catch (error) {
@@ -148,7 +167,18 @@ export default function MentorAssessmentsPage() {
     } as const;
 
     return (
-      <Badge variant={variants[status as keyof typeof variants] || "secondary"}>
+      <Badge
+        variant={variants[status as keyof typeof variants] || "secondary"}
+        className={cn(
+          variants[status as keyof typeof variants] === "default"
+            ? "text-white bg-green-600"
+            : variants[status as keyof typeof variants] === "secondary"
+            ? "bg-neutral-400 text-white"
+            : variants[status as keyof typeof variants] === "destructive"
+            ? "text-white bg-red-600"
+            : "text-white bg-neutral-400"
+        )}
+      >
         {status.charAt(0).toUpperCase() + status.slice(1)}
       </Badge>
     );
@@ -168,7 +198,9 @@ export default function MentorAssessmentsPage() {
     const now = new Date();
     const startDate = new Date(assessment.startDate);
     const endDate = new Date(assessment.endDate);
-    return assessment.status === "published" && now >= startDate && now <= endDate;
+    return (
+      assessment.status === "published" && now >= startDate && now <= endDate
+    );
   };
 
   const isAssessmentUpcoming = (assessment: Assessment) => {
@@ -201,9 +233,14 @@ export default function MentorAssessmentsPage() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 md:gap-4">
         <div>
           <h1 className="text-2xl md:text-3xl font-bold">Assessments</h1>
-          <p className="text-sm md:text-base text-gray-600">Manage assessments and track student progress</p>
+          <p className="text-sm md:text-base text-gray-600">
+            Manage assessments and track student progress
+          </p>
         </div>
-        <Button onClick={handleCreateNewAssessment} className="text-xs md:text-sm">
+        <Button
+          onClick={handleCreateNewAssessment}
+          className="text-xs md:text-sm"
+        >
           <Plus className="h-3 w-3 md:h-4 md:w-4 mr-1 md:mr-2" />
           Create
         </Button>
@@ -230,14 +267,18 @@ export default function MentorAssessmentsPage() {
         <Card>
           <CardContent className="text-center py-8 md:py-12">
             <BookOpen className="h-10 w-10 md:h-12 md:w-12 text-gray-400 mx-auto mb-3 md:mb-4" />
-            <h3 className="text-base md:text-lg font-semibold mb-2">No assessments found</h3>
+            <h3 className="text-base md:text-lg font-semibold mb-2">
+              No assessments found
+            </h3>
             <p className="text-sm md:text-base text-gray-600 mb-3 md:mb-4">
-              {statusFilter === "all" 
+              {statusFilter === "all"
                 ? "Create your first assessment"
-                : `No "${statusFilter}" assessments`
-              }
+                : `No "${statusFilter}" assessments`}
             </p>
-            <Button onClick={handleCreateNewAssessment} className="text-xs md:text-sm">
+            <Button
+              onClick={handleCreateNewAssessment}
+              className="text-xs md:text-sm"
+            >
               <Plus className="h-3 w-3 md:h-4 md:w-4 mr-1 md:mr-2" />
               Create Assessment
             </Button>
@@ -251,12 +292,24 @@ export default function MentorAssessmentsPage() {
                 <TableHeader>
                   <TableRow>
                     <TableHead className="text-xs md:text-sm">Title</TableHead>
-                    <TableHead className="text-xs md:text-sm hidden md:table-cell">Grade & Sections</TableHead>
-                    <TableHead className="text-xs md:text-sm hidden lg:table-cell">Status</TableHead>
-                    <TableHead className="text-xs md:text-sm hidden lg:table-cell">Duration</TableHead>
-                    <TableHead className="text-xs md:text-sm hidden xl:table-cell">Date Range</TableHead>
-                    <TableHead className="text-xs md:text-sm hidden xl:table-cell">Attempts</TableHead>
-                    <TableHead className="text-xs md:text-sm">Actions</TableHead>
+                    <TableHead className="text-xs md:text-sm hidden md:table-cell">
+                      Grade & Sections
+                    </TableHead>
+                    <TableHead className="text-xs md:text-sm hidden lg:table-cell">
+                      Status
+                    </TableHead>
+                    <TableHead className="text-xs md:text-sm hidden lg:table-cell">
+                      Duration
+                    </TableHead>
+                    <TableHead className="text-xs md:text-sm hidden xl:table-cell">
+                      Date Range
+                    </TableHead>
+                    <TableHead className="text-xs md:text-sm hidden xl:table-cell">
+                      Attempts
+                    </TableHead>
+                    <TableHead className="text-xs md:text-sm">
+                      Actions
+                    </TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -264,37 +317,50 @@ export default function MentorAssessmentsPage() {
                     <TableRow key={assessment._id} className="hover:bg-gray-50">
                       <TableCell className="font-medium max-w-[200px]">
                         <div className="flex flex-col gap-1">
-                          <span className="text-xs md:text-sm line-clamp-1">{assessment.title}</span>
+                          <span className="text-xs md:text-sm line-clamp-1">
+                            {assessment.title}
+                          </span>
                           <div className="flex gap-1 flex-wrap">
                             {isAssessmentActive(assessment) && (
-                              <Badge variant="default" className="bg-green-100 text-green-800 text-[10px]">
+                              <Badge
+                                variant="default"
+                                className="bg-green-100 text-green-800 text-[10px]"
+                              >
                                 Active
                               </Badge>
                             )}
                             {isAssessmentUpcoming(assessment) && (
-                              <Badge variant="outline" className="border-blue-300 text-blue-700 text-[10px]">
+                              <Badge
+                                variant="outline"
+                                className="border-blue-300 text-blue-700 text-[10px]"
+                              >
                                 Upcoming
                               </Badge>
                             )}
                             {isAssessmentExpired(assessment) && (
-                              <Badge variant="outline" className="border-gray-300 text-gray-700 text-[10px]">
+                              <Badge
+                                variant="outline"
+                                className="border-gray-300 text-gray-700 text-[10px]"
+                              >
                                 Expired
                               </Badge>
                             )}
                           </div>
                           <div className="md:hidden text-[10px] text-gray-600">
-                            Grade {assessment.grade} • {assessment.sections.join(", ") || "All"}
+                            Grade {assessment.grade} •{" "}
+                            {assessment.sections.join(", ") || "All"}
                           </div>
                         </div>
                       </TableCell>
                       <TableCell className="hidden md:table-cell">
                         <div className="text-xs md:text-sm">
-                          <div className="font-medium">Grade {assessment.grade}</div>
+                          <div className="font-medium">
+                            Grade {assessment.grade}
+                          </div>
                           <div className="text-gray-600">
-                            {assessment.sections.length > 0 
+                            {assessment.sections.length > 0
                               ? `${assessment.sections.join(", ")}`
-                              : "All sections"
-                            }
+                              : "All sections"}
                           </div>
                         </div>
                       </TableCell>
@@ -307,7 +373,9 @@ export default function MentorAssessmentsPage() {
                       <TableCell className="text-xs md:text-sm hidden xl:table-cell">
                         <div className="flex flex-col gap-1">
                           <div>{formatDate(assessment.startDate)}</div>
-                          <div className="text-gray-600">{formatDate(assessment.endDate)}</div>
+                          <div className="text-gray-600">
+                            {formatDate(assessment.endDate)}
+                          </div>
                         </div>
                       </TableCell>
                       <TableCell className="text-center text-xs md:text-sm hidden xl:table-cell">
@@ -318,19 +386,25 @@ export default function MentorAssessmentsPage() {
                           <Button
                             variant="ghost"
                             size="sm"
-                            onClick={() => navigate(`/mentor/assessments/${assessment._id}`)}
+                            onClick={() =>
+                              navigate(`/mentor/assessments/${assessment._id}`)
+                            }
                             title="View"
                             className="h-7 w-7 md:h-8 md:w-8 p-0"
                           >
                             <Eye className="h-3 w-3 md:h-4 md:w-4" />
                           </Button>
-                          
+
                           {assessment.status === "draft" && (
                             <>
                               <Button
                                 variant="ghost"
                                 size="sm"
-                                onClick={() => navigate(`/mentor/assessments/${assessment._id}/edit`)}
+                                onClick={() =>
+                                  navigate(
+                                    `/mentor/assessments/${assessment._id}/edit`
+                                  )
+                                }
                                 title="Edit"
                                 className="h-7 w-7 md:h-8 md:w-8 p-0"
                               >
@@ -339,7 +413,9 @@ export default function MentorAssessmentsPage() {
                               <Button
                                 variant="ghost"
                                 size="sm"
-                                onClick={() => handlePublishAssessment(assessment._id)}
+                                onClick={() =>
+                                  handlePublishAssessment(assessment._id)
+                                }
                                 title="Publish"
                                 className="text-blue-600 hover:text-blue-700 h-7 w-7 md:h-8 md:w-8 p-0"
                               >
@@ -347,52 +423,63 @@ export default function MentorAssessmentsPage() {
                               </Button>
                             </>
                           )}
-                          
+
                           {assessment.status === "published" && (
                             <Button
                               variant="ghost"
                               size="sm"
-                              onClick={() => handleCancelAssessment(assessment._id)}
+                              onClick={() =>
+                                handleCancelAssessment(assessment._id)
+                              }
                               title="Cancel"
                               className="text-orange-600 hover:text-orange-700 h-7 w-7 md:h-8 md:w-8 p-0"
                             >
                               <XCircle className="h-3 w-3 md:h-4 md:w-4" />
                             </Button>
                           )}
-                          
+
                           {assessment.totalAttempts > 0 && (
                             <Button
                               variant="ghost"
                               size="sm"
-                              onClick={() => navigate(`/mentor/assessments/${assessment._id}/analytics`)}
+                              onClick={() =>
+                                navigate(
+                                  `/mentor/assessments/${assessment._id}/analytics`
+                                )
+                              }
                               title="Analytics"
                               className="h-7 w-7 md:h-8 md:w-8 p-0"
                             >
                               <BarChart3 className="h-3 w-3 md:h-4 md:w-4" />
                             </Button>
                           )}
-                          
+
                           <Button
                             variant="ghost"
                             size="sm"
-                            onClick={() => handleDuplicateAssessment(assessment)}
+                            onClick={() =>
+                              handleDuplicateAssessment(assessment)
+                            }
                             title="Duplicate"
                             className="text-green-600 hover:text-green-700 h-7 w-7 md:h-8 md:w-8 p-0"
                           >
                             <Copy className="h-3 w-3 md:h-4 md:w-4" />
                           </Button>
-                          
-                          {assessment.status === "draft" && assessment.totalAttempts === 0 && (
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => handleDeleteAssessment(assessment._id)}
-                              title="Delete"
-                              className="text-red-600 hover:text-red-700 h-7 w-7 md:h-8 md:w-8 p-0"
-                            >
-                              <Trash2 className="h-3 w-3 md:h-4 md:w-4" />
-                            </Button>
-                          )}
+
+                          {assessment.status === "draft" &&
+                            assessment.totalAttempts === 0 && (
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() =>
+                                  handleDeleteAssessment(assessment._id)
+                                }
+                                title="Delete"
+                                className="text-red-600 hover:text-red-700 h-7 w-7 md:h-8 md:w-8 p-0"
+                              >
+                                <Trash2 className="h-3 w-3 md:h-4 md:w-4" />
+                              </Button>
+                            )}
                         </div>
                       </TableCell>
                     </TableRow>
