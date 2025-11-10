@@ -64,7 +64,7 @@ export default function EditSchoolPage() {
           address: school.address,
           boards: school.boards || [],
           state: school.state,
-          city: school.city || school.district || "",
+          city: school.city || "",
           district: school.district || "",
           pinCode: school.pinCode || "",
           schoolEmail: school.schoolEmail || "",
@@ -128,7 +128,7 @@ export default function EditSchoolPage() {
           stateId: matchedState._id,
           districtId: matchedDistrict?._id ?? "",
           district: matchedDistrict?.name ?? prev.district,
-          city: matchedDistrict?.name ?? prev.city,
+          city: prev.city || matchedDistrict?.name || "",
         }));
       } catch (error) {
         console.error("Failed to populate state/district IDs", error);
@@ -181,6 +181,7 @@ export default function EditSchoolPage() {
       { field: 'address', label: 'Address' },
       { field: 'state', label: 'State' },
       { field: 'district', label: 'District' },
+      { field: 'city', label: 'City' },
       { field: 'pinCode', label: 'PIN Code' },
       { field: 'schoolEmail', label: 'School Email' },
       { field: 'principalName', label: 'Principal Name' },
@@ -366,22 +367,35 @@ export default function EditSchoolPage() {
                   ...prev,
                   district: district?.name ?? "",
                   districtId: district?.id ?? "",
-                  city: district?.name ?? "",
                 }))
               }
               required
             />
 
-            <div className="space-y-2">
-              <Label htmlFor="pinCode">PIN Code *</Label>
-              <Input
-                id="pinCode"
-                name="pinCode"
-                value={formData.pinCode}
-                onChange={handleInputChange}
-                placeholder="Enter PIN code"
-                required
-              />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="city">City *</Label>
+                <Input
+                  id="city"
+                  name="city"
+                  value={formData.city || ""}
+                  onChange={handleInputChange}
+                  placeholder="Enter city"
+                  required
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="pinCode">PIN Code *</Label>
+                <Input
+                  id="pinCode"
+                  name="pinCode"
+                  value={formData.pinCode}
+                  onChange={handleInputChange}
+                  placeholder="Enter PIN code"
+                  required
+                />
+              </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

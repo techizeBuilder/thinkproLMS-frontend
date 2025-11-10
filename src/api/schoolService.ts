@@ -64,7 +64,7 @@ export interface CreateSchoolData {
   logo?: File;
   affiliatedTo?: string;
   state: string;
-  city?: string;
+  city: string;
   stateId?: string;
   districtId?: string;
   district: string;
@@ -142,7 +142,7 @@ export const schoolService = {
     formData.append('address', data.address);
     formData.append('boards', JSON.stringify(data.boards));
     formData.append('state', data.state);
-    formData.append('city', data.city ?? data.district);
+    formData.append('city', data.city);
     formData.append('district', data.district);
     formData.append('pinCode', data.pinCode);
     formData.append('schoolEmail', data.schoolEmail);
@@ -180,11 +180,7 @@ export const schoolService = {
     if (data.address !== undefined) formData.append('address', data.address);
     if (data.boards !== undefined) formData.append('boards', JSON.stringify(data.boards));
     if (data.state !== undefined) formData.append('state', data.state);
-    if (data.city !== undefined) {
-      formData.append('city', data.city ?? "");
-    } else if (data.district !== undefined) {
-      formData.append('city', data.district);
-    }
+    if (data.city !== undefined) formData.append('city', data.city);
     if (data.district !== undefined) formData.append('district', data.district);
     if (data.pinCode !== undefined) formData.append('pinCode', data.pinCode);
     if (data.schoolEmail !== undefined) formData.append('schoolEmail', data.schoolEmail);

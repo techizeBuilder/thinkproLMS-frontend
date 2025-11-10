@@ -356,20 +356,30 @@ export default function LeadPageForm({
                       ...prev,
                       district: district?.name ?? "",
                       districtId: district?.id ?? "",
-                      city: district?.name ?? "",
                     }))
                   }
                 />
-                <div className="space-y-2">
-                  <Label>PIN Code</Label>
-                  <Input
-                    name="pinCode"
-                    placeholder="6-digit PIN"
-                    inputMode="numeric"
-                    pattern="\\d*"
-                    value={form.pinCode}
-                    onChange={handleChange}
-                  />
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label>City</Label>
+                    <Input
+                      name="city"
+                      placeholder="e.g. Bengaluru"
+                      value={form.city}
+                      onChange={handleChange}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>PIN Code</Label>
+                    <Input
+                      name="pinCode"
+                      placeholder="6-digit PIN"
+                      inputMode="numeric"
+                      pattern="\\d*"
+                      value={form.pinCode}
+                      onChange={handleChange}
+                    />
+                  </div>
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
