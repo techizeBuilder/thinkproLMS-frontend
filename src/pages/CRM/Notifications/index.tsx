@@ -9,13 +9,32 @@ import { useSocket } from "@/contexts/SocketContext";
 import { useCRMNotifications } from "@/hooks/useCRMNotifications";
 import { Bell, Check, CheckCheck, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 
+const NOTIFICATION_TYPE_LABELS: Record<string, string> = {
+  "pending-lead-details": "Update Pending Lead Details",
+  "actions-due": "Actions Due",
+  "phase-change": "Phase Change",
+  "sales-poc-change": "Sales POC Change",
+  "action-on-change": "Action On Change",
+  "action-due-date-change": "Action Due Date Change",
+  "multiple-changes": "Lead Update",
+  generic: "Lead Update",
+};
+
+const getNotificationTypeLabel = (type?: string): string | null => {
+  if (!type) return null;
+  return NOTIFICATION_TYPE_LABELS[type] || "Lead Update";
+};
+
 function NotificationMessage({
+  typeLabel,
   message,
   isRead,
   isAuthorYou,
 }: {
+  typeLabel: string | null;
   message: string;
   isRead: boolean;
   isAuthorYou: boolean;
@@ -50,6 +69,11 @@ function NotificationMessage({
 
   return (
     <div>
+      {typeLabel && (
+        <Badge variant="secondary" className="mb-2 uppercase tracking-wide">
+          {typeLabel}
+        </Badge>
+      )}
       <p
         ref={textRef}
         className={cn(
@@ -59,8 +83,14 @@ function NotificationMessage({
           !isExpanded && "line-clamp-3"
         )}
       >
-        <b>{isAuthorYou ? "You" : null} </b>
-        {message}
+        {isAuthorYou ? (
+          <>
+            <b>You </b>
+            {message}
+          </>
+        ) : (
+          message
+        )}
       </p>
       {showToggle && (
         <button
@@ -120,6 +150,8 @@ export default function CRMNotificationsPage() {
             message: data.message,
             leadId: { _id: data.leadId, leadNo: data.leadNo, schoolName: "" },
             leadNo: data.leadNo,
+            type: data.type,
+            metadata: data.metadata,
             createdBy: { _id: "", name: "", email: "" },
             createdByName: "",
             createdByRole: "",
@@ -238,64 +270,95 @@ export default function CRMNotificationsPage() {
         </div>
       ) : (
         <div className="space-y-1">
-          {notifications.map((notification) => (
-            <div
-              key={notification._id}
-              className={cn(
-                "flex items-start gap-3 p-3 rounded-lg border transition-colors hover:bg-gray-50",
-                !notification.isRead && "bg-blue-50 border-blue-200"
-              )}
-            >
-              <div className="flex-1 min-w-0">
-                <NotificationMessage
-                  message={notification.message}
-                  isRead={!!notification.isRead}
-                  isAuthorYou={notification.createdBy._id === user?.id}
-                />
-                <div className="flex items-center gap-2 mt-1">
-                  <span className="text-xs text-gray-500">
-                    {new Date(notification.createdAt).toLocaleString("en-GB", {
-                      day: "numeric",
-                      month: "short",
-                      year: "numeric",
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    })}
-                  </span>
-                  {notification.leadId && (
-                    <Link
-                      to={
-                        user?.role === "superadmin"
-                          ? `/crm/superadmin`
-                          : user?.role === "sales-manager"
-                          ? `/crm/sales-manager/leads`
-                          : `/crm/sales-executive/leads`
-                      }
-                      className="text-xs text-blue-600 hover:underline"
-                    >
-                      View Lead: {notification.leadNo}
-                    </Link>
-                  )}
+          {notifications.map((notification) => {
+            const missingFields = Array.isArray(
+              ((notification.metadata as { missingFields?: unknown }) || {})
+                .missingFields
+            )
+              ? (
+                  notification.metadata as {
+                    missingFields?: string[];
+                  }
+                ).missingFields ?? []
+              : [];
+
+            return (
+              <div
+                key={notification._id}
+                className={cn(
+                  "flex items-start gap-3 p-3 rounded-lg border transition-colors hover:bg-gray-50",
+                  !notification.isRead && "bg-blue-50 border-blue-200"
+                )}
+              >
+                <div className="flex-1 min-w-0">
+                  <NotificationMessage
+                    typeLabel={getNotificationTypeLabel(notification.type)}
+                    message={notification.message}
+                    isRead={!!notification.isRead}
+                    isAuthorYou={notification.createdBy._id === user?.id}
+                  />
+                  {notification.type === "pending-lead-details" &&
+                    missingFields.length > 0 && (
+                      <div className="mt-2 flex flex-wrap gap-1.5">
+                        {missingFields.map((field) => (
+                          <Badge
+                            key={field}
+                            variant="outline"
+                            className="bg-white text-xs font-normal"
+                          >
+                            {field}
+                          </Badge>
+                        ))}
+                      </div>
+                    )}
+                  <div className="flex items-center gap-2 mt-1">
+                    <span className="text-xs text-gray-500">
+                      {new Date(notification.createdAt).toLocaleString(
+                        "en-GB",
+                        {
+                          day: "numeric",
+                          month: "short",
+                          year: "numeric",
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        }
+                      )}
+                    </span>
+                    {notification.leadId && (
+                      <Link
+                        to={
+                          user?.role === "superadmin"
+                            ? `/crm/superadmin`
+                            : user?.role === "sales-manager"
+                            ? `/crm/sales-manager/leads/${notification.leadId._id}/edit`
+                            : `/crm/sales-executive/leads/${notification.leadId._id}/edit`
+                        }
+                        className="text-xs text-blue-600 hover:underline"
+                      >
+                        View Lead: {notification.leadNo}
+                      </Link>
+                    )}
+                  </div>
                 </div>
+                {!notification.isRead && (
+                  <Button
+                    onClick={() => handleMarkAsRead(notification._id)}
+                    disabled={markingRead === notification._id}
+                    variant="ghost"
+                    size="sm"
+                    className="h-8 w-8 p-0"
+                    title="Mark as read"
+                  >
+                    {markingRead === notification._id ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <Check className="h-4 w-4" />
+                    )}
+                  </Button>
+                )}
               </div>
-              {!notification.isRead && (
-                <Button
-                  onClick={() => handleMarkAsRead(notification._id)}
-                  disabled={markingRead === notification._id}
-                  variant="ghost"
-                  size="sm"
-                  className="h-8 w-8 p-0"
-                  title="Mark as read"
-                >
-                  {markingRead === notification._id ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                  ) : (
-                    <Check className="h-4 w-4" />
-                  )}
-                </Button>
-              )}
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
 

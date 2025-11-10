@@ -9,13 +9,9 @@ export interface CRMNotification {
 		schoolName: string;
 	};
 	leadNo: string;
-	changes?: {
-		phase?: { old: string; new: string };
-		salesPOC?: { old?: { type: string; name: string }; new?: { type: string; name: string } };
-		actionOn?: { old?: { type: string; name: string }; new?: { type: string; name: string } };
-		actionDueDate?: { old: string; new: string };
-		actionNeeded?: { old: string; new: string };
-	};
+	changes?: Record<string, unknown>;
+	type?: string;
+	metadata?: Record<string, unknown>;
 	createdBy: {
 		_id: string;
 		name: string;
