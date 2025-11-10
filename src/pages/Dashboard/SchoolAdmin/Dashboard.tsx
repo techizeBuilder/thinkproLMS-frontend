@@ -32,19 +32,20 @@ export default function SchoolAdminDashboard() {
     try {
       setLoading(true);
       
-      // Load mentors and students data
-      const [mentorsRes, studentsRes] = await Promise.all([
-        schoolAdminService.getMentors(),
-        schoolAdminService.getStudents()
+      // Load counts and school admin data
+      const [mentorsCountRes, studentsCountRes, mentorsRes] = await Promise.all([
+        schoolAdminService.getMentorCount(),
+        schoolAdminService.getStudentCount(),
+        schoolAdminService.getMentors({ page: 1, limit: 1 }) // Just to get schoolAdmin info
       ]);
 
       if (mentorsRes.success) {
         setSchoolAdmin(mentorsRes.data.schoolAdmin);
       }
 
-      // Calculate stats
-      const totalMentors = mentorsRes.success ? mentorsRes.data.mentors.length : 0;
-      const totalStudents = studentsRes.success ? studentsRes.data.students.length : 0;
+      // Get counts
+      const totalMentors = mentorsCountRes.success ? mentorsCountRes.data.count : 0;
+      const totalStudents = studentsCountRes.success ? studentsCountRes.data.count : 0;
 
       setStats({
         totalMentors,

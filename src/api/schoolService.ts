@@ -64,7 +64,9 @@ export interface CreateSchoolData {
   logo?: File;
   affiliatedTo?: string;
   state: string;
-  city: string;
+  city?: string;
+  stateId?: string;
+  districtId?: string;
   district: string;
   pinCode: string;
   schoolEmail: string;
@@ -140,7 +142,7 @@ export const schoolService = {
     formData.append('address', data.address);
     formData.append('boards', JSON.stringify(data.boards));
     formData.append('state', data.state);
-    formData.append('city', data.city);
+    formData.append('city', data.city ?? data.district);
     formData.append('district', data.district);
     formData.append('pinCode', data.pinCode);
     formData.append('schoolEmail', data.schoolEmail);
@@ -178,7 +180,11 @@ export const schoolService = {
     if (data.address !== undefined) formData.append('address', data.address);
     if (data.boards !== undefined) formData.append('boards', JSON.stringify(data.boards));
     if (data.state !== undefined) formData.append('state', data.state);
-    if (data.city !== undefined) formData.append('city', data.city);
+    if (data.city !== undefined) {
+      formData.append('city', data.city ?? "");
+    } else if (data.district !== undefined) {
+      formData.append('city', data.district);
+    }
     if (data.district !== undefined) formData.append('district', data.district);
     if (data.pinCode !== undefined) formData.append('pinCode', data.pinCode);
     if (data.schoolEmail !== undefined) formData.append('schoolEmail', data.schoolEmail);
@@ -221,6 +227,16 @@ export const schoolService = {
   // Get school service details for grade/section filtering
   getServiceDetails: async (id: string): Promise<{ success: boolean; data: { grades: AvailableGrade[]; hasServiceDetails: boolean } }> => {
     const response = await axiosInstance.get(`/schools/${id}/service-details`);
+    return response.data;
+  },
+
+  // Get school count
+  getCount: async (filters?: { includeInactive?: boolean; inactiveOnly?: boolean }): Promise<{ success: boolean; data: { total: number; active: number; inactive: number } }> => {
+    const params = new URLSearchParams();
+    if (filters?.includeInactive) params.append('includeInactive', 'true');
+    if (filters?.inactiveOnly) params.append('inactiveOnly', 'true');
+    const url = params.toString() ? `/schools/count?${params.toString()}` : '/schools/count';
+    const response = await axiosInstance.get(url);
     return response.data;
   },
 };

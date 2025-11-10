@@ -93,4 +93,13 @@ export const mentorService = {
     const response = await axiosInstance.delete(`/mentors/${id}`);
     return response.data;
   },
+
+  // Get mentor count
+  getCount: async (filters?: { schoolId?: string }): Promise<{ success: boolean; data: { count: number } }> => {
+    const params = new URLSearchParams();
+    if (filters?.schoolId) params.append("schoolId", filters.schoolId);
+    const url = params.toString() ? `/mentors/count?${params.toString()}` : '/mentors/count';
+    const response = await axiosInstance.get(url);
+    return response.data;
+  },
 };

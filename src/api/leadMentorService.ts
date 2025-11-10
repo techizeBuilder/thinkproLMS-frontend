@@ -90,4 +90,15 @@ export const leadMentorService = {
     const response = await axiosInstance.delete(`/lead-mentors/${id}`);
     return response.data;
   },
+
+  // Get lead mentor count
+  getCount: async (params?: { includeInactive?: boolean }): Promise<{ success: boolean; data: { count: number } }> => {
+    const queryParams = new URLSearchParams();
+    if (params?.includeInactive) {
+      queryParams.append('includeInactive', 'true');
+    }
+    const url = queryParams.toString() ? `/lead-mentors/count?${queryParams.toString()}` : '/lead-mentors/count';
+    const response = await axiosInstance.get(url);
+    return response.data;
+  },
 };

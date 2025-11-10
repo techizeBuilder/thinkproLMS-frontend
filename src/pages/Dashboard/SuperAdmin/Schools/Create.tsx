@@ -12,7 +12,7 @@ import {
 } from "@/api/schoolService";
 import { toast } from "sonner";
 import ServiceForm from "@/components/ServiceForm";
-import StateCitySelector from "@/components/StateCitySelector";
+import StateDistrictSelector from "@/components/StateDistrictSelector";
 
 export default function CreateSchoolPage() {
   const navigate = useNavigate();
@@ -24,8 +24,10 @@ export default function CreateSchoolPage() {
     address: "",
     boards: [],
     state: "",
-    city: "",
     district: "",
+    city: "",
+    stateId: "",
+    districtId: "",
     pinCode: "",
     schoolEmail: "",
     schoolWebsite: "",
@@ -87,7 +89,6 @@ export default function CreateSchoolPage() {
       { field: 'name', label: 'School Name' },
       { field: 'address', label: 'Address' },
       { field: 'state', label: 'State' },
-      { field: 'city', label: 'City' },
       { field: 'district', label: 'District' },
       { field: 'pinCode', label: 'PIN Code' },
       { field: 'schoolEmail', label: 'School Email' },
@@ -246,38 +247,42 @@ export default function CreateSchoolPage() {
               />
             </div>
 
-            <StateCitySelector
-              selectedState={formData.state || ''}
-              selectedCity={formData.city || ''}
-              onStateChange={(state) => setFormData(prev => ({ ...prev, state }))}
-              onCityChange={(city) => setFormData(prev => ({ ...prev, city }))}
+            <StateDistrictSelector
+              selectedStateId={formData.stateId}
+              selectedStateName={formData.state}
+              selectedDistrictId={formData.districtId}
+              selectedDistrictName={formData.district}
+              onStateChange={(state) =>
+                setFormData((prev) => ({
+                  ...prev,
+                  state: state?.name ?? "",
+                  stateId: state?.id ?? "",
+                  district: "",
+                  districtId: "",
+                  city: "",
+                }))
+              }
+              onDistrictChange={(district) =>
+                setFormData((prev) => ({
+                  ...prev,
+                  district: district?.name ?? "",
+                  districtId: district?.id ?? "",
+                  city: district?.name ?? "",
+                }))
+              }
               required
             />
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="district">District *</Label>
-                <Input
-                  id="district"
-                  name="district"
-                  value={formData.district}
-                  onChange={handleInputChange}
-                  placeholder="Enter district"
-                  required
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="pinCode">PIN Code *</Label>
-                <Input
-                  id="pinCode"
-                  name="pinCode"
-                  value={formData.pinCode}
-                  onChange={handleInputChange}
-                  placeholder="Enter PIN code"
-                  required
-                />
-              </div>
+            <div className="space-y-2">
+              <Label htmlFor="pinCode">PIN Code *</Label>
+              <Input
+                id="pinCode"
+                name="pinCode"
+                value={formData.pinCode}
+                onChange={handleInputChange}
+                placeholder="Enter PIN code"
+                required
+              />
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

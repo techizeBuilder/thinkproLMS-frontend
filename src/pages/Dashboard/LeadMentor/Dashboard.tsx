@@ -30,15 +30,15 @@ export default function LeadMentorDashboard() {
 
   const fetchStats = async () => {
     try {
-      const [schoolAdminsRes, mentorsRes, studentsRes] = await Promise.all([
-        schoolAdminService.getAll(),
-        mentorService.getAll(),
-        studentService.getAll(),
+      const [schoolAdminsCountRes, mentorsCountRes, studentsCountRes] = await Promise.all([
+        schoolAdminService.getCount(),
+        mentorService.getCount(),
+        studentService.getCount(),
       ]);
 
-      const schoolAdminsCount = schoolAdminsRes.success ? schoolAdminsRes.data.length : 0;
-      const mentorsCount = mentorsRes.success ? mentorsRes.data.length : 0;
-      const studentsCount = studentsRes.success ? studentsRes.data.length : 0;
+      const schoolAdminsCount = schoolAdminsCountRes.success ? schoolAdminsCountRes.data.count : 0;
+      const mentorsCount = mentorsCountRes.success ? mentorsCountRes.data.count : 0;
+      const studentsCount = studentsCountRes.success ? studentsCountRes.data.count : 0;
 
       setStats({
         schoolAdmins: schoolAdminsCount,

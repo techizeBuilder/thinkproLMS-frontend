@@ -217,4 +217,25 @@ export const schoolAdminService = {
     const response = await axiosInstance.get("/school-admins/assessment-reports");
     return response.data;
   },
+
+  // Get counts
+  getCount: async (params?: { includeInactive?: boolean }): Promise<{ success: boolean; data: { count: number } }> => {
+    const queryParams = new URLSearchParams();
+    if (params?.includeInactive) {
+      queryParams.append('includeInactive', 'true');
+    }
+    const url = queryParams.toString() ? `/school-admins/count?${queryParams.toString()}` : '/school-admins/count';
+    const response = await axiosInstance.get(url);
+    return response.data;
+  },
+
+  getMentorCount: async (): Promise<{ success: boolean; data: { count: number } }> => {
+    const response = await axiosInstance.get("/school-admins/mentors/count");
+    return response.data;
+  },
+
+  getStudentCount: async (): Promise<{ success: boolean; data: { count: number } }> => {
+    const response = await axiosInstance.get("/school-admins/students/count");
+    return response.data;
+  },
 };

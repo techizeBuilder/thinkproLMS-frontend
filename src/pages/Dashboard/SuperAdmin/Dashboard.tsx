@@ -37,31 +37,29 @@ export default function SuperAdminDashboard() {
 
   const fetchStats = async () => {
     try {
-      const [schoolsRes, schoolsAllRes, schoolAdminsRes, leadMentorsRes, mentorsRes, studentsRes] = await Promise.all([
-        schoolService.getAll(), // Active schools only
-        schoolService.getAll({ statusFilter: 'all' }), // All schools (active + inactive)
-        schoolAdminService.getAll(),
-        leadMentorService.getAll(),
-        mentorService.getAll(),
-        studentService.getAll(),
+      const [schoolsCountRes, schoolAdminsCountRes, leadMentorsCountRes, mentorsCountRes, studentsCountRes] = await Promise.all([
+        schoolService.getCount({ includeInactive: true }), // Get all counts (total, active, inactive)
+        schoolAdminService.getCount(),
+        leadMentorService.getCount(),
+        mentorService.getCount(),
+        studentService.getCount(),
       ]);
 
-      const allSchools = schoolsAllRes.success ? schoolsAllRes.data : [];
-      const activeSchools = schoolsRes.success ? schoolsRes.data : [];
-      const inactiveSchools = allSchools.filter(school => !school.isActive);
+      const schoolCounts = schoolsCountRes.success ? schoolsCountRes.data : { total: 0, active: 0, inactive: 0 };
+      const schoolAdminsCount = schoolAdminsCountRes.success ? schoolAdminsCountRes.data.count : 0;
+      const leadMentorsCount = leadMentorsCountRes.success ? leadMentorsCountRes.data.count : 0;
+      const mentorsCount = mentorsCountRes.success ? mentorsCountRes.data.count : 0;
+      const studentsCount = studentsCountRes.success ? studentsCountRes.data.count : 0;
 
       setStats({
-        schools: allSchools.length,
-        activeSchools: activeSchools.length,
-        inactiveSchools: inactiveSchools.length,
-        schoolAdmins: schoolAdminsRes.success ? schoolAdminsRes.data.length : 0,
-        leadMentors: leadMentorsRes.success ? leadMentorsRes.data.length : 0,
-        schoolMentors: mentorsRes.success ? mentorsRes.data.length : 0,
-        students: studentsRes.success ? studentsRes.data.length : 0,
-        totalUsers: (schoolAdminsRes.success ? schoolAdminsRes.data.length : 0) + 
-                   (leadMentorsRes.success ? leadMentorsRes.data.length : 0) +
-                   (mentorsRes.success ? mentorsRes.data.length : 0) +
-                   (studentsRes.success ? studentsRes.data.length : 0),
+        schools: schoolCounts.total,
+        activeSchools: schoolCounts.active,
+        inactiveSchools: schoolCounts.inactive,
+        schoolAdmins: schoolAdminsCount,
+        leadMentors: leadMentorsCount,
+        schoolMentors: mentorsCount,
+        students: studentsCount,
+        totalUsers: schoolAdminsCount + leadMentorsCount + mentorsCount + studentsCount,
       });
     } catch (error) {
       console.error("Error fetching stats:", error);

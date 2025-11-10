@@ -24,7 +24,7 @@ import { format } from "date-fns";
 import axiosInstance from "@/api/axiosInstance";
 import { type Lead } from "@/api/leadService";
 import { isValidPhoneNumber, getPhoneNumberError } from "@/utils/validation";
-import StateCitySelector from "@/components/StateCitySelector";
+import StateDistrictSelector from "@/components/StateDistrictSelector";
 
 type SalesManager = { _id: string; name: string; email: string };
 type SalesExecutive = { _id: string; name: string; email: string };
@@ -58,6 +58,8 @@ export default function LeadPageForm({
     city: "",
     state: "",
     district: "",
+    stateId: "",
+    districtId: "",
     pinCode: "",
     boardAffiliated: "CBSE",
     principalName: "",
@@ -248,6 +250,11 @@ export default function LeadPageForm({
     if (payload.actionOn === "none") payload.actionOn = null;
     if (payload.salesExecutive === "none") payload.salesExecutive = null;
     if (payload.salesManager === "none") payload.salesManager = null;
+    if (payload.district && !payload.city) {
+      payload.city = payload.district;
+    }
+    delete payload.stateId;
+    delete payload.districtId;
     await onSubmit(payload);
   };
 
@@ -329,33 +336,40 @@ export default function LeadPageForm({
                     onChange={handleChange}
                   />
                 </div>
-                <StateCitySelector
-                  selectedState={form.state || ""}
-                  selectedCity={form.city || ""}
-                  onStateChange={(v) => handleSelect("state", v)}
-                  onCityChange={(v) => handleSelect("city", v)}
+                <StateDistrictSelector
+                  selectedStateId={form.stateId}
+                  selectedStateName={form.state}
+                  selectedDistrictId={form.districtId}
+                  selectedDistrictName={form.district}
+                  onStateChange={(state) =>
+                    setForm((prev: any) => ({
+                      ...prev,
+                      state: state?.name ?? "",
+                      stateId: state?.id ?? "",
+                      district: "",
+                      districtId: "",
+                      city: "",
+                    }))
+                  }
+                  onDistrictChange={(district) =>
+                    setForm((prev: any) => ({
+                      ...prev,
+                      district: district?.name ?? "",
+                      districtId: district?.id ?? "",
+                      city: district?.name ?? "",
+                    }))
+                  }
                 />
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label>District</Label>
-                    <Input
-                      name="district"
-                      placeholder="e.g. Bengaluru Urban"
-                      value={form.district}
-                      onChange={handleChange}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>PIN Code</Label>
-                    <Input
-                      name="pinCode"
-                      placeholder="6-digit PIN"
-                      inputMode="numeric"
-                      pattern="\\d*"
-                      value={form.pinCode}
-                      onChange={handleChange}
-                    />
-                  </div>
+                <div className="space-y-2">
+                  <Label>PIN Code</Label>
+                  <Input
+                    name="pinCode"
+                    placeholder="6-digit PIN"
+                    inputMode="numeric"
+                    pattern="\\d*"
+                    value={form.pinCode}
+                    onChange={handleChange}
+                  />
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">

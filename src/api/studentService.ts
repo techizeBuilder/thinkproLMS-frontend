@@ -161,4 +161,21 @@ export const studentService = {
     const response = await axiosInstance.get(`/certificates/students?${queryParams}`);
     return response.data;
   },
+
+  // Get student count
+  getCount: async (filters?: {
+    schoolId?: string;
+    grade?: string;
+    section?: string;
+    includeInactive?: boolean;
+  }): Promise<{ success: boolean; data: { count: number } }> => {
+    const params = new URLSearchParams();
+    if (filters?.schoolId) params.append("schoolId", filters.schoolId);
+    if (filters?.grade) params.append("grade", filters.grade);
+    if (filters?.section) params.append("section", filters.section);
+    if (filters?.includeInactive) params.append("includeInactive", "true");
+    const url = params.toString() ? `/students/count?${params.toString()}` : '/students/count';
+    const response = await axiosInstance.get(url);
+    return response.data;
+  },
 };

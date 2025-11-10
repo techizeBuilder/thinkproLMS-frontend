@@ -67,10 +67,10 @@ export default function MentorDashboard() {
     }
 
     try {
-      // Count students from all assigned schools - backend will handle filtering
-      const response = await studentService.getAll();
+      // Get student count - backend will handle filtering based on mentor's assigned schools
+      const response = await studentService.getCount();
       if (response.success) {
-        setStudentCount(response.data.length);
+        setStudentCount(response.data.count);
       } else {
         setStudentCount(0);
       }
