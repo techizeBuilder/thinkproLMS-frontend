@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -10,6 +10,7 @@ import { toast } from "sonner";
 import ServiceForm from "@/components/ServiceForm";
 import StateDistrictSelector from "@/components/StateDistrictSelector";
 import { getMediaUrl } from "@/utils/mediaUrl";
+import { locationService } from "@/api/locationService";
 
 export default function EditSchoolPage() {
   const navigate = useNavigate();
@@ -20,6 +21,7 @@ export default function EditSchoolPage() {
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [existingImage, setExistingImage] = useState<string | null>(null);
   const [existingLogo, setExistingLogo] = useState<string | null>(null);
+  const locationInitRef = useRef(false);
   const [formData, setFormData] = useState<UpdateSchoolData>({
     name: "",
     address: "",
@@ -94,6 +96,49 @@ export default function EditSchoolPage() {
       setFetchLoading(false);
     }
   };
+
+  useEffect(() => {
+    const populateLocationIds = async () => {
+      if (locationInitRef.current) return;
+      const stateName = formData.state;
+      const districtName = formData.district;
+      if (!stateName || !districtName) return;
+
+      try {
+        const states = await locationService.getStates();
+        const matchedState = states.find(
+          (state) =>
+            state.name.trim().toLowerCase() === stateName.trim().toLowerCase()
+        );
+
+        if (!matchedState) {
+          locationInitRef.current = true;
+          return;
+        }
+
+        const districts = await locationService.getDistricts(matchedState._id);
+        const matchedDistrict = districts.find(
+          (district) =>
+            district.name.trim().toLowerCase() ===
+            districtName.trim().toLowerCase()
+        );
+
+        setFormData((prev) => ({
+          ...prev,
+          stateId: matchedState._id,
+          districtId: matchedDistrict?._id ?? "",
+          district: matchedDistrict?.name ?? prev.district,
+          city: matchedDistrict?.name ?? prev.city,
+        }));
+      } catch (error) {
+        console.error("Failed to populate state/district IDs", error);
+      } finally {
+        locationInitRef.current = true;
+      }
+    };
+
+    populateLocationIds();
+  }, [formData.state, formData.district]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;

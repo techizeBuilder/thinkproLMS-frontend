@@ -26,8 +26,6 @@ import {
   Trash2,
   Calendar as CalendarIcon,
   Download,
-  Check,
-  ChevronsUpDown,
 } from "lucide-react";
 import { useDebounce } from "@/hooks/useDebounce";
 import {
@@ -52,15 +50,6 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-} from "@/components/ui/command";
-import { cn } from "@/lib/utils";
 
 interface LeadsTableProps {
   onAddNew?: () => void;
@@ -78,7 +67,6 @@ export default function LeadsTable({ onAddNew, onEdit }: LeadsTableProps) {
   const [search, setSearch] = useState("");
   const [stateFilter, setStateFilter] = useState("all");
   const [districtFilter, setDistrictFilter] = useState("");
-  const [cityFilter, setCityFilter] = useState("");
   const [phaseFilter, setPhaseFilter] = useState("all");
   const [qualityFilter, setQualityFilter] = useState("all");
   const [programFilter, setProgramFilter] = useState("all");
@@ -97,9 +85,6 @@ export default function LeadsTable({ onAddNew, onEdit }: LeadsTableProps) {
     to?: Date;
   }>({});
   const [indiaStates, setIndiaStates] = useState<IndiaState[]>([]);
-  const [cities, setCities] = useState<string[]>([]);
-  const [loadingCities, setLoadingCities] = useState(false);
-  const [cityFilterOpen, setCityFilterOpen] = useState(false);
   const [managers, setManagers] = useState<
     Array<{ _id: string; name: string }>
   >([]);
@@ -123,7 +108,6 @@ export default function LeadsTable({ onAddNew, onEdit }: LeadsTableProps) {
     debouncedSearch,
     stateFilter,
     districtFilter,
-    cityFilter,
     phaseFilter,
     qualityFilter,
     programFilter,
@@ -148,7 +132,6 @@ export default function LeadsTable({ onAddNew, onEdit }: LeadsTableProps) {
     debouncedSearch,
     stateFilter,
     districtFilter,
-    cityFilter,
     phaseFilter,
     qualityFilter,
     programFilter,
@@ -173,36 +156,6 @@ export default function LeadsTable({ onAddNew, onEdit }: LeadsTableProps) {
     };
     loadStates();
   }, []);
-
-  useEffect(() => {
-    if (stateFilter && stateFilter !== "all") {
-      const fetchCities = async () => {
-        setLoadingCities(true);
-        try {
-          const citiesData = await locationService.getCities(
-            "India",
-            stateFilter
-          );
-          setCities(citiesData);
-          // Clear city filter if current city is not in the new state's cities
-          if (cityFilter && !citiesData.includes(cityFilter)) {
-            setCityFilter("");
-          }
-        } catch (e) {
-          // ignore toast here to avoid noise; filters still usable
-          setCities([]);
-          setCityFilter("");
-        } finally {
-          setLoadingCities(false);
-        }
-      };
-      fetchCities();
-    } else {
-      setCities([]);
-      setCityFilter("");
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [stateFilter]);
 
   useEffect(() => {
     (async () => {
@@ -237,7 +190,6 @@ export default function LeadsTable({ onAddNew, onEdit }: LeadsTableProps) {
         search: debouncedSearch || undefined,
         state: stateFilter && stateFilter !== "all" ? stateFilter : undefined,
         district: districtFilter || undefined,
-        city: cityFilter || undefined,
         phase: phaseFilter !== "all" ? phaseFilter : undefined,
         quality: qualityFilter !== "all" ? qualityFilter : undefined,
         programType: programFilter !== "all" ? programFilter : undefined,
@@ -289,7 +241,6 @@ export default function LeadsTable({ onAddNew, onEdit }: LeadsTableProps) {
         search: debouncedSearch || undefined,
         state: stateFilter && stateFilter !== "all" ? stateFilter : undefined,
         district: districtFilter || undefined,
-        city: cityFilter || undefined,
         phase: phaseFilter !== "all" ? phaseFilter : undefined,
         quality: qualityFilter !== "all" ? qualityFilter : undefined,
         programType: programFilter !== "all" ? programFilter : undefined,
@@ -364,12 +315,12 @@ export default function LeadsTable({ onAddNew, onEdit }: LeadsTableProps) {
       </div>
 
       <div className="flex flex-col gap-2 items-start">
-        {/* Row 1: Search, State, District, City */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 w-full">
+        {/* Row 1: Search, State, District */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 w-full">
           <div className="space-y-1 sm:space-y-2">
             <Label>Search by Name</Label>
             <Input
-              placeholder="Lead No / School Name / City"
+              placeholder="Lead No / School Name"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
             />
@@ -389,73 +340,6 @@ export default function LeadsTable({ onAddNew, onEdit }: LeadsTableProps) {
                 ))}
               </SelectContent>
             </Select>
-          </div>
-          <div className="space-y-1 sm:space-y-2">
-            <Label>City</Label>
-            <Popover open={cityFilterOpen} onOpenChange={setCityFilterOpen}>
-              <PopoverTrigger asChild>
-                <Button
-                  variant="outline"
-                  role="combobox"
-                  aria-expanded={cityFilterOpen}
-                  className="w-full justify-between h-10"
-                  disabled={
-                    !stateFilter || stateFilter === "all" || loadingCities
-                  }
-                >
-                  {cityFilter ||
-                    (!stateFilter || stateFilter === "all"
-                      ? "Select state first"
-                      : loadingCities
-                      ? "Loading cities..."
-                      : "Select city")}
-                  <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-full p-0" align="start">
-                <Command>
-                  <CommandInput placeholder="Search cities..." />
-                  <CommandList>
-                    <CommandEmpty>No city found.</CommandEmpty>
-                    <CommandGroup>
-                      <CommandItem
-                        value="all"
-                        onSelect={() => {
-                          setCityFilter("");
-                          setCityFilterOpen(false);
-                        }}
-                      >
-                        <Check
-                          className={cn(
-                            "mr-2 h-4 w-4",
-                            !cityFilter ? "opacity-100" : "opacity-0"
-                          )}
-                        />
-                        All
-                      </CommandItem>
-                      {cities.map((city) => (
-                        <CommandItem
-                          key={city}
-                          value={city}
-                          onSelect={() => {
-                            setCityFilter(city);
-                            setCityFilterOpen(false);
-                          }}
-                        >
-                          <Check
-                            className={cn(
-                              "mr-2 h-4 w-4",
-                              cityFilter === city ? "opacity-100" : "opacity-0"
-                            )}
-                          />
-                          {city}
-                        </CommandItem>
-                      ))}
-                    </CommandGroup>
-                  </CommandList>
-                </Command>
-              </PopoverContent>
-            </Popover>
           </div>
           <div className="space-y-1 sm:space-y-2">
             <Label>District</Label>
