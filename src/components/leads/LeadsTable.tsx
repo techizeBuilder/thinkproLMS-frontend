@@ -23,7 +23,8 @@ import {
   Loader2,
   Plus,
   Pencil,
-  Trash2,
+  Archive,
+  RotateCcw,
   Calendar as CalendarIcon,
   Download,
 } from "lucide-react";
@@ -50,6 +51,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface LeadsTableProps {
   onAddNew?: () => void;
@@ -57,6 +59,7 @@ interface LeadsTableProps {
 }
 
 export default function LeadsTable({ onAddNew, onEdit }: LeadsTableProps) {
+  const { user } = useAuth();
   const [loading, setLoading] = useState(true);
   const [tableLoading, setTableLoading] = useState(false);
   const [leads, setLeads] = useState<Lead[]>([]);
@@ -91,8 +94,14 @@ export default function LeadsTable({ onAddNew, onEdit }: LeadsTableProps) {
   const [executives, setExecutives] = useState<
     Array<{ _id: string; name: string }>
   >([]);
-  const [confirmDelete, setConfirmDelete] = useState<Lead | null>(null);
+  const [pendingStatusChange, setPendingStatusChange] = useState<{
+    lead: Lead;
+    action: "activate" | "deactivate";
+  } | null>(null);
   const [exporting, setExporting] = useState(false);
+  const [statusFilter, setStatusFilter] = useState<
+    "active" | "inactive" | "all"
+  >("active");
 
   const debouncedSearch = useDebounce(search, 400);
 
@@ -120,6 +129,7 @@ export default function LeadsTable({ onAddNew, onEdit }: LeadsTableProps) {
     actionDueDateFrom,
     actionDueDateTo,
     actionDueDateExact,
+    statusFilter,
     page,
     pageSize,
   ]);
@@ -143,6 +153,7 @@ export default function LeadsTable({ onAddNew, onEdit }: LeadsTableProps) {
     actionDueDateFrom,
     actionDueDateTo,
     actionDueDateExact,
+    statusFilter,
   ]);
 
   useEffect(() => {
@@ -207,6 +218,7 @@ export default function LeadsTable({ onAddNew, onEdit }: LeadsTableProps) {
           ? endOfDay(new Date(actionDueDateTo)).toISOString()
           : undefined,
         actionDueDate: actionDueDateExact || undefined,
+        status: statusFilter,
         page,
         limit: pageSize,
       });
@@ -219,18 +231,51 @@ export default function LeadsTable({ onAddNew, onEdit }: LeadsTableProps) {
     }
   };
 
-  const handleDelete = (lead: Lead) => setConfirmDelete(lead);
+  const getLeadCreatorId = (lead: Lead): string | null => {
+    if (!lead?.createdBy) return null;
+    if (typeof lead.createdBy === "string") return lead.createdBy;
+    if (
+      typeof lead.createdBy === "object" &&
+      typeof lead.createdBy._id === "string"
+    ) {
+      return lead.createdBy._id;
+    }
+    return null;
+  };
 
-  const confirmDeleteAction = async () => {
-    if (!confirmDelete) return;
+  const canManageLead = (lead: Lead) => {
+    if (!user?.id) return false;
+    return getLeadCreatorId(lead) === user.id;
+  };
+
+  const openStatusChangeDialog = (lead: Lead) => {
+    if (!canManageLead(lead)) {
+      toast.error("You can only manage leads you created");
+      return;
+    }
+    const action = lead.isActive === false ? "activate" : "deactivate";
+    setPendingStatusChange({ lead, action });
+  };
+
+  const confirmStatusChange = async () => {
+    if (!pendingStatusChange) return;
+    const { lead, action } = pendingStatusChange;
     try {
-      await leadService.remove(confirmDelete._id);
-      toast.success("Lead deleted");
+      if (action === "deactivate") {
+        await leadService.remove(lead._id);
+        toast.success("Lead deactivated");
+      } else {
+        await leadService.activate(lead._id);
+        toast.success("Lead activated");
+      }
       fetchLeads();
     } catch (e: any) {
-      toast.error(e?.response?.data?.message || "Failed to delete lead");
+      toast.error(
+        e?.response?.data?.message ||
+          `Failed to ${action === "deactivate" ? "deactivate" : "activate"} lead`
+      );
     } finally {
-      setConfirmDelete(null);
+      setPendingStatusChange(null);
     }
   };
 
@@ -258,6 +303,7 @@ export default function LeadsTable({ onAddNew, onEdit }: LeadsTableProps) {
           ? endOfDay(new Date(actionDueDateTo)).toISOString()
           : undefined,
         actionDueDate: actionDueDateExact || undefined,
+        status: statusFilter,
       };
 
       const blob = await leadService.exportToExcel(params);
@@ -315,8 +361,8 @@ export default function LeadsTable({ onAddNew, onEdit }: LeadsTableProps) {
       </div>
 
       <div className="flex flex-col gap-2 items-start">
-        {/* Row 1: Search, State, District */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 w-full">
+        {/* Row 1: Search, State, District, Status */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 w-full">
           <div className="space-y-1 sm:space-y-2">
             <Label>Search by Name</Label>
             <Input
@@ -348,6 +394,24 @@ export default function LeadsTable({ onAddNew, onEdit }: LeadsTableProps) {
               value={districtFilter}
               onChange={(e) => setDistrictFilter(e.target.value)}
             />
+          </div>
+          <div className="space-y-1 sm:space-y-2">
+            <Label>Status</Label>
+            <Select
+              value={statusFilter}
+              onValueChange={(v) =>
+                setStatusFilter(v as "active" | "inactive" | "all")
+              }
+            >
+              <SelectTrigger className="h-10">
+                <SelectValue placeholder="Status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="active">Active</SelectItem>
+                <SelectItem value="inactive">Archived</SelectItem>
+                <SelectItem value="all">All</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
         </div>
 
@@ -801,24 +865,36 @@ export default function LeadsTable({ onAddNew, onEdit }: LeadsTableProps) {
                   {l.teamRemarks || "-"}
                 </TableCell>
                 <TableCell className="text-right sticky right-0 bg-white z-10">
-                  <div className="flex items-center justify-end gap-1">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => onEdit && onEdit(l)}
-                      aria-label="Edit lead"
-                    >
-                      <Pencil className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => handleDelete(l)}
-                      aria-label="Delete lead"
-                    >
-                      <Trash2 className="h-4 w-4 text-red-600" />
-                    </Button>
-                  </div>
+                  {canManageLead(l) ? (
+                    <div className="flex items-center justify-end gap-1">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => onEdit && onEdit(l)}
+                        aria-label="Edit lead"
+                      >
+                        <Pencil className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => openStatusChangeDialog(l)}
+                        aria-label={
+                          l.isActive === false
+                            ? "Activate lead"
+                            : "Deactivate lead"
+                        }
+                      >
+                        {l.isActive === false ? (
+                          <RotateCcw className="h-4 w-4 text-green-600" />
+                        ) : (
+                          <Archive className="h-4 w-4 text-red-600" />
+                        )}
+                      </Button>
+                    </div>
+                  ) : (
+                    <span className="text-xs text-muted-foreground">-</span>
+                  )}
                 </TableCell>
               </TableRow>
             ))}
@@ -872,25 +948,37 @@ export default function LeadsTable({ onAddNew, onEdit }: LeadsTableProps) {
       </div>
 
       <AlertDialog
-        open={!!confirmDelete}
-        onOpenChange={(open) => !open && setConfirmDelete(null)}
+        open={!!pendingStatusChange}
+        onOpenChange={(open) => !open && setPendingStatusChange(null)}
       >
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete lead?</AlertDialogTitle>
+            <AlertDialogTitle>
+              {pendingStatusChange?.action === "deactivate"
+                ? "Deactivate lead?"
+                : "Activate lead?"}
+            </AlertDialogTitle>
             <AlertDialogDescription>
-              This will archive the lead. You can’t undo this action.
+              {pendingStatusChange?.action === "deactivate"
+                ? "This will archive the lead. Switch the Status filter to Archived to view it later."
+                : "This will move the lead back to the Active list."}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel onClick={() => setConfirmDelete(null)}>
+            <AlertDialogCancel onClick={() => setPendingStatusChange(null)}>
               Cancel
             </AlertDialogCancel>
             <AlertDialogAction
-              onClick={confirmDeleteAction}
-              className="bg-red-600 hover:bg-red-700"
+              onClick={confirmStatusChange}
+              className={
+                pendingStatusChange?.action === "deactivate"
+                  ? "bg-red-600 hover:bg-red-700"
+                  : "bg-green-600 hover:bg-green-700"
+              }
             >
-              Delete
+              {pendingStatusChange?.action === "deactivate"
+                ? "Deactivate"
+                : "Activate"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

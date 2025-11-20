@@ -39,7 +39,10 @@ export interface Lead {
 	actionOnModel?: "SalesManager" | "SalesExecutive" | null;
 	actionDueDate?: string | null;
 	annualContractValue?: number | null;
+	createdBy: string | { _id: string; name?: string; email?: string };
+	isActive?: boolean;
 	createdAt: string;
+	updatedAt?: string;
 }
 
 export interface LeadListResponse {
@@ -79,6 +82,10 @@ export const leadService = {
 	},
 	update: async (id: string, payload: Partial<Lead>): Promise<{ success: boolean; data: Lead; message: string }> => {
 		const res = await axiosInstance.put(`/leads/${id}`,(payload as any));
+		return res.data;
+	},
+	activate: async (id: string): Promise<{ success: boolean; message: string }> => {
+		const res = await axiosInstance.patch(`/leads/${id}/activate`);
 		return res.data;
 	},
 	remove: async (id: string): Promise<{ success: boolean; message: string }> => {
