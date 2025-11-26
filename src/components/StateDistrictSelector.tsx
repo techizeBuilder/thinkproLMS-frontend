@@ -17,6 +17,7 @@ import {
   type District,
   type State,
 } from "@/api/locationService";
+import { REQUIRED_LABEL_CLASS } from "@/constants/forms";
 import { toast } from "sonner";
 
 interface SelectionValue {
@@ -33,6 +34,10 @@ interface StateDistrictSelectorProps {
   onDistrictChange: (value: SelectionValue | null) => void;
   required?: boolean;
   disabled?: boolean;
+  stateLabel?: string;
+  districtLabel?: string;
+  stateLabelClassName?: string;
+  districtLabelClassName?: string;
 }
 
 export default function StateDistrictSelector({
@@ -44,6 +49,10 @@ export default function StateDistrictSelector({
   onDistrictChange,
   required = false,
   disabled = false,
+  stateLabel = "State",
+  districtLabel = "District",
+  stateLabelClassName,
+  districtLabelClassName,
 }: StateDistrictSelectorProps) {
   const [states, setStates] = useState<State[]>([]);
   const [districts, setDistricts] = useState<District[]>([]);
@@ -166,8 +175,14 @@ export default function StateDistrictSelector({
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
       <div className="space-y-2">
-        <Label htmlFor="state">
-          State {required ? "*" : ""}
+        <Label
+          htmlFor="state"
+          className={cn(
+            stateLabelClassName,
+            required ? REQUIRED_LABEL_CLASS : undefined
+          )}
+        >
+          {stateLabel}
         </Label>
         <Popover open={stateOpen} onOpenChange={setStateOpen}>
           <PopoverTrigger asChild>
@@ -215,8 +230,14 @@ export default function StateDistrictSelector({
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="district">
-          District {required ? "*" : ""}
+        <Label
+          htmlFor="district"
+          className={cn(
+            districtLabelClassName,
+            required ? REQUIRED_LABEL_CLASS : undefined
+          )}
+        >
+          {districtLabel}
         </Label>
         <Popover open={districtOpen} onOpenChange={setDistrictOpen}>
           <PopoverTrigger asChild>

@@ -25,6 +25,27 @@ import axiosInstance from "@/api/axiosInstance";
 import { type Lead } from "@/api/leadService";
 import { isValidPhoneNumber, getPhoneNumberError } from "@/utils/validation";
 import StateDistrictSelector from "@/components/StateDistrictSelector";
+import { REQUIRED_LABEL_CLASS } from "@/constants/forms";
+
+const REQUIRED_FIELDS = new Set([
+  "schoolName",
+  "postalAddress",
+  "city",
+  "state",
+  "district",
+  "pinCode",
+  "salesExecutive",
+  "leadSource",
+  "phase",
+  "salesCycle",
+  "actionNeeded",
+  "actionOn",
+  "actionDueDate",
+]);
+const getLabelClassName = (field: string, base?: string) =>
+  [base, REQUIRED_FIELDS.has(field) ? REQUIRED_LABEL_CLASS : ""]
+    .filter(Boolean)
+    .join(" ");
 
 type SalesManager = { _id: string; name: string; email: string };
 type SalesExecutive = { _id: string; name: string; email: string };
@@ -318,7 +339,9 @@ export default function LeadPageForm({
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-2">
-                  <Label>School Name</Label>
+                  <Label className={getLabelClassName("schoolName")}>
+                    School Name
+                  </Label>
                   <Input
                     name="schoolName"
                     placeholder="e.g. Springfield High School"
@@ -328,7 +351,9 @@ export default function LeadPageForm({
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label>Postal Address</Label>
+                  <Label className={getLabelClassName("postalAddress")}>
+                    Postal Address
+                  </Label>
                   <Input
                     name="postalAddress"
                     placeholder="Street, Area, Landmark"
@@ -341,6 +366,9 @@ export default function LeadPageForm({
                   selectedStateName={form.state}
                   selectedDistrictId={form.districtId}
                   selectedDistrictName={form.district}
+                  required
+                  stateLabelClassName={getLabelClassName("state")}
+                  districtLabelClassName={getLabelClassName("district")}
                   onStateChange={(state) =>
                     setForm((prev: any) => ({
                       ...prev,
@@ -361,7 +389,9 @@ export default function LeadPageForm({
                 />
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label>City</Label>
+                    <Label className={getLabelClassName("city")}>
+                      City / Town
+                    </Label>
                     <Input
                       name="city"
                       placeholder="e.g. Bengaluru"
@@ -370,7 +400,7 @@ export default function LeadPageForm({
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label>PIN Code</Label>
+                    <Label className={getLabelClassName("pinCode")}>PIN Code</Label>
                     <Input
                       name="pinCode"
                       placeholder="6-digit PIN"
@@ -625,7 +655,9 @@ export default function LeadPageForm({
               <CardContent className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label>TPA Sales POC (Executive)</Label>
+                    <Label className={getLabelClassName("salesExecutive")}>
+                      TPA Sales POC (Executive)
+                    </Label>
                     <Select
                       value={form.salesExecutive}
                       onValueChange={(v) => handleSelect("salesExecutive", v)}
@@ -673,7 +705,9 @@ export default function LeadPageForm({
               <CardContent className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label>Lead Source</Label>
+                    <Label className={getLabelClassName("leadSource")}>
+                      Lead Source
+                    </Label>
                     <Select
                       value={form.leadSource}
                       onValueChange={(v) => handleSelect("leadSource", v)}
@@ -690,7 +724,7 @@ export default function LeadPageForm({
                     </Select>
                   </div>
                   <div className="space-y-2">
-                    <Label>Phase</Label>
+                    <Label className={getLabelClassName("phase")}>Phase</Label>
                     <Select
                       value={form.phase}
                       onValueChange={(v) => handleSelect("phase", v)}
@@ -797,7 +831,9 @@ export default function LeadPageForm({
                     </Select>
                   </div>
                   <div className="space-y-2">
-                    <Label>Sales Cycle</Label>
+                    <Label className={getLabelClassName("salesCycle")}>
+                      Sales Cycle
+                    </Label>
                     <Select
                       value={form.salesCycle}
                       onValueChange={(v) => handleSelect("salesCycle", v)}
@@ -874,7 +910,9 @@ export default function LeadPageForm({
                 </div>
                 <div className="space-y-2">
                   <div className="space-y-2 col-span-2">
-                    <Label>Action needed - From Team</Label>
+                    <Label className={getLabelClassName("actionNeeded")}>
+                      Action needed - From Team
+                    </Label>
                     <Input
                       name="actionNeeded"
                       placeholder="e.g. Call Principal for demo scheduling"
@@ -884,12 +922,16 @@ export default function LeadPageForm({
                   </div>
 
                   <div className="space-y-2">
-                    <Label className="text-[var(--muted-foreground)]">Action Due date</Label>
+                    <Label className={getLabelClassName("actionDueDate")}>
+                      Action Due date
+                    </Label>
                     {dateField("Action Due date", "actionDueDate")}
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <Label>Action On</Label>
+                  <Label className={getLabelClassName("actionOn")}>
+                    Action On
+                  </Label>
                   <Select
                     value={form.actionOn || "none"}
                     onValueChange={(v) => handleSelect("actionOn", v)}
