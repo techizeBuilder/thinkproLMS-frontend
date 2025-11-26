@@ -295,7 +295,7 @@ export default function CRMNotificationsPage() {
                     typeLabel={getNotificationTypeLabel(notification.type)}
                     message={notification.message}
                     isRead={!!notification.isRead}
-                    isAuthorYou={notification.createdBy._id === user?.id}
+                    isAuthorYou={notification.createdBy?._id === user?.id}
                   />
                   {notification.type === "pending-lead-details" &&
                     missingFields.length > 0 && (

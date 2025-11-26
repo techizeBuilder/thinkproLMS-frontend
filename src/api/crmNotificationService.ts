@@ -3,23 +3,23 @@ import axiosInstance from "./axiosInstance";
 export interface CRMNotification {
 	_id: string;
 	message: string;
-	leadId: {
+	leadId?: {
 		_id: string;
 		leadNo: string;
 		schoolName: string;
-	};
+	} | null;
 	leadNo: string;
 	changes?: Record<string, unknown>;
 	type?: string;
 	metadata?: Record<string, unknown>;
-	createdBy: {
+	createdBy?: {
 		_id: string;
 		name: string;
 		email: string;
-	};
+	} | null;
 	createdByName: string;
 	createdByRole: string;
-	readBy: string[];
+	readBy?: string[];
 	isRead: boolean;
 	createdAt: string;
 	updatedAt: string;
