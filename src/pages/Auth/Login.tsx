@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { useAuth } from "@/contexts/AuthContext";
 import axiosInstance from "@/api/axiosInstance";
 import GoogleAuthButton from "@/components/GoogleAuthButton";
+import { Eye, EyeOff } from "lucide-react";
 
 export default function Login() {
   const { login, user, loading } = useAuth();
@@ -16,6 +17,7 @@ export default function Login() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [showGuestForm, setShowGuestForm] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   // Redirect authenticated users to their role-based dashboard
   useEffect(() => {
@@ -190,15 +192,29 @@ export default function Login() {
                     >
                       Password
                     </Label>
-                    <Input
-                      id="password"
-                      type="password"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      placeholder="Enter your password"
-                      className="h-10 sm:h-11 text-sm sm:text-base"
-                      required
-                    />
+                    <div className="relative">
+                      <Input
+                        id="password"
+                        type={showPassword ? "text" : "password"}
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        placeholder="Enter your password"
+                        className="h-10 sm:h-11 text-sm sm:text-base pr-10"
+                        required
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition-colors duration-200 focus:outline-none"
+                        aria-label={showPassword ? "Hide password" : "Show password"}
+                      >
+                        {showPassword ? (
+                          <EyeOff className="h-4 w-4 sm:h-5 sm:w-5" />
+                        ) : (
+                          <Eye className="h-4 w-4 sm:h-5 sm:w-5" />
+                        )}
+                      </button>
+                    </div>
                   </div>
                   {error && (
                     <div className="p-2 sm:p-3 text-xs sm:text-sm text-[var(--destructive)] bg-[color-mix(in_srgb,_var(--destructive)_12%,_white)] border border-[color-mix(in_srgb,_var(--destructive)_28%,_white)] rounded-md">
@@ -301,6 +317,17 @@ export default function Login() {
           <div className="text-center mt-6 sm:mt-8">
             <p className="text-xs sm:text-sm text-[var(--muted-foreground)]">
               © 2024 ThinkPro LMS. All rights reserved.
+            </p>
+            <p className="text-xs sm:text-sm text-[var(--muted-foreground)] mt-2">
+              Powered by{" "}
+              <a
+                href="https://techizebuilder.com/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition-colors duration-200 underline decoration-dotted underline-offset-2"
+              >
+                TechizeBuilder
+              </a>
             </p>
           </div>
         </div>
