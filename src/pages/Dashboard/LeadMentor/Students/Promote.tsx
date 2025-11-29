@@ -51,7 +51,9 @@ export default function PromoteGradePage() {
   const [selectedSchool, setSelectedSchool] = useState("");
   const [selectedGrade, setSelectedGrade] = useState("");
   const [students, setStudents] = useState<Student[]>([]);
-  const [selectedStudents, setSelectedStudents] = useState<Set<string>>(new Set());
+  const [selectedStudents, setSelectedStudents] = useState<Set<string>>(
+    new Set()
+  );
   const [loading, setLoading] = useState(false);
   const [promoting, setPromoting] = useState(false);
 
@@ -101,7 +103,7 @@ export default function PromoteGradePage() {
   useEffect(() => {
     // Select all students by default when students list changes
     if (students.length > 0) {
-      setSelectedStudents(new Set(students.map(student => student._id)));
+      setSelectedStudents(new Set(students.map((student) => student._id)));
     }
   }, [students]);
 
@@ -135,7 +137,7 @@ export default function PromoteGradePage() {
 
   const handleSelectAll = (checked: boolean) => {
     if (checked) {
-      setSelectedStudents(new Set(students.map(student => student._id)));
+      setSelectedStudents(new Set(students.map((student) => student._id)));
     } else {
       setSelectedStudents(new Set());
     }
@@ -163,7 +165,9 @@ export default function PromoteGradePage() {
     }
 
     const confirmed = confirm(
-      `Are you sure you want to promote ${selectedStudents.size} students from ${selectedGrade} to ${getNextGrade(selectedGrade)}?`
+      `Are you sure you want to promote ${
+        selectedStudents.size
+      } students from ${selectedGrade} to ${getNextGrade(selectedGrade)}?`
     );
 
     if (!confirmed) return;
@@ -177,59 +181,64 @@ export default function PromoteGradePage() {
       });
 
       toast.success(response.data.message);
-      
+
       // Refresh the students list
       await fetchStudentsForPromotion();
-      
+
       // Clear selection
       setSelectedStudents(new Set());
     } catch (error: any) {
       console.error("Error promoting students:", error);
-      toast.error(error.response?.data?.message || "Failed to promote students");
+      toast.error(
+        error.response?.data?.message || "Failed to promote students"
+      );
     } finally {
       setPromoting(false);
     }
   };
 
-  const isAllSelected = students.length > 0 && selectedStudents.size === students.length;
+  const isAllSelected =
+    students.length > 0 && selectedStudents.size === students.length;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6 px-3 sm:px-0">
       {/* Header */}
-      <div className="flex items-center gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
         <Button
           variant="ghost"
           onClick={() => navigate(studentsPath)}
-          className="flex items-center gap-2"
-        >
+          className="flex items-center gap-2 w-full sm:w-auto justify-center sm:justify-start min-h-[44px]">
           <ArrowLeft className="h-4 w-4" />
           Back to Students
         </Button>
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">Promote Students</h1>
-          <p className="text-gray-600">Promote students to the next grade level</p>
+        <div className="min-w-0">
+          <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900">
+            Promote Students
+          </h1>
+          <p className="text-sm sm:text-base text-gray-600">
+            Promote students to the next grade level
+          </p>
         </div>
       </div>
 
       {/* School and Grade Selection */}
-      <Card>
+      <Card className="overflow-hidden">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <School className="h-5 w-5" />
+          <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+            <School className="h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0" />
             Select School and Grade
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
+            <div className="min-w-0">
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 School
               </label>
               <select
                 value={selectedSchool}
                 onChange={(e) => setSelectedSchool(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base min-h-[44px] truncate">
                 <option value="">Select a school</option>
                 {schools.map((school) => (
                   <option key={school._id} value={school._id}>
@@ -238,22 +247,25 @@ export default function PromoteGradePage() {
                 ))}
               </select>
             </div>
-            <div>
+            <div className="min-w-0">
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Current Grade
               </label>
               <select
                 value={selectedGrade}
                 onChange={(e) => setSelectedGrade(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                disabled={!selectedSchool}
-              >
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base min-h-[44px] truncate"
+                disabled={!selectedSchool}>
                 <option value="">Select a grade</option>
-                {grades.slice(0, -1).map((grade) => ( // Exclude Grade 10 since it's the highest
-                  <option key={grade} value={grade}>
-                    {grade}
-                  </option>
-                ))}
+                {grades.slice(0, -1).map(
+                  (
+                    grade // Exclude Grade 10 since it's the highest
+                  ) => (
+                    <option key={grade} value={grade}>
+                      {grade}
+                    </option>
+                  )
+                )}
               </select>
             </div>
           </div>
@@ -262,18 +274,20 @@ export default function PromoteGradePage() {
 
       {/* Students List */}
       {selectedSchool && selectedGrade && (
-        <Card>
+        <Card className="overflow-hidden">
           <CardHeader>
-            <div className="flex items-center justify-between">
-              <CardTitle className="flex items-center gap-2">
-                <GraduationCap className="h-5 w-5" />
-                Students in {selectedGrade}
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+              <CardTitle className="flex items-center gap-2 text-base sm:text-lg flex-wrap">
+                <GraduationCap className="h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0" />
+                <span>Students in {selectedGrade}</span>
                 {students.length > 0 && (
-                  <Badge variant="secondary">{students.length} students</Badge>
+                  <Badge variant="secondary" className="text-xs">
+                    {students.length} students
+                  </Badge>
                 )}
               </CardTitle>
               {students.length > 0 && (
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 min-h-[44px]">
                   <Checkbox
                     checked={isAllSelected}
                     onCheckedChange={handleSelectAll}
@@ -283,51 +297,67 @@ export default function PromoteGradePage() {
               )}
             </div>
           </CardHeader>
-          <CardContent>
+          <CardContent className="p-3 sm:p-6">
             {loading ? (
               <div className="text-center py-8">
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
-                <p className="text-gray-600 mt-2">Loading students...</p>
+                <p className="text-sm sm:text-base text-gray-600 mt-2">
+                  Loading students...
+                </p>
               </div>
             ) : students.length === 0 ? (
               <div className="text-center py-8">
-                <AlertCircle className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                <p className="text-gray-600">No students found in {selectedGrade}</p>
+                <AlertCircle className="h-10 w-10 sm:h-12 sm:w-12 text-gray-400 mx-auto mb-4" />
+                <p className="text-sm sm:text-base text-gray-600">
+                  No students found in {selectedGrade}
+                </p>
               </div>
             ) : (
               <div className="space-y-3">
                 {students.map((student) => (
                   <div
                     key={student._id}
-                    className="flex items-center gap-4 p-4 border border-gray-200 rounded-lg hover:bg-gray-50"
-                  >
-                    <Checkbox
-                      checked={selectedStudents.has(student._id)}
-                      onCheckedChange={(checked) =>
-                        handleSelectStudent(student._id, checked as boolean)
-                      }
-                    />
-                    <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-                      <User className="h-5 w-5 text-blue-600" />
-                    </div>
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2">
-                        <h3 className="font-semibold">{student.user.name}</h3>
-                        <Badge
-                          variant={student.user.isVerified ? "default" : "secondary"}
-                        >
-                          {student.user.isVerified ? "Verified" : "Pending"}
-                        </Badge>
-                        {!student.hasCustomCredentials && (
-                          <Badge variant="outline">System Generated</Badge>
-                        )}
+                    className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 p-3 sm:p-4 border border-gray-200 rounded-lg hover:bg-gray-50">
+                    <div className="flex items-center gap-3 sm:gap-4 w-full">
+                      <Checkbox
+                        checked={selectedStudents.has(student._id)}
+                        onCheckedChange={(checked) =>
+                          handleSelectStudent(student._id, checked as boolean)
+                        }
+                        className="flex-shrink-0"
+                      />
+                      <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
+                        <User className="h-5 w-5 text-blue-600" />
                       </div>
-                      <div className="flex items-center gap-4 text-sm text-gray-600 mt-1">
-                        <span className="font-mono">{student.studentId}</span>
-                        <span>{student.user.email}</span>
-                        <div className="flex items-center gap-1">
-                          <GraduationCap className="h-4 w-4" />
-                          {student.grade}
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <h3 className="font-semibold text-sm sm:text-base break-words">
+                            {student.user.name}
+                          </h3>
+                          <Badge
+                            variant={
+                              student.user.isVerified ? "default" : "secondary"
+                            }
+                            className="text-xs flex-shrink-0">
+                            {student.user.isVerified ? "Verified" : "Pending"}
+                          </Badge>
+                          {!student.hasCustomCredentials && (
+                            <Badge
+                              variant="outline"
+                              className="text-xs flex-shrink-0">
+                              System Generated
+                            </Badge>
+                          )}
+                        </div>
+                        <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-4 text-xs sm:text-sm text-gray-600 mt-1">
+                          <span className="font-mono truncate">
+                            {student.studentId}
+                          </span>
+                          <span className="truncate">{student.user.email}</span>
+                          <div className="flex items-center gap-1">
+                            <GraduationCap className="h-3 w-3 sm:h-4 sm:w-4" />
+                            {student.grade}
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -341,34 +371,40 @@ export default function PromoteGradePage() {
 
       {/* Promotion Action */}
       {selectedSchool && selectedGrade && students.length > 0 && (
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900">
+        <Card className="overflow-hidden">
+          <CardContent className="p-4 sm:p-6">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+              <div className="min-w-0 flex-1">
+                <h3 className="text-base sm:text-lg font-semibold text-gray-900">
                   Promotion Summary
                 </h3>
-                <p className="text-gray-600">
-                  {selectedStudents.size} of {students.length} students selected for promotion
+                <p className="text-sm sm:text-base text-gray-600">
+                  {selectedStudents.size} of {students.length} students selected
+                  for promotion
                 </p>
-                <p className="text-sm text-gray-500 mt-1">
+                <p className="text-xs sm:text-sm text-gray-500 mt-1">
                   From {selectedGrade} to {getNextGrade(selectedGrade)}
                 </p>
               </div>
               <Button
                 onClick={handlePromote}
-                disabled={selectedStudents.size === 0 || promoting || selectedGrade === "Grade 10"}
-                className="flex items-center gap-2"
-              >
+                disabled={
+                  selectedStudents.size === 0 ||
+                  promoting ||
+                  selectedGrade === "Grade 10"
+                }
+                className="flex items-center gap-2 w-full sm:w-auto justify-center min-h-[44px]">
                 {promoting ? (
                   <>
                     <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                    Promoting...
+                    <span className="text-sm sm:text-base">Promoting...</span>
                   </>
                 ) : (
                   <>
                     <ArrowUp className="h-4 w-4" />
-                    Promote to {getNextGrade(selectedGrade)}
+                    <span className="text-sm sm:text-base">
+                      Promote to {getNextGrade(selectedGrade)}
+                    </span>
                   </>
                 )}
               </Button>
@@ -378,16 +414,21 @@ export default function PromoteGradePage() {
       )}
 
       {/* Info Card */}
-      <Card className="border-blue-200 bg-blue-50">
-        <CardContent className="p-4">
-          <div className="flex items-start gap-3">
-            <CheckCircle className="h-5 w-5 text-blue-600 mt-0.5" />
-            <div>
-              <h4 className="font-medium text-blue-900">Grade Promotion Information</h4>
-              <ul className="text-sm text-blue-800 mt-2 space-y-1">
+      <Card className="border-blue-200 bg-blue-50 overflow-hidden">
+        <CardContent className="p-3 sm:p-4">
+          <div className="flex items-start gap-2 sm:gap-3">
+            <CheckCircle className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600 mt-0.5 flex-shrink-0" />
+            <div className="min-w-0">
+              <h4 className="font-medium text-blue-900 text-sm sm:text-base">
+                Grade Promotion Information
+              </h4>
+              <ul className="text-xs sm:text-sm text-blue-800 mt-2 space-y-1">
                 <li>• All students are selected by default for promotion</li>
                 <li>• You can uncheck individual students if needed</li>
-                <li>• Students will be promoted from their current grade to the next grade</li>
+                <li>
+                  • Students will be promoted from their current grade to the
+                  next grade
+                </li>
                 <li>• Grade 10 students cannot be promoted further</li>
                 <li>• This action cannot be undone</li>
               </ul>

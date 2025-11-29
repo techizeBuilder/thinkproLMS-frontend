@@ -16,8 +16,8 @@ export default function GuestLayout() {
     };
 
     checkScreenSize();
-    window.addEventListener('resize', checkScreenSize);
-    return () => window.removeEventListener('resize', checkScreenSize);
+    window.addEventListener("resize", checkScreenSize);
+    return () => window.removeEventListener("resize", checkScreenSize);
   }, []);
 
   // Close mobile menu when screen becomes desktop
@@ -51,8 +51,7 @@ export default function GuestLayout() {
           onClick={toggleMobileMenu}
           variant="outline"
           size="sm"
-          className="bg-white shadow-lg"
-        >
+          className="bg-white shadow-lg">
           <Menu className="h-4 w-4" />
         </Button>
       </div>
@@ -61,20 +60,16 @@ export default function GuestLayout() {
       {mobileMenuOpen && (
         <>
           {/* Backdrop */}
-          <div 
+          <div
             className="lg:hidden fixed inset-0 bg-[rgba(0,0,0,0.5)] z-40"
             onClick={closeMobileMenu}
           />
-          
+
           {/* Mobile Sidebar */}
           <div className="lg:hidden fixed left-0 top-0 h-full w-80 bg-white shadow-xl z-50 transform transition-transform duration-300 ease-in-out">
             <div className="flex justify-between items-center p-4 border-b">
               <h2 className="text-lg font-semibold">Menu</h2>
-              <Button
-                onClick={closeMobileMenu}
-                variant="ghost"
-                size="sm"
-              >
+              <Button onClick={closeMobileMenu} variant="ghost" size="sm">
                 <X className="h-4 w-4" />
               </Button>
             </div>
@@ -89,7 +84,7 @@ export default function GuestLayout() {
 
       {/* Main Content */}
       <main className="flex-1 overflow-auto relative">
-        <div className="p-4">
+        <div className="p-0">
           <Outlet />
         </div>
       </main>

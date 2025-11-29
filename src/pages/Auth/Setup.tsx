@@ -28,7 +28,8 @@ export default function Setup() {
         setUser(res.data);
         setError("");
       } catch (err: any) {
-        const message = err.response?.data?.message || "Invalid or expired link";
+        const message =
+          err.response?.data?.message || "Invalid or expired link";
         setError(message);
         toast.error(message);
       }
@@ -51,7 +52,8 @@ export default function Setup() {
       await axiosInstance.post(`/setup/complete-setup/${token}`, {
         password,
       });
-      const successMessage = "✅ Account setup complete! Redirecting to login...";
+      const successMessage =
+        "✅ Account setup complete! Redirecting to login...";
       setSuccess(successMessage);
       toast.success(successMessage);
       setTimeout(() => navigate("/login"), 2000);
@@ -65,10 +67,10 @@ export default function Setup() {
   };
 
   return (
-    <div className="flex h-screen items-center justify-center bg-gray-50">
+    <div className="flex min-h-screen items-center justify-center bg-gray-50 p-3 sm:p-6">
       <Card className="w-full max-w-md shadow-lg">
-        <CardHeader>
-          <CardTitle className="text-center">
+        <CardHeader className="px-4 sm:px-6 pt-4 sm:pt-6">
+          <CardTitle className="text-center text-lg sm:text-xl md:text-2xl">
             {!error
               ? user
                 ? `Hi ${user.name}, set your password`
@@ -76,40 +78,53 @@ export default function Setup() {
               : "Invalid Setup Link"}
           </CardTitle>
         </CardHeader>
-        <CardContent>
-          {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
-          {success && <p className="text-green-600 text-sm mb-4">{success}</p>}
-          
+        <CardContent className="px-4 sm:px-6 pb-4 sm:pb-6">
+          {error && (
+            <p className="text-red-500 text-xs sm:text-sm mb-4">{error}</p>
+          )}
+          {success && (
+            <p className="text-green-600 text-xs sm:text-sm mb-4">{success}</p>
+          )}
+
           {!error && user && (
             <form onSubmit={handleSubmit} className="space-y-4">
-              <p className="text-center text-sm text-gray-500 mb-4">
+              <p className="text-center text-xs sm:text-sm text-gray-500 mb-4">
                 Email: <span className="font-medium">{user.email}</span>
               </p>
 
-              <div>
-                <Label htmlFor="password">Password</Label>
+              <div className="space-y-2">
+                <Label htmlFor="password" className="text-xs sm:text-sm">
+                  Password
+                </Label>
                 <Input
                   id="password"
                   type="password"
                   placeholder="••••••••"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
+                  className="h-10 sm:h-11 text-sm sm:text-base"
                   required
                 />
               </div>
-              <div>
-                <Label htmlFor="confirmPassword">Confirm Password</Label>
+              <div className="space-y-2">
+                <Label htmlFor="confirmPassword" className="text-xs sm:text-sm">
+                  Confirm Password
+                </Label>
                 <Input
                   id="confirmPassword"
                   type="password"
                   placeholder="••••••••"
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
+                  className="h-10 sm:h-11 text-sm sm:text-base"
                   required
                 />
               </div>
 
-              <Button type="submit" className="w-full" disabled={loading}>
+              <Button
+                type="submit"
+                className="w-full h-10 sm:h-11 text-sm sm:text-base touch-manipulation"
+                disabled={loading}>
                 {loading ? "Setting up..." : "Complete Setup"}
               </Button>
             </form>

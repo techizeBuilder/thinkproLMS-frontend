@@ -13,11 +13,11 @@ export default function NotFound() {
       // Redirect to user's dashboard based on role
       const roleRouteMap: { [key: string]: string } = {
         superadmin: "/superadmin",
-        leadmentor: "/leadmentor", 
+        leadmentor: "/leadmentor",
         schooladmin: "/admin",
         admin: "/admin",
         mentor: "/mentor",
-        student: "/student"
+        student: "/student",
       };
       const route = roleRouteMap[user.role] || "/";
       navigate(route);
@@ -31,50 +31,51 @@ export default function NotFound() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 flex items-center justify-center p-3 sm:p-4">
       <Card className="w-full max-w-md shadow-xl border-0">
-        <CardContent className="p-8 text-center">
+        <CardContent className="p-6 sm:p-8 text-center">
           {/* 404 Number */}
-          <div className="mb-6">
-            <h1 className="text-8xl font-bold text-slate-200 mb-2">404</h1>
-            <div className="w-16 h-1 bg-blue-500 mx-auto rounded-full"></div>
+          <div className="mb-4 sm:mb-6">
+            <h1 className="text-6xl sm:text-8xl font-bold text-slate-200 mb-2">
+              404
+            </h1>
+            <div className="w-12 sm:w-16 h-1 bg-blue-500 mx-auto rounded-full"></div>
           </div>
 
           {/* Error Message */}
-          <div className="mb-8">
-            <h2 className="text-2xl font-semibold text-slate-800 mb-3">
+          <div className="mb-6 sm:mb-8">
+            <h2 className="text-xl sm:text-2xl font-semibold text-slate-800 mb-3">
               Page Not Found
             </h2>
-            <p className="text-slate-600 leading-relaxed">
-              The page you're looking for doesn't exist or has been moved to a different location.
+            <p className="text-sm sm:text-base text-slate-600 leading-relaxed">
+              The page you're looking for doesn't exist or has been moved to a
+              different location.
             </p>
           </div>
 
           {/* Action Buttons */}
           <div className="space-y-3">
-            <Button 
+            <Button
               onClick={handleGoHome}
-              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5"
-              size="lg"
-            >
+              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5 text-sm sm:text-base touch-manipulation"
+              size="lg">
               <Home className="w-4 h-4 mr-2" />
               Go to Dashboard
             </Button>
-            
-            <Button 
+
+            <Button
               onClick={handleGoBack}
               variant="outline"
-              className="w-full border-slate-300 text-slate-700 hover:bg-slate-50 font-medium py-2.5"
-              size="lg"
-            >
+              className="w-full border-slate-300 text-slate-700 hover:bg-slate-50 font-medium py-2.5 text-sm sm:text-base touch-manipulation"
+              size="lg">
               <ArrowLeft className="w-4 h-4 mr-2" />
               Go Back
             </Button>
           </div>
 
           {/* Help Text */}
-          <div className="mt-8 pt-6 border-t border-slate-200">
-            <p className="text-sm text-slate-500">
+          <div className="mt-6 sm:mt-8 pt-4 sm:pt-6 border-t border-slate-200">
+            <p className="text-xs sm:text-sm text-slate-500">
               Need help? Contact our support team or check our documentation.
             </p>
           </div>

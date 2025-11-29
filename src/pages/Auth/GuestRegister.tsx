@@ -17,16 +17,18 @@ export default function GuestRegister() {
   const [searchParams] = useSearchParams();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
-  
+
   // Handle Google OAuth callback
   useEffect(() => {
-    const token = searchParams.get('token');
-    const userParam = searchParams.get('user');
-    const error = searchParams.get('error');
+    const token = searchParams.get("token");
+    const userParam = searchParams.get("user");
+    const error = searchParams.get("error");
 
     if (error) {
-      if (error === 'google_not_configured') {
-        setError("Google authentication is not configured. Please use the registration form below.");
+      if (error === "google_not_configured") {
+        setError(
+          "Google authentication is not configured. Please use the registration form below."
+        );
       } else {
         setError("Google authentication failed. Please try again.");
       }
@@ -49,19 +51,19 @@ export default function GuestRegister() {
     if (!loading && user) {
       const roleRouteMap: { [key: string]: string } = {
         superadmin: "/superadmin",
-        leadmentor: "/leadmentor", 
+        leadmentor: "/leadmentor",
         schooladmin: "/schooladmin",
         admin: "/admin",
         mentor: "/mentor",
         student: "/student",
-        guest: "/guest"
+        guest: "/guest",
       };
-      
+
       const route = roleRouteMap[user.role] || "/login";
       navigate(route, { replace: true });
     }
   }, [user, loading, navigate]);
-  
+
   // Form state
   const [formData, setFormData] = useState({
     name: "",
@@ -82,7 +84,7 @@ export default function GuestRegister() {
   });
 
   const handleInputChange = (field: string, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+    setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -118,11 +120,17 @@ export default function GuestRegister() {
         guestType: formData.guestType,
         city: formData.city,
         phoneNumber: formData.phoneNumber,
-        schoolName: formData.guestType === "student" ? formData.schoolName : undefined,
+        schoolName:
+          formData.guestType === "student" ? formData.schoolName : undefined,
         grade: formData.guestType === "student" ? formData.grade : undefined,
-        childName: formData.guestType === "parent" ? formData.childName : undefined,
-        childSchoolName: formData.guestType === "parent" ? formData.childSchoolName : undefined,
-        organisation: formData.guestType === "other" ? formData.organisation : undefined,
+        childName:
+          formData.guestType === "parent" ? formData.childName : undefined,
+        childSchoolName:
+          formData.guestType === "parent"
+            ? formData.childSchoolName
+            : undefined,
+        organisation:
+          formData.guestType === "other" ? formData.organisation : undefined,
       });
 
       login(res.data.user, res.data.token);
@@ -136,7 +144,9 @@ export default function GuestRegister() {
 
   const handleGoogleSignIn = () => {
     // Redirect to backend Google OAuth endpoint
-    window.location.href = `${import.meta.env.VITE_API_URL || 'http://localhost:8000/api'}/auth/google`;
+    window.location.href = `${
+      import.meta.env.VITE_API_URL || "http://localhost:8000/api"
+    }/auth/google`;
   };
 
   // Show loading while checking authentication
@@ -152,19 +162,23 @@ export default function GuestRegister() {
   }
 
   return (
-    <div className="h-screen bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50 flex items-start justify-center p-4 overflow-y-auto">
+    <div className="h-screen bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50 flex items-start justify-center p-3 sm:p-4 overflow-y-auto">
       <div className="w-full max-w-2xl py-8">
         {/* Logo Section */}
         <div className="text-center mb-8">
           <div className="mx-auto w-24 h-24 mb-4 rounded-full bg-white shadow-lg flex items-center justify-center">
-            <img 
-              src="/fancy-logo.jpg" 
-              alt="ThinkPro LMS" 
+            <img
+              src="/fancy-logo.jpg"
+              alt="ThinkPro LMS"
               className="w-16 h-16 object-contain rounded-full"
             />
           </div>
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">Guest Registration</h1>
-          <p className="text-gray-600">Join as a guest to explore our platform</p>
+          <h1 className="text-2xl font-bold text-gray-900 mb-2">
+            Guest Registration
+          </h1>
+          <p className="text-gray-600">
+            Join as a guest to explore our platform
+          </p>
         </div>
 
         <Card className="shadow-xl border-0 bg-white/80 backdrop-blur-sm">
@@ -177,8 +191,7 @@ export default function GuestRegister() {
                 variant="ghost"
                 size="sm"
                 onClick={() => navigate("/login")}
-                className="text-gray-500 hover:text-gray-700"
-              >
+                className="text-gray-500 hover:text-gray-700">
                 ← Back to Login
               </Button>
             </div>
@@ -192,9 +205,10 @@ export default function GuestRegister() {
                 </Label>
                 <RadioGroup
                   value={formData.guestType}
-                  onValueChange={(value) => handleInputChange("guestType", value)}
-                  className="flex flex-col space-y-2"
-                >
+                  onValueChange={(value) =>
+                    handleInputChange("guestType", value)
+                  }
+                  className="flex flex-col space-y-2">
                   <div className="flex items-center space-x-2">
                     <RadioGroupItem value="student" id="student" />
                     <Label htmlFor="student" className="text-sm font-medium">
@@ -219,7 +233,9 @@ export default function GuestRegister() {
               {/* Common Fields */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="name" className="text-sm font-medium text-gray-700">
+                  <Label
+                    htmlFor="name"
+                    className="text-sm font-medium text-gray-700">
                     Full Name *
                   </Label>
                   <Input
@@ -233,7 +249,9 @@ export default function GuestRegister() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="email" className="text-sm font-medium text-gray-700">
+                  <Label
+                    htmlFor="email"
+                    className="text-sm font-medium text-gray-700">
                     Email Address *
                   </Label>
                   <Input
@@ -250,7 +268,9 @@ export default function GuestRegister() {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="city" className="text-sm font-medium text-gray-700">
+                  <Label
+                    htmlFor="city"
+                    className="text-sm font-medium text-gray-700">
                     City *
                   </Label>
                   <Input
@@ -267,7 +287,9 @@ export default function GuestRegister() {
                   <PhoneInput
                     label="Phone Number"
                     value={formData.phoneNumber}
-                    onChange={(value) => handleInputChange("phoneNumber", value)}
+                    onChange={(value) =>
+                      handleInputChange("phoneNumber", value)
+                    }
                     required
                   />
                 </div>
@@ -277,28 +299,36 @@ export default function GuestRegister() {
               {formData.guestType === "student" && (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="schoolName" className="text-sm font-medium text-gray-700">
+                    <Label
+                      htmlFor="schoolName"
+                      className="text-sm font-medium text-gray-700">
                       School Name *
                     </Label>
                     <Input
                       id="schoolName"
                       type="text"
                       value={formData.schoolName}
-                      onChange={(e) => handleInputChange("schoolName", e.target.value)}
+                      onChange={(e) =>
+                        handleInputChange("schoolName", e.target.value)
+                      }
                       placeholder="Enter your school name"
                       className="h-11 border-gray-200 focus:border-green-500 focus:ring-green-500"
                       required
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="grade" className="text-sm font-medium text-gray-700">
+                    <Label
+                      htmlFor="grade"
+                      className="text-sm font-medium text-gray-700">
                       Grade *
                     </Label>
                     <Input
                       id="grade"
                       type="text"
                       value={formData.grade}
-                      onChange={(e) => handleInputChange("grade", e.target.value)}
+                      onChange={(e) =>
+                        handleInputChange("grade", e.target.value)
+                      }
                       placeholder="Enter your grade"
                       className="h-11 border-gray-200 focus:border-green-500 focus:ring-green-500"
                       required
@@ -310,28 +340,36 @@ export default function GuestRegister() {
               {formData.guestType === "parent" && (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="childName" className="text-sm font-medium text-gray-700">
+                    <Label
+                      htmlFor="childName"
+                      className="text-sm font-medium text-gray-700">
                       Child's Name *
                     </Label>
                     <Input
                       id="childName"
                       type="text"
                       value={formData.childName}
-                      onChange={(e) => handleInputChange("childName", e.target.value)}
+                      onChange={(e) =>
+                        handleInputChange("childName", e.target.value)
+                      }
                       placeholder="Enter your child's name"
                       className="h-11 border-gray-200 focus:border-green-500 focus:ring-green-500"
                       required
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="childSchoolName" className="text-sm font-medium text-gray-700">
+                    <Label
+                      htmlFor="childSchoolName"
+                      className="text-sm font-medium text-gray-700">
                       Child's School Name *
                     </Label>
                     <Input
                       id="childSchoolName"
                       type="text"
                       value={formData.childSchoolName}
-                      onChange={(e) => handleInputChange("childSchoolName", e.target.value)}
+                      onChange={(e) =>
+                        handleInputChange("childSchoolName", e.target.value)
+                      }
                       placeholder="Enter your child's school name"
                       className="h-11 border-gray-200 focus:border-green-500 focus:ring-green-500"
                       required
@@ -342,14 +380,18 @@ export default function GuestRegister() {
 
               {formData.guestType === "other" && (
                 <div className="space-y-2">
-                  <Label htmlFor="organisation" className="text-sm font-medium text-gray-700">
+                  <Label
+                    htmlFor="organisation"
+                    className="text-sm font-medium text-gray-700">
                     Organisation/Institution *
                   </Label>
                   <Input
                     id="organisation"
                     type="text"
                     value={formData.organisation}
-                    onChange={(e) => handleInputChange("organisation", e.target.value)}
+                    onChange={(e) =>
+                      handleInputChange("organisation", e.target.value)
+                    }
                     placeholder="Enter your organisation or institution"
                     className="h-11 border-gray-200 focus:border-green-500 focus:ring-green-500"
                     required
@@ -360,28 +402,36 @@ export default function GuestRegister() {
               {/* Password Fields */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="password" className="text-sm font-medium text-gray-700">
+                  <Label
+                    htmlFor="password"
+                    className="text-sm font-medium text-gray-700">
                     Password *
                   </Label>
                   <Input
                     id="password"
                     type="password"
                     value={formData.password}
-                    onChange={(e) => handleInputChange("password", e.target.value)}
+                    onChange={(e) =>
+                      handleInputChange("password", e.target.value)
+                    }
                     placeholder="Create a password"
                     className="h-11 border-gray-200 focus:border-green-500 focus:ring-green-500"
                     required
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="confirmPassword" className="text-sm font-medium text-gray-700">
+                  <Label
+                    htmlFor="confirmPassword"
+                    className="text-sm font-medium text-gray-700">
                     Confirm Password *
                   </Label>
                   <Input
                     id="confirmPassword"
                     type="password"
                     value={formData.confirmPassword}
-                    onChange={(e) => handleInputChange("confirmPassword", e.target.value)}
+                    onChange={(e) =>
+                      handleInputChange("confirmPassword", e.target.value)
+                    }
                     placeholder="Confirm your password"
                     className="h-11 border-gray-200 focus:border-green-500 focus:ring-green-500"
                     required
@@ -395,11 +445,10 @@ export default function GuestRegister() {
                 </div>
               )}
 
-              <Button 
-                type="submit" 
-                className="w-full h-11 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-medium shadow-lg hover:shadow-xl transition-all duration-200" 
-                disabled={isSubmitting}
-              >
+              <Button
+                type="submit"
+                className="w-full h-11 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-medium shadow-lg hover:shadow-xl transition-all duration-200"
+                disabled={isSubmitting}>
                 {isSubmitting ? (
                   <div className="flex items-center space-x-2">
                     <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
@@ -410,14 +459,16 @@ export default function GuestRegister() {
                 )}
               </Button>
             </form>
-            
+
             {/* Divider */}
             <div className="relative my-6">
               <div className="absolute inset-0 flex items-center">
                 <div className="w-full border-t border-gray-300" />
               </div>
               <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-white text-gray-500">Or continue with</span>
+                <span className="px-2 bg-white text-gray-500">
+                  Or continue with
+                </span>
               </div>
             </div>
 

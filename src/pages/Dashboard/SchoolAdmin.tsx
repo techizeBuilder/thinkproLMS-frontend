@@ -1,5 +1,8 @@
 import { Outlet } from "react-router-dom";
-import { SidebarProvider, useSidebar } from "@/components/ui/collapsible-sidebar";
+import {
+  SidebarProvider,
+  useSidebar,
+} from "@/components/ui/collapsible-sidebar";
 import { SchoolAdminSidebar } from "@/components/ui/school-admin-sidebar";
 import { Building2 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
@@ -38,10 +41,18 @@ function SchoolAdminContent() {
             <button
               onClick={toggle}
               className="p-2 rounded-md hover:bg-accent"
-              aria-label="Open menu"
-            >
-              <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+              aria-label="Open menu">
+              <svg
+                className="h-5 w-5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24">
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M4 6h16M4 12h16M4 18h16"
+                />
               </svg>
             </button>
           )}
@@ -49,7 +60,13 @@ function SchoolAdminContent() {
             <div className="flex items-center gap-2">
               <Building2 className="h-5 w-5 text-purple-500 flex-shrink-0" />
               <h1 className="text-xl md:text-2xl font-semibold truncate">
-                {loading ? "Loading..." : schoolAdmin ? `${user?.name || 'Admin'} - ${schoolAdmin.assignedSchool?.name || 'School'}` : "School Admin Dashboard"}
+                {loading
+                  ? "Loading..."
+                  : schoolAdmin
+                  ? `${user?.name || "Admin"} - ${
+                      schoolAdmin.assignedSchool?.name || "School"
+                    }`
+                  : "School Admin Dashboard"}
               </h1>
             </div>
             <p className="text-sm text-muted-foreground hidden sm:block">
@@ -59,7 +76,7 @@ function SchoolAdminContent() {
         </div>
       </header>
       <main className="flex-1 overflow-auto">
-        <div className="p-4 md:p-6">
+        <div className="px-3 py-3 md:p-6">
           <Outlet />
         </div>
       </main>

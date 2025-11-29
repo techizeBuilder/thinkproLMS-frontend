@@ -117,7 +117,7 @@ export default function GuestLogin() {
   }
 
   return (
-    <div className="h-screen overflow-auto bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50 flex items-center justify-center p-4">
+    <div className="h-screen overflow-auto bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50 flex items-center justify-center p-3 sm:p-4">
       <div className="w-full max-w-md">
         {/* Logo Section */}
         <div className="text-center mb-8">
@@ -142,8 +142,7 @@ export default function GuestLogin() {
                 variant="ghost"
                 size="sm"
                 onClick={() => navigate("/login")}
-                className="text-gray-500 hover:text-gray-700"
-              >
+                className="text-gray-500 hover:text-gray-700">
                 ← Back
               </Button>
             </div>
@@ -153,8 +152,7 @@ export default function GuestLogin() {
               <div className="space-y-2">
                 <Label
                   htmlFor="email"
-                  className="text-sm font-medium text-gray-700"
-                >
+                  className="text-sm font-medium text-gray-700">
                   Email Address
                 </Label>
                 <Input
@@ -170,8 +168,7 @@ export default function GuestLogin() {
               <div className="space-y-2">
                 <Label
                   htmlFor="password"
-                  className="text-sm font-medium text-gray-700"
-                >
+                  className="text-sm font-medium text-gray-700">
                   Password
                 </Label>
                 <Input
@@ -192,8 +189,7 @@ export default function GuestLogin() {
               <Button
                 type="submit"
                 className="w-full h-11 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-medium shadow-lg hover:shadow-xl transition-all duration-200"
-                disabled={isSubmitting}
-              >
+                disabled={isSubmitting}>
                 {isSubmitting ? (
                   <div className="flex items-center space-x-2">
                     <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
@@ -229,8 +225,7 @@ export default function GuestLogin() {
                 Don't have a guest account?{" "}
                 <button
                   onClick={() => navigate("/guest/register")}
-                  className="text-green-600 hover:text-green-700 font-medium"
-                >
+                  className="text-green-600 hover:text-green-700 font-medium">
                   Register here
                 </button>
               </p>

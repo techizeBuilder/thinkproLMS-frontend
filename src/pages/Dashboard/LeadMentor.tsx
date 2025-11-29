@@ -1,5 +1,8 @@
 import { Outlet } from "react-router-dom";
-import { SidebarProvider, useSidebar } from "@/components/ui/collapsible-sidebar";
+import {
+  SidebarProvider,
+  useSidebar,
+} from "@/components/ui/collapsible-sidebar";
 import { LeadMentorSidebar } from "@/components/ui/lead-mentor-sidebar";
 import { useAuth } from "@/contexts/AuthContext";
 import { Badge } from "@/components/ui/badge";
@@ -18,10 +21,18 @@ function LeadMentorContent() {
             <button
               onClick={toggle}
               className="p-2 rounded-md hover:bg-accent"
-              aria-label="Open menu"
-            >
-              <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+              aria-label="Open menu">
+              <svg
+                className="h-5 w-5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24">
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M4 6h16M4 12h16M4 18h16"
+                />
               </svg>
             </button>
           )}
@@ -29,15 +40,21 @@ function LeadMentorContent() {
             <div className="flex items-center gap-2 sm:gap-3 truncate">
               <div className="flex items-center gap-2">
                 <Crown className="h-4 w-4 text-amber-500 flex-shrink-0" />
-                <h1 className="text-base sm:text-lg md:text-xl font-semibold truncate">{user?.name || "User"}</h1>
+                <h1 className="text-base sm:text-lg md:text-xl font-semibold truncate">
+                  {user?.name || "User"}
+                </h1>
               </div>
-              <Badge variant="secondary" className="text-[10px] sm:text-xs flex-shrink-0">Lead Mentor</Badge>
+              <Badge
+                variant="secondary"
+                className="text-[10px] sm:text-xs flex-shrink-0">
+                Lead Mentor
+              </Badge>
             </div>
           </div>
         </div>
       </header>
       <main className="flex-1 overflow-auto">
-        <div className="p-4 md:p-6">
+        <div className="px-3 py-3 md:p-6">
           <Outlet />
         </div>
       </main>

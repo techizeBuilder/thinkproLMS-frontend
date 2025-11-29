@@ -3,13 +3,13 @@ import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { 
-  Video, 
-  FileText, 
+import {
+  Video,
+  FileText,
   ExternalLink,
   BookOpen,
   Play,
-  Loader2
+  Loader2,
 } from "lucide-react";
 import { resourceService, type Resource } from "@/api/resourceService";
 import { getFileTypeBadgeColor, formatFileSize } from "@/utils/resourceUtils";
@@ -45,10 +45,9 @@ export default function GuestResources() {
     } else {
       // For documents, open in new tab
       const displayUrl = resourceService.getResourceUrl(resource);
-      window.open(displayUrl, '_blank');
+      window.open(displayUrl, "_blank");
     }
   };
-
 
   if (isLoading) {
     return (
@@ -68,37 +67,45 @@ export default function GuestResources() {
       <div className="p-6">
         <div className="text-center">
           <p className="text-red-600 mb-4">{error}</p>
-          <Button onClick={() => window.location.reload()}>
-            Try Again
-          </Button>
+          <Button onClick={() => window.location.reload()}>Try Again</Button>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="p-6">
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">Promotional Resources</h1>
-        <p className="text-gray-600">
-          Explore our collection of promotional materials, guides, and videos to learn more about ThinkPro LMS.
+    <div className="px-3 py-3 sm:p-4 md:p-6">
+      <div className="mb-4 sm:mb-6">
+        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">
+          Promotional Resources
+        </h1>
+        <p className="text-sm sm:text-base text-gray-600">
+          Explore our collection of promotional materials, guides, and videos to
+          learn more about ThinkPro LMS.
         </p>
       </div>
 
       {resources.length === 0 ? (
         <div className="text-center py-12">
-          <BookOpen className="h-12 w-12 mx-auto mb-4 text-gray-400" />
-          <h3 className="text-lg font-semibold text-gray-900 mb-2">No Resources Available</h3>
-          <p className="text-gray-600">Check back later for new resources.</p>
+          <BookOpen className="h-10 w-10 sm:h-12 sm:w-12 mx-auto mb-4 text-gray-400" />
+          <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-2">
+            No Resources Available
+          </h3>
+          <p className="text-sm sm:text-base text-gray-600">
+            Check back later for new resources.
+          </p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
           {resources.map((resource) => {
             const Icon = resource.type === "video" ? Video : FileText;
             const colorClasses = getFileTypeBadgeColor(resource);
-            
+
             return (
-              <Card key={resource._id} className="shadow-md hover:shadow-lg transition-shadow cursor-pointer" onClick={() => handleResourceClick(resource)}>
+              <Card
+                key={resource._id}
+                className="shadow-md hover:shadow-lg transition-shadow cursor-pointer"
+                onClick={() => handleResourceClick(resource)}>
                 <CardHeader className="pb-3">
                   <div className="flex items-center gap-3">
                     <div className={`p-2 rounded-lg ${colorClasses}`}>
@@ -118,27 +125,32 @@ export default function GuestResources() {
                   <p className="text-gray-600 text-sm mb-4">
                     {resource.description || "No description available"}
                   </p>
-                  
+
                   <div className="flex items-center justify-between">
                     <div className="text-xs text-gray-500">
                       {resource.content.fileSize && (
-                        <span>Size: {formatFileSize(resource.content.fileSize)}</span>
+                        <span>
+                          Size: {formatFileSize(resource.content.fileSize)}
+                        </span>
                       )}
                       {resource.viewCount > 0 && (
                         <span className="ml-2">{resource.viewCount} views</span>
                       )}
                     </div>
-                    
-                    <Button 
-                      size="sm" 
+
+                    <Button
+                      size="sm"
                       className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white"
                       onClick={(e) => {
                         e.stopPropagation();
                         handleResourceClick(resource);
-                      }}
-                    >
-                      {resource.type === "video" && <Play className="h-4 w-4 mr-1" />}
-                      {resource.type === "document" && <ExternalLink className="h-4 w-4 mr-1" />}
+                      }}>
+                      {resource.type === "video" && (
+                        <Play className="h-4 w-4 mr-1" />
+                      )}
+                      {resource.type === "document" && (
+                        <ExternalLink className="h-4 w-4 mr-1" />
+                      )}
                       {resource.type === "video" ? "Watch" : "Open"}
                     </Button>
                   </div>
@@ -157,10 +169,12 @@ export default function GuestResources() {
               More Resources Coming Soon!
             </h3>
             <p className="text-gray-600 mb-4">
-              We're constantly adding new resources, case studies, and educational content. 
-              Check back regularly for updates.
+              We're constantly adding new resources, case studies, and
+              educational content. Check back regularly for updates.
             </p>
-            <Button variant="outline" className="border-green-300 text-green-700 hover:bg-green-100">
+            <Button
+              variant="outline"
+              className="border-green-300 text-green-700 hover:bg-green-100">
               <BookOpen className="h-4 w-4 mr-2" />
               Subscribe for Updates
             </Button>

@@ -81,11 +81,13 @@ export default function GuestResourceViewPage() {
 
   if (isLoading) {
     return (
-      <div className="p-6">
+      <div className="px-3 py-3 sm:p-4 md:p-6">
         <div className="flex items-center justify-center h-64">
           <div className="text-center">
-            <Loader2 className="h-8 w-8 animate-spin mx-auto mb-2 text-green-600" />
-            <p className="text-gray-600">Loading resource...</p>
+            <Loader2 className="h-6 w-6 sm:h-8 sm:w-8 animate-spin mx-auto mb-2 text-green-600" />
+            <p className="text-sm sm:text-base text-gray-600">
+              Loading resource...
+            </p>
           </div>
         </div>
       </div>
@@ -94,11 +96,15 @@ export default function GuestResourceViewPage() {
 
   if (!resource) {
     return (
-      <div className="p-6">
+      <div className="px-3 py-3 sm:p-4 md:p-6">
         <div className="text-center">
-          <p className="text-red-600 mb-4">Resource not found</p>
-          <Button onClick={() => navigate("/guest/resources")}>
-            <ArrowLeft className="h-4 w-4 mr-2" />
+          <p className="text-sm sm:text-base text-red-600 mb-4">
+            Resource not found
+          </p>
+          <Button
+            onClick={() => navigate("/guest/resources")}
+            className="text-sm sm:text-base h-9 sm:h-10 md:h-11 touch-manipulation">
+            <ArrowLeft className="h-3 w-3 sm:h-4 sm:w-4 mr-2" />
             Back to Resources
           </Button>
         </div>
@@ -113,8 +119,7 @@ export default function GuestResourceViewPage() {
         <Button
           variant="outline"
           onClick={() => navigate("/guest/resources")}
-          className="mb-4"
-        >
+          className="mb-4">
           <ArrowLeft className="h-4 w-4 mr-2" />
           Back to Resources
         </Button>
@@ -157,8 +162,7 @@ export default function GuestResourceViewPage() {
       <div
         className={`${
           showFullscreen ? "fixed inset-0 z-50 bg-white" : "h-[600px]"
-        }`}
-      >
+        }`}>
         <Card className={`${showFullscreen ? "h-full" : "h-full"}`}>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <div className="flex items-center gap-3">
@@ -206,8 +210,7 @@ export default function GuestResourceViewPage() {
                           variant="outline"
                           size="sm"
                           onClick={handleExternalOpen}
-                          className="mt-2"
-                        >
+                          className="mt-2">
                           <ExternalLink className="h-4 w-4 mr-1" />
                           Open in New Tab
                         </Button>
@@ -224,8 +227,7 @@ export default function GuestResourceViewPage() {
                       onLoadStart={() => setIsIframeLoading(false)}
                       onError={handleIframeError}
                       onLoadedData={() => setIsIframeLoading(false)}
-                      title={resource.title}
-                    >
+                      title={resource.title}>
                       Your browser does not support the video tag.
                     </video>
                   ) : (
@@ -259,8 +261,7 @@ export default function GuestResourceViewPage() {
                           variant="outline"
                           size="sm"
                           onClick={handleExternalOpen}
-                          className="mt-2"
-                        >
+                          className="mt-2">
                           <ExternalLink className="h-4 w-4 mr-1" />
                           Open in New Tab
                         </Button>

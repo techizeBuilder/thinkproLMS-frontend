@@ -1,14 +1,14 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { 
-  CreditCard, 
-  Lock, 
+import {
+  CreditCard,
+  Lock,
   Star,
   Crown,
   CheckCircle,
   Clock,
-  Users
+  Users,
 } from "lucide-react";
 
 export default function GuestPremium() {
@@ -16,69 +16,75 @@ export default function GuestPremium() {
     {
       id: 1,
       title: "Advanced Learning Analytics",
-      description: "Deep dive into learning analytics and how to use data to improve student outcomes.",
+      description:
+        "Deep dive into learning analytics and how to use data to improve student outcomes.",
       duration: "25:30",
       price: "$9.99",
       rating: 4.8,
       views: 1250,
       locked: true,
-      thumbnail: "📊"
+      thumbnail: "📊",
     },
     {
       id: 2,
       title: "AI-Powered Assessment Tools",
-      description: "Learn about our AI-driven assessment features and automated grading systems.",
+      description:
+        "Learn about our AI-driven assessment features and automated grading systems.",
       duration: "18:45",
       price: "$7.99",
       rating: 4.9,
       views: 890,
       locked: true,
-      thumbnail: "🤖"
+      thumbnail: "🤖",
     },
     {
       id: 3,
       title: "Gamification in Education",
-      description: "Discover how to implement gamification elements to boost student engagement.",
+      description:
+        "Discover how to implement gamification elements to boost student engagement.",
       duration: "32:15",
       price: "$12.99",
       rating: 4.7,
       views: 2100,
       locked: true,
-      thumbnail: "🎮"
+      thumbnail: "🎮",
     },
     {
       id: 4,
       title: "Mobile Learning Optimization",
-      description: "Best practices for optimizing learning content for mobile devices and tablets.",
+      description:
+        "Best practices for optimizing learning content for mobile devices and tablets.",
       duration: "22:10",
       price: "$8.99",
       rating: 4.6,
       views: 1560,
       locked: true,
-      thumbnail: "📱"
+      thumbnail: "📱",
     },
     {
       id: 5,
       title: "Integration with Third-Party Tools",
-      description: "Learn how to integrate ThinkPro LMS with popular educational tools and platforms.",
+      description:
+        "Learn how to integrate ThinkPro LMS with popular educational tools and platforms.",
       duration: "28:20",
       price: "$11.99",
       rating: 4.8,
       views: 980,
       locked: true,
-      thumbnail: "🔗"
+      thumbnail: "🔗",
     },
     {
       id: 6,
       title: "Advanced Reporting & Insights",
-      description: "Master the art of creating comprehensive reports and gaining actionable insights.",
+      description:
+        "Master the art of creating comprehensive reports and gaining actionable insights.",
       duration: "35:45",
       price: "$14.99",
       rating: 4.9,
       views: 750,
       locked: true,
-      thumbnail: "📈"
-    }
+      thumbnail: "📈",
+    },
   ];
 
   const subscriptionPlans = [
@@ -92,9 +98,9 @@ export default function GuestPremium() {
         "5 premium videos per month",
         "Basic analytics access",
         "Email support",
-        "Mobile app access"
+        "Mobile app access",
       ],
-      popular: false
+      popular: false,
     },
     {
       id: 2,
@@ -108,9 +114,9 @@ export default function GuestPremium() {
         "Priority support",
         "Mobile app access",
         "Early access to new features",
-        "Custom learning paths"
+        "Custom learning paths",
       ],
-      popular: true
+      popular: true,
     },
     {
       id: 3,
@@ -124,78 +130,93 @@ export default function GuestPremium() {
         "Custom branding options",
         "Dedicated account manager",
         "API access",
-        "White-label solutions"
+        "White-label solutions",
       ],
-      popular: false
-    }
+      popular: false,
+    },
   ];
 
   const handleSubscribe = (planId: number) => {
     // TODO: Implement subscription functionality
-    alert(`Subscription functionality for plan ${planId} will be implemented soon!`);
+    alert(
+      `Subscription functionality for plan ${planId} will be implemented soon!`
+    );
   };
 
   const handlePurchaseVideo = (videoId: number) => {
     // TODO: Implement individual video purchase functionality
-    alert(`Video purchase functionality for video ${videoId} will be implemented soon!`);
+    alert(
+      `Video purchase functionality for video ${videoId} will be implemented soon!`
+    );
   };
 
   return (
-    <div className="p-6">
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">Premium Content</h1>
-        <p className="text-gray-600">
-          Unlock exclusive premium videos and advanced features with our subscription plans.
+    <div className="px-3 py-3 sm:p-4 md:p-6">
+      <div className="mb-4 sm:mb-6">
+        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">
+          Premium Content
+        </h1>
+        <p className="text-sm sm:text-base text-gray-600">
+          Unlock exclusive premium videos and advanced features with our
+          subscription plans.
         </p>
       </div>
 
       {/* Subscription Plans */}
-      <div className="mb-8">
-        <h2 className="text-2xl font-semibold text-gray-900 mb-6">Choose Your Plan</h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="mb-6 sm:mb-8">
+        <h2 className="text-xl sm:text-2xl font-semibold text-gray-900 mb-4 sm:mb-6">
+          Choose Your Plan
+        </h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
           {subscriptionPlans.map((plan) => (
-            <Card 
-              key={plan.id} 
+            <Card
+              key={plan.id}
               className={`shadow-md hover:shadow-lg transition-shadow ${
-                plan.popular ? 'ring-2 ring-green-500 bg-gradient-to-b from-green-50 to-white' : ''
-              }`}
-            >
-              <CardHeader className="text-center">
+                plan.popular
+                  ? "ring-2 ring-green-500 bg-gradient-to-b from-green-50 to-white"
+                  : ""
+              }`}>
+              <CardHeader className="text-center px-3 sm:px-4 md:px-6 pt-3 sm:pt-4 md:pt-6">
                 {plan.popular && (
-                  <Badge className="w-fit mx-auto mb-2 bg-green-600 text-white">
+                  <Badge className="w-fit mx-auto mb-2 bg-green-600 text-white text-xs sm:text-sm">
                     <Crown className="h-3 w-3 mr-1" />
                     Most Popular
                   </Badge>
                 )}
-                <CardTitle className="text-xl font-semibold text-gray-900">
+                <CardTitle className="text-lg sm:text-xl font-semibold text-gray-900">
                   {plan.name}
                 </CardTitle>
                 <div className="mt-2">
-                  <span className="text-3xl font-bold text-gray-900">{plan.price}</span>
-                  <span className="text-gray-600">/{plan.period}</span>
+                  <span className="text-2xl sm:text-3xl font-bold text-gray-900">
+                    {plan.price}
+                  </span>
+                  <span className="text-sm sm:text-base text-gray-600">
+                    /{plan.period}
+                  </span>
                 </div>
-                <p className="text-gray-600 text-sm mt-2">
+                <p className="text-gray-600 text-xs sm:text-sm mt-2">
                   {plan.description}
                 </p>
               </CardHeader>
-              <CardContent>
-                <ul className="space-y-3 mb-6">
+              <CardContent className="px-3 sm:px-4 md:px-6 pb-3 sm:pb-4 md:pb-6">
+                <ul className="space-y-2 sm:space-y-3 mb-4 sm:mb-6">
                   {plan.features.map((feature, index) => (
-                    <li key={index} className="flex items-center gap-2 text-sm">
-                      <CheckCircle className="h-4 w-4 text-green-600 flex-shrink-0" />
+                    <li
+                      key={index}
+                      className="flex items-center gap-2 text-xs sm:text-sm">
+                      <CheckCircle className="h-3 w-3 sm:h-4 sm:w-4 text-green-600 flex-shrink-0" />
                       <span className="text-gray-700">{feature}</span>
                     </li>
                   ))}
                 </ul>
                 <Button
                   onClick={() => handleSubscribe(plan.id)}
-                  className={`w-full ${
+                  className={`w-full text-sm sm:text-base h-9 sm:h-10 md:h-11 touch-manipulation ${
                     plan.popular
                       ? "bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700"
                       : "bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700"
-                  } text-white`}
-                >
-                  <CreditCard className="h-4 w-4 mr-2" />
+                  } text-white`}>
+                  <CreditCard className="h-3 w-3 sm:h-4 sm:w-4 mr-2" />
                   Subscribe Now
                 </Button>
               </CardContent>
@@ -206,10 +227,14 @@ export default function GuestPremium() {
 
       {/* Premium Videos */}
       <div>
-        <h2 className="text-2xl font-semibold text-gray-900 mb-6">Premium Video Library</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <h2 className="text-xl sm:text-2xl font-semibold text-gray-900 mb-4 sm:mb-6">
+          Premium Video Library
+        </h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
           {premiumVideos.map((video) => (
-            <Card key={video.id} className="shadow-md hover:shadow-lg transition-shadow">
+            <Card
+              key={video.id}
+              className="shadow-md hover:shadow-lg transition-shadow">
               <CardHeader className="pb-3">
                 <div className="relative">
                   <div className="w-full h-32 bg-gradient-to-br from-gray-100 to-gray-200 rounded-lg flex items-center justify-center text-4xl mb-3">
@@ -226,11 +251,9 @@ export default function GuestPremium() {
                 <CardTitle className="text-lg font-semibold text-gray-900">
                   {video.title}
                 </CardTitle>
-                <p className="text-gray-600 text-sm">
-                  {video.description}
-                </p>
+                <p className="text-gray-600 text-sm">{video.description}</p>
               </CardHeader>
-              
+
               <CardContent>
                 <div className="space-y-4">
                   {/* Video Stats */}
@@ -257,8 +280,7 @@ export default function GuestPremium() {
                     <Button
                       onClick={() => handlePurchaseVideo(video.id)}
                       size="sm"
-                      className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white"
-                    >
+                      className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white">
                       <CreditCard className="h-4 w-4 mr-1" />
                       Purchase
                     </Button>
@@ -281,12 +303,14 @@ export default function GuestPremium() {
               Start Your Free Trial Today!
             </h3>
             <p className="text-gray-600 mb-4">
-              Get 7 days of free access to all premium content. No credit card required.
+              Get 7 days of free access to all premium content. No credit card
+              required.
             </p>
-            <Button 
+            <Button
               className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white"
-              onClick={() => alert("Free trial functionality will be implemented soon!")}
-            >
+              onClick={() =>
+                alert("Free trial functionality will be implemented soon!")
+              }>
               <Crown className="h-4 w-4 mr-2" />
               Start Free Trial
             </Button>

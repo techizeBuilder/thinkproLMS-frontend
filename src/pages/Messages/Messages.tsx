@@ -19,18 +19,22 @@ import { toast } from "sonner";
 
 const Messages: React.FC = () => {
   const [conversations, setConversations] = useState<Conversation[]>([]);
-  const [selectedConversationId, setSelectedConversationId] = useState<string | null>(null);
+  const [selectedConversationId, setSelectedConversationId] = useState<
+    string | null
+  >(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoadingConversations, setIsLoadingConversations] = useState(false);
   const [isLoadingMessages, setIsLoadingMessages] = useState(false);
   const [currentUserId, setCurrentUserId] = useState<string>("");
   const [isTyping, setIsTyping] = useState(false);
-  const [typingTimeout, setTypingTimeout] = useState<NodeJS.Timeout | null>(null);
+  const [typingTimeout, setTypingTimeout] = useState<NodeJS.Timeout | null>(
+    null
+  );
   const [showConversationsList, setShowConversationsList] = useState(true);
 
-  const { 
-    socket, 
-    isConnected, 
+  const {
+    socket,
+    isConnected,
     onlineUsers,
     sendMessage: socketSendMessage,
     joinConversation,
@@ -65,10 +69,10 @@ const Messages: React.FC = () => {
       }
     };
 
-    window.addEventListener('resize', handleResize);
+    window.addEventListener("resize", handleResize);
     handleResize(); // Call once on mount
 
-    return () => window.removeEventListener('resize', handleResize);
+    return () => window.removeEventListener("resize", handleResize);
   }, [selectedConversationId]);
 
   useEffect(() => {
@@ -87,12 +91,15 @@ const Messages: React.FC = () => {
     if (!socket) return;
 
     // Handle new messages
-    const handleNewMessage = (data: { message: Message; conversationId: string }) => {
+    const handleNewMessage = (data: {
+      message: Message;
+      conversationId: string;
+    }) => {
       // Add message to list if we're viewing this conversation
       if (data.conversationId === selectedConversationId) {
         setMessages((prev) => {
           // Avoid duplicates
-          if (prev.some(m => m._id === data.message._id)) {
+          if (prev.some((m) => m._id === data.message._id)) {
             return prev;
           }
           return [...prev, data.message];
@@ -121,14 +128,24 @@ const Messages: React.FC = () => {
     };
 
     // Handle typing updates
-    const handleTypingUpdate = (data: { conversationId: string; userId: string; isTyping: boolean }) => {
-      if (data.conversationId === selectedConversationId && data.userId !== currentUserId) {
+    const handleTypingUpdate = (data: {
+      conversationId: string;
+      userId: string;
+      isTyping: boolean;
+    }) => {
+      if (
+        data.conversationId === selectedConversationId &&
+        data.userId !== currentUserId
+      ) {
         setIsTyping(data.isTyping);
       }
     };
 
     // Handle message read status
-    const handleMessageRead = (data: { conversationId: string; messageIds: string[] }) => {
+    const handleMessageRead = (data: {
+      conversationId: string;
+      messageIds: string[];
+    }) => {
       if (data.conversationId === selectedConversationId) {
         setMessages((prev) =>
           prev.map((msg) =>
@@ -162,7 +179,9 @@ const Messages: React.FC = () => {
       setConversations(response.conversations);
     } catch (error: any) {
       console.error("Error loading conversations:", error);
-      toast.error(error.response?.data?.message || "Failed to load conversations");
+      toast.error(
+        error.response?.data?.message || "Failed to load conversations"
+      );
     } finally {
       setIsLoadingConversations(false);
     }
@@ -192,74 +211,91 @@ const Messages: React.FC = () => {
     }
   };
 
-  const handleSendMessage = useCallback((content: string) => {
-    if (!selectedConversationId) return;
+  const handleSendMessage = useCallback(
+    (content: string) => {
+      if (!selectedConversationId) return;
 
-    const selectedConversation = conversations.find(
-      (c) => c._id === selectedConversationId
-    );
+      const selectedConversation = conversations.find(
+        (c) => c._id === selectedConversationId
+      );
 
-    if (!selectedConversation) return;
+      if (!selectedConversation) return;
 
-    // Send via socket for real-time delivery
-    socketSendMessage({
-      conversationId: selectedConversationId,
-      receiverId: selectedConversation.participant._id,
-      content,
-    });
+      // Send via socket for real-time delivery
+      socketSendMessage({
+        conversationId: selectedConversationId,
+        receiverId: selectedConversation.participant._id,
+        content,
+      });
 
-    // Stop typing indicator
-    stopTyping(selectedConversationId, selectedConversation.participant._id);
-  }, [selectedConversationId, conversations, socketSendMessage, stopTyping]);
-
-  const handleTyping = useCallback((_content: string) => {
-    if (!selectedConversationId) return;
-
-    const selectedConversation = conversations.find(
-      (c) => c._id === selectedConversationId
-    );
-
-    if (!selectedConversation) return;
-
-    // Clear existing timeout
-    if (typingTimeout) {
-      clearTimeout(typingTimeout);
-    }
-
-    // Start typing
-    startTyping(selectedConversationId, selectedConversation.participant._id);
-
-    // Set timeout to stop typing after 2 seconds of inactivity
-    const timeout = setTimeout(() => {
+      // Stop typing indicator
       stopTyping(selectedConversationId, selectedConversation.participant._id);
-    }, 2000);
+    },
+    [selectedConversationId, conversations, socketSendMessage, stopTyping]
+  );
 
-    setTypingTimeout(timeout);
-  }, [selectedConversationId, conversations, typingTimeout, startTyping, stopTyping]);
+  const handleTyping = useCallback(
+    (_content: string) => {
+      if (!selectedConversationId) return;
+
+      const selectedConversation = conversations.find(
+        (c) => c._id === selectedConversationId
+      );
+
+      if (!selectedConversation) return;
+
+      // Clear existing timeout
+      if (typingTimeout) {
+        clearTimeout(typingTimeout);
+      }
+
+      // Start typing
+      startTyping(selectedConversationId, selectedConversation.participant._id);
+
+      // Set timeout to stop typing after 2 seconds of inactivity
+      const timeout = setTimeout(() => {
+        stopTyping(
+          selectedConversationId,
+          selectedConversation.participant._id
+        );
+      }, 2000);
+
+      setTypingTimeout(timeout);
+    },
+    [
+      selectedConversationId,
+      conversations,
+      typingTimeout,
+      startTyping,
+      stopTyping,
+    ]
+  );
 
   const handleSelectUser = async (userId: string) => {
     try {
       const response = await getOrCreateConversation(userId);
-      
+
       // Reload conversations
       await loadConversations();
-      
+
       // Select the conversation
       setSelectedConversationId(response.conversation._id);
-      
+
       // On mobile, hide conversations list when a conversation is selected
       if (window.innerWidth < 1024) {
         setShowConversationsList(false);
       }
     } catch (error: any) {
       console.error("Error creating conversation:", error);
-      toast.error(error.response?.data?.message || "Failed to create conversation");
+      toast.error(
+        error.response?.data?.message || "Failed to create conversation"
+      );
     }
   };
 
   const handleSelectConversation = (conversationId: string) => {
     setSelectedConversationId(conversationId);
-    
+
     // On mobile, hide conversations list when a conversation is selected
     if (window.innerWidth < 1024) {
       setShowConversationsList(false);
@@ -290,17 +326,16 @@ const Messages: React.FC = () => {
     : false;
 
   return (
-    <div className="container mx-auto max-w-7xl h-[calc(100vh-80px)]">
+    <div className="h-[calc(100vh-80px)] flex flex-col px-3 sm:px-4 max-w-7xl mx-auto overflow-hidden">
       {/* Header */}
-      <div className="mb-2 sm:mb-3 flex items-center justify-between">
+      <div className="mb-2 sm:mb-3 flex items-center justify-between flex-shrink-0">
         <div className="flex items-center gap-2">
           {/* Mobile menu button - only visible on small screens */}
           <Button
             variant="outline"
             size="sm"
             className="lg:hidden h-8 w-8 p-0"
-            onClick={toggleConversationsList}
-          >
+            onClick={toggleConversationsList}>
             <Menu className="h-3 w-3" />
           </Button>
           <h1 className="text-xl sm:text-2xl font-bold">Messages</h1>
@@ -326,28 +361,32 @@ const Messages: React.FC = () => {
         </div>
       </div>
 
-      <div className="flex h-full gap-2 sm:gap-3 relative">
+      <div className="flex flex-1 gap-2 sm:gap-3 relative overflow-hidden min-h-0">
         {/* Mobile overlay backdrop */}
         {showConversationsList && (
-          <div 
+          <div
             className="lg:hidden fixed inset-0 bg-black/50 z-40"
             onClick={() => setShowConversationsList(false)}
           />
         )}
 
         {/* Conversations List - Desktop: always visible, Mobile: conditional with overlay */}
-        <div className={`${showConversationsList ? 'block' : 'hidden'} lg:block w-full lg:w-1/3 relative z-50 lg:z-auto`}>
-          <Card className="flex flex-col h-full">
+        <div
+          className={`${
+            showConversationsList ? "block" : "hidden"
+          } lg:block w-full lg:w-1/3 relative z-50 lg:z-auto h-full`}>
+          <Card className="flex flex-col h-full overflow-hidden">
             <CardHeader className="border-b py-2 sm:py-3">
               <div className="flex items-center justify-between">
-                <CardTitle className="text-base sm:text-lg">Conversations</CardTitle>
+                <CardTitle className="text-base sm:text-lg">
+                  Conversations
+                </CardTitle>
                 {/* Mobile close button */}
                 <Button
                   variant="ghost"
                   size="sm"
                   className="lg:hidden h-8 w-8 p-0"
-                  onClick={() => setShowConversationsList(false)}
-                >
+                  onClick={() => setShowConversationsList(false)}>
                   <ArrowLeft className="h-3 w-3" />
                 </Button>
               </div>
@@ -364,8 +403,11 @@ const Messages: React.FC = () => {
         </div>
 
         {/* Messages Area - Desktop: 2/3 width, Mobile: full width */}
-        <div className={`${!showConversationsList ? 'block' : 'hidden'} lg:block w-full lg:w-2/3`}>
-          <Card className="flex flex-col h-full">
+        <div
+          className={`${
+            !showConversationsList ? "block" : "hidden"
+          } lg:block w-full lg:w-2/3 h-full`}>
+          <Card className="flex flex-col h-full overflow-hidden">
             {selectedConversation ? (
               <>
                 <CardHeader className="border-b py-2 sm:py-3">
@@ -376,23 +418,38 @@ const Messages: React.FC = () => {
                         variant="ghost"
                         size="sm"
                         className="lg:hidden flex-shrink-0 h-8 w-8 p-0"
-                        onClick={handleBackToConversations}
-                      >
+                        onClick={handleBackToConversations}>
                         <ArrowLeft className="h-3 w-3" />
                       </Button>
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-1 sm:gap-2 flex-wrap">
-                          <CardTitle className="text-base sm:text-lg truncate">{selectedConversation.participant.name}</CardTitle>
-                          <Badge variant="secondary" className="text-xs flex-shrink-0">
+                          <CardTitle className="text-base sm:text-lg truncate">
+                            {selectedConversation.participant.name}
+                          </CardTitle>
+                          <Badge
+                            variant="secondary"
+                            className="text-xs flex-shrink-0">
                             {selectedConversation.participant.role}
                           </Badge>
-                          {selectedConversation.participant.role === "mentor" && selectedConversation.participant.school?.schoolCount && selectedConversation.participant.school.schoolCount > 1 && (
-                            <Badge variant="outline" className="text-xs flex-shrink-0 bg-blue-50 text-blue-700 border-blue-200">
-                              {selectedConversation.participant.school.schoolCount} schools
-                            </Badge>
-                          )}
+                          {selectedConversation.participant.role === "mentor" &&
+                            selectedConversation.participant.school
+                              ?.schoolCount &&
+                            selectedConversation.participant.school
+                              .schoolCount > 1 && (
+                              <Badge
+                                variant="outline"
+                                className="text-xs flex-shrink-0 bg-blue-50 text-blue-700 border-blue-200">
+                                {
+                                  selectedConversation.participant.school
+                                    .schoolCount
+                                }{" "}
+                                schools
+                              </Badge>
+                            )}
                           {isParticipantOnline && (
-                            <Badge variant="outline" className="gap-1 text-xs flex-shrink-0">
+                            <Badge
+                              variant="outline"
+                              className="gap-1 text-xs flex-shrink-0">
                               <div className="h-2 w-2 rounded-full bg-green-500" />
                               <span className="hidden sm:inline">Online</span>
                             </Badge>
@@ -404,7 +461,9 @@ const Messages: React.FC = () => {
                           </p>
                           {selectedConversation.participant.school && (
                             <p className="text-xs text-muted-foreground truncate">
-                              🏫 {selectedConversation.participant.school.name} - {selectedConversation.participant.school.city}, {selectedConversation.participant.school.state}
+                              🏫 {selectedConversation.participant.school.name}{" "}
+                              - {selectedConversation.participant.school.city},{" "}
+                              {selectedConversation.participant.school.state}
                             </p>
                           )}
                         </div>
@@ -425,7 +484,7 @@ const Messages: React.FC = () => {
                       {selectedConversation.participant.name} is typing...
                     </p>
                   )}
-                  <MessageInput 
+                  <MessageInput
                     onSendMessage={handleSendMessage}
                     onTyping={handleTyping}
                   />
@@ -435,7 +494,9 @@ const Messages: React.FC = () => {
               <CardContent className="flex-1 flex items-center justify-center p-4">
                 <div className="text-center">
                   <MessageSquare className="h-8 w-8 sm:h-12 sm:w-12 text-muted-foreground mx-auto mb-3 sm:mb-4" />
-                  <p className="text-base sm:text-lg font-medium mb-2">Select a conversation</p>
+                  <p className="text-base sm:text-lg font-medium mb-2">
+                    Select a conversation
+                  </p>
                   <p className="text-xs sm:text-sm text-muted-foreground">
                     Choose a conversation from the list or start a new one
                   </p>

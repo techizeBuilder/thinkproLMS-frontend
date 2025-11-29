@@ -53,14 +53,12 @@ export default function CRMSuperAdminLayout({
             <SidebarNav>
               <SidebarNavItem
                 to="/crm/superadmin/sales-managers"
-                icon={UserCheck}
-              >
+                icon={UserCheck}>
                 Sales Managers
               </SidebarNavItem>
               <SidebarNavItem
                 to="/crm/superadmin/sales-executives"
-                icon={Users}
-              >
+                icon={Users}>
                 Sales Executives
               </SidebarNavItem>
               <SidebarNavItem to="/crm/superadmin/notifications" icon={Bell}>
@@ -69,8 +67,7 @@ export default function CRMSuperAdminLayout({
                   {unreadCount > 0 && !isCollapsed && (
                     <Badge
                       variant="destructive"
-                      className="ml-auto text-xs px-1.5 py-0 h-5"
-                    >
+                      className="ml-auto text-xs px-1.5 py-0 h-5">
                       {unreadCount}
                     </Badge>
                   )}
@@ -85,8 +82,7 @@ export default function CRMSuperAdminLayout({
               <Link to="/superadmin">
                 <Button
                   variant="ghost"
-                  className="w-full justify-start text-sm bg-[#333A47] hover:bg-[#20252d]"
-                >
+                  className="w-full justify-start text-sm bg-[#333A47] hover:bg-[#20252d]">
                   <Building2 className="mr-3 h-4 w-4 text-white" />
                   <span className="text-white">Back to LMS</span>
                 </Button>
@@ -96,8 +92,7 @@ export default function CRMSuperAdminLayout({
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="w-full bg-[#333A47] hover:bg-[#20252d]"
-                >
+                  className="w-full bg-[#333A47] hover:bg-[#20252d]">
                   <Building2 className="h-4 w-4 text-white" />
                   <span className="sr-only">Back to LMS</span>
                 </Button>
@@ -117,7 +112,7 @@ export default function CRMSuperAdminLayout({
       </Sidebar>
 
       <div className="flex-1 flex flex-col overflow-hidden">
-        <header className="bg-white border-b border-gray-200 px-4 sm:px-6 py-3 sm:py-4">
+        <header className="bg-white border-b border-gray-200 px-3 sm:px-6 py-3 sm:py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               {/* Mobile menu toggle */}
@@ -129,7 +124,9 @@ export default function CRMSuperAdminLayout({
           </div>
         </header>
 
-        <main className="flex-1 overflow-auto">{children}</main>
+        <main className="flex-1 overflow-auto px-3 py-3 sm:p-4 md:p-6">
+          {children}
+        </main>
       </div>
     </div>
   );

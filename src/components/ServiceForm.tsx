@@ -13,7 +13,6 @@ interface ServiceFormProps {
   onChange: (serviceDetails: ServiceDetails | null) => void;
 }
 
-
 export default function ServiceForm({
   serviceDetails,
   onChange,
@@ -23,7 +22,7 @@ export default function ServiceForm({
   // Initialize selectedGrades from existing serviceDetails
   useEffect(() => {
     if (serviceDetails?.grades && serviceDetails.grades.length > 0) {
-      const grades = serviceDetails.grades.map(gradeData => gradeData.grade);
+      const grades = serviceDetails.grades.map((gradeData) => gradeData.grade);
       setSelectedGrades(grades);
     }
   }, [serviceDetails]);
@@ -37,7 +36,6 @@ export default function ServiceForm({
     };
     onChange({ ...current, ...updates });
   };
-
 
   const handleMentorSelect = (value: "School Mentor" | "ThinkPro Mentor") => {
     updateServiceDetails({ mentors: [value] });
@@ -55,7 +53,7 @@ export default function ServiceForm({
     // Update service details with grades that have sections
     const currentGrades = serviceDetails?.grades || [];
     let updatedGrades;
-    
+
     if (checked) {
       // When adding a grade, initialize it with default section "A" if it doesn't exist
       const existingGrade = currentGrades.find((g) => g.grade === grade);
@@ -77,7 +75,7 @@ export default function ServiceForm({
         newSelectedGrades.includes(g.grade)
       );
     }
-    
+
     updateServiceDetails({ grades: updatedGrades });
   };
 
@@ -97,7 +95,6 @@ export default function ServiceForm({
     setSelectedGrades([]);
     updateServiceDetails({ grades: [] });
   };
-
 
   const addSectionToGrade = (grade: number) => {
     const currentGrades = serviceDetails?.grades || [];
@@ -155,8 +152,8 @@ export default function ServiceForm({
   };
 
   return (
-    <div className="space-y-6">
-      <h3 className="text-lg font-semibold">Service Details</h3>
+    <div className="space-y-4 sm:space-y-6">
+      <h3 className="text-base sm:text-lg font-semibold">Service Details</h3>
 
       {/* Service Type */}
       {/* <div className="space-y-2">
@@ -172,36 +169,44 @@ export default function ServiceForm({
       </div> */}
 
       {/* Mentor Selection */}
-      <div className="space-y-3">
-        <Label>Mentor Type *</Label>
+      <div className="space-y-2 sm:space-y-3">
+        <Label className="text-sm sm:text-base">Mentor Type *</Label>
         <RadioGroup
           value={serviceDetails?.mentors?.[0] || ""}
-          onValueChange={(v) => handleMentorSelect(v as "School Mentor" | "ThinkPro Mentor")}
-          className="space-y-2"
-        >
-          <div className="flex items-center space-x-2">
+          onValueChange={(v) =>
+            handleMentorSelect(v as "School Mentor" | "ThinkPro Mentor")
+          }
+          className="space-y-3">
+          <div className="flex items-center space-x-2 min-h-[44px]">
             <RadioGroupItem id="school-mentor" value="School Mentor" />
-            <Label htmlFor="school-mentor">School Mentor</Label>
+            <Label
+              htmlFor="school-mentor"
+              className="text-sm sm:text-base cursor-pointer">
+              School Mentor
+            </Label>
           </div>
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center space-x-2 min-h-[44px]">
             <RadioGroupItem id="thinker-mentor" value="ThinkPro Mentor" />
-            <Label htmlFor="thinker-mentor">ThinkPro Mentor</Label>
+            <Label
+              htmlFor="thinker-mentor"
+              className="text-sm sm:text-base cursor-pointer">
+              ThinkPro Mentor
+            </Label>
           </div>
         </RadioGroup>
       </div>
 
       {/* Grade Selection */}
-      <div className="space-y-3">
-        <div className="flex items-center justify-between">
-          <Label>Select Grades *</Label>
+      <div className="space-y-2 sm:space-y-3">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+          <Label className="text-sm sm:text-base">Select Grades *</Label>
           <div className="flex gap-2">
             <Button
               type="button"
               variant="outline"
               size="sm"
               onClick={handleSelectAllGrades}
-              className="text-xs"
-            >
+              className="text-xs flex-1 sm:flex-none min-h-[44px]">
               Select All
             </Button>
             <Button
@@ -209,15 +214,16 @@ export default function ServiceForm({
               variant="outline"
               size="sm"
               onClick={handleDeselectAllGrades}
-              className="text-xs"
-            >
+              className="text-xs flex-1 sm:flex-none min-h-[44px]">
               Deselect All
             </Button>
           </div>
         </div>
-        <div className="grid grid-cols-5 gap-2">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 sm:gap-3">
           {Array.from({ length: 10 }, (_, i) => i + 1).map((grade) => (
-            <div key={grade} className="flex items-center space-x-2">
+            <div
+              key={grade}
+              className="flex items-center space-x-2 min-h-[44px]">
               <Checkbox
                 id={`grade-${grade}`}
                 checked={selectedGrades.includes(grade)}
@@ -225,7 +231,9 @@ export default function ServiceForm({
                   handleGradeChange(grade, checked as boolean)
                 }
               />
-              <Label htmlFor={`grade-${grade}`} className="text-sm">
+              <Label
+                htmlFor={`grade-${grade}`}
+                className="text-xs sm:text-sm cursor-pointer">
                 Grade {grade}
               </Label>
             </div>
@@ -235,8 +243,8 @@ export default function ServiceForm({
 
       {/* Subject Selection */}
       {/* <div className="space-y-3"> */}
-        {/* <Label>Subjects *</Label> */}
-        {/* <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+      {/* <Label>Subjects *</Label> */}
+      {/* <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
           {COMMON_SUBJECTS.map((subject) => (
             <div key={subject} className="flex items-center space-x-2">
               <Checkbox
@@ -253,8 +261,8 @@ export default function ServiceForm({
           ))}
         </div> */}
 
-        {/* Custom Subject Input */}
-        {/* <div className="flex gap-2">
+      {/* Custom Subject Input */}
+      {/* <div className="flex gap-2">
           <Input
             value={customSubject}
             onChange={(e) => setCustomSubject(e.target.value)}
@@ -271,8 +279,8 @@ export default function ServiceForm({
           </Button>
         </div> */}
 
-        {/* Selected Subjects */}
-        {/* {serviceDetails?.subjects && serviceDetails.subjects.length > 0 && (
+      {/* Selected Subjects */}
+      {/* {serviceDetails?.subjects && serviceDetails.subjects.length > 0 && (
           <div className="space-y-2">
             <Label className="text-sm font-medium">Selected Subjects:</Label>
             <div className="flex flex-wrap gap-2">
@@ -298,23 +306,26 @@ export default function ServiceForm({
 
       {/* Sections for Selected Grades */}
       {selectedGrades.length > 0 && (
-        <div className="space-y-4">
-          <Label>Create Sections for Selected Grades *</Label>
-          <div className="space-y-4">
+        <div className="space-y-3 sm:space-y-4">
+          <Label className="text-sm sm:text-base">
+            Create Sections for Selected Grades *
+          </Label>
+          <div className="space-y-3 sm:space-y-4">
             {selectedGrades.map((grade) => {
               const sections = getGradeSections(grade);
               return (
-                <Card key={grade} className="p-4">
+                <Card key={grade} className="p-3 sm:p-4">
                   <div className="space-y-3">
-                    <div className="flex items-center justify-between">
-                      <h4 className="font-medium">Grade {grade}</h4>
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                      <h4 className="font-medium text-sm sm:text-base">
+                        Grade {grade}
+                      </h4>
                       <Button
                         type="button"
                         variant="outline"
                         size="sm"
                         onClick={() => addSectionToGrade(grade)}
-                        className="flex items-center gap-1"
-                      >
+                        className="flex items-center justify-center gap-1 w-full sm:w-auto min-h-[44px]">
                         <Plus className="h-3 w-3" />
                         Add Section
                       </Button>
@@ -325,8 +336,7 @@ export default function ServiceForm({
                         {sections.map((sectionName, sectionIndex) => (
                           <div
                             key={sectionIndex}
-                            className="flex items-center gap-2"
-                          >
+                            className="flex items-center gap-2">
                             <Input
                               value={sectionName}
                               onChange={(e) =>
@@ -337,7 +347,7 @@ export default function ServiceForm({
                                 )
                               }
                               placeholder="A, B, C"
-                              className="flex-1"
+                              className="flex-1 min-h-[44px]"
                             />
                             {sections.length > 1 && (
                               <Button
@@ -347,8 +357,7 @@ export default function ServiceForm({
                                 onClick={() =>
                                   removeSectionFromGrade(grade, sectionIndex)
                                 }
-                                className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                              >
+                                className="text-red-600 hover:text-red-700 hover:bg-red-50 min-h-[44px] min-w-[44px]">
                                 <X className="h-4 w-4" />
                               </Button>
                             )}
@@ -356,7 +365,7 @@ export default function ServiceForm({
                         ))}
                       </div>
                     ) : (
-                      <div className="text-center py-2 text-gray-500 text-sm">
+                      <div className="text-center py-2 text-gray-500 text-xs sm:text-sm">
                         No sections added yet. Click "Add Section" to create
                         sections for Grade {grade}.
                       </div>
@@ -370,7 +379,7 @@ export default function ServiceForm({
       )}
 
       {selectedGrades.length === 0 && (
-        <div className="text-center py-4 text-gray-500">
+        <div className="text-center py-4 text-gray-500 text-xs sm:text-sm">
           <p>Please select grades first to create sections.</p>
         </div>
       )}

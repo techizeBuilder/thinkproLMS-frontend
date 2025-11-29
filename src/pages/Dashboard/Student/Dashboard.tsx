@@ -1,25 +1,32 @@
-import { 
-  Card, 
-  CardContent, 
-  CardDescription, 
-  CardHeader, 
-  CardTitle 
-} from "@/components/ui/card"
-import { BookOpen, FileText, Award, MessageSquare, Bell, Calendar } from "lucide-react"
-import { Link } from "react-router-dom"
-import { Button } from "@/components/ui/button"
-import { useState, useEffect } from "react"
-import { resourceService } from "@/api/resourceService"
-import { studentAssessmentService } from "@/api/assessmentService"
-import { certificateService } from "@/api/certificateService"
-import { getConversations } from "@/api/messageService"
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  BookOpen,
+  FileText,
+  Award,
+  MessageSquare,
+  Bell,
+  Calendar,
+} from "lucide-react";
+import { Link } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { useState, useEffect } from "react";
+import { resourceService } from "@/api/resourceService";
+import { studentAssessmentService } from "@/api/assessmentService";
+import { certificateService } from "@/api/certificateService";
+import { getConversations } from "@/api/messageService";
 
 export default function StudentDashboard() {
   const [stats, setStats] = useState({
     resources: 0,
     assessments: 0,
     certificates: 0,
-    messages: 0
+    messages: 0,
   });
   const [loading, setLoading] = useState(true);
 
@@ -29,20 +36,39 @@ export default function StudentDashboard() {
 
   const fetchDashboardData = async () => {
     try {
-      const [resourcesRes, assessmentsRes, certificatesRes, conversationsRes] = await Promise.allSettled([
-        resourceService.getByCategory("student", { limit: 1 }),
-        studentAssessmentService.getAvailableAssessments(),
-        certificateService.getStudentCertificates(),
-        getConversations()
-      ]);
+      const [resourcesRes, assessmentsRes, certificatesRes, conversationsRes] =
+        await Promise.allSettled([
+          resourceService.getByCategory("student", { limit: 1 }),
+          studentAssessmentService.getAvailableAssessments(),
+          certificateService.getStudentCertificates(),
+          getConversations(),
+        ]);
 
       setStats({
-        resources: resourcesRes.status === 'fulfilled' ? resourcesRes.value.pagination?.total || 0 : 0,
-        assessments: assessmentsRes.status === 'fulfilled' ? 
-          (assessmentsRes.value.data?.filter((assessment: any) => assessment.assessmentStatus === "available") || []).length : 0,
-        certificates: certificatesRes.status === 'fulfilled' ? certificatesRes.value.data?.length || 0 : 0,
-        messages: conversationsRes.status === 'fulfilled' ? 
-          conversationsRes.value.conversations?.reduce((total, conv) => total + conv.unreadCount, 0) || 0 : 0
+        resources:
+          resourcesRes.status === "fulfilled"
+            ? resourcesRes.value.pagination?.total || 0
+            : 0,
+        assessments:
+          assessmentsRes.status === "fulfilled"
+            ? (
+                assessmentsRes.value.data?.filter(
+                  (assessment: any) =>
+                    assessment.assessmentStatus === "available"
+                ) || []
+              ).length
+            : 0,
+        certificates:
+          certificatesRes.status === "fulfilled"
+            ? certificatesRes.value.data?.length || 0
+            : 0,
+        messages:
+          conversationsRes.status === "fulfilled"
+            ? conversationsRes.value.conversations?.reduce(
+                (total, conv) => total + conv.unreadCount,
+                0
+              ) || 0
+            : 0,
       });
     } catch (error) {
       console.error("Error fetching dashboard data:", error);
@@ -52,7 +78,7 @@ export default function StudentDashboard() {
   };
 
   return (
-    <div className="p-3 sm:p-4 lg:p-6 space-y-4 sm:space-y-6">
+    <div className="px-3 py-3 sm:p-4 lg:p-6 space-y-3 sm:space-y-6">
       {/* Dashboard Stats */}
       <div className="grid gap-3 sm:gap-4 grid-cols-1 xs:grid-cols-2 lg:grid-cols-4">
         <Card>
@@ -71,7 +97,7 @@ export default function StudentDashboard() {
             </p>
           </CardContent>
         </Card>
-        
+
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 px-3 sm:px-6 pt-3 sm:pt-6">
             <CardTitle className="text-xs sm:text-sm font-medium">
@@ -88,7 +114,7 @@ export default function StudentDashboard() {
             </p>
           </CardContent>
         </Card>
-        
+
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 px-3 sm:px-6 pt-3 sm:pt-6">
             <CardTitle className="text-xs sm:text-sm font-medium">
@@ -105,7 +131,7 @@ export default function StudentDashboard() {
             </p>
           </CardContent>
         </Card>
-        
+
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 px-3 sm:px-6 pt-3 sm:pt-6">
             <CardTitle className="text-xs sm:text-sm font-medium">
@@ -137,15 +163,16 @@ export default function StudentDashboard() {
             </CardDescription>
           </CardHeader>
           <CardContent className="px-3 sm:px-6 pb-3 sm:pb-6 space-y-2">
-            <Button asChild className="w-full h-8 sm:h-9 lg:h-10 text-xs sm:text-sm lg:text-base touch-manipulation">
-              <Link to="/student/assessments">
-                View Available Assessments
-              </Link>
+            <Button
+              asChild
+              className="w-full h-8 sm:h-9 lg:h-10 text-xs sm:text-sm lg:text-base touch-manipulation">
+              <Link to="/student/assessments">View Available Assessments</Link>
             </Button>
-            <Button asChild variant="outline" className="w-full h-8 sm:h-9 lg:h-10 text-xs sm:text-sm lg:text-base touch-manipulation">
-              <Link to="/student/assessments/results">
-                View Results
-              </Link>
+            <Button
+              asChild
+              variant="outline"
+              className="w-full h-8 sm:h-9 lg:h-10 text-xs sm:text-sm lg:text-base touch-manipulation">
+              <Link to="/student/assessments/results">View Results</Link>
             </Button>
           </CardContent>
         </Card>
@@ -161,10 +188,10 @@ export default function StudentDashboard() {
             </CardDescription>
           </CardHeader>
           <CardContent className="px-3 sm:px-6 pb-3 sm:pb-6">
-            <Button asChild className="w-full h-8 sm:h-9 lg:h-10 text-xs sm:text-sm lg:text-base touch-manipulation">
-              <Link to="/student/resources">
-                Browse Resources
-              </Link>
+            <Button
+              asChild
+              className="w-full h-8 sm:h-9 lg:h-10 text-xs sm:text-sm lg:text-base touch-manipulation">
+              <Link to="/student/resources">Browse Resources</Link>
             </Button>
           </CardContent>
         </Card>
@@ -180,10 +207,10 @@ export default function StudentDashboard() {
             </CardDescription>
           </CardHeader>
           <CardContent className="px-3 sm:px-6 pb-3 sm:pb-6">
-            <Button asChild className="w-full h-8 sm:h-9 lg:h-10 text-xs sm:text-sm lg:text-base touch-manipulation">
-              <Link to="/student/notifications">
-                View Notifications
-              </Link>
+            <Button
+              asChild
+              className="w-full h-8 sm:h-9 lg:h-10 text-xs sm:text-sm lg:text-base touch-manipulation">
+              <Link to="/student/notifications">View Notifications</Link>
             </Button>
           </CardContent>
         </Card>
@@ -219,14 +246,14 @@ export default function StudentDashboard() {
             </CardDescription>
           </CardHeader>
           <CardContent className="px-3 sm:px-6 pb-3 sm:pb-6">
-            <Button asChild className="w-full h-8 sm:h-9 lg:h-10 text-xs sm:text-sm lg:text-base touch-manipulation">
-              <Link to="/student/messages">
-                Open Messages
-              </Link>
+            <Button
+              asChild
+              className="w-full h-8 sm:h-9 lg:h-10 text-xs sm:text-sm lg:text-base touch-manipulation">
+              <Link to="/student/messages">Open Messages</Link>
             </Button>
           </CardContent>
         </Card>
       </div>
     </div>
-  )
+  );
 }

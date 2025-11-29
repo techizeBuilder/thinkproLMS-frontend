@@ -101,8 +101,7 @@ export default function Login() {
           className="absolute inset-0 opacity-10"
           style={{
             backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.1'%3E%3Ccircle cx='30' cy='30' r='2'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
-          }}
-        ></div>
+          }}></div>
 
         {/* Floating Elements */}
         <div className="absolute top-20 left-20 w-32 h-32 rounded-full blur-xl bg-[var(--soft-engineering)]"></div>
@@ -139,7 +138,7 @@ export default function Login() {
       </div>
 
       {/* Right Side - Login Form */}
-      <div className="m-auto w-full lg:w-1/2 flex items-center justify-center p-4 sm:p-6 lg:p-8">
+      <div className="m-auto w-full lg:w-1/2 flex items-center justify-center p-3 sm:p-6 lg:p-8">
         <div className="w-full max-w-md">
           {/* Mobile Logo */}
           <div className="lg:hidden text-center mb-6 sm:mb-8">
@@ -171,8 +170,7 @@ export default function Login() {
                   <div className="space-y-2">
                     <Label
                       htmlFor="email"
-                      className="text-xs sm:text-sm font-medium text-[var(--muted-foreground)]"
-                    >
+                      className="text-xs sm:text-sm font-medium text-[var(--muted-foreground)]">
                       Email/LoginID
                     </Label>
                     <Input
@@ -188,8 +186,7 @@ export default function Login() {
                   <div className="space-y-2">
                     <Label
                       htmlFor="password"
-                      className="text-xs sm:text-sm font-medium text-[var(--muted-foreground)]"
-                    >
+                      className="text-xs sm:text-sm font-medium text-[var(--muted-foreground)]">
                       Password
                     </Label>
                     <div className="relative">
@@ -206,8 +203,9 @@ export default function Login() {
                         type="button"
                         onClick={() => setShowPassword(!showPassword)}
                         className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition-colors duration-200 focus:outline-none"
-                        aria-label={showPassword ? "Hide password" : "Show password"}
-                      >
+                        aria-label={
+                          showPassword ? "Hide password" : "Show password"
+                        }>
                         {showPassword ? (
                           <EyeOff className="h-4 w-4 sm:h-5 sm:w-5" />
                         ) : (
@@ -224,8 +222,7 @@ export default function Login() {
                   <Button
                     type="submit"
                     className="w-full h-10 sm:h-11 bg-[var(--primary)] hover:bg-[var(--accent)] text-[var(--primary-foreground)] font-medium shadow-lg hover:shadow-xl transition-all duration-200 text-sm sm:text-base touch-manipulation"
-                    disabled={isSubmitting}
-                  >
+                    disabled={isSubmitting}>
                     {isSubmitting ? (
                       <div className="flex items-center space-x-2">
                         <div className="w-4 h-4 border-2 border-[var(--primary-foreground)] border-t-transparent rounded-full animate-spin"></div>
@@ -246,8 +243,7 @@ export default function Login() {
                     <Button
                       onClick={handleGuestLogin}
                       variant="outline"
-                      className="w-full h-10 sm:h-11 font-medium shadow-lg hover:shadow-xl transition-all duration-200 text-sm sm:text-base touch-manipulation"
-                    >
+                      className="w-full h-10 sm:h-11 font-medium shadow-lg hover:shadow-xl transition-all duration-200 text-sm sm:text-base touch-manipulation">
                       Enter as Guest
                     </Button>
                   </div>
@@ -266,8 +262,7 @@ export default function Login() {
                     variant="ghost"
                     size="sm"
                     onClick={handleBackToLogin}
-                    className="text-[var(--muted-foreground)] hover:text-[var(--foreground)] text-sm sm:text-base touch-manipulation"
-                  >
+                    className="text-[var(--muted-foreground)] hover:text-[var(--foreground)] text-sm sm:text-base touch-manipulation">
                     ← Back
                   </Button>
                 </div>
@@ -281,8 +276,7 @@ export default function Login() {
                   <div className="space-y-3">
                     <Button
                       onClick={() => navigate("/guest/register")}
-                      className="w-full h-10 sm:h-11 bg-[var(--primary)] hover:bg-[var(--accent)] text-[var(--primary-foreground)] font-medium shadow-lg hover:shadow-xl transition-all duration-200 text-sm sm:text-base touch-manipulation"
-                    >
+                      className="w-full h-10 sm:h-11 bg-[var(--primary)] hover:bg-[var(--accent)] text-[var(--primary-foreground)] font-medium shadow-lg hover:shadow-xl transition-all duration-200 text-sm sm:text-base touch-manipulation">
                       Register as Guest
                     </Button>
 
@@ -302,8 +296,7 @@ export default function Login() {
                       Already have a guest account?{" "}
                       <button
                         onClick={() => navigate("/guest/login")}
-                        className="text-[var(--primary)] hover:text-[var(--accent)] font-medium touch-manipulation"
-                      >
+                        className="text-[var(--primary)] hover:text-[var(--accent)] font-medium touch-manipulation">
                         Sign in here
                       </button>
                     </div>
@@ -324,8 +317,7 @@ export default function Login() {
                 href="https://techizebuilder.com/"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition-colors duration-200 underline decoration-dotted underline-offset-2"
-              >
+                className="text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition-colors duration-200 underline decoration-dotted underline-offset-2">
                 TechizeBuilder
               </a>
             </p>

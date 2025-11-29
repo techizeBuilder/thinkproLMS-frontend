@@ -1,6 +1,13 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { School, UserCheck, Crown, Building2, Users, GraduationCap } from "lucide-react";
+import {
+  School,
+  UserCheck,
+  Crown,
+  Building2,
+  Users,
+  GraduationCap,
+} from "lucide-react";
 import { schoolService } from "@/api/schoolService";
 import { schoolAdminService } from "@/api/schoolAdminService";
 import { leadMentorService } from "@/api/leadMentorService";
@@ -37,7 +44,13 @@ export default function SuperAdminDashboard() {
 
   const fetchStats = async () => {
     try {
-      const [schoolsCountRes, schoolAdminsCountRes, leadMentorsCountRes, mentorsCountRes, studentsCountRes] = await Promise.all([
+      const [
+        schoolsCountRes,
+        schoolAdminsCountRes,
+        leadMentorsCountRes,
+        mentorsCountRes,
+        studentsCountRes,
+      ] = await Promise.all([
         schoolService.getCount({ includeInactive: true }), // Get all counts (total, active, inactive)
         schoolAdminService.getCount(),
         leadMentorService.getCount(),
@@ -45,11 +58,21 @@ export default function SuperAdminDashboard() {
         studentService.getCount(),
       ]);
 
-      const schoolCounts = schoolsCountRes.success ? schoolsCountRes.data : { total: 0, active: 0, inactive: 0 };
-      const schoolAdminsCount = schoolAdminsCountRes.success ? schoolAdminsCountRes.data.count : 0;
-      const leadMentorsCount = leadMentorsCountRes.success ? leadMentorsCountRes.data.count : 0;
-      const mentorsCount = mentorsCountRes.success ? mentorsCountRes.data.count : 0;
-      const studentsCount = studentsCountRes.success ? studentsCountRes.data.count : 0;
+      const schoolCounts = schoolsCountRes.success
+        ? schoolsCountRes.data
+        : { total: 0, active: 0, inactive: 0 };
+      const schoolAdminsCount = schoolAdminsCountRes.success
+        ? schoolAdminsCountRes.data.count
+        : 0;
+      const leadMentorsCount = leadMentorsCountRes.success
+        ? leadMentorsCountRes.data.count
+        : 0;
+      const mentorsCount = mentorsCountRes.success
+        ? mentorsCountRes.data.count
+        : 0;
+      const studentsCount = studentsCountRes.success
+        ? studentsCountRes.data.count
+        : 0;
 
       setStats({
         schools: schoolCounts.total,
@@ -59,7 +82,8 @@ export default function SuperAdminDashboard() {
         leadMentors: leadMentorsCount,
         schoolMentors: mentorsCount,
         students: studentsCount,
-        totalUsers: schoolAdminsCount + leadMentorsCount + mentorsCount + studentsCount,
+        totalUsers:
+          schoolAdminsCount + leadMentorsCount + mentorsCount + studentsCount,
       });
     } catch (error) {
       console.error("Error fetching stats:", error);
@@ -114,17 +138,23 @@ export default function SuperAdminDashboard() {
   ];
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       <div>
-        <h1 className="text-2xl md:text-3xl font-bold">SuperAdmin Dashboard</h1>
-        <p className="text-gray-600 text-sm md:text-base">Overview of your school management system</p>
+        <h1 className="text-xl sm:text-2xl md:text-3xl font-bold">
+          SuperAdmin Dashboard
+        </h1>
+        <p className="text-gray-600 text-xs sm:text-sm md:text-base">
+          Overview of your school management system
+        </p>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 md:gap-6">
         {statCards.map((card) => (
           <Card key={card.title}>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">{card.title}</CardTitle>
+              <CardTitle className="text-sm font-medium">
+                {card.title}
+              </CardTitle>
               <div className={`p-2 rounded-full ${card.bgColor}`}>
                 <card.icon className={`h-4 w-4 ${card.color}`} />
               </div>
@@ -145,24 +175,21 @@ export default function SuperAdminDashboard() {
           </CardHeader>
           <CardContent className="space-y-3">
             <div className="grid grid-cols-1 gap-2">
-              <a 
-                href="/superadmin/schools/create" 
-                className="flex items-center p-3 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors"
-              >
+              <a
+                href="/superadmin/schools/create"
+                className="flex items-center p-3 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors">
                 <School className="h-5 w-5 text-blue-600 mr-3" />
                 <span className="font-medium">Add New School</span>
               </a>
-              <a 
-                href="/superadmin/school-admins/create" 
-                className="flex items-center p-3 bg-green-50 hover:bg-green-100 rounded-lg transition-colors"
-              >
+              <a
+                href="/superadmin/school-admins/create"
+                className="flex items-center p-3 bg-green-50 hover:bg-green-100 rounded-lg transition-colors">
                 <UserCheck className="h-5 w-5 text-green-600 mr-3" />
                 <span className="font-medium">Invite School Admin</span>
               </a>
-              <a 
-                href="/superadmin/lead-mentors/create" 
-                className="flex items-center p-3 bg-yellow-50 hover:bg-yellow-100 rounded-lg transition-colors"
-              >
+              <a
+                href="/superadmin/lead-mentors/create"
+                className="flex items-center p-3 bg-yellow-50 hover:bg-yellow-100 rounded-lg transition-colors">
                 <Crown className="h-5 w-5 text-yellow-600 mr-3" />
                 <span className="font-medium">Invite Lead Mentor</span>
               </a>
@@ -197,7 +224,9 @@ export default function SuperAdminDashboard() {
                 <span className="font-medium">{stats.schoolMentors}</span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-sm text-gray-600">School Administrators</span>
+                <span className="text-sm text-gray-600">
+                  School Administrators
+                </span>
                 <span className="font-medium">{stats.schoolAdmins}</span>
               </div>
               <div className="flex justify-between items-center">

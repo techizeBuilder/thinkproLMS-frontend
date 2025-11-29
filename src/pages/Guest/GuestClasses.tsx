@@ -1,14 +1,14 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { 
-  Calendar, 
-  Clock, 
-  Users, 
+import {
+  Calendar,
+  Clock,
+  Users,
   Video,
   BookOpen,
   Star,
-  Plus
+  Plus,
 } from "lucide-react";
 
 export default function GuestClasses() {
@@ -16,7 +16,8 @@ export default function GuestClasses() {
     {
       id: 1,
       title: "ThinkPro LMS Platform Demo",
-      description: "Comprehensive demonstration of our learning management system features and capabilities.",
+      description:
+        "Comprehensive demonstration of our learning management system features and capabilities.",
       date: "2024-01-15",
       time: "10:00 AM",
       duration: "45 minutes",
@@ -24,12 +25,13 @@ export default function GuestClasses() {
       maxParticipants: 50,
       currentParticipants: 23,
       type: "Demo",
-      level: "Beginner"
+      level: "Beginner",
     },
     {
       id: 2,
       title: "Digital Learning Best Practices",
-      description: "Learn about effective strategies for implementing digital learning in educational institutions.",
+      description:
+        "Learn about effective strategies for implementing digital learning in educational institutions.",
       date: "2024-01-18",
       time: "2:00 PM",
       duration: "60 minutes",
@@ -37,12 +39,13 @@ export default function GuestClasses() {
       maxParticipants: 30,
       currentParticipants: 18,
       type: "Workshop",
-      level: "Intermediate"
+      level: "Intermediate",
     },
     {
       id: 3,
       title: "Student Engagement Techniques",
-      description: "Discover innovative methods to keep students engaged in online learning environments.",
+      description:
+        "Discover innovative methods to keep students engaged in online learning environments.",
       date: "2024-01-22",
       time: "11:00 AM",
       duration: "30 minutes",
@@ -50,12 +53,13 @@ export default function GuestClasses() {
       maxParticipants: 100,
       currentParticipants: 67,
       type: "Webinar",
-      level: "All Levels"
+      level: "All Levels",
     },
     {
       id: 4,
       title: "Platform Customization Guide",
-      description: "Learn how to customize ThinkPro LMS to match your school's unique requirements.",
+      description:
+        "Learn how to customize ThinkPro LMS to match your school's unique requirements.",
       date: "2024-01-25",
       time: "3:00 PM",
       duration: "90 minutes",
@@ -63,8 +67,8 @@ export default function GuestClasses() {
       maxParticipants: 25,
       currentParticipants: 12,
       type: "Training",
-      level: "Advanced"
-    }
+      level: "Advanced",
+    },
   ];
 
   const getTypeColor = (type: string) => {
@@ -99,39 +103,46 @@ export default function GuestClasses() {
 
   const handleRegister = (classId: number) => {
     // TODO: Implement class registration functionality
-    alert(`Class registration functionality for class ${classId} will be implemented soon!`);
+    alert(
+      `Class registration functionality for class ${classId} will be implemented soon!`
+    );
   };
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', { 
-      weekday: 'long', 
-      year: 'numeric', 
-      month: 'long', 
-      day: 'numeric' 
+    return date.toLocaleDateString("en-US", {
+      weekday: "long",
+      year: "numeric",
+      month: "long",
+      day: "numeric",
     });
   };
 
   return (
-    <div className="p-6">
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">Online Classes & Demonstrations</h1>
-        <p className="text-gray-600">
-          Register for our free online classes, workshops, and demonstrations to learn more about ThinkPro LMS.
+    <div className="px-3 py-3 sm:p-4 md:p-6">
+      <div className="mb-4 sm:mb-6">
+        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">
+          Online Classes & Demonstrations
+        </h1>
+        <p className="text-sm sm:text-base text-gray-600">
+          Register for our free online classes, workshops, and demonstrations to
+          learn more about ThinkPro LMS.
         </p>
       </div>
 
       {/* Stats Overview */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 md:gap-6 mb-6 sm:mb-8">
         <Card className="bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200">
-          <CardContent className="p-6">
-            <div className="flex items-center gap-3">
-              <div className="p-3 bg-blue-100 rounded-lg">
-                <Calendar className="h-6 w-6 text-blue-600" />
+          <CardContent className="p-3 sm:p-4 md:p-6">
+            <div className="flex items-center gap-2 sm:gap-3">
+              <div className="p-2 sm:p-3 bg-blue-100 rounded-lg flex-shrink-0">
+                <Calendar className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6 text-blue-600" />
               </div>
-              <div>
-                <p className="text-2xl font-bold text-gray-900">4</p>
-                <p className="text-sm text-gray-600">Upcoming Classes</p>
+              <div className="min-w-0">
+                <p className="text-xl sm:text-2xl font-bold text-gray-900">4</p>
+                <p className="text-xs sm:text-sm text-gray-600 truncate">
+                  Upcoming Classes
+                </p>
               </div>
             </div>
           </CardContent>
@@ -181,20 +192,22 @@ export default function GuestClasses() {
       </div>
 
       {/* Classes Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
         {upcomingClasses.map((classItem) => (
-          <Card key={classItem.id} className="shadow-md hover:shadow-lg transition-shadow">
-            <CardHeader>
-              <div className="flex items-start justify-between mb-3">
-                <div className="flex-1">
-                  <CardTitle className="text-xl font-semibold text-gray-900 mb-2">
+          <Card
+            key={classItem.id}
+            className="shadow-md hover:shadow-lg transition-shadow">
+            <CardHeader className="px-3 sm:px-4 md:px-6 pt-3 sm:pt-4 md:pt-6">
+              <div className="flex flex-col sm:flex-row items-start justify-between gap-3 mb-3">
+                <div className="flex-1 min-w-0">
+                  <CardTitle className="text-base sm:text-lg md:text-xl font-semibold text-gray-900 mb-2">
                     {classItem.title}
                   </CardTitle>
-                  <p className="text-gray-600 text-sm">
+                  <p className="text-gray-600 text-xs sm:text-sm">
                     {classItem.description}
                   </p>
                 </div>
-                <div className="flex gap-2">
+                <div className="flex gap-2 flex-shrink-0">
                   <Badge className={getTypeColor(classItem.type)}>
                     {classItem.type}
                   </Badge>
@@ -204,11 +217,11 @@ export default function GuestClasses() {
                 </div>
               </div>
             </CardHeader>
-            
-            <CardContent>
-              <div className="space-y-4">
+
+            <CardContent className="px-3 sm:px-4 md:px-6 pb-3 sm:pb-4 md:pb-6">
+              <div className="space-y-3 sm:space-y-4">
                 {/* Class Details */}
-                <div className="grid grid-cols-2 gap-4 text-sm">
+                <div className="grid grid-cols-2 gap-2 sm:gap-4 text-xs sm:text-sm">
                   <div className="flex items-center gap-2 text-gray-600">
                     <Calendar className="h-4 w-4" />
                     <span>{formatDate(classItem.date)}</span>
@@ -232,7 +245,8 @@ export default function GuestClasses() {
                   <div className="flex items-center gap-2">
                     <Users className="h-4 w-4 text-gray-600" />
                     <span className="text-sm text-gray-600">
-                      {classItem.currentParticipants} / {classItem.maxParticipants} participants
+                      {classItem.currentParticipants} /{" "}
+                      {classItem.maxParticipants} participants
                     </span>
                   </div>
                   <div className="flex items-center gap-1">
@@ -244,14 +258,14 @@ export default function GuestClasses() {
                 {/* Registration Button */}
                 <Button
                   onClick={() => handleRegister(classItem.id)}
-                  className="w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white"
-                  disabled={classItem.currentParticipants >= classItem.maxParticipants}
-                >
-                  <Plus className="h-4 w-4 mr-2" />
-                  {classItem.currentParticipants >= classItem.maxParticipants 
-                    ? "Class Full" 
-                    : "Register for Class"
-                  }
+                  className="w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white text-sm sm:text-base h-9 sm:h-10 md:h-11 touch-manipulation"
+                  disabled={
+                    classItem.currentParticipants >= classItem.maxParticipants
+                  }>
+                  <Plus className="h-3 w-3 sm:h-4 sm:w-4 mr-2" />
+                  {classItem.currentParticipants >= classItem.maxParticipants
+                    ? "Class Full"
+                    : "Register for Class"}
                 </Button>
               </div>
             </CardContent>
@@ -270,13 +284,17 @@ export default function GuestClasses() {
               Need a Custom Demonstration?
             </h3>
             <p className="text-gray-600 mb-4">
-              Can't find a suitable time? Request a personalized demonstration tailored to your specific needs and schedule.
+              Can't find a suitable time? Request a personalized demonstration
+              tailored to your specific needs and schedule.
             </p>
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               className="border-indigo-300 text-indigo-700 hover:bg-indigo-100"
-              onClick={() => alert("Custom demo request functionality will be implemented soon!")}
-            >
+              onClick={() =>
+                alert(
+                  "Custom demo request functionality will be implemented soon!"
+                )
+              }>
               <Calendar className="h-4 w-4 mr-2" />
               Request Custom Demo
             </Button>

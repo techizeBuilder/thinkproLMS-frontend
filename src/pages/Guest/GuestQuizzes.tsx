@@ -2,14 +2,14 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { 
-  Puzzle, 
-  Clock, 
-  Users, 
+import {
+  Puzzle,
+  Clock,
+  Users,
   Trophy,
   Play,
   CheckCircle,
-  Star
+  Star,
 } from "lucide-react";
 
 export default function GuestQuizzes() {
@@ -23,41 +23,44 @@ export default function GuestQuizzes() {
       difficulty: "Beginner",
       participants: 1250,
       rating: 4.5,
-      completed: false
+      completed: false,
     },
     {
       id: 2,
       title: "Digital Learning Trends 2024",
-      description: "Explore the latest trends in digital education and e-learning.",
+      description:
+        "Explore the latest trends in digital education and e-learning.",
       questions: 15,
       duration: "8 minutes",
       difficulty: "Intermediate",
       participants: 890,
       rating: 4.3,
-      completed: true
+      completed: true,
     },
     {
       id: 3,
       title: "Educational Technology Quiz",
-      description: "Challenge yourself with questions about educational technology tools.",
+      description:
+        "Challenge yourself with questions about educational technology tools.",
       questions: 20,
       duration: "12 minutes",
       difficulty: "Advanced",
       participants: 567,
       rating: 4.7,
-      completed: false
+      completed: false,
     },
     {
       id: 4,
       title: "Student Engagement Strategies",
-      description: "Learn about effective strategies for engaging students in online learning.",
+      description:
+        "Learn about effective strategies for engaging students in online learning.",
       questions: 12,
       duration: "6 minutes",
       difficulty: "Beginner",
       participants: 2100,
       rating: 4.6,
-      completed: false
-    }
+      completed: false,
+    },
   ];
 
   const getDifficultyColor = (difficulty: string) => {
@@ -79,16 +82,19 @@ export default function GuestQuizzes() {
   };
 
   return (
-    <div className="p-6">
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">Quizzes & Puzzles</h1>
-        <p className="text-gray-600">
-          Test your knowledge and challenge yourself with our interactive quizzes and puzzles.
+    <div className="px-3 py-3 sm:p-4 md:p-6">
+      <div className="mb-4 sm:mb-6">
+        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">
+          Quizzes & Puzzles
+        </h1>
+        <p className="text-sm sm:text-base text-gray-600">
+          Test your knowledge and challenge yourself with our interactive
+          quizzes and puzzles.
         </p>
       </div>
 
       {/* Stats Overview */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-8">
         <Card className="bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200">
           <CardContent className="p-6">
             <div className="flex items-center gap-3">
@@ -133,16 +139,18 @@ export default function GuestQuizzes() {
       </div>
 
       {/* Quizzes Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
         {quizzes.map((quiz) => (
-          <Card key={quiz.id} className="shadow-md hover:shadow-lg transition-shadow">
-            <CardHeader>
-              <div className="flex items-start justify-between">
-                <div className="flex-1">
-                  <CardTitle className="text-xl font-semibold text-gray-900 mb-2">
+          <Card
+            key={quiz.id}
+            className="shadow-md hover:shadow-lg transition-shadow">
+            <CardHeader className="px-3 sm:px-4 md:px-6 pt-3 sm:pt-4 md:pt-6">
+              <div className="flex items-start justify-between gap-3">
+                <div className="flex-1 min-w-0">
+                  <CardTitle className="text-base sm:text-lg md:text-xl font-semibold text-gray-900 mb-2">
                     {quiz.title}
                   </CardTitle>
-                  <p className="text-gray-600 text-sm mb-3">
+                  <p className="text-gray-600 text-xs sm:text-sm mb-3">
                     {quiz.description}
                   </p>
                 </div>
@@ -150,28 +158,28 @@ export default function GuestQuizzes() {
                   <CheckCircle className="h-6 w-6 text-green-600 flex-shrink-0" />
                 )}
               </div>
-              
+
               <div className="flex flex-wrap gap-2 mb-4">
                 <Badge className={getDifficultyColor(quiz.difficulty)}>
                   {quiz.difficulty}
                 </Badge>
-                <Badge variant="secondary">
-                  {quiz.questions} questions
-                </Badge>
+                <Badge variant="secondary">{quiz.questions} questions</Badge>
                 <Badge variant="outline">
                   <Clock className="h-3 w-3 mr-1" />
                   {quiz.duration}
                 </Badge>
               </div>
             </CardHeader>
-            
+
             <CardContent>
               <div className="space-y-4">
                 {/* Quiz Stats */}
                 <div className="flex items-center justify-between text-sm text-gray-600">
                   <div className="flex items-center gap-1">
                     <Users className="h-4 w-4" />
-                    <span>{quiz.participants.toLocaleString()} participants</span>
+                    <span>
+                      {quiz.participants.toLocaleString()} participants
+                    </span>
                   </div>
                   <div className="flex items-center gap-1">
                     <Star className="h-4 w-4 text-yellow-500" />
@@ -184,7 +192,9 @@ export default function GuestQuizzes() {
                   <div className="space-y-2">
                     <div className="flex justify-between text-sm">
                       <span className="text-gray-600">Your Progress</span>
-                      <span className="text-green-600 font-medium">Completed</span>
+                      <span className="text-green-600 font-medium">
+                        Completed
+                      </span>
                     </div>
                     <Progress value={100} className="h-2" />
                   </div>
@@ -197,8 +207,7 @@ export default function GuestQuizzes() {
                     quiz.completed
                       ? "bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700"
                       : "bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700"
-                  } text-white`}
-                >
+                  } text-white`}>
                   <Play className="h-4 w-4 mr-2" />
                   {quiz.completed ? "Retake Quiz" : "Start Quiz"}
                 </Button>
@@ -219,10 +228,12 @@ export default function GuestQuizzes() {
               More Interactive Content Coming Soon!
             </h3>
             <p className="text-gray-600 mb-4">
-              We're working on adding more quizzes, puzzles, and interactive learning activities. 
-              Stay tuned for updates!
+              We're working on adding more quizzes, puzzles, and interactive
+              learning activities. Stay tuned for updates!
             </p>
-            <Button variant="outline" className="border-orange-300 text-orange-700 hover:bg-orange-100">
+            <Button
+              variant="outline"
+              className="border-orange-300 text-orange-700 hover:bg-orange-100">
               <Puzzle className="h-4 w-4 mr-2" />
               Get Notified
             </Button>
