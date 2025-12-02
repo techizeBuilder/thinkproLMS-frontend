@@ -28,6 +28,8 @@ import axiosInstance from "@/api/axiosInstance";
 import { toast } from "sonner";
 import { Plus, Shield, Users, Loader2 } from "lucide-react";
 import { MobileActions } from "@/components/ui/mobile-actions";
+import { ResetPasswordDialog } from "@/components/ResetPasswordDialog";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface SuperAdmin {
   _id: string;
@@ -39,11 +41,17 @@ interface SuperAdmin {
 }
 
 const SuperAdminsPage = () => {
+  const { user: currentUser } = useAuth();
   const [superAdmins, setSuperAdmins] = useState<SuperAdmin[]>([]);
   const [loading, setLoading] = useState(true);
   const [deleteLoading, setDeleteLoading] = useState<string | null>(null);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [superAdminToDelete, setSuperAdminToDelete] = useState<SuperAdmin | null>(null);
+  const [resetPasswordUser, setResetPasswordUser] = useState<{
+    id: string;
+    name: string;
+    email: string;
+  } | null>(null);
 
   useEffect(() => {
     const fetchSuperAdmins = async () => {
@@ -175,7 +183,21 @@ const SuperAdminsPage = () => {
                     </TableCell>
                     <TableCell className="text-right">
                       <MobileActions
-                        onDelete={!superAdmin.isSystemAdmin ? () => handleDeleteClick(superAdmin) : undefined}
+                        onResetPassword={() => setResetPasswordUser({
+                          id: superAdmin._id,
+                          name: superAdmin.name,
+                          email: superAdmin.email,
+                        })}
+                        resetPasswordDisabled={
+                          // Disable reset password button if:
+                          // Target is System SuperAdmin AND 
+                          // current user is NOT System SuperAdmin AND
+                          // current user is NOT viewing their own account
+                          superAdmin.isSystemAdmin && 
+                          !currentUser?.isSystemAdmin && 
+                          currentUser?.id !== superAdmin._id
+                        }
+                        onDelete={() => handleDeleteClick(superAdmin)}
                         isSystemAdmin={superAdmin.isSystemAdmin}
                         isSuperAdmin={true}
                         deleteLoading={deleteLoading === superAdmin._id}
@@ -219,6 +241,17 @@ const SuperAdminsPage = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Reset Password Dialog */}
+      {resetPasswordUser && (
+        <ResetPasswordDialog
+          open={!!resetPasswordUser}
+          onOpenChange={(open) => !open && setResetPasswordUser(null)}
+          userId={resetPasswordUser.id}
+          userName={resetPasswordUser.name}
+          userEmail={resetPasswordUser.email}
+        />
+      )}
     </div>
   );
 };

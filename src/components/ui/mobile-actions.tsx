@@ -19,6 +19,7 @@ interface MobileActionsProps {
   isSuperAdmin?: boolean
   deleteLoading?: boolean
   toggleLoading?: boolean
+  resetPasswordDisabled?: boolean
 }
 
 export function MobileActions({
@@ -32,7 +33,8 @@ export function MobileActions({
   isSystemAdmin,
   isSuperAdmin,
   deleteLoading,
-  toggleLoading
+  toggleLoading,
+  resetPasswordDisabled = false
 }: MobileActionsProps) {
   return (
     <div className="flex justify-end items-center gap-2">
@@ -43,7 +45,8 @@ export function MobileActions({
             variant="outline"
             size="icon"
             onClick={onResetPassword}
-            title="Reset Password"
+            disabled={resetPasswordDisabled}
+            title={resetPasswordDisabled ? "Only System SuperAdmin can reset System SuperAdmin password" : "Reset Password"}
           >
             <KeyRound className="h-4 w-4" />
           </Button>
@@ -78,14 +81,14 @@ export function MobileActions({
             <Edit className="h-4 w-4" />
           </Button>
         )}
-        {onDelete && isSuperAdmin && !isSystemAdmin && (
+        {onDelete && isSuperAdmin && (
           <Button
             variant="outline"
             size="icon"
             className="text-red-600 hover:text-red-700"
             onClick={onDelete}
-            disabled={deleteLoading}
-            title="Delete (Permanent)"
+            disabled={isSystemAdmin || deleteLoading}
+            title={isSystemAdmin ? "Cannot delete System SuperAdmin" : "Delete (Permanent)"}
           >
             {deleteLoading ? (
               <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current"></div>
@@ -110,11 +113,6 @@ export function MobileActions({
             )}
           </Button>
         )}
-        {isSystemAdmin && (
-          <span className="text-xs text-muted-foreground px-2 py-1 bg-muted rounded">
-            Protected
-          </span>
-        )}
       </div>
 
       {/* Mobile: Show popover menu */}
@@ -132,7 +130,9 @@ export function MobileActions({
                   variant="ghost"
                   size="sm"
                   onClick={onResetPassword}
-                  className="w-full justify-start"
+                  disabled={resetPasswordDisabled}
+                  className="w-full justify-start disabled:opacity-50"
+                  title={resetPasswordDisabled ? "Only System SuperAdmin can reset System SuperAdmin password" : undefined}
                 >
                   <KeyRound className="mr-2 h-4 w-4" />
                   Reset Password
@@ -175,13 +175,14 @@ export function MobileActions({
                   Edit
                 </Button>
               )}
-              {onDelete && isSuperAdmin && !isSystemAdmin && (
+              {onDelete && isSuperAdmin && (
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={onDelete}
-                  disabled={deleteLoading}
-                  className="w-full justify-start text-red-600 hover:text-red-600 hover:bg-red-50"
+                  disabled={isSystemAdmin || deleteLoading}
+                  className="w-full justify-start text-red-600 hover:text-red-600 hover:bg-red-50 disabled:opacity-50"
+                  title={isSystemAdmin ? "Cannot delete System SuperAdmin" : undefined}
                 >
                   {deleteLoading ? (
                     <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current mr-2"></div>

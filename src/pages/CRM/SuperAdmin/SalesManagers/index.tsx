@@ -10,9 +10,12 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Edit, Trash2, PowerOff } from "lucide-react";
+import { Plus, Edit, Trash2, PowerOff, KeyRound } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import axiosInstance from "@/api/axiosInstance";
+import { ResetPasswordDialog } from "@/components/ResetPasswordDialog";
+import { useAuth } from "@/contexts/AuthContext";
+import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -40,10 +43,16 @@ type SalesManager = {
   tpaEmpId: string;
   isActive: boolean;
   createdAt: string;
+  user?: {
+    _id: string;
+    name: string;
+    email: string;
+  } | string;
 };
 
 export default function SalesManagersPage() {
   const navigate = useNavigate();
+  const { user: currentUser } = useAuth();
   const [loading, setLoading] = useState(true);
   const [managers, setManagers] = useState<SalesManager[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
@@ -53,6 +62,11 @@ export default function SalesManagersPage() {
   const [confirmState, setConfirmState] = useState<
     { type: "deactivate" | "reactivate" | "delete" | "bulk-delete"; id?: string } | null
   >(null);
+  const [resetPasswordUser, setResetPasswordUser] = useState<{
+    id: string;
+    name: string;
+    email: string;
+  } | null>(null);
 
   useEffect(() => {
     (async () => {
@@ -209,6 +223,27 @@ export default function SalesManagersPage() {
                   </TableCell>
                   <TableCell className="text-right">
                     <div className="flex items-center justify-end gap-2">
+                      {currentUser?.isSystemAdmin === true && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => {
+                            const userId = typeof manager.user === 'object' ? manager.user?._id : manager.user;
+                            if (userId) {
+                              setResetPasswordUser({
+                                id: String(userId),
+                                name: manager.name,
+                                email: manager.email,
+                              });
+                            } else {
+                              toast.error("User ID not found");
+                            }
+                          }}
+                          title="Reset Password"
+                        >
+                          <KeyRound className="h-4 w-4" />
+                        </Button>
+                      )}
                       <Button
                         variant="ghost"
                         size="sm"
@@ -249,7 +284,14 @@ export default function SalesManagersPage() {
                           <PowerOff className="h-4 w-4" />
                         </Button>
                       )}
-       </div>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))
+            )}
+          </TableBody>
+        </Table>
+      </div>
 
       <AlertDialog
         open={!!confirmState}
@@ -300,13 +342,17 @@ export default function SalesManagersPage() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-                  </TableCell>
-                </TableRow>
-              ))
-            )}
-          </TableBody>
-        </Table>
-      </div>
+
+      {/* Reset Password Dialog */}
+      {resetPasswordUser && (
+        <ResetPasswordDialog
+          open={!!resetPasswordUser}
+          onOpenChange={(open) => !open && setResetPasswordUser(null)}
+          userId={resetPasswordUser.id}
+          userName={resetPasswordUser.name}
+          userEmail={resetPasswordUser.email}
+        />
+      )}
     </div>
   );
 }

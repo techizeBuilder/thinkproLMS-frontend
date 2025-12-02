@@ -9,6 +9,7 @@ type User = {
   leadMentorId?: string;
   permissions?: string[];
   profilePicture?: string | null;
+  isSystemAdmin?: boolean;
 } | null;
 
 interface AuthContextType {
@@ -26,12 +27,39 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   useEffect(() => {
     const stored = localStorage.getItem("user");
-    if (stored) setUser(JSON.parse(stored));
-
     const token = localStorage.getItem("token");
-    axiosInstance.defaults.headers.common["Authorization"] = `Bearer ${token}`;
-
-    setLoading(false);
+    
+    if (token) {
+      axiosInstance.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+      
+      // If user is stored but missing isSystemAdmin, fetch it from backend
+      if (stored) {
+        const parsedUser = JSON.parse(stored);
+        setUser(parsedUser);
+        
+        // If isSystemAdmin is missing, fetch current user from backend
+        if (parsedUser && parsedUser.isSystemAdmin === undefined) {
+          axiosInstance.get("/auth/me")
+            .then((response) => {
+              const updatedUser = response.data.user;
+              setUser(updatedUser);
+              localStorage.setItem("user", JSON.stringify(updatedUser));
+            })
+            .catch((error) => {
+              console.error("Error fetching user info:", error);
+            })
+            .finally(() => {
+              setLoading(false);
+            });
+        } else {
+          setLoading(false);
+        }
+      } else {
+        setLoading(false);
+      }
+    } else {
+      setLoading(false);
+    }
   }, []);
 
   const login = (user: User, token: string) => {
