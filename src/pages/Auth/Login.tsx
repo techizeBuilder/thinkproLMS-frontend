@@ -4,10 +4,18 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { useAuth } from "@/contexts/AuthContext";
 import axiosInstance from "@/api/axiosInstance";
 import GoogleAuthButton from "@/components/GoogleAuthButton";
 import { Eye, EyeOff } from "lucide-react";
+import { forgotPassword } from "@/api/authService";
 
 export default function Login() {
   const { login, user, loading } = useAuth();
@@ -18,6 +26,10 @@ export default function Login() {
   const [error, setError] = useState("");
   const [showGuestForm, setShowGuestForm] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
+  const [forgotPasswordEmail, setForgotPasswordEmail] = useState("");
+  const [isSendingReset, setIsSendingReset] = useState(false);
+  const [resetSent, setResetSent] = useState(false);
 
   // Redirect authenticated users to their role-based dashboard
   useEffect(() => {
@@ -77,6 +89,28 @@ export default function Login() {
 
   const handleBackToLogin = () => {
     setShowGuestForm(false);
+    setError("");
+  };
+
+  const handleForgotPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSendingReset(true);
+    setError("");
+
+    try {
+      await forgotPassword({ email: forgotPasswordEmail });
+      setResetSent(true);
+    } catch (err: any) {
+      setError(err.response?.data?.message || "Failed to send reset email");
+    } finally {
+      setIsSendingReset(false);
+    }
+  };
+
+  const handleCloseForgotPassword = () => {
+    setShowForgotPassword(false);
+    setForgotPasswordEmail("");
+    setResetSent(false);
     setError("");
   };
 
@@ -216,6 +250,15 @@ export default function Login() {
                       </button>
                     </div>
                   </div>
+                  <div className="flex justify-end">
+                    <button
+                      type="button"
+                      onClick={() => setShowForgotPassword(true)}
+                      className="text-xs sm:text-sm text-[var(--primary)] hover:text-[var(--accent)] transition-colors duration-200 font-medium"
+                    >
+                      Forgot Password?
+                    </button>
+                  </div>
                   {error && (
                     <div className="p-2 sm:p-3 text-xs sm:text-sm text-[var(--destructive)] bg-[color-mix(in_srgb,_var(--destructive)_12%,_white)] border border-[color-mix(in_srgb,_var(--destructive)_28%,_white)] rounded-md">
                       {error}
@@ -312,6 +355,83 @@ export default function Login() {
               </CardContent>
             </Card>
           )}
+
+          {/* Forgot Password Dialog */}
+          <Dialog open={showForgotPassword} onOpenChange={handleCloseForgotPassword}>
+            <DialogContent className="sm:max-w-md">
+              <DialogHeader>
+                <DialogTitle>Reset Password</DialogTitle>
+                <DialogDescription>
+                  Enter your email address and we'll send you a link to reset your password.
+                </DialogDescription>
+              </DialogHeader>
+              {resetSent ? (
+                <div className="space-y-4">
+                  <div className="p-4 text-sm text-[var(--muted-foreground)] bg-[color-mix(in_srgb,_var(--primary)_8%,_white)] border border-[color-mix(in_srgb,_var(--primary)_20%,_white)] rounded-md">
+                    <p className="font-medium text-[var(--foreground)] mb-2">
+                      Check your email
+                    </p>
+                    <p>
+                      If an account exists with this email, a password reset link has been sent.
+                      Please check your inbox and follow the instructions to reset your password.
+                    </p>
+                    <p className="mt-2 text-xs">
+                      The link will expire in 1 hour.
+                    </p>
+                  </div>
+                  <Button
+                    onClick={handleCloseForgotPassword}
+                    className="w-full"
+                  >
+                    Close
+                  </Button>
+                </div>
+              ) : (
+                <form onSubmit={handleForgotPassword} className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="forgot-email">Email</Label>
+                    <Input
+                      id="forgot-email"
+                      type="email"
+                      value={forgotPasswordEmail}
+                      onChange={(e) => setForgotPasswordEmail(e.target.value)}
+                      placeholder="Enter your email"
+                      required
+                    />
+                  </div>
+                  {error && (
+                    <div className="p-2 text-xs sm:text-sm text-[var(--destructive)] bg-[color-mix(in_srgb,_var(--destructive)_12%,_white)] border border-[color-mix(in_srgb,_var(--destructive)_28%,_white)] rounded-md">
+                      {error}
+                    </div>
+                  )}
+                  <div className="flex gap-2">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={handleCloseForgotPassword}
+                      className="flex-1"
+                    >
+                      Cancel
+                    </Button>
+                    <Button
+                      type="submit"
+                      disabled={isSendingReset}
+                      className="flex-1"
+                    >
+                      {isSendingReset ? (
+                        <div className="flex items-center space-x-2">
+                          <div className="w-4 h-4 border-2 border-[var(--primary-foreground)] border-t-transparent rounded-full animate-spin"></div>
+                          <span>Sending...</span>
+                        </div>
+                      ) : (
+                        "Send Reset Link"
+                      )}
+                    </Button>
+                  </div>
+                </form>
+              )}
+            </DialogContent>
+          </Dialog>
 
           {/* Footer */}
           <div className="text-center mt-6 sm:mt-8">

@@ -4,6 +4,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 
 import Login from "../pages/Auth/Login";
 import Setup from "../pages/Auth/Setup";
+import ResetPassword from "../pages/Auth/ResetPassword";
 import GuestLogin from "../pages/Auth/GuestLogin";
 import GuestRegister from "../pages/Auth/GuestRegister";
 import NotFound from "../pages/NotFound";
@@ -241,6 +242,7 @@ export default function AppRouter() {
         {/* Public */}
         <Route path="/login" element={<Login />} />
         <Route path="/setup/:token" element={<Setup />} />
+        <Route path="/reset-password/:token" element={<ResetPassword />} />
         <Route path="/guest/login" element={<GuestLogin />} />
         <Route path="/guest/register" element={<GuestRegister />} />
 
