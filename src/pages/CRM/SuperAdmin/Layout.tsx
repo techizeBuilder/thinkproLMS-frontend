@@ -10,7 +10,7 @@ import {
   useSidebar,
   SidebarFooter,
 } from "@/components/ui/collapsible-sidebar";
-import { Users, UserCheck, Building2, Bell } from "lucide-react";
+import { Users, UserCheck, Building2, Bell, NotebookPen, Table } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { LogoutButton } from "@/components/ui/logout-button";
@@ -51,6 +51,12 @@ export default function CRMSuperAdminLayout({
         <SidebarContent className="space-y-4">
           <SidebarGroup label="Management">
             <SidebarNav>
+              <SidebarNavItem to="/crm/superadmin/leads" icon={NotebookPen}>
+                Leads
+              </SidebarNavItem>
+              <SidebarNavItem to="/crm/superadmin/summary" icon={Table}>
+                Summary
+              </SidebarNavItem>
               <SidebarNavItem
                 to="/crm/superadmin/sales-managers"
                 icon={UserCheck}
