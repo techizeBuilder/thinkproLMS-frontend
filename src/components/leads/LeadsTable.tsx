@@ -245,6 +245,10 @@ export default function LeadsTable({ onAddNew, onEdit }: LeadsTableProps) {
 
   const canManageLead = (lead: Lead) => {
     if (!user?.id) return false;
+
+    // SuperAdmin can manage any lead irrespective of creator
+    if (user.role === "superadmin") return true;
+
     return getLeadCreatorId(lead) === user.id;
   };
 
