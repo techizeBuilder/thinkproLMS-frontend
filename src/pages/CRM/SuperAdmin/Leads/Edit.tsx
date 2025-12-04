@@ -10,7 +10,7 @@ export default function SAEditLeadPage() {
   const { id } = useParams();
   const [saving, setSaving] = useState(false);
   const [lead, setLead] = useState<Lead | null>(null);
-  const { user, loading } = useAuth();
+  const { loading } = useAuth();
 
   useEffect(() => {
     (async () => {
