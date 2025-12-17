@@ -22,8 +22,8 @@ export interface Lead {
 	noOfStudents?: number | null;
 	avgFeesPerYear?: number | null;
 	qualified?: "Yes" | "No";
-	salesExecutive?: string | null;
-	salesManager?: string | null;
+	salesExecutive?: string | { _id: string; name: string; email: string; user?: { _id: string } } | null;
+	salesManager?: string | { _id: string; name: string; email: string; user?: { _id: string } } | null;
 	leadSource?: "Internal" | "Channel Partner";
 	leadRemarks?: string;
 	phase?: string;
@@ -35,7 +35,7 @@ export interface Lead {
 	salesCycle?: "2025-2026" | "2026-2027";
 	teamRemarks?: string;
 	actionNeeded?: string;
-	actionOn?: string | { _id: string; name: string; email: string; type?: "manager" | "executive" } | null;
+	actionOn?: string | { _id: string; name: string; email: string; user?: { _id: string }; type?: "manager" | "executive" } | null;
 	actionOnModel?: "SalesManager" | "SalesExecutive" | null;
 	actionDueDate?: string | null;
 	annualContractValue?: number | null;

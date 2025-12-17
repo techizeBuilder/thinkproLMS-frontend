@@ -249,12 +249,30 @@ export default function LeadsTable({ onAddNew, onEdit }: LeadsTableProps) {
     // SuperAdmin can manage any lead irrespective of creator
     if (user.role === "superadmin") return true;
 
-    return getLeadCreatorId(lead) === user.id;
+    // Check if user is the creator
+    if (getLeadCreatorId(lead) === user.id) return true;
+
+    // Check if user is assigned as TPA Sales POC (Executive)
+    if (lead.salesExecutive && typeof lead.salesExecutive === "object") {
+      if (lead.salesExecutive.user?._id === user.id) return true;
+    }
+
+    // Check if user is assigned as TPA Sales POC (Manager)
+    if (lead.salesManager && typeof lead.salesManager === "object") {
+      if (lead.salesManager.user?._id === user.id) return true;
+    }
+
+    // Check if user is assigned as Action on
+    if (lead.actionOn && typeof lead.actionOn === "object") {
+      if (lead.actionOn.user?._id === user.id) return true;
+    }
+
+    return false;
   };
 
   const openStatusChangeDialog = (lead: Lead) => {
     if (!canManageLead(lead)) {
-      toast.error("You can only manage leads you created");
+      toast.error("You can only manage leads that you created or are assigned to");
       return;
     }
     const action = lead.isActive === false ? "activate" : "deactivate";
