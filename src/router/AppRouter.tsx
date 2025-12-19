@@ -160,6 +160,12 @@ import GuestQuizzes from "../pages/Guest/GuestQuizzes";
 import GuestClasses from "../pages/Guest/GuestClasses";
 import GuestPremium from "../pages/Guest/GuestPremium";
 
+//
+import HRMSAdminLayout from "@/pages/HRMS/Admin/Layout";
+import AddUser from "@/pages/HRMS/Admin/AddUser";
+import Employee from "@/pages/HRMS/Admin/Employee";
+import Holiday from "@/pages/HRMS/Admin/Holidays/Holiday";
+
 function ProtectedRoute({
   children,
   role,
@@ -235,6 +241,22 @@ function CRMRootRoute() {
   return <Navigate to={route} replace />;
 }
 
+function HRMSRootRoute() {
+  const { user, loading } = useAuth();
+
+  if (loading) return <div>Loading...</div>;
+  if (!user) return <Navigate to="/login" replace />;
+
+  // sirf admin ko allow
+  if (user.role !== "admin") {
+    return <Navigate to="/" replace />;
+  }
+
+  return <Navigate to="/hrms/admin" replace />;
+}
+
+
+
 export default function AppRouter() {
   return (
     <BrowserRouter>
@@ -258,10 +280,7 @@ export default function AppRouter() {
               <SidebarProvider defaultCollapsed={false}>
                 <CRMSuperAdminLayout>
                   <Routes>
-                    <Route
-                      index
-                      element={<Navigate to="leads" replace />}
-                    />
+                    <Route index element={<Navigate to="leads" replace />} />
                     <Route path="leads" element={<SASalesLeadsPage />} />
                     <Route path="leads/add" element={<SAAddLeadPage />} />
                     <Route path="leads/:id/edit" element={<SAEditLeadPage />} />
@@ -300,6 +319,33 @@ export default function AppRouter() {
             </ProtectedRoute>
           }
         />
+
+        {/* HRMS */}
+        <Route path="/hrms" element={<HRMSRootRoute />} />
+
+        <Route
+          path="/hrms/admin/*"
+          element={
+            <SidebarProvider defaultCollapsed={false}>
+              <HRMSAdminLayout>
+                <Routes>
+                  <Route index element={<Navigate to="addUser" replace />} />
+                  <Route path="addUser" element={<AddUser />} />
+                  <Route path="employees" element={<Employee />} />
+                  <Route path="holidays" element={<Holiday/>} />
+                  {/* <Route path="dashboard" element={<HRDashboard />} />
+
+                    <Route path="employees" element={<EmployeesPage />} />
+                    <Route path="attendance" element={<AttendancePage />} />
+                    <Route path="leave" element={<LeavePage />} />
+                    <Route path="payroll" element={<PayrollPage />} />
+                    <Route path="recruitment" element={<RecruitmentPage />} /> */}
+                </Routes>
+              </HRMSAdminLayout>
+            </SidebarProvider>
+          }
+        />
+
         <Route
           path="/crm/sales-manager/*"
           element={

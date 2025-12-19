@@ -57,6 +57,18 @@ interface LeadsTableProps {
   onAddNew?: () => void;
   onEdit?: (lead: Lead) => void;
 }
+type SalesManager = {
+  _id: string;
+  name: string;
+  email: string;
+  isActive: boolean;
+};
+type SalesExecutive = {
+  _id: string;
+  name: string;
+  email: string;
+  isActive: boolean;
+};
 
 export default function LeadsTable({ onAddNew, onEdit }: LeadsTableProps) {
   const { user } = useAuth();
@@ -83,17 +95,13 @@ export default function LeadsTable({ onAddNew, onEdit }: LeadsTableProps) {
   const [actionDueDateTo, setActionDueDateTo] = useState<string>("");
   const [actionDueDateExact, setActionDueDateExact] = useState<string>("");
   const [actionDueOpen, setActionDueOpen] = useState(false);
+  const [managers, setManagers] = useState<SalesManager[]>([]);
+  const [executives, setExecutives] = useState<SalesExecutive[]>([]);
   const [actionDueRange, setActionDueRange] = useState<{
     from?: Date;
     to?: Date;
   }>({});
   const [indiaStates, setIndiaStates] = useState<IndiaState[]>([]);
-  const [managers, setManagers] = useState<
-    Array<{ _id: string; name: string }>
-  >([]);
-  const [executives, setExecutives] = useState<
-    Array<{ _id: string; name: string }>
-  >([]);
   const [pendingStatusChange, setPendingStatusChange] = useState<{
     lead: Lead;
     action: "activate" | "deactivate";
@@ -109,6 +117,19 @@ export default function LeadsTable({ onAddNew, onEdit }: LeadsTableProps) {
     fetchLeads(true);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+    useEffect(() => {
+      (async () => {
+        try {
+          const [mgrRes, execRes] = await Promise.all([
+            axiosInstance.get("/sales/managers"),
+            axiosInstance.get("/sales/executives"),
+          ]);
+          setManagers(mgrRes.data.data || []);
+          setExecutives(execRes.data.data || []);
+        } catch {}
+      })();
+    }, []);
 
   useEffect(() => {
     fetchLeads();
@@ -168,30 +189,7 @@ export default function LeadsTable({ onAddNew, onEdit }: LeadsTableProps) {
     loadStates();
   }, []);
 
-  useEffect(() => {
-    (async () => {
-      try {
-        const [mgrRes, execRes] = await Promise.all([
-          axiosInstance.get("/sales/managers"),
-          axiosInstance.get("/sales/executives"),
-        ]);
-        setManagers(
-          (mgrRes.data?.data || []).map((m: any) => ({
-            _id: m._id,
-            name: m.name,
-          }))
-        );
-        setExecutives(
-          (execRes.data?.data || []).map((e: any) => ({
-            _id: e._id,
-            name: e.name,
-          }))
-        );
-      } catch {
-        // noop
-      }
-    })();
-  }, []);
+
 
   const fetchLeads = async (initial = false) => {
     try {
@@ -555,18 +553,49 @@ export default function LeadsTable({ onAddNew, onEdit }: LeadsTableProps) {
             </Select>
           </div>
           <div className="space-y-1 sm:space-y-2">
-            <Label>TPA Sales POC</Label>
+            <Label>TPA Sales POC (Manager)</Label>
+
             <Select value={pocRoleFilter} onValueChange={setPocRoleFilter}>
               <SelectTrigger className="h-10">
-                <SelectValue placeholder="POC Role" />
+                <SelectValue placeholder="Select Manager" />
               </SelectTrigger>
+
               <SelectContent>
                 <SelectItem value="all">All</SelectItem>
-                <SelectItem value="Manager">Manager</SelectItem>
-                <SelectItem value="Executive">Executive</SelectItem>
+
+                {managers
+                  .filter((m) => m.isActive === true)
+                  .map((m) => (
+                    <SelectItem key={m._id} value={m._id}>
+                      {m.name}
+                    </SelectItem>
+                  ))}
               </SelectContent>
             </Select>
           </div>
+
+          <div className="space-y-1 sm:space-y-2">
+            <Label>TPA Sales POC (Executive)</Label>
+
+            <Select value={pocRoleFilter} onValueChange={setPocRoleFilter}>
+              <SelectTrigger className="h-10">
+                <SelectValue placeholder="Select Executive" />
+              </SelectTrigger>
+
+              <SelectContent>
+                <SelectItem value="all">All</SelectItem>
+
+                {executives
+                  .filter((e) => e.isActive === true)
+                  .map((e) => (
+                    <SelectItem key={e._id} value={e._id}>
+                      {e.name}
+                    </SelectItem>
+                  ))}
+              </SelectContent>
+            </Select>
+          </div>
+
           <div className="space-y-1 sm:space-y-2">
             <Label>Phase</Label>
             <Select value={phaseFilter} onValueChange={setPhaseFilter}>

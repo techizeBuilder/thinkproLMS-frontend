@@ -47,8 +47,13 @@ const getLabelClassName = (field: string, base?: string) =>
     .filter(Boolean)
     .join(" ");
 
-type SalesManager = { _id: string; name: string; email: string };
-type SalesExecutive = { _id: string; name: string; email: string };
+type SalesManager = {
+  _id: string;
+  name: string;
+  email: string;
+  isActive: boolean;
+};
+type SalesExecutive = { _id: string; name: string; email: string,isActive:boolean };
 
 interface LeadPageFormProps {
   lead?: Lead | null;
@@ -326,7 +331,9 @@ export default function LeadPageForm({
           <h1 className="text-2xl font-semibold">
             {isEdit ? `Edit Lead ${lead?.leadNo}` : "Create Lead"}
           </h1>
-          <p className="text-[var(--muted-foreground)]">Fill the details below.</p>
+          <p className="text-[var(--muted-foreground)]">
+            Fill the details below.
+          </p>
         </div>
       </div>
       <div className="max-w-7xl mx-auto space-y-4">
@@ -400,7 +407,9 @@ export default function LeadPageForm({
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label className={getLabelClassName("pinCode")}>PIN Code</Label>
+                    <Label className={getLabelClassName("pinCode")}>
+                      PIN Code
+                    </Label>
                     <Input
                       name="pinCode"
                       placeholder="6-digit PIN"
@@ -497,7 +506,7 @@ export default function LeadPageForm({
                   </div>
                 </div>
                 <div className="space-y-2">
-                    <Label className="text-[var(--muted-foreground)]">
+                  <Label className="text-[var(--muted-foreground)]">
                     Principal Email (Optional)
                   </Label>
                   <Input
@@ -509,7 +518,7 @@ export default function LeadPageForm({
                   />
                 </div>
                 <div className="space-y-2">
-                    <Label className="text-[var(--muted-foreground)]">
+                  <Label className="text-[var(--muted-foreground)]">
                     School Email (Optional)
                   </Label>
                   <Input
@@ -557,7 +566,7 @@ export default function LeadPageForm({
                   </div>
                 </div>
                 <div className="space-y-2">
-                    <Label className="text-[var(--muted-foreground)]">
+                  <Label className="text-[var(--muted-foreground)]">
                     Key Person Email (Optional)
                   </Label>
                   <Input
@@ -667,7 +676,9 @@ export default function LeadPageForm({
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="none">None</SelectItem>
-                        {executives.map((e) => (
+                        {executives
+                        .filter((e) => e.isActive === true)
+                        .map((e) => (
                           <SelectItem key={e._id} value={e._id}>
                             {e.name}
                           </SelectItem>
@@ -686,11 +697,14 @@ export default function LeadPageForm({
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="none">None</SelectItem>
-                        {managers.map((m) => (
-                          <SelectItem key={m._id} value={m._id}>
-                            {m.name}
-                          </SelectItem>
-                        ))}
+
+                        {managers
+                          .filter((m) => m.isActive === true)
+                          .map((m) => (
+                            <SelectItem key={m._id} value={m._id}>
+                              {m.name}
+                            </SelectItem>
+                          ))}
                       </SelectContent>
                     </Select>
                   </div>
@@ -866,7 +880,7 @@ export default function LeadPageForm({
                   </div>
                 </div>
                 <div className="space-y-2">
-                    <Label className="text-[var(--muted-foreground)]">
+                  <Label className="text-[var(--muted-foreground)]">
                     Annual Contract Value (INR) (Optional)
                   </Label>
                   <Input
