@@ -160,22 +160,56 @@ import GuestQuizzes from "../pages/Guest/GuestQuizzes";
 import GuestClasses from "../pages/Guest/GuestClasses";
 import GuestPremium from "../pages/Guest/GuestPremium";
 
+//
+import HRMSAdminLayout from "@/pages/HRMS/Admin/Layout";
+import AddUser from "@/pages/HRMS/Admin/AddUser";
+import Employee from "@/pages/HRMS/Admin/Employee";
+import Holiday from "@/pages/HRMS/Admin/Holidays/Holiday";
+import Document from "@/pages/HRMS/Admin/Document";
+import OnboardingChecklist from "@/pages/HRMS/Admin/OnboardingChecklist";
+import Letters from "@/pages/HRMS/Admin/Latters";
+import Resignation from "@/pages/HRMS/Admin/Resignation";
+import Clearance from "@/pages/HRMS/Admin/Clerance";
+import OnboardingTasks from "@/pages/HRMS/Admin/OnboardingTask";
+import FinalSettlement from "@/pages/HRMS/Admin/FinalSattlement";
+import AttendanceReport from "@/pages/HRMS/Admin/AttendanceReport";
+import ShiftRoster from "@/pages/HRMS/Admin/ShiftRoaster";
+import LeaveRequests from "@/pages/HRMS/Admin/LeaveRequests";
+import LeaveType from "@/pages/HRMS/Admin/LeaveManagement/LeaveType";
+import LeaveEncashment from "@/pages/HRMS/Admin/LeaveManagement/LeaveEncashment";
+import SalaryStructure from "@/pages/HRMS/Admin/Payroll/SalaryStructure";
+import PayrollRun from "@/pages/HRMS/Admin/Payroll/PayrollRun";
+import Payslips from "@/pages/HRMS/Admin/Payroll/Payslips";
+import JobOpening from "@/pages/HRMS/Admin/Recruitment/JobOpenings";
+import Candidates from "@/pages/HRMS/Admin/Recruitment/Candidates";
+import InterviewPipeline from "@/pages/HRMS/Admin/Recruitment/InterviewPipeline";
+import RoleBasedLayout from "@/pages/HRMS/Admin/Layout/RoleBasedLayout";
+import Company from "@/pages/HRMS/Admin/SystemConfigration/Company";
+import Branches from "@/pages/HRMS/Admin/SystemConfigration/Branches";
+import DepartmentPage from "@/pages/HRMS/Admin/SystemConfigration/Departments";
 function ProtectedRoute({
   children,
   role,
+  roles,
 }: {
   children: JSX.Element;
-  role?: string;
+  role?: string; // ✅ old usage support
+  roles?: string[]; // ✅ new usage support
 }) {
   const { user, loading } = useAuth();
 
   if (loading) return <div>Loading...</div>;
   if (!user) return <Navigate to="/login" replace />;
 
-  if (role && user.role !== role) {
-    // Map roles to their appropriate routes for redirection
-    const roleRouteMap: { [key: string]: string } = {
+  const userRole = user.role?.toLowerCase().trim();
+
+  // 🔥 smart handling: role OR roles
+  const allowedRoles = roles ?? (role ? [role] : []);
+
+  if (allowedRoles.length && !allowedRoles.includes(userRole)) {
+    const roleRouteMap: Record<string, string> = {
       superadmin: "/superadmin",
+      manager: "/superadmin", // manager = superadmin
       leadmentor: "/leadmentor",
       schooladmin: "/schooladmin",
       admin: "/admin",
@@ -186,12 +220,13 @@ function ProtectedRoute({
       "sales-executive": "/crm/sales-executive",
     };
 
-    const route = roleRouteMap[user.role] || "/login";
-    return <Navigate to={route} replace />;
+    return <Navigate to={roleRouteMap[userRole] || "/login"} replace />;
   }
 
   return children;
 }
+
+
 
 function RootRoute() {
   const { user, loading } = useAuth();
@@ -235,6 +270,26 @@ function CRMRootRoute() {
   return <Navigate to={route} replace />;
 }
 
+function HRMSRootRoute() {
+  const { user, loading } = useAuth();
+
+  if (loading) return <div>Loading...</div>;
+  if (!user) return <Navigate to="/login" replace />;
+
+  if (user.role === "admin") {
+    return <Navigate to="/hrms/admin/jobs" replace />;
+  }
+
+  if (user.role === "manager") {
+    return <Navigate to="/hrms/manager/interviews" replace />;
+  }
+
+  return <Navigate to="/" replace />;
+}
+
+
+
+
 export default function AppRouter() {
   return (
     <BrowserRouter>
@@ -258,10 +313,7 @@ export default function AppRouter() {
               <SidebarProvider defaultCollapsed={false}>
                 <CRMSuperAdminLayout>
                   <Routes>
-                    <Route
-                      index
-                      element={<Navigate to="leads" replace />}
-                    />
+                    <Route index element={<Navigate to="leads" replace />} />
                     <Route path="leads" element={<SASalesLeadsPage />} />
                     <Route path="leads/add" element={<SAAddLeadPage />} />
                     <Route path="leads/:id/edit" element={<SAEditLeadPage />} />
@@ -300,6 +352,57 @@ export default function AppRouter() {
             </ProtectedRoute>
           }
         />
+
+        {/* HRMS */}
+        <Route path="/hrms" element={<HRMSRootRoute />} />
+
+        <Route
+          path="/hrms/*"
+          element={
+            <SidebarProvider defaultCollapsed={false}>
+              <RoleBasedLayout />
+            </SidebarProvider>
+          }
+        >
+          {/* ADMIN ROUTES */}
+          <Route path="admin/addUser" element={<AddUser />} />
+          <Route path="admin/employees" element={<Employee />} />
+          <Route path="admin/holidays" element={<Holiday />} />
+          <Route path="admin/documents" element={<Document />} />
+          <Route
+            path="admin/onboarding/checklist"
+            element={<OnboardingChecklist />}
+          />
+          <Route path="admin/letters" element={<Letters />} />
+          <Route
+            path="admin/offboarding/resignations"
+            element={<Resignation />}
+          />
+          <Route path="admin/offboarding/clearance" element={<Clearance />} />
+          <Route path="admin/onboarding/tasks" element={<OnboardingTasks />} />
+          <Route
+            path="admin/offboarding/full-final"
+            element={<FinalSettlement />}
+          />
+          <Route path="admin/attendance" element={<AttendanceReport />} />
+          <Route path="admin/shifts" element={<ShiftRoster />} />
+          <Route path="admin/leaves" element={<LeaveRequests />} />
+          <Route path="admin/leave-types" element={<LeaveType />} />
+          <Route path="admin/leave-encashment" element={<LeaveEncashment />} />
+          <Route path="admin/salary-structure" element={<SalaryStructure />} />
+          <Route path="admin/payroll/run" element={<PayrollRun />} />
+          <Route path="admin/payslips" element={<Payslips />} />
+          <Route path="admin/jobs" element={<JobOpening />} />
+          <Route path="admin/candidates" element={<Candidates />} />
+          <Route path="admin/interviews" element={<InterviewPipeline />} />
+          <Route path="admin/companies" element={<Company />} />
+          <Route path="admin/branches" element={<Branches />} />
+          <Route path="admin/departments" element={<DepartmentPage />} />
+
+          {/* MANAGER ROUTES */}
+          <Route path="manager/interviews" element={<InterviewPipeline />} />
+        </Route>
+
         <Route
           path="/crm/sales-manager/*"
           element={
@@ -361,7 +464,7 @@ export default function AppRouter() {
         <Route
           path="/superadmin"
           element={
-            <ProtectedRoute role="superadmin">
+            <ProtectedRoute roles={["superadmin", "manager"]}>
               <SuperAdmin />
             </ProtectedRoute>
           }

@@ -202,11 +202,11 @@ export function SuperAdminSidebar({ className }: SuperAdminSidebarProps) {
           </SidebarNav>
         </SidebarGroup>
       </SidebarContent>
-
       <SidebarFooter>
         <div className="flex flex-col gap-1">
           {!isCollapsed ? (
             <>
+              {/* Enter CRM */}
               <Link to="/crm/superadmin">
                 <Button
                   variant="ghost"
@@ -216,6 +216,18 @@ export function SuperAdminSidebar({ className }: SuperAdminSidebarProps) {
                   <span className="text-white">Enter CRM</span>
                 </Button>
               </Link>
+
+              {/* Enter HRMS */}
+              <Link to="/hrms/admin">
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start text-sm bg-[#4b5563] hover:bg-[#374151]"
+                >
+                  <Users className="mr-3 h-4 w-4 text-white" />
+                  <span className="text-white">Enter HRMS</span>
+                </Button>
+              </Link>
+
               <LogoutButton
                 variant="ghost"
                 className="w-full justify-start text-[var(--sidebar-text-muted)] hover:text-[var(--sidebar-foreground)] hover:bg-[var(--sidebar-hover-bg)]"
@@ -231,9 +243,21 @@ export function SuperAdminSidebar({ className }: SuperAdminSidebarProps) {
                   className="w-full bg-[#5a6576] hover:bg-[#3a414c]"
                 >
                   <Building2 className="h-4 w-4 text-white" />
-                  <span className="sr-only text-white">Enter CRM</span>
+                  <span className="sr-only">Enter CRM</span>
                 </Button>
               </Link>
+
+              <Link to="/hrms/admin">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="w-full bg-[#4b5563] hover:bg-[#374151]"
+                >
+                  <Users className="h-4 w-4 text-white" />
+                  <span className="sr-only">Enter HRMS</span>
+                </Button>
+              </Link>
+
               <LogoutButton
                 variant="ghost"
                 size="icon"

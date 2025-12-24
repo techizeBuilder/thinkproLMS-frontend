@@ -1,11 +1,11 @@
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
-import { 
-  Home, 
-  Puzzle, 
-  Calendar, 
-  CreditCard, 
+import {
+  Home,
+  Puzzle,
+  Calendar,
+  CreditCard,
   LogOut,
   User,
   BookOpen,
@@ -80,9 +80,9 @@ export default function GuestSidebar({ collapsed, onToggle, isMobile = false }: 
       {/* Header */}
       <div className="p-6 border-b border-gray-200">
         <div className="flex items-center gap-3">
-          <img 
-            src="/fancy-logo.jpg" 
-            alt="ThinkPro LMS" 
+          <img
+            src="/fancy-logo.jpg"
+            alt="ThinkPro LMS"
             className="w-10 h-10 object-contain rounded-full"
           />
           {(!collapsed || isMobile) && (
@@ -119,7 +119,7 @@ export default function GuestSidebar({ collapsed, onToggle, isMobile = false }: 
           {menuItems.map((item) => {
             const Icon = item.icon;
             const isActive = location.pathname === item.path;
-            
+
             return (
               <li key={item.name}>
                 <Link
