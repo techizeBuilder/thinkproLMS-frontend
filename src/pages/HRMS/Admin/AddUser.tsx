@@ -288,7 +288,7 @@ const passbookRef = useRef<HTMLInputElement | null>(null);
       </Card>
 
       {/* LEAD MENTOR EXTRA FORM */}
-      {formData.role === "leadmentor" && <LeadMentorForm hideHeader />}
+      {formData.role === "leadmentor" && <LeadMentorForm />}
 
       {/* ================= UPLOAD DOCUMENTS SECTION ================= */}
 
