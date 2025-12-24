@@ -23,12 +23,10 @@ import { isValidPhoneNumber } from "@/utils/validation";
 
 interface LeadMentorFormProps {
   onSuccess?: () => void;
-  hideHeader?: boolean;
 }
 
 export function LeadMentorForm({
   onSuccess,
-  hideHeader = false,
 }: LeadMentorFormProps) {
   const [loading, setLoading] = useState(false);
   const [schools, setSchools] = useState<School[]>([]);

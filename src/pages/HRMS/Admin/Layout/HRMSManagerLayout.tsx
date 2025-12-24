@@ -28,8 +28,6 @@ import {
   TrendingUp,
   GitBranch,
   UserCheck,
-  LayoutDashboard,
-  Bell,
   Building2,
 } from "lucide-react";
 

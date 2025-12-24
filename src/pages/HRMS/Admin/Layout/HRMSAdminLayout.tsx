@@ -20,12 +20,8 @@ import {
   GitBranch,
   IndianRupee,
   Calendar,
-  LogOut,
-  Building2,
 } from "lucide-react";
 
-import { Button } from "@/components/ui/button";
-import { Link } from "react-router-dom";
 import { LogoutButton } from "@/components/ui/logout-button";
 import { useAuth } from "@/contexts/AuthContext";
 import { CRMHeaderUserInfo } from "@/components/crm/CRMHeaderUserInfo";

@@ -161,7 +161,6 @@ import GuestClasses from "../pages/Guest/GuestClasses";
 import GuestPremium from "../pages/Guest/GuestPremium";
 
 //
-import HRMSAdminLayout from "@/pages/HRMS/Admin/Layout";
 import AddUser from "@/pages/HRMS/Admin/AddUser";
 import Employee from "@/pages/HRMS/Admin/Employee";
 import Holiday from "@/pages/HRMS/Admin/Holidays/Holiday";

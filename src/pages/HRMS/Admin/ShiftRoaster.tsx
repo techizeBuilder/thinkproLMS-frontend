@@ -1,6 +1,6 @@
 /** @format */
 
-import React, { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import axios from "axios";
 import {
   Dialog,
@@ -16,12 +16,6 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import {
-  Command,
-  CommandInput,
-  CommandItem,
-  CommandList,
-} from "@/components/ui/command";
 
 const API_BASE = import.meta.env.VITE_API_URL;
 
@@ -58,7 +52,7 @@ const ShiftRoster = () => {
 
   const [users, setUsers] = useState<User[]>([]);
   const [shifts, setShifts] = useState<ShiftAssignment[]>([]);
-  const [weekStart, setWeekStart] = useState(getMondayOfWeek(today));
+  const [weekStart] = useState(getMondayOfWeek(today));
   const [editingShiftId, setEditingShiftId] = useState<string | null>(null);
 
 

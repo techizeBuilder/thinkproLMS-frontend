@@ -16,7 +16,6 @@ import {
   Users,
   UserCheck,
   Building2,
-  Bell,
   Briefcase,
   CalendarDays,
   FileText,
@@ -44,7 +43,6 @@ import {
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { LogoutButton } from "@/components/ui/logout-button";
-import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
 import { CRMHeaderUserInfo } from "@/components/crm/CRMHeaderUserInfo";
