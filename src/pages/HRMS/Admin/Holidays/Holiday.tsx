@@ -5,7 +5,6 @@ import axios from "axios";
 import { MoreVertical } from "lucide-react";
 import AddHolidayModal from "./AddHolidayModel";
 import ViewHolidayModal from "./ViewHolidayModel";
-
 interface Holiday {
   _id: string;
   title: string;

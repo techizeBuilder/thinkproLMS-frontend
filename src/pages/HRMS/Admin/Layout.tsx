@@ -37,6 +37,8 @@ import {
   PlayCircle,
   FileBarChart,
   GitBranch,
+  ClipboardList,
+  MapPin,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -72,6 +74,41 @@ export default function HRMSAdminLayout({ children }: HRMSAdminLayoutProps) {
           <SidebarToggle />
         </SidebarHeader>
         <SidebarContent className="space-y-4">
+          <SidebarGroup label="System Configuration">
+            <SidebarNav>
+              <SidebarNavItem to="/hrms/admin/companies" icon={Building2}>
+                Companies
+              </SidebarNavItem>
+
+              <SidebarNavItem to="/hrms/admin/branches" icon={MapPin}>
+                Branches
+              </SidebarNavItem>
+
+              <SidebarNavItem to="/hrms/admin/departments" icon={Users}>
+                Departments
+              </SidebarNavItem>
+
+              <SidebarNavItem to="/hrms/admin/designations" icon={Briefcase}>
+                Designations
+              </SidebarNavItem>
+
+              <SidebarNavItem to="/hrms/admin/policies" icon={ShieldCheck}>
+                Company Policies
+              </SidebarNavItem>
+
+              <SidebarNavItem to="/hrms/admin/calendar" icon={CalendarDays}>
+                Holiday Calendar
+              </SidebarNavItem>
+
+              <SidebarNavItem
+                to="/hrms/admin/payroll-settings"
+                icon={IndianRupee}
+              >
+                Payroll Settings
+              </SidebarNavItem>
+            </SidebarNav>
+          </SidebarGroup>
+
           {/* Employee Lifecycle */}
           <SidebarGroup label="User and Roles">
             <SidebarNav>
@@ -84,7 +121,7 @@ export default function HRMSAdminLayout({ children }: HRMSAdminLayoutProps) {
           <SidebarGroup label="Employee Management">
             <SidebarNav>
               <SidebarNavItem to="/hrms/admin/employees" icon={Users}>
-                Employees
+                All Users
               </SidebarNavItem>
               <SidebarNavItem to="/hrms/admin/documents" icon={FileText}>
                 Documents
@@ -108,16 +145,10 @@ export default function HRMSAdminLayout({ children }: HRMSAdminLayoutProps) {
                 Onboarding Checklist
               </SidebarNavItem>
               <SidebarNavItem
-                to="/hrms/admin/onboarding/documents"
-                icon={FileText}
+                to="/hrms/admin/onboarding/tasks"
+                icon={ClipboardList}
               >
-                Document Verification
-              </SidebarNavItem>
-              <SidebarNavItem
-                to="/hrms/admin/onboarding/kyc"
-                icon={ShieldCheck}
-              >
-                KYC Verification
+                Onboarding Tasks
               </SidebarNavItem>
             </SidebarNav>
           </SidebarGroup>
@@ -222,13 +253,13 @@ export default function HRMSAdminLayout({ children }: HRMSAdminLayoutProps) {
           </SidebarGroup>
 
           {/* Notifications */}
-          <SidebarGroup label="System">
+          {/* <SidebarGroup label="System">
             <SidebarNav>
               <SidebarNavItem to="/hrms/admin/notifications" icon={Bell}>
                 Notifications
               </SidebarNavItem>
             </SidebarNav>
-          </SidebarGroup>
+          </SidebarGroup> */}
         </SidebarContent>
 
         <SidebarFooter>

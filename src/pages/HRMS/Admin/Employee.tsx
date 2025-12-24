@@ -37,6 +37,24 @@ export default function Employee() {
     }
   };
 
+  const handleDelete = async (id: string) => {
+    try {
+      const token = localStorage.getItem("token");
+
+      await axios.delete(`${API_BASE}/users/${id}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      // UI se turant remove
+      setEmployees((prev) => prev.filter((emp) => emp._id !== id));
+    } catch (error) {
+      console.error("Failed to delete user", error);
+      alert("Failed to delete user");
+    }
+  };
+
   const filteredEmployees = employees.filter((emp) =>
     emp.name.toLowerCase().includes(search.toLowerCase())
   );
@@ -104,7 +122,12 @@ export default function Employee() {
                     className="w-full text-left px-4 py-2 text-sm text-red-500 hover:bg-red-50"
                     onClick={() => {
                       setOpenMenu(null);
-                      alert(`Delete ${emp.name}`);
+
+                      if (
+                        confirm(`Are you sure you want to delete ${emp.name}?`)
+                      ) {
+                        handleDelete(emp._id);
+                      }
                     }}
                   >
                     Delete
