@@ -31,7 +31,7 @@ export default function SuperAdminTest3DView() {
     const height = container.clientHeight || container.offsetWidth * (9 / 16);
 
     const scene = new THREE.Scene();
-    scene.background = new THREE.Color(0x000000);
+    scene.background = new THREE.Color(0x222222); // Lighter dark gray instead of pure black
 
     const camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 1000);
     camera.position.set(2, 2, 4);
