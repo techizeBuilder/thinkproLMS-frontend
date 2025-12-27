@@ -31,7 +31,26 @@ export default function SuperAdminTest3DView() {
     const height = container.clientHeight || container.offsetWidth * (9 / 16);
 
     const scene = new THREE.Scene();
-    scene.background = new THREE.Color(0x222222); // Lighter dark gray instead of pure black
+    
+    // Create gradient background
+    const gradientTexture = new THREE.CanvasTexture(
+      (() => {
+        const canvas = document.createElement('canvas');
+        canvas.width = 256;
+        canvas.height = 256;
+        const context = canvas.getContext('2d')!;
+        const gradient = context.createLinearGradient(0, 0, 0, 256);
+        // Bright white/light at top, fading to darker at bottom
+        gradient.addColorStop(0, '#ffffff');
+        gradient.addColorStop(0.3, '#e8e8e8');
+        gradient.addColorStop(0.6, '#d0d0d0');
+        gradient.addColorStop(1, '#a0a0a0');
+        context.fillStyle = gradient;
+        context.fillRect(0, 0, 256, 256);
+        return canvas;
+      })()
+    );
+    scene.background = gradientTexture;
 
     const camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 1000);
     camera.position.set(2, 2, 4);
@@ -48,12 +67,36 @@ export default function SuperAdminTest3DView() {
     controls.target.set(0, 0, 0);
     controls.update();
 
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
-    scene.add(ambientLight);
+    // Hemisphere light - provides sky (top) and ground (bottom) colors
+    // Bright white/light blue from top, darker from bottom
+    const hemisphereLight = new THREE.HemisphereLight(
+      0xffffff, // Sky color (top) - bright white
+      0x444444, // Ground color (bottom) - darker gray
+      0.8 // Intensity
+    );
+    scene.add(hemisphereLight);
 
-    const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
-    directionalLight.position.set(5, 10, 7.5);
-    scene.add(directionalLight);
+    // Bright main directional light from top
+    const mainLight = new THREE.DirectionalLight(0xffffff, 1.2);
+    mainLight.position.set(0, 10, 0); // Directly above
+    mainLight.castShadow = false;
+    scene.add(mainLight);
+
+    // Colored lights from different angles for depth and color variation
+    // Warm light from front-right
+    const warmLight = new THREE.DirectionalLight(0xffaa66, 0.4);
+    warmLight.position.set(5, 8, 5);
+    scene.add(warmLight);
+
+    // Cool light from front-left
+    const coolLight = new THREE.DirectionalLight(0x6699ff, 0.3);
+    coolLight.position.set(-5, 8, 5);
+    scene.add(coolLight);
+
+    // Subtle back light for rim lighting
+    const backLight = new THREE.DirectionalLight(0xffffff, 0.2);
+    backLight.position.set(0, 5, -10);
+    scene.add(backLight);
 
     // TEMP: hardcode local backend URL for testing the GLB
     const modelUrl = "http://localhost:8000/models/lego_assembly.glb";
