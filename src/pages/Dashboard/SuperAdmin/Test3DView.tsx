@@ -2,7 +2,7 @@ import { useRef, useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Play, Pause } from "lucide-react";
+import { ArrowLeft, Play, Pause, ChevronLeft, ChevronRight } from "lucide-react";
 import * as THREE from "three";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
@@ -250,6 +250,73 @@ export default function SuperAdminTest3DView() {
     return `${minutes}:${seconds.toString().padStart(2, "0")}`;
   };
 
+  // Frame duration (assuming 30fps, which is standard)
+  const FRAME_DURATION = 1 / 30;
+
+  // Step one frame backward
+  const stepFrameBackward = () => {
+    if (!mixerRef.current || durationRef.current <= 0 || actionsRef.current.length === 0) {
+      return;
+    }
+
+    // Pause if playing
+    if (isPlayingRef.current) {
+      mixerRef.current.timeScale = 0;
+      isPlayingRef.current = false;
+      setIsPlaying(false);
+    }
+
+    const newTime = Math.max(0, currentTime - FRAME_DURATION);
+    
+    // Update each action's time
+    actionsRef.current.forEach((action) => {
+      if (action && action.getClip()) {
+        const clipDuration = action.getClip().duration;
+        if (Math.abs(clipDuration - durationRef.current) < 0.001) {
+          action.time = newTime;
+        } else {
+          action.time = (newTime / durationRef.current) * clipDuration;
+        }
+        action.time = Math.max(0, Math.min(action.time, clipDuration));
+      }
+    });
+
+    mixerRef.current.update(0);
+    setCurrentTime(newTime);
+  };
+
+  // Step one frame forward
+  const stepFrameForward = () => {
+    if (!mixerRef.current || durationRef.current <= 0 || actionsRef.current.length === 0) {
+      return;
+    }
+
+    // Pause if playing
+    if (isPlayingRef.current) {
+      mixerRef.current.timeScale = 0;
+      isPlayingRef.current = false;
+      setIsPlaying(false);
+    }
+
+    const newTime = Math.min(durationRef.current, currentTime + FRAME_DURATION);
+    
+    // Update each action's time
+    actionsRef.current.forEach((action) => {
+      if (action && action.getClip()) {
+        const clipDuration = action.getClip().duration;
+        if (Math.abs(clipDuration - durationRef.current) < 0.001) {
+          action.time = newTime;
+        } else {
+          action.time = (newTime / durationRef.current) * clipDuration;
+        }
+        action.time = Math.max(0, Math.min(action.time, clipDuration));
+      }
+    });
+
+    mixerRef.current.update(0);
+    setCurrentTime(newTime);
+  };
+
   return (
     <>
       <style>{`
@@ -258,7 +325,7 @@ export default function SuperAdminTest3DView() {
           width: 16px;
           height: 16px;
           border-radius: 50%;
-          background: #9333ea;
+          background: var(--accent);
           cursor: pointer;
           border: 2px solid #ffffff;
           box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
@@ -267,7 +334,7 @@ export default function SuperAdminTest3DView() {
           width: 16px;
           height: 16px;
           border-radius: 50%;
-          background: #9333ea;
+          background: var(--accent);
           cursor: pointer;
           border: 2px solid #ffffff;
           box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
@@ -276,7 +343,7 @@ export default function SuperAdminTest3DView() {
           outline: none;
         }
         .slider:focus::-webkit-slider-thumb {
-          box-shadow: 0 0 0 3px rgba(147, 51, 234, 0.3);
+          box-shadow: 0 0 0 3px rgba(255, 148, 78, 0.3);
         }
       `}</style>
       <div className="container mx-auto p-6 max-w-6xl">
@@ -307,18 +374,40 @@ export default function SuperAdminTest3DView() {
               {modelLoaded && duration > 0 && (
                 <div className="bg-gray-900 text-white p-4 rounded-b-lg">
                   <div className="flex items-center gap-4">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={togglePlayPause}
-                      className="text-white hover:bg-gray-800 h-8 w-8 p-0"
-                    >
-                      {isPlaying ? (
-                        <Pause className="h-4 w-4" />
-                      ) : (
-                        <Play className="h-4 w-4" />
-                      )}
-                    </Button>
+                    <div className="flex items-center gap-1">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={stepFrameBackward}
+                        disabled={currentTime <= 0}
+                        className="text-white hover:bg-accent/20 hover:text-accent h-8 w-8 p-0 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-150 active:scale-90 active:bg-accent/30"
+                        title="Previous frame"
+                      >
+                        <ChevronLeft className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={togglePlayPause}
+                        className="text-white hover:bg-accent/20 hover:text-accent h-8 w-8 p-0 transition-all duration-150 active:scale-90 active:bg-accent/30"
+                      >
+                        {isPlaying ? (
+                          <Pause className="h-4 w-4" />
+                        ) : (
+                          <Play className="h-4 w-4" />
+                        )}
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={stepFrameForward}
+                        disabled={currentTime >= duration}
+                        className="text-white hover:bg-accent/20 hover:text-accent h-8 w-8 p-0 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-150 active:scale-90 active:bg-accent/30"
+                        title="Next frame"
+                      >
+                        <ChevronRight className="h-4 w-4" />
+                      </Button>
+                    </div>
                     <div className="flex-1 flex items-center gap-2">
                       <input
                         type="range"
@@ -342,7 +431,7 @@ export default function SuperAdminTest3DView() {
                         onTouchEnd={handleTimelineMouseUp}
                         className="flex-1 h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer slider"
                         style={{
-                          background: `linear-gradient(to right, #9333ea 0%, #9333ea ${
+                          background: `linear-gradient(to right, var(--accent) 0%, var(--accent) ${
                             duration > 0 ? (currentTime / duration) * 100 : 0
                           }%, #374151 ${
                             duration > 0 ? (currentTime / duration) * 100 : 0
