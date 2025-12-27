@@ -46,7 +46,7 @@ import { toast } from 'sonner';
 export default function MentorResourcesPage() {
   const navigate = useNavigate();
   const [selectedUserType, setSelectedUserType] = useState<UserType>('student');
-  const [selectedBucket, setSelectedBucket] = useState<BucketType | 'all'>('all');
+  const [selectedBucket, setSelectedBucket] = useState<BucketType | '3dmodels' | 'all'>('all');
   const [selectedGrade, setSelectedGrade] = useState<string | 'all'>('all');
   const [resources, setResources] = useState<ApiResource[]>([]);
   const [loading, setLoading] = useState(false);
@@ -72,7 +72,13 @@ export default function MentorResourcesPage() {
 
       // Only add type filter if not 'all'
       if (selectedBucket !== 'all') {
-        filters.type = selectedBucket === 'videos' ? 'video' : 'document';
+        if (selectedBucket === 'videos') {
+          filters.type = 'video';
+        } else if (selectedBucket === '3dmodels') {
+          filters.type = '3dmodel';
+        } else {
+          filters.type = 'document';
+        }
       }
 
       // Add grade filter if selected
@@ -216,7 +222,7 @@ export default function MentorResourcesPage() {
           </SelectContent>
         </Select>
 
-        <Select value={selectedBucket} onValueChange={(v: BucketType | 'all') => setSelectedBucket(v)}>
+        <Select value={selectedBucket} onValueChange={(v: BucketType | '3dmodels' | 'all') => setSelectedBucket(v)}>
           <SelectTrigger className="w-[160px] text-sm">
             <SelectValue placeholder="Type" />
           </SelectTrigger>
@@ -229,6 +235,9 @@ export default function MentorResourcesPage() {
             </SelectItem>
             <SelectItem value="videos">
               <div className="flex items-center gap-2"><Video className="h-4 w-4" /> Videos</div>
+            </SelectItem>
+            <SelectItem value="3dmodels">
+              <div className="flex items-center gap-2"><Box className="h-4 w-4" /> 3D Models</div>
             </SelectItem>
           </SelectContent>
         </Select>
@@ -257,6 +266,8 @@ export default function MentorResourcesPage() {
                   ? 'Resources' 
                   : selectedBucket === 'videos' 
                     ? 'Videos' 
+                    : selectedBucket === '3dmodels'
+                    ? '3D Models'
                     : 'Documents'
               }
             </h2>
