@@ -9,7 +9,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { X, Upload, FileText, Video, Link } from 'lucide-react';
+import { X, Upload, FileText, Video, Link, Box } from 'lucide-react';
 import { toast } from 'sonner';
 import { resourceService, type CreateResourceData } from '@/api/resourceService';
 import { moduleService, type Module } from '@/api/moduleService';
@@ -20,7 +20,7 @@ import { Loader2 } from 'lucide-react';
 const resourceSchema = z.object({
   title: z.string().min(1, 'Title is required'),
   description: z.string().optional(),
-  type: z.enum(['document', 'video']),
+  type: z.enum(['document', 'video', '3dmodel']),
   category: z.enum(['mentor', 'student']),
   subject: z.string().optional(),
   grade: z.string().optional(),
@@ -221,7 +221,7 @@ export default function ResourceForm({ resource, onSuccess, onCancel }: Resource
               <Label htmlFor="type">Type *</Label>
               <Select
                 value={watchedType}
-                onValueChange={(value) => setValue('type', value as 'document' | 'video')}
+                onValueChange={(value) => setValue('type', value as 'document' | 'video' | '3dmodel')}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Select type" />
@@ -237,6 +237,12 @@ export default function ResourceForm({ resource, onSuccess, onCancel }: Resource
                     <div className="flex items-center gap-2">
                       <Video className="h-4 w-4" />
                       Video
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="3dmodel">
+                    <div className="flex items-center gap-2">
+                      <Box className="h-4 w-4" />
+                      3D Model
                     </div>
                   </SelectItem>
                 </SelectContent>
@@ -380,6 +386,8 @@ export default function ResourceForm({ resource, onSuccess, onCancel }: Resource
                   onChange={handleFileChange}
                   accept={watchedType === 'video' 
                     ? 'video/mp4,video/avi,video/mov,video/wmv,video/webm'
+                    : watchedType === '3dmodel'
+                    ? '.glb,.gltf'
                     : '.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx'
                   }
                 />

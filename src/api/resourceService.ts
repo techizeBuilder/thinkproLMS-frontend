@@ -5,7 +5,7 @@ export interface Resource {
   _id: string;
   title: string;
   description: string;
-  type: "document" | "video";
+  type: "document" | "video" | "3dmodel";
   category: "mentor" | "student" | "guest" | "all";
   content: {
     url: string;
@@ -53,7 +53,7 @@ export interface Resource {
 export interface CreateResourceData {
   title: string;
   description?: string;
-  type: "document" | "video";
+  type: "document" | "video" | "3dmodel";
   category: "mentor" | "student" | "guest" | "all";
   subject?: string;
   grade?: string;

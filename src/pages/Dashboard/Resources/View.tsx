@@ -18,6 +18,7 @@ import { getResourceDisplayUrl } from '@/utils/resourceUtils';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 import analyticsService from '@/api/analyticsService';
+import Model3DViewer from '@/components/Model3DViewer';
 
 export default function ViewResourcePage() {
   const { user } = useAuth();
@@ -224,6 +225,8 @@ export default function ViewResourcePage() {
 
   const embedUrl = resourceService.getIframeUrl(resource);
   const isVideo = resource.type === 'video';
+  const is3DModel = resource.type === '3dmodel';
+  const modelUrl = is3DModel ? resourceService.getResourceUrl(resource) : '';
 
   return (
     <div className="container mx-auto p-6 max-w-6xl">
@@ -244,14 +247,16 @@ export default function ViewResourcePage() {
             {resource.description}
           </p>
         </div>
-        <Button
-          variant="outline"
-          onClick={handleExternalOpen}
-          className="flex items-center gap-2"
-        >
-          <ExternalLink className="h-4 w-4" />
-          Open External
-        </Button>
+        {resource.type !== '3dmodel' && (
+          <Button
+            variant="outline"
+            onClick={handleExternalOpen}
+            className="flex items-center gap-2"
+          >
+            <ExternalLink className="h-4 w-4" />
+            Open External
+          </Button>
+        )}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -259,8 +264,11 @@ export default function ViewResourcePage() {
         <div className="lg:col-span-2">
           <Card>
             <CardContent className="p-0">
-              <div className="aspect-video bg-black rounded-lg overflow-hidden">
-                {isVideo ? (
+              {is3DModel ? (
+                <Model3DViewer modelUrl={modelUrl} />
+              ) : (
+                <div className="aspect-video bg-black rounded-lg overflow-hidden">
+                  {isVideo ? (
                   resource.content.isExternal ? (
                     <iframe
                       ref={iframeRef}
@@ -367,7 +375,8 @@ export default function ViewResourcePage() {
                     </div>
                   </div>
                 )}
-              </div>
+                </div>
+              )}
             </CardContent>
           </Card>
         </div>
@@ -470,14 +479,16 @@ export default function ViewResourcePage() {
               >
                 Edit Resource
               </Button>
-              <Button
-                variant="outline"
-                className="w-full justify-start"
-                onClick={handleExternalOpen}
-              >
-                <ExternalLink className="h-4 w-4 mr-2" />
-                Open in New Tab
-              </Button>
+              {resource.type !== '3dmodel' && (
+                <Button
+                  variant="outline"
+                  className="w-full justify-start"
+                  onClick={handleExternalOpen}
+                >
+                  <ExternalLink className="h-4 w-4 mr-2" />
+                  Open in New Tab
+                </Button>
+              )}
             </CardContent>
           </Card>
         </div>

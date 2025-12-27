@@ -137,6 +137,7 @@ import {
 
 // Dashboard Components
 import SuperAdminDashboard from "../pages/Dashboard/SuperAdmin/Dashboard";
+import SuperAdminTest3DView from "../pages/Dashboard/SuperAdmin/Test3DView";
 import LeadMentorDashboard from "../pages/Dashboard/LeadMentor/Dashboard";
 import Student from "../pages/Dashboard/Student";
 
@@ -635,6 +636,9 @@ export default function AppRouter() {
 
           {/* Access Reports */}
           <Route path="access-reports" element={<AccessReportsPage />} />
+
+          {/* Experimental/Test Routes */}
+          <Route path="test" element={<SuperAdminTest3DView />} />
         </Route>
 
         {/* Admin */}

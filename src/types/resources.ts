@@ -64,9 +64,9 @@ export interface ApiResource {
   updatedAt: string;
 }
 
-export type ResourceType = 'document' | 'video';
+export type ResourceType = 'document' | 'video' | '3dmodel';
 export type UserType = 'mentor' | 'student' | 'guest' | 'all';
-export type BucketType = 'documents' | 'videos';
+export type BucketType = 'documents' | 'videos' | '3dmodels';
 
 export interface DocumentResource extends Resource {
   type: 'document';

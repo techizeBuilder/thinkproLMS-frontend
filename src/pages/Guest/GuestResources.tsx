@@ -40,7 +40,7 @@ export default function GuestResources() {
   }, []);
 
   const handleResourceClick = (resource: Resource) => {
-    if (resource.type === "video") {
+    if (resource.type === "video" || resource.type === "3dmodel") {
       navigate(`/guest/resource/${resource._id}/view`);
     } else {
       // For documents, open in new tab

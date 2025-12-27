@@ -10,7 +10,9 @@ import {
   Eye,
   ExternalLink,
   Download,
-  Loader2
+  Loader2,
+  Box,
+  Grid3x3
 } from 'lucide-react';
 import type { ApiResource } from '@/types/resources';
 import { useNavigate } from 'react-router-dom';
@@ -22,7 +24,7 @@ import { useAuth } from '@/contexts/AuthContext';
 export default function StudentResourcesPage() {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const [selectedBucket, setSelectedBucket] = useState<'documents' | 'videos'>('documents');
+  const [selectedBucket, setSelectedBucket] = useState<'documents' | 'videos' | '3dmodels' | 'all'>('all');
   const [resources, setResources] = useState<ApiResource[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -52,8 +54,29 @@ export default function StudentResourcesPage() {
     resource => resource.type === 'video'
   );
 
+  const model3DResources = resources.filter(
+    resource => resource.type === '3dmodel'
+  );
+
+  // Get resources based on selected bucket
+  const getFilteredResources = () => {
+    switch (selectedBucket) {
+      case 'documents':
+        return documentResources;
+      case 'videos':
+        return videoResources;
+      case '3dmodels':
+        return model3DResources;
+      case 'all':
+      default:
+        return resources;
+    }
+  };
+
+  const filteredResources = getFilteredResources();
+
   const handleViewResource = async (resource: ApiResource) => {
-    if (resource.type === 'video') {
+    if (resource.type === 'video' || resource.type === '3dmodel') {
       navigate(`/student/resources/${resource._id}/view`);
     } else {
       // For documents, track access and then open in new tab
@@ -81,10 +104,17 @@ export default function StudentResourcesPage() {
   };
 
   const getResourceIcon = (type: string) => {
-    return type === 'video' ? <Video className="h-5 w-5" /> : <FileText className="h-5 w-5" />;
+    if (type === 'video') return <Video className="h-5 w-5" />;
+    if (type === '3dmodel') return <Box className="h-5 w-5" />;
+    return <FileText className="h-5 w-5" />;
   };
 
   const getFileTypeBadge = (resource: ApiResource) => {
+    if (resource.type === '3dmodel') {
+      const extension = resource.content.fileName?.split('.').pop()?.toLowerCase();
+      return <Badge variant="secondary">3D {extension?.toUpperCase() || 'MODEL'}</Badge>;
+    }
+    
     const url = resource.content.url;
     const isExternal = resource.content.isExternal;
     
@@ -126,8 +156,12 @@ export default function StudentResourcesPage() {
         </div>
       </div>
 
-      <Tabs value={selectedBucket} onValueChange={(value: string) => setSelectedBucket(value as 'documents' | 'videos')}>
-        <TabsList className="grid w-full grid-cols-2 text-xs md:text-sm">
+      <Tabs value={selectedBucket} onValueChange={(value: string) => setSelectedBucket(value as 'documents' | 'videos' | '3dmodels' | 'all')}>
+        <TabsList className="grid w-full grid-cols-4 text-xs md:text-sm">
+          <TabsTrigger value="all" className="flex items-center gap-2">
+            <Grid3x3 className="h-4 w-4" />
+            All ({resources.length})
+          </TabsTrigger>
           <TabsTrigger value="documents" className="flex items-center gap-2">
             <FileText className="h-4 w-4" />
             Documents ({documentResources.length})
@@ -136,7 +170,76 @@ export default function StudentResourcesPage() {
             <Video className="h-4 w-4" />
             Videos ({videoResources.length})
           </TabsTrigger>
+          <TabsTrigger value="3dmodels" className="flex items-center gap-2">
+            <Box className="h-4 w-4" />
+            3D Models ({model3DResources.length})
+          </TabsTrigger>
         </TabsList>
+
+        <TabsContent value="all" className="space-y-4">
+          <div className="flex items-center gap-2">
+            <Grid3x3 className="h-5 w-5" />
+            <h2 className="text-lg md:text-xl font-semibold">All Resources</h2>
+            <Badge variant="outline">{filteredResources.length} resources</Badge>
+          </div>
+          
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            {filteredResources.length === 0 ? (
+              <div className="col-span-full text-center py-8 text-muted-foreground">
+                No resources available
+              </div>
+            ) : (
+              filteredResources.map((resource) => (
+                <Card key={resource._id} className="hover:shadow-md transition-shadow">
+                  <CardHeader className="pb-3">
+                    <div className="flex items-start justify-between">
+                      <div className="flex items-center gap-2">
+                        {getResourceIcon(resource.type)}
+                        <CardTitle className="text-base md:text-lg">{resource.title}</CardTitle>
+                      </div>
+                      {getFileTypeBadge(resource)}
+                    </div>
+                    {resource.description && (
+                      <CardDescription className="text-sm md:text-base">{resource.description}</CardDescription>
+                    )}
+                  </CardHeader>
+                  <CardContent className="pt-0">
+                    <div className="flex items-center justify-between">
+                      <div className="flex flex-wrap gap-1">
+                        {resource.tags?.map((tag) => (
+                          <Badge key={tag} variant="secondary" className="text-xs">
+                            {tag}
+                          </Badge>
+                        ))}
+                      </div>
+                      <div className="flex gap-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleViewResource(resource)}
+                        >
+                          <Eye className="h-4 w-4" />
+                        </Button>
+                        {resource.type !== '3dmodel' && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleDownloadResource(resource)}
+                          >
+                            <Download className="h-4 w-4" />
+                          </Button>
+                        )}
+                      </div>
+                    </div>
+                    <div className="text-[11px] md:text-xs text-muted-foreground mt-2">
+                      Uploaded by {resource.uploadedBy?.name || 'Unknown'} • {new Date(resource.createdAt).toLocaleDateString()}
+                    </div>
+                  </CardContent>
+                </Card>
+              ))
+            )}
+          </div>
+        </TabsContent>
 
         <TabsContent value="documents" className="space-y-4">
           <div className="flex items-center gap-2">
@@ -245,12 +348,61 @@ export default function StudentResourcesPage() {
                         >
                           <Eye className="h-4 w-4" />
                         </Button>
+                      </div>
+                    </div>
+                    <div className="text-[11px] md:text-xs text-muted-foreground mt-2">
+                      Uploaded by {resource.uploadedBy?.name || 'Unknown'} • {new Date(resource.createdAt).toLocaleDateString()}
+                    </div>
+                  </CardContent>
+                </Card>
+              ))
+            )}
+          </div>
+        </TabsContent>
+
+        <TabsContent value="3dmodels" className="space-y-4">
+          <div className="flex items-center gap-2">
+            <Box className="h-5 w-5" />
+            <h2 className="text-lg md:text-xl font-semibold">3D Models</h2>
+            <Badge variant="outline">{model3DResources.length} resources</Badge>
+          </div>
+          
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            {model3DResources.length === 0 ? (
+              <div className="col-span-full text-center py-8 text-muted-foreground">
+                No 3D model resources available
+              </div>
+            ) : (
+              model3DResources.map((resource) => (
+                <Card key={resource._id} className="hover:shadow-md transition-shadow">
+                  <CardHeader className="pb-3">
+                    <div className="flex items-start justify-between">
+                      <div className="flex items-center gap-2">
+                        {getResourceIcon(resource.type)}
+                        <CardTitle className="text-base md:text-lg">{resource.title}</CardTitle>
+                      </div>
+                      {getFileTypeBadge(resource)}
+                    </div>
+                    {resource.description && (
+                      <CardDescription className="text-sm md:text-base">{resource.description}</CardDescription>
+                    )}
+                  </CardHeader>
+                  <CardContent className="pt-0">
+                    <div className="flex items-center justify-between">
+                      <div className="flex flex-wrap gap-1">
+                        {resource.tags?.map((tag) => (
+                          <Badge key={tag} variant="secondary" className="text-xs">
+                            {tag}
+                          </Badge>
+                        ))}
+                      </div>
+                      <div className="flex gap-2">
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={() => window.open(resourceService.getResourceUrl(resource), '_blank')}
+                          onClick={() => handleViewResource(resource)}
                         >
-                          <ExternalLink className="h-4 w-4" />
+                          <Eye className="h-4 w-4" />
                         </Button>
                       </div>
                     </div>
