@@ -22,7 +22,6 @@ export default function Model3DViewer({ modelUrl, className = "" }: Model3DViewe
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
-  const [isScrubbing, setIsScrubbing] = useState(false);
 
   useEffect(() => {
     if (!mountRef.current) return;
@@ -228,7 +227,6 @@ export default function Model3DViewer({ modelUrl, className = "" }: Model3DViewe
     }
 
     isScrubbingRef.current = true;
-    setIsScrubbing(true);
     const newTime = Math.max(0, Math.min((value / 100) * durationRef.current, durationRef.current));
     
     // Update each action's time to scrub the animation
@@ -257,7 +255,6 @@ export default function Model3DViewer({ modelUrl, className = "" }: Model3DViewe
 
   const handleTimelineMouseUp = () => {
     isScrubbingRef.current = false;
-    setIsScrubbing(false);
   };
 
   // Format time for display
@@ -418,12 +415,10 @@ export default function Model3DViewer({ modelUrl, className = "" }: Model3DViewe
                   }}
                   onMouseDown={() => {
                     isScrubbingRef.current = true;
-                    setIsScrubbing(true);
                   }}
                   onMouseUp={handleTimelineMouseUp}
                   onTouchStart={() => {
                     isScrubbingRef.current = true;
-                    setIsScrubbing(true);
                   }}
                   onTouchEnd={handleTimelineMouseUp}
                   className="flex-1 h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer slider"

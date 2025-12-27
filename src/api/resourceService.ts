@@ -71,7 +71,7 @@ export type UploadProgressCallback = (percent: number) => void;
 export interface UpdateResourceData extends Partial<CreateResourceData> {}
 
 export interface ResourceFilters {
-  type?: "document" | "video";
+  type?: "document" | "video" | "3dmodel";
   category?: "mentor" | "student" | "guest" | "all";
   subject?: string;
   grade?: string;
