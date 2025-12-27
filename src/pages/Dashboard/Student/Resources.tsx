@@ -10,7 +10,8 @@ import {
   Eye,
   ExternalLink,
   Download,
-  Loader2
+  Loader2,
+  Box
 } from 'lucide-react';
 import type { ApiResource } from '@/types/resources';
 import { useNavigate } from 'react-router-dom';
@@ -53,7 +54,7 @@ export default function StudentResourcesPage() {
   );
 
   const handleViewResource = async (resource: ApiResource) => {
-    if (resource.type === 'video') {
+    if (resource.type === 'video' || resource.type === '3dmodel') {
       navigate(`/student/resources/${resource._id}/view`);
     } else {
       // For documents, track access and then open in new tab
@@ -81,7 +82,9 @@ export default function StudentResourcesPage() {
   };
 
   const getResourceIcon = (type: string) => {
-    return type === 'video' ? <Video className="h-5 w-5" /> : <FileText className="h-5 w-5" />;
+    if (type === 'video') return <Video className="h-5 w-5" />;
+    if (type === '3dmodel') return <Box className="h-5 w-5" />;
+    return <FileText className="h-5 w-5" />;
   };
 
   const getFileTypeBadge = (resource: ApiResource) => {

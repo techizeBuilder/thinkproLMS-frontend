@@ -15,6 +15,7 @@ import type { Resource as ApiResource } from '@/api/resourceService';
 import { resourceService } from '@/api/resourceService';
 import { getResourceDisplayUrl } from '@/utils/resourceUtils';
 import { toast } from 'sonner';
+import Model3DViewer from '@/components/Model3DViewer';
 
 export default function MentorResourceViewPage() {
   const navigate = useNavigate();
@@ -123,14 +124,16 @@ export default function MentorResourceViewPage() {
             {resource.description}
           </p>
         </div>
-        <Button
-          variant="outline"
-          onClick={handleExternalOpen}
-          className="flex items-center gap-2"
-        >
-          <ExternalLink className="h-4 w-4" />
-          Open External
-        </Button>
+        {resource.type !== '3dmodel' && (
+          <Button
+            variant="outline"
+            onClick={handleExternalOpen}
+            className="flex items-center gap-2"
+          >
+            <ExternalLink className="h-4 w-4" />
+            Open External
+          </Button>
+        )}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -138,26 +141,30 @@ export default function MentorResourceViewPage() {
         <div className="lg:col-span-2">
           <Card>
             <CardContent className="p-0">
-              <div className="aspect-video bg-black rounded-lg overflow-hidden">
-                {videoSource === 'direct' ? (
-                  <video
-                    controls
-                    className="w-full h-full"
-                    src={resource.content.url}
-                  >
-                    Your browser does not support the video tag.
-                  </video>
-                ) : (
-                  <iframe
-                    src={embedUrl}
-                    className="w-full h-full"
-                    frameBorder="0"
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                    allowFullScreen
-                    title={resource.title}
-                  />
-                )}
-              </div>
+              {resource.type === '3dmodel' ? (
+                <Model3DViewer modelUrl={resourceService.getResourceUrl(resource)} />
+              ) : (
+                <div className="aspect-video bg-black rounded-lg overflow-hidden">
+                  {videoSource === 'direct' ? (
+                    <video
+                      controls
+                      className="w-full h-full"
+                      src={resource.content.url}
+                    >
+                      Your browser does not support the video tag.
+                    </video>
+                  ) : (
+                    <iframe
+                      src={embedUrl}
+                      className="w-full h-full"
+                      frameBorder="0"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                      allowFullScreen
+                      title={resource.title}
+                    />
+                  )}
+                </div>
+              )}
             </CardContent>
           </Card>
         </div>
@@ -216,14 +223,16 @@ export default function MentorResourceViewPage() {
               <CardTitle>Actions</CardTitle>
             </CardHeader>
             <CardContent className="space-y-2">
-              <Button
-                variant="outline"
-                className="w-full justify-start"
-                onClick={handleExternalOpen}
-              >
-                <ExternalLink className="h-4 w-4 mr-2" />
-                Open in New Tab
-              </Button>
+              {resource.type !== '3dmodel' && (
+                <Button
+                  variant="outline"
+                  className="w-full justify-start"
+                  onClick={handleExternalOpen}
+                >
+                  <ExternalLink className="h-4 w-4 mr-2" />
+                  Open in New Tab
+                </Button>
+              )}
             </CardContent>
           </Card>
         </div>

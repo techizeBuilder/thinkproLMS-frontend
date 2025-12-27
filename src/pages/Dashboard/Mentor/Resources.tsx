@@ -28,6 +28,7 @@ import {
   Search,
   Loader2,
   Calendar,
+  Box,
   User,
   SortAsc,
   SortDesc,
@@ -115,7 +116,7 @@ export default function MentorResourcesPage() {
   };
 
   const handleViewResource = (resource: ApiResource) => {
-    if (resource.type === 'video') {
+    if (resource.type === 'video' || resource.type === '3dmodel') {
       navigate(`/mentor/resources/${resource._id}/view`);
     } else {
       // For documents, open in new tab or iframe
@@ -125,7 +126,9 @@ export default function MentorResourcesPage() {
   };
 
   const getResourceIcon = (type: string) => {
-    return type === 'video' ? <Video className="h-5 w-5" /> : <FileText className="h-5 w-5" />;
+    if (type === 'video') return <Video className="h-5 w-5" />;
+    if (type === '3dmodel') return <Box className="h-5 w-5" />;
+    return <FileText className="h-5 w-5" />;
   };
 
   const getFileTypeBadge = (resource: ApiResource) => {
