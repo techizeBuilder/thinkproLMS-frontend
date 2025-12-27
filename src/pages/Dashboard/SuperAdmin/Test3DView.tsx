@@ -2,7 +2,7 @@ import { useRef, useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Play, Pause } from "lucide-react";
 import * as THREE from "three";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
@@ -10,8 +10,18 @@ import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 export default function SuperAdminTest3DView() {
   const navigate = useNavigate();
   const mountRef = useRef<HTMLDivElement | null>(null);
+  const mixerRef = useRef<THREE.AnimationMixer | null>(null);
+  const animationsRef = useRef<THREE.AnimationClip[]>([]);
+  const actionsRef = useRef<THREE.AnimationAction[]>([]);
+  const isPlayingRef = useRef(false);
+  const isScrubbingRef = useRef(false);
+  const durationRef = useRef(0);
   const [modelLoaded, setModelLoaded] = useState(false);
   const [modelError, setModelError] = useState(false);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [duration, setDuration] = useState(0);
+  const [isScrubbing, setIsScrubbing] = useState(false);
 
   useEffect(() => {
     if (!mountRef.current) return;
@@ -73,6 +83,32 @@ export default function SuperAdminTest3DView() {
         model.scale.setScalar(0.02); // tweak if too big/small
 
         scene.add(model);
+
+        // Setup animation mixer if animations exist
+        if (gltf.animations && gltf.animations.length > 0) {
+          const mixer = new THREE.AnimationMixer(model);
+          mixerRef.current = mixer;
+          animationsRef.current = gltf.animations;
+
+          // Play all animations and store actions
+          const actions: THREE.AnimationAction[] = [];
+          gltf.animations.forEach((clip) => {
+            const action = mixer.clipAction(clip);
+            action.play();
+            actions.push(action);
+          });
+          actionsRef.current = actions;
+
+          // Find the maximum duration of all animations
+          const maxDuration = Math.max(
+            ...gltf.animations.map((clip) => clip.duration)
+          );
+          durationRef.current = maxDuration;
+          isPlayingRef.current = true;
+          setDuration(maxDuration);
+          setIsPlaying(true);
+        }
+
         setModelLoaded(true);
       },
       undefined,
@@ -83,20 +119,51 @@ export default function SuperAdminTest3DView() {
     );
 
     let animationFrameId: number;
+    let lastTime = performance.now() / 1000;
 
-    const animate = () => {
-      animationFrameId = requestAnimationFrame(animate);
+    const animate = (currentTimeInSeconds: number) => {
+      animationFrameId = requestAnimationFrame(() => animate(performance.now() / 1000));
+
+      const delta = currentTimeInSeconds - lastTime;
+      lastTime = currentTimeInSeconds;
 
       // Rotate cube so we can clearly see rendering while GLB is loading / if it fails
       if (!modelLoaded) {
         cube.rotation.y += 0.01;
       }
-      controls.update();
 
+      // Update animation mixer
+      if (mixerRef.current) {
+        if (isPlayingRef.current && !isScrubbingRef.current) {
+          mixerRef.current.update(delta);
+          // Get the current time from the first action (or mixer)
+          const currentMixerTime = actionsRef.current.length > 0 
+            ? actionsRef.current[0].time 
+            : mixerRef.current.time;
+          if (currentMixerTime > durationRef.current) {
+            // Reset all actions to 0
+            actionsRef.current.forEach((action) => {
+              action.time = 0;
+            });
+            setCurrentTime(0);
+          } else {
+            setCurrentTime(currentMixerTime);
+          }
+        } else if (isScrubbingRef.current) {
+          // When scrubbing, update mixer with 0 delta to show current frame
+          // This ensures the scene renders at the scrubbed time
+          mixerRef.current.update(0);
+        } else {
+          // When paused, still update to show current frame
+          mixerRef.current.update(0);
+        }
+      }
+
+      controls.update();
       renderer.render(scene, camera);
     };
 
-    animate();
+    animate(performance.now() / 1000);
 
     const handleResize = () => {
       if (!container) return;
@@ -112,6 +179,9 @@ export default function SuperAdminTest3DView() {
     return () => {
       window.removeEventListener("resize", handleResize);
       cancelAnimationFrame(animationFrameId);
+      if (mixerRef.current) {
+        mixerRef.current.stopAllAction();
+      }
       controls.dispose();
       cubeGeometry.dispose();
       cubeMaterial.dispose();
@@ -120,8 +190,96 @@ export default function SuperAdminTest3DView() {
     };
   }, []);
 
+  // Handle play/pause toggle
+  const togglePlayPause = () => {
+    if (mixerRef.current) {
+      isPlayingRef.current = !isPlayingRef.current;
+      if (isPlayingRef.current) {
+        mixerRef.current.timeScale = 1;
+      } else {
+        mixerRef.current.timeScale = 0;
+      }
+      setIsPlaying(isPlayingRef.current);
+    }
+  };
+
+  // Handle timeline scrubbing
+  const handleTimelineChange = (value: number) => {
+    if (!mixerRef.current || durationRef.current <= 0 || actionsRef.current.length === 0) {
+      return;
+    }
+
+    isScrubbingRef.current = true;
+    setIsScrubbing(true);
+    const newTime = Math.max(0, Math.min((value / 100) * durationRef.current, durationRef.current));
+    
+    // Update each action's time to scrub the animation
+    actionsRef.current.forEach((action) => {
+      if (action && action.getClip()) {
+        const clipDuration = action.getClip().duration;
+        // Set time directly, ensuring it's within the clip's duration
+        // If animations have different durations, scale proportionally
+        if (Math.abs(clipDuration - durationRef.current) < 0.001) {
+          // Same duration (within floating point tolerance) - set directly
+          action.time = newTime;
+        } else {
+          // Different duration - scale proportionally
+          action.time = (newTime / durationRef.current) * clipDuration;
+        }
+        // Ensure time is within valid range
+        action.time = Math.max(0, Math.min(action.time, clipDuration));
+      }
+    });
+    
+    // Force mixer update to apply the time changes immediately
+    // This is crucial - without this, the visual won't update
+    mixerRef.current.update(0);
+    
+    setCurrentTime(newTime);
+  };
+
+  const handleTimelineMouseUp = () => {
+    isScrubbingRef.current = false;
+    setIsScrubbing(false);
+  };
+
+  // Format time for display
+  const formatTime = (time: number) => {
+    const minutes = Math.floor(time / 60);
+    const seconds = Math.floor(time % 60);
+    return `${minutes}:${seconds.toString().padStart(2, "0")}`;
+  };
+
   return (
-    <div className="container mx-auto p-6 max-w-6xl">
+    <>
+      <style>{`
+        .slider::-webkit-slider-thumb {
+          appearance: none;
+          width: 16px;
+          height: 16px;
+          border-radius: 50%;
+          background: #9333ea;
+          cursor: pointer;
+          border: 2px solid #ffffff;
+          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        .slider::-moz-range-thumb {
+          width: 16px;
+          height: 16px;
+          border-radius: 50%;
+          background: #9333ea;
+          cursor: pointer;
+          border: 2px solid #ffffff;
+          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        .slider:focus {
+          outline: none;
+        }
+        .slider:focus::-webkit-slider-thumb {
+          box-shadow: 0 0 0 3px rgba(147, 51, 234, 0.3);
+        }
+      `}</style>
+      <div className="container mx-auto p-6 max-w-6xl">
       <div className="flex items-center gap-4 mb-6">
         <Button
           variant="outline"
@@ -141,11 +299,72 @@ export default function SuperAdminTest3DView() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2">
           <Card>
-            <CardContent className="p-0">
+            <CardContent className="p-0 relative">
               <div
                 ref={mountRef}
-                className="aspect-video bg-black rounded-lg overflow-hidden"
+                className="aspect-video bg-black rounded-t-lg overflow-hidden"
               />
+              {modelLoaded && duration > 0 && (
+                <div className="bg-gray-900 text-white p-4 rounded-b-lg">
+                  <div className="flex items-center gap-4">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={togglePlayPause}
+                      className="text-white hover:bg-gray-800 h-8 w-8 p-0"
+                    >
+                      {isPlaying ? (
+                        <Pause className="h-4 w-4" />
+                      ) : (
+                        <Play className="h-4 w-4" />
+                      )}
+                    </Button>
+                    <div className="flex-1 flex items-center gap-2">
+                      <input
+                        type="range"
+                        min="0"
+                        max="100"
+                        step="0.1"
+                        value={duration > 0 ? (currentTime / duration) * 100 : 0}
+                        onChange={(e) => {
+                          const val = parseFloat(e.target.value);
+                          handleTimelineChange(val);
+                        }}
+                        onMouseDown={() => {
+                          isScrubbingRef.current = true;
+                          setIsScrubbing(true);
+                        }}
+                        onMouseUp={handleTimelineMouseUp}
+                        onTouchStart={() => {
+                          isScrubbingRef.current = true;
+                          setIsScrubbing(true);
+                        }}
+                        onTouchEnd={handleTimelineMouseUp}
+                        className="flex-1 h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer slider"
+                        style={{
+                          background: `linear-gradient(to right, #9333ea 0%, #9333ea ${
+                            duration > 0 ? (currentTime / duration) * 100 : 0
+                          }%, #374151 ${
+                            duration > 0 ? (currentTime / duration) * 100 : 0
+                          }%, #374151 100%)`,
+                        }}
+                      />
+                    </div>
+                    <div className="text-sm font-mono min-w-[80px] text-right">
+                      {formatTime(currentTime)} / {formatTime(duration)}
+                    </div>
+                  </div>
+                  <div className="mt-2 text-xs text-gray-400 flex items-center gap-2">
+                    <span>Animation</span>
+                    {animationsRef.current.length > 0 && (
+                      <span className="text-gray-500">
+                        ({animationsRef.current.length} animation
+                        {animationsRef.current.length !== 1 ? "s" : ""})
+                      </span>
+                    )}
+                  </div>
+                </div>
+              )}
             </CardContent>
           </Card>
         </div>
@@ -173,6 +392,7 @@ export default function SuperAdminTest3DView() {
         </div>
       </div>
     </div>
+    </>
   );
 }
 
