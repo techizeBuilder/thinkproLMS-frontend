@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import axios from "axios";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Card, CardContent, CardHeader,CardTitle } from "@/components/ui/card";
 import { ChevronLeft, ChevronRight, CheckCircle, XCircle } from "lucide-react";
 
 const API_BASE = import.meta.env.VITE_API_URL;

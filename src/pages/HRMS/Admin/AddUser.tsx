@@ -582,7 +582,7 @@ const handleSubmit = async (e: any) => {
       </Card>
 
       {/* LEAD MENTOR EXTRA FORM */}
-      {formData.role === "leadmentor" && <LeadMentorForm hideHeader />}
+      {formData.role === "leadmentor" && <LeadMentorForm />}
 
       {/* ================= UPLOAD DOCUMENTS SECTION ================= */}
 

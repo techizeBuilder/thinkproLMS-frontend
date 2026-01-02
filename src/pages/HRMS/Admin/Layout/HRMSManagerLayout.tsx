@@ -28,8 +28,6 @@ import {
   GitBranch,
   UserCheck,
   LayoutDashboard,
-  Bell,
-  Building2,
 } from "lucide-react";
 
 import { LogoutButton } from "@/components/ui/logout-button";
