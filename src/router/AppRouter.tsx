@@ -138,6 +138,7 @@ import {
 
 // Dashboard Components
 import SuperAdminDashboard from "../pages/Dashboard/SuperAdmin/Dashboard";
+import SuperAdminTest3DView from "../pages/Dashboard/SuperAdmin/Test3DView";
 import LeadMentorDashboard from "../pages/Dashboard/LeadMentor/Dashboard";
 import Student from "../pages/Dashboard/Student";
 
@@ -161,6 +162,8 @@ import GuestQuizzes from "../pages/Guest/GuestQuizzes";
 import GuestClasses from "../pages/Guest/GuestClasses";
 import GuestPremium from "../pages/Guest/GuestPremium";
 
+//
+import HRMSAdminLayout from "@/pages/HRMS/Admin/Layout";
 import AddUser from "@/pages/HRMS/Admin/AddUser";
 import Employee from "@/pages/HRMS/Admin/Employee";
 import Holiday from "@/pages/HRMS/Admin/Holidays/Holiday";
@@ -760,6 +763,9 @@ export default function AppRouter() {
 
           {/* Access Reports */}
           <Route path="access-reports" element={<AccessReportsPage />} />
+
+          {/* Experimental/Test Routes */}
+          <Route path="test" element={<SuperAdminTest3DView />} />
         </Route>
 
         {/* Admin */}

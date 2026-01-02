@@ -28,6 +28,7 @@ import {
   Eye,
   Search,
   Loader2,
+  Box,
   Edit,
   Trash2,
   Download,
@@ -188,7 +189,7 @@ export default function ResourcesPage() {
   };
 
   const handleViewResource = (resource: ApiResource) => {
-    if (resource.type === "video") {
+    if (resource.type === "video" || resource.type === "3dmodel") {
       const basePath =
         user?.role === "superadmin" ? "/superadmin" : "/leadmentor";
       navigate(`${basePath}/resources/${resource._id}/view`);
@@ -244,11 +245,9 @@ export default function ResourcesPage() {
   };
 
   const getResourceIcon = (type: string) => {
-    return type === "video" ? (
-      <Video className="h-5 w-5" />
-    ) : (
-      <FileText className="h-5 w-5" />
-    );
+    if (type === "video") return <Video className="h-5 w-5" />;
+    if (type === "3dmodel") return <Box className="h-5 w-5" />;
+    return <FileText className="h-5 w-5" />;
   };
 
   const getFileTypeBadge = (resource: ApiResource) => {

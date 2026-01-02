@@ -43,6 +43,7 @@ import {
   Plus,
   Check,
   ChevronsUpDown,
+  Box,
 } from "lucide-react";
 import type { UserType, ResourceType } from "@/types/resources";
 import type { CreateResourceData } from "@/api/resourceService";
@@ -105,6 +106,11 @@ export default function AddResourcePage() {
       ...prev,
       [field]: value,
     }));
+    
+    // Automatically set content method to "file" for 3D models
+    if (field === "type" && value === "3dmodel") {
+      setContentMethod("file");
+    }
   };
 
   const handleAddTag = () => {
@@ -153,6 +159,12 @@ export default function AddResourcePage() {
         }
       }
 
+      // 3D models must be uploaded as files
+      if (formData.type === "3dmodel" && !formData.file) {
+        toast.error("Please select a 3D model file to upload");
+        return;
+      }
+
       if (contentMethod === "file" && !formData.file) {
         toast.error("Please select a file to upload");
         return;
@@ -198,6 +210,8 @@ export default function AddResourcePage() {
     switch (type) {
       case "video":
         return <Video className="h-5 w-5" />;
+      case "3dmodel":
+        return <Box className="h-5 w-5" />;
       case "document":
       default:
         return <FileText className="h-5 w-5" />;
@@ -208,6 +222,8 @@ export default function AddResourcePage() {
     switch (type) {
       case "video":
         return "video/mp4,video/avi,video/mov,video/wmv";
+      case "3dmodel":
+        return ".glb,.gltf";
       case "document":
       default:
         return ".pdf,.pptx,.xlsx,.docx,.doc,.xls,.ppt";
@@ -218,6 +234,8 @@ export default function AddResourcePage() {
     switch (type) {
       case "video":
         return "Supported formats: MP4, AVI, MOV, WMV";
+      case "3dmodel":
+        return "Supported formats: GLB, GLTF";
       case "document":
       default:
         return "Supported formats: PDF, PPTX, XLSX, DOCX, DOC, XLS, PPT";
@@ -389,7 +407,7 @@ export default function AddResourcePage() {
               <RadioGroup
                 value={formData.type}
                 onValueChange={(value) => handleInputChange("type", value as ResourceType)}
-                className="grid grid-cols-2 gap-4"
+                className="grid grid-cols-3 gap-4"
               >
                 <div className="flex items-center space-x-2 p-4 border rounded-lg hover:bg-gray-50 cursor-pointer">
                   <RadioGroupItem value="document" id="document" />
@@ -405,36 +423,45 @@ export default function AddResourcePage() {
                     Video
                   </Label>
                 </div>
+                <div className="flex items-center space-x-2 p-4 border rounded-lg hover:bg-gray-50 cursor-pointer">
+                  <RadioGroupItem value="3dmodel" id="3dmodel" />
+                  <Label htmlFor="3dmodel" className="flex items-center gap-2 cursor-pointer">
+                    <Box className="h-4 w-4" />
+                    3D Model
+                  </Label>
+                </div>
               </RadioGroup>
             </div>
 
             {/* Content Method Selection */}
-            <div className="space-y-3">
-              <Label>How would you like to provide the content?</Label>
-              <RadioGroup
-                value={contentMethod}
-                onValueChange={(value) => setContentMethod(value as "file" | "url")}
-                className="grid grid-cols-2 gap-4"
-              >
-                <div className="flex items-center space-x-2 p-4 border rounded-lg hover:bg-gray-50 cursor-pointer">
-                  <RadioGroupItem value="file" id="file-method" />
-                  <Label htmlFor="file-method" className="flex items-center gap-2 cursor-pointer">
-                    <Upload className="h-4 w-4" />
-                    Upload File
-                  </Label>
-                </div>
-                <div className="flex items-center space-x-2 p-4 border rounded-lg hover:bg-gray-50 cursor-pointer">
-                  <RadioGroupItem value="url" id="url-method" />
-                  <Label htmlFor="url-method" className="flex items-center gap-2 cursor-pointer">
-                    <Link className="h-4 w-4" />
-                    External URL
-                  </Label>
-                </div>
-              </RadioGroup>
-            </div>
+            {formData.type !== "3dmodel" && (
+              <div className="space-y-3">
+                <Label>How would you like to provide the content?</Label>
+                <RadioGroup
+                  value={contentMethod}
+                  onValueChange={(value) => setContentMethod(value as "file" | "url")}
+                  className="grid grid-cols-2 gap-4"
+                >
+                  <div className="flex items-center space-x-2 p-4 border rounded-lg hover:bg-gray-50 cursor-pointer">
+                    <RadioGroupItem value="file" id="file-method" />
+                    <Label htmlFor="file-method" className="flex items-center gap-2 cursor-pointer">
+                      <Upload className="h-4 w-4" />
+                      Upload File
+                    </Label>
+                  </div>
+                  <div className="flex items-center space-x-2 p-4 border rounded-lg hover:bg-gray-50 cursor-pointer">
+                    <RadioGroupItem value="url" id="url-method" />
+                    <Label htmlFor="url-method" className="flex items-center gap-2 cursor-pointer">
+                      <Link className="h-4 w-4" />
+                      External URL
+                    </Label>
+                  </div>
+                </RadioGroup>
+              </div>
+            )}
 
             {/* Content Input Based on Method */}
-            {contentMethod === "file" ? (
+            {(contentMethod === "file" || formData.type === "3dmodel") ? (
               <div className="space-y-3">
                 <Label htmlFor="file">Upload File</Label>
                 <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-gray-400 transition-colors">

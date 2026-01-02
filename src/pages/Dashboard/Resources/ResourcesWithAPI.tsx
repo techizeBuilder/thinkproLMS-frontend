@@ -15,6 +15,7 @@ import {
   Eye,
   Search,
   Loader2,
+  Box,
 } from 'lucide-react';
 import type { UserType, BucketType } from '@/types/resources';
 import type { Resource as ApiResource, ResourceFilters } from '@/api/resourceService';
@@ -80,7 +81,7 @@ export default function ResourcesWithAPIPage() {
   };
 
   const handleViewResource = (resource: ApiResource) => {
-    if (resource.type === 'video') {
+    if (resource.type === 'video' || resource.type === '3dmodel') {
       navigate(`/leadmentor/resources/${resource._id}/view`);
     } else {
       // For documents, open in new tab or iframe
@@ -105,7 +106,9 @@ export default function ResourcesWithAPIPage() {
   };
 
   const getResourceIcon = (type: string) => {
-    return type === 'video' ? <Video className="h-5 w-5" /> : <FileText className="h-5 w-5" />;
+    if (type === 'video') return <Video className="h-5 w-5" />;
+    if (type === '3dmodel') return <Box className="h-5 w-5" />;
+    return <FileText className="h-5 w-5" />;
   };
 
   const getFileTypeBadge = (resource: ApiResource) => {

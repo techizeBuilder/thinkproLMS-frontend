@@ -581,8 +581,11 @@ const handleSubmit = async (e: any) => {
         </CardContent>
       </Card>
 
+      {/* LEAD MENTOR EXTRA FORM */}
       {formData.role === "leadmentor" && <LeadMentorForm hideHeader />}
-      {/* ================= UPLOAD DOCUMENTS (SAME UI) ================= */}
+
+      {/* ================= UPLOAD DOCUMENTS SECTION ================= */}
+
       <Card className="max-w-3xl">
         <CardHeader>
           <CardTitle className="text-lg font-medium">

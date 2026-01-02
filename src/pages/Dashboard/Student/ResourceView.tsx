@@ -17,6 +17,7 @@ import { resourceService } from '@/api/resourceService';
 import { getResourceDisplayUrl } from '@/utils/resourceUtils';
 import { toast } from 'sonner';
 import analyticsService from '@/api/analyticsService';
+import Model3DViewer from '@/components/Model3DViewer';
 
 export default function StudentResourceViewPage() {
   const navigate = useNavigate();
@@ -233,14 +234,16 @@ export default function StudentResourceViewPage() {
             {resource.description}
           </p>
         </div>
-        <Button
-          variant="outline"
-          onClick={handleExternalOpen}
-          className="flex items-center gap-2"
-        >
-          <ExternalLink className="h-4 w-4" />
-          Open External
-        </Button>
+        {resource.type !== '3dmodel' && (
+          <Button
+            variant="outline"
+            onClick={handleExternalOpen}
+            className="flex items-center gap-2"
+          >
+            <ExternalLink className="h-4 w-4" />
+            Open External
+          </Button>
+        )}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -248,8 +251,11 @@ export default function StudentResourceViewPage() {
         <div className="lg:col-span-2">
           <Card>
             <CardContent className="p-0">
-              <div className="aspect-video bg-black rounded-lg overflow-hidden">
-                {resource.content.isExternal ? (
+              {resource.type === '3dmodel' ? (
+                <Model3DViewer modelUrl={resourceService.getResourceUrl(resource)} />
+              ) : (
+                <div className="aspect-video bg-black rounded-lg overflow-hidden">
+                  {resource.content.isExternal ? (
                   <iframe
                     ref={iframeRef}
                     src={embedUrl}
@@ -341,7 +347,8 @@ export default function StudentResourceViewPage() {
                     Your browser does not support the video tag.
                   </video>
                 )}
-              </div>
+                </div>
+              )}
             </CardContent>
           </Card>
         </div>
@@ -398,14 +405,16 @@ export default function StudentResourceViewPage() {
               <CardTitle>Actions</CardTitle>
             </CardHeader>
             <CardContent className="space-y-2">
-              <Button
-                variant="outline"
-                className="w-full justify-start"
-                onClick={handleExternalOpen}
-              >
-                <ExternalLink className="h-4 w-4 mr-2" />
-                Open in New Tab
-              </Button>
+              {resource.type !== '3dmodel' && (
+                <Button
+                  variant="outline"
+                  className="w-full justify-start"
+                  onClick={handleExternalOpen}
+                >
+                  <ExternalLink className="h-4 w-4 mr-2" />
+                  Open in New Tab
+                </Button>
+              )}
             </CardContent>
           </Card>
         </div>

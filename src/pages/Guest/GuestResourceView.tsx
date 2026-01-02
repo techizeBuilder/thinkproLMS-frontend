@@ -21,6 +21,7 @@ import {
   formatFileSize,
 } from "@/utils/resourceUtils";
 import { toast } from "sonner";
+import Model3DViewer from "@/components/Model3DViewer";
 
 export default function GuestResourceViewPage() {
   const navigate = useNavigate();
@@ -187,7 +188,9 @@ export default function GuestResourceViewPage() {
           </CardHeader>
           <CardContent className="p-0 h-full">
             <div className="h-full">
-              {resource.type === "video" ? (
+              {resource.type === "3dmodel" ? (
+                <Model3DViewer modelUrl={resourceService.getResourceUrl(resource)} />
+              ) : resource.type === "video" ? (
                 <div className="relative w-full h-full">
                   {isIframeLoading && (
                     <div className="absolute inset-0 flex items-center justify-center bg-gray-100">
