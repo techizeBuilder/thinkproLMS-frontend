@@ -1,6 +1,6 @@
 /** @format */
 
-import { useState,useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import axios from "axios";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,279 +11,573 @@ import { LeadMentorForm } from "./LeadMentorForm";
 const API_BASE = import.meta.env.VITE_API_URL;
 
 const ROLE_OPTIONS = [
-  { label: "Super Admin", value: "superadmin" },
   { label: "HR Admin", value: "hr-admin" },
   { label: "Manager", value: "manager" },
   { label: "Finance", value: "finance" },
   { label: "IT Admin", value: "it-admin" },
   { label: "Lead Mentor", value: "leadmentor" },
-  { label: "School Admin", value: "schooladmin" },
   { label: "Mentor", value: "mentor" },
-  { label: "Student", value: "student" },
-  { label: "Sales Manager", value: "sales-manager" },
-  { label: "Sales Executive", value: "sales-executive" },
-  { label: "Guest", value: "guest" },
 ];
 
 export default function AddUser() {
+  const token = localStorage.getItem("token");
+
+  /* ================= BASIC INFO ================= */
   const [formData, setFormData] = useState({
     name: "",
     email: "",
-    role: "",
+    mobile: "",
+    gender: "",
+    dob: "",
+    joiningDate: "",
     password: "",
+    role: "",
   });
 
-const [documents, setDocuments] = useState<{
-  aadhaar: File | null;
-  pan: File | null;
-  marksheet12: File | null;
-  passbook: File | null;
-}>({
-  aadhaar: null,
-  pan: null,
-  marksheet12: null,
-  passbook: null,
-});
+  /* ================= COMPANY & JOB ================= */
+  const [job, setJob] = useState({
+    companyId: "",
+    branchId: "",
+    departmentId: "",
+    designationId: "",
+    managerId: "",
+    employmentType: "",
+  });
 
-const aadhaarRef = useRef<HTMLInputElement | null>(null);
-const panRef = useRef<HTMLInputElement | null>(null);
-const marksheet12Ref = useRef<HTMLInputElement | null>(null);
-const passbookRef = useRef<HTMLInputElement | null>(null);
+  /* ================= DROPDOWNS ================= */
+  const [companies, setCompanies] = useState<any[]>([]);
+  const [branches, setBranches] = useState<any[]>([]);
+  const [departments, setDepartments] = useState<any[]>([]);
+  const [designations, setDesignations] = useState<any[]>([]);
+  const [managers, setManagers] = useState<any[]>([]);
 
+  /* ================= DOCUMENTS ================= */
+  const [documents, setDocuments] = useState<any>({
+    aadhaar: null,
+    pan: null,
+    marksheet12: null,
+    passbook: null,
+  });
 
+  const aadhaarRef = useRef<HTMLInputElement>(null);
+  const panRef = useRef<HTMLInputElement>(null);
+  const marksheet12Ref = useRef<HTMLInputElement>(null);
+  const passbookRef = useRef<HTMLInputElement>(null);
 
   const [errors, setErrors] = useState<any>({});
   const [loading, setLoading] = useState(false);
 
+  /* ================= FETCH MASTER ================= */
+  useEffect(() => {
+    axios
+      .get(`${API_BASE}/companies`, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      .then((res) => setCompanies(res.data));
+
+    axios
+      .get(`${API_BASE}/branches`, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      .then((res) => setBranches(res.data));
+
+    axios
+      .get(`${API_BASE}/departments`, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      .then((res) => setDepartments(res.data));
+
+    axios
+      .get(`${API_BASE}/designations`, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      .then((res) => setDesignations(res.data));
+
+    axios
+      .get(`${API_BASE}/users?role=manager`, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      .then((res) => setManagers(res.data));
+  }, []);
+
+  /* ================= FILTER ================= */
+  const filteredBranches = branches.filter(
+    (b) => b.companyId._id === job.companyId
+  );
+  const filteredDepartments = departments.filter(
+    (d) => d.branchId._id === job.branchId
+  );
+  const filteredDesignations = designations.filter(
+    (d) => d.departmentId._id === job.departmentId
+  );
+
   /* ================= VALIDATION ================= */
   const validate = () => {
-    const newErrors: any = {};
+    const e: any = {};
 
-    if (!formData.name.trim()) newErrors.name = "Name is required";
+    Object.entries(formData).forEach(([k, v]) => {
+      if (!v) e[k] = "Required";
+    });
 
-    if (!formData.email) newErrors.email = "Email is required";
-    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email))
-      newErrors.email = "Invalid email address";
+    Object.entries(job).forEach(([k, v]) => {
+      if (!v) e[k] = "Required";
+    });
 
-    if (!formData.role) newErrors.role = "Role is required";
+    if (!documents.aadhaar) e.aadhaar = "Required";
+    if (!documents.marksheet12) e.marksheet12 = "Required";
+    if (!documents.passbook) e.passbook = "Required";
 
-
-      if (!formData.password) newErrors.password = "Password is required";
-      else if (formData.password.length < 6)
-        newErrors.password = "Minimum 6 characters required";
-    
-
-    if (!documents.aadhaar) {
-      newErrors.aadhaar = "Aadhaar card is required";
-    }
-    if (!documents.marksheet12) {
-      newErrors.marksheet12 = "12th Marksheet is required";
-    }
-    if (!documents.passbook) {
-      newErrors.passbook = "Passbook is required";
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+    setErrors(e);
+    return Object.keys(e).length === 0;
   };
 
-  /* ================= SUBMIT ================= */
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!validate()) return;
+  /* ================= SUBMIT (SAME FLOW) ================= */
+const handleSubmit = async (e: any) => {
+  e.preventDefault();
+  if (!validate()) return;
 
-    const token = localStorage.getItem("token");
-    if (!token) return alert("Unauthorized");
+  try {
+    setLoading(true);
 
-    try {
-      setLoading(true);
+    // ✅ STEP 1: CREATE USER (JSON ONLY)
+    const userRes = await axios.post(
+      `${API_BASE}/users`,
+      {
+        // BASIC
+        name: formData.name,
+        email: formData.email,
+        mobile: formData.mobile,
+        gender: formData.gender,
+        dob: formData.dob,
+        joiningDate: formData.joiningDate,
+        password: formData.password,
+        role: formData.role,
 
-      /* ================= 1️⃣ CREATE USER ================= */
-      const userRes = await axios.post(
-        `${API_BASE}/users`,
-        {
-          name: formData.name,
-          email: formData.email,
-          role: formData.role,
-          password: formData.password,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      const userId = userRes.data.user.id;
-
-      /* ================= 2️⃣ UPLOAD DOCUMENTS ================= */
-
-      // Aadhaar upload
-     if (documents.aadhaar) {
-       const aadhaarForm = new FormData();
-       aadhaarForm.append("type", "AADHAAR");
-       aadhaarForm.append("file", documents.aadhaar);
-
-       await axios.post(
-         `${API_BASE}/documents/upload/${userId}`, // ✅ userId in URL
-         aadhaarForm,
-         {
-           headers: {
-             Authorization: `Bearer ${token}`,
-             "Content-Type": "multipart/form-data",
-           },
-         }
-       );
-     }
-
-
-      // PAN upload
-    if (documents.pan) {
-      const panForm = new FormData();
-      panForm.append("type", "PAN");
-      panForm.append("file", documents.pan);
-
-      await axios.post(
-        `${API_BASE}/documents/upload/${userId}`, // ✅ userId in URL
-        panForm,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "multipart/form-data",
-          },
-        }
-      );
-    }
-
-    if (documents.marksheet12) {
-      const form = new FormData();
-      form.append("type", "MARKSHEET_12");
-      form.append("file", documents.marksheet12);
-
-      await axios.post(`${API_BASE}/documents/upload/${userId}`, form, {
+        // JOB
+        companyId: job.companyId,
+        branchId: job.branchId,
+        departmentId: job.departmentId,
+        designationId: job.designationId,
+        managerId: job.managerId,
+        employmentType: job.employmentType,
+      },
+      {
         headers: {
           Authorization: `Bearer ${token}`,
-          "Content-Type": "multipart/form-data",
+          "Content-Type": "application/json",
         },
-      });
-    }
+      }
+    );
 
-    if (documents.passbook) {
-      const form = new FormData();
-      form.append("type", "PASSBOOK");
-      form.append("file", documents.passbook);
+   const userId = userRes.data.user.id;
 
-      await axios.post(`${API_BASE}/documents/upload/${userId}`, form, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "multipart/form-data",
-        },
-      });
-    }
+    // ✅ STEP 2: UPLOAD DOCUMENTS (SEPARATE API)
+    const docFD = new FormData();
+
+    if (documents.aadhaar) docFD.append("aadhaar", documents.aadhaar);
+    if (documents.pan) docFD.append("pan", documents.pan);
+    if (documents.marksheet12)
+      docFD.append("marksheet12", documents.marksheet12);
+    if (documents.passbook) docFD.append("passbook", documents.passbook);
+
+    await axios.post(`${API_BASE}/documents/upload/${userId}`, docFD, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    alert("User created successfully");
+
+    setFormData({
+      name: "",
+      email: "",
+      mobile: "",
+      gender: "",
+      dob: "",
+      joiningDate: "",
+      password: "",
+      role: "",
+    });
+
+    setJob({
+      companyId: "",
+      branchId: "",
+      departmentId: "",
+      designationId: "",
+      managerId: "",
+      employmentType: "",
+    });
+
+    setDocuments({
+      aadhaar: null,
+      pan: null,
+      marksheet12: null,
+      passbook: null,
+    });
+
+    setErrors({});
+
+    // ✅ CLEAR FILE INPUTS
+    if (aadhaarRef.current) aadhaarRef.current.value = "";
+    if (panRef.current) panRef.current.value = "";
+    if (marksheet12Ref.current) marksheet12Ref.current.value = "";
+    if (passbookRef.current) passbookRef.current.value = "";
+  } catch (err) {
+    console.error(err);
+    alert("Something went wrong");
+  } finally {
+    setLoading(false);
+  }
+};
 
 
-      /* ================= SUCCESS ================= */
-      alert("User & documents added successfully");
 
-      setFormData({ name: "", email: "", role: "", password: "" });
-      setDocuments({
-        aadhaar: null,
-        pan: null,
-        marksheet12: null,
-        passbook: null,
-      });
-       aadhaarRef.current && (aadhaarRef.current.value = "");
-       panRef.current && (panRef.current.value = "");
-       marksheet12Ref.current && (marksheet12Ref.current.value = "");
-       passbookRef.current && (passbookRef.current.value = "");
-    } catch (err: any) {
-      alert(err?.response?.data?.message || "Failed");
-    } finally {
-      setLoading(false);
-    }
-  };
 
   return (
     <div className="p-6 space-y-6">
       <h1 className="text-2xl font-semibold">Add User</h1>
-
-      <Card className="max-w-3xl">
+      {/* ================= BASIC INFORMATION ================= */}
+      <Card className="max-w-4xl">
         <CardHeader>
-          <CardTitle>User Basic Details</CardTitle>
+          <CardTitle className="text-lg font-medium">
+            Basic Information
+          </CardTitle>
         </CardHeader>
 
-        <CardContent>
-          <form
-            id="add-user-form"
-            onSubmit={handleSubmit}
-            className="grid grid-cols-1 sm:grid-cols-2 gap-5"
-          >
-            {/* Name */}
-            <div>
-              <Label>Full Name</Label>
-              <Input
-                value={formData.name}
-                onChange={(e) =>
-                  setFormData({ ...formData, name: e.target.value })
-                }
-              />
-              {errors.name && (
-                <p className="text-sm text-red-500">{errors.name}</p>
-              )}
-            </div>
+        <CardContent className="grid grid-cols-2 gap-5">
+          {/* Full Name */}
+          <div>
+            <Label>
+              Full Name <span className="text-red-500">*</span>
+            </Label>
+            <Input
+              value={formData.name}
+              onChange={(e) =>
+                setFormData({ ...formData, name: e.target.value })
+              }
+              className={errors.name ? "border-red-500" : ""}
+            />
+            {errors.name && (
+              <p className="text-sm text-red-500">{errors.name}</p>
+            )}
+          </div>
 
-            {/* Email */}
-            <div>
-              <Label>Email</Label>
-              <Input
-                value={formData.email}
-                onChange={(e) =>
-                  setFormData({ ...formData, email: e.target.value })
-                }
-              />
-              {errors.email && (
-                <p className="text-sm text-red-500">{errors.email}</p>
-              )}
-            </div>
+          {/* Email */}
+          <div>
+            <Label>
+              Email <span className="text-red-500">*</span>
+            </Label>
+            <Input
+              value={formData.email}
+              onChange={(e) =>
+                setFormData({ ...formData, email: e.target.value })
+              }
+              className={errors.email ? "border-red-500" : ""}
+            />
+            {errors.email && (
+              <p className="text-sm text-red-500">{errors.email}</p>
+            )}
+          </div>
 
-            {/* Role */}
-            <div>
-              <Label>Role</Label>
-              <select
-                value={formData.role}
-                onChange={(e) =>
-                  setFormData({ ...formData, role: e.target.value })
-                }
-                className="w-full h-10 border rounded-md px-3"
-              >
-                <option value="">Select role</option>
-                {ROLE_OPTIONS.map((r) => (
-                  <option key={r.value} value={r.value}>
-                    {r.label}
-                  </option>
-                ))}
-              </select>
-              {errors.role && (
-                <p className="text-sm text-red-500">{errors.role}</p>
-              )}
-            </div>
+          {/* Mobile */}
+          <div>
+            <Label>
+              Mobile <span className="text-red-500">*</span>
+            </Label>
+            <Input
+              value={formData.mobile}
+              onChange={(e) =>
+                setFormData({ ...formData, mobile: e.target.value })
+              }
+              className={errors.mobile ? "border-red-500" : ""}
+            />
+            {errors.mobile && (
+              <p className="text-sm text-red-500">{errors.mobile}</p>
+            )}
+          </div>
 
-            {/* Password */}
+          {/* Gender */}
+          <div>
+            <Label>
+              Gender <span className="text-red-500">*</span>
+            </Label>
+            <select
+              value={formData.gender}
+              onChange={(e) =>
+                setFormData({ ...formData, gender: e.target.value })
+              }
+              className={`w-full h-10 border rounded-md px-3 ${
+                errors.gender ? "border-red-500" : ""
+              }`}
+            >
+              <option value="">Select</option>
+              <option>Male</option>
+              <option>Female</option>
+            </select>
+            {errors.gender && (
+              <p className="text-sm text-red-500">{errors.gender}</p>
+            )}
+          </div>
 
-            <div>
-              <Label>Password</Label>
-              <Input
-                type="password"
-                value={formData.password}
-                onChange={(e) =>
-                  setFormData({ ...formData, password: e.target.value })
-                }
-              />
-              {errors.password && (
-                <p className="text-sm text-red-500">{errors.password}</p>
-              )}
-            </div>
-          </form>
+          {/* DOB */}
+          <div>
+            <Label>
+              Date of Birth <span className="text-red-500">*</span>
+            </Label>
+            <Input
+              type="date"
+              value={formData.dob}
+              onChange={(e) =>
+                setFormData({ ...formData, dob: e.target.value })
+              }
+              className={errors.dob ? "border-red-500" : ""}
+            />
+            {errors.dob && <p className="text-sm text-red-500">{errors.dob}</p>}
+          </div>
+
+          {/* Joining Date */}
+          <div>
+            <Label>
+              Joining Date <span className="text-red-500">*</span>
+            </Label>
+            <Input
+              type="date"
+              value={formData.joiningDate}
+              onChange={(e) =>
+                setFormData({ ...formData, joiningDate: e.target.value })
+              }
+              className={errors.joiningDate ? "border-red-500" : ""}
+            />
+            {errors.joiningDate && (
+              <p className="text-sm text-red-500">{errors.joiningDate}</p>
+            )}
+          </div>
+
+          {/* Password */}
+          <div>
+            <Label>
+              Password <span className="text-red-500">*</span>
+            </Label>
+            <Input
+              type="password"
+              value={formData.password}
+              onChange={(e) =>
+                setFormData({ ...formData, password: e.target.value })
+              }
+              className={errors.password ? "border-red-500" : ""}
+            />
+            {errors.password && (
+              <p className="text-sm text-red-500">{errors.password}</p>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* ================= COMPANY & JOB ================= */}
+      <Card className="max-w-4xl">
+        <CardHeader>
+          <CardTitle className="text-lg font-medium">
+            Company & Job Details
+          </CardTitle>
+        </CardHeader>
+
+        <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-5">
+          {/* Company */}
+          <div>
+            <Label>
+              Company <span className="text-red-500">*</span>
+            </Label>
+            <select
+              value={job.companyId}
+              onChange={(e) =>
+                setJob({
+                  ...job,
+                  companyId: e.target.value,
+                  branchId: "",
+                  departmentId: "",
+                  designationId: "",
+                })
+              }
+              className={`w-full h-10 border rounded-md px-3 ${
+                errors.companyId ? "border-red-500" : ""
+              }`}
+            >
+              <option value="">Select Company</option>
+              {companies.map((c) => (
+                <option key={c._id} value={c._id}>
+                  {c.name}
+                </option>
+              ))}
+            </select>
+            {errors.companyId && (
+              <p className="text-sm text-red-500">{errors.companyId}</p>
+            )}
+          </div>
+
+          {/* Branch */}
+          <div>
+            <Label>
+              Branch <span className="text-red-500">*</span>
+            </Label>
+            <select
+              value={job.branchId}
+              disabled={!job.companyId}
+              onChange={(e) =>
+                setJob({
+                  ...job,
+                  branchId: e.target.value,
+                  departmentId: "",
+                  designationId: "",
+                })
+              }
+              className={`w-full h-10 border rounded-md px-3 disabled:bg-gray-100 ${
+                errors.branchId ? "border-red-500" : ""
+              }`}
+            >
+              <option value="">Select Branch</option>
+              {filteredBranches.map((b) => (
+                <option key={b._id} value={b._id}>
+                  {b.name}
+                </option>
+              ))}
+            </select>
+            {errors.branchId && (
+              <p className="text-sm text-red-500">{errors.branchId}</p>
+            )}
+          </div>
+
+          {/* Department */}
+          <div>
+            <Label>
+              Department <span className="text-red-500">*</span>
+            </Label>
+            <select
+              value={job.departmentId}
+              disabled={!job.branchId}
+              onChange={(e) =>
+                setJob({
+                  ...job,
+                  departmentId: e.target.value,
+                  designationId: "",
+                })
+              }
+              className={`w-full h-10 border rounded-md px-3 disabled:bg-gray-100 ${
+                errors.departmentId ? "border-red-500" : ""
+              }`}
+            >
+              <option value="">Select Department</option>
+              {filteredDepartments.map((d) => (
+                <option key={d._id} value={d._id}>
+                  {d.name}
+                </option>
+              ))}
+            </select>
+            {errors.departmentId && (
+              <p className="text-sm text-red-500">{errors.departmentId}</p>
+            )}
+          </div>
+
+          {/* Designation */}
+          <div>
+            <Label>
+              Designation <span className="text-red-500">*</span>
+            </Label>
+            <select
+              value={job.designationId}
+              disabled={!job.departmentId}
+              onChange={(e) =>
+                setJob({ ...job, designationId: e.target.value })
+              }
+              className={`w-full h-10 border rounded-md px-3 disabled:bg-gray-100 ${
+                errors.designationId ? "border-red-500" : ""
+              }`}
+            >
+              <option value="">Select Designation</option>
+              {filteredDesignations.map((d) => (
+                <option key={d._id} value={d._id}>
+                  {d.name}
+                </option>
+              ))}
+            </select>
+            {errors.designationId && (
+              <p className="text-sm text-red-500">{errors.designationId}</p>
+            )}
+          </div>
+
+          {/* Role */}
+          <div>
+            <Label>
+              Role <span className="text-red-500">*</span>
+            </Label>
+            <select
+              value={formData.role}
+              onChange={(e) =>
+                setFormData({ ...formData, role: e.target.value })
+              }
+              className={`w-full h-10 border rounded-md px-3 ${
+                errors.role ? "border-red-500" : ""
+              }`}
+            >
+              <option value="">Select Role</option>
+              {ROLE_OPTIONS.map((r) => (
+                <option key={r.value} value={r.value}>
+                  {r.label}
+                </option>
+              ))}
+            </select>
+            {errors.role && (
+              <p className="text-sm text-red-500">{errors.role}</p>
+            )}
+          </div>
+
+          {/* Reporting Manager */}
+          <div>
+            <Label>
+              Reporting Manager <span className="text-red-500">*</span>
+            </Label>
+            <select
+              value={job.managerId}
+              onChange={(e) => setJob({ ...job, managerId: e.target.value })}
+              className={`w-full h-10 border rounded-md px-3 ${
+                errors.managerId ? "border-red-500" : ""
+              }`}
+            >
+              <option value="">Select Manager</option>
+              {managers.map((m) => (
+                <option key={m._id} value={m._id}>
+                  {m.name}
+                </option>
+              ))}
+            </select>
+            {errors.managerId && (
+              <p className="text-sm text-red-500">{errors.managerId}</p>
+            )}
+          </div>
+
+          {/* Employee Type */}
+          <div>
+            <Label>
+              Employee Type <span className="text-red-500">*</span>
+            </Label>
+            <select
+              value={job.employmentType}
+              onChange={(e) =>
+                setJob({ ...job, employmentType: e.target.value })
+              }
+              className={`w-full h-10 border rounded-md px-3 ${
+                errors.employmentType ? "border-red-500" : ""
+              }`}
+            >
+              <option value="">Select Type</option>
+              <option value="Full-Time">Full-Time</option>
+              <option value="Part-Time">Part-Time</option>
+              <option value="Intern">Intern</option>
+              <option value="Contract">Contract</option>
+            </select>
+            {errors.employmentType && (
+              <p className="text-sm text-red-500">{errors.employmentType}</p>
+            )}
+          </div>
         </CardContent>
       </Card>
 
@@ -309,20 +603,20 @@ const passbookRef = useRef<HTMLInputElement | null>(null);
               ref={aadhaarRef}
               type="file"
               accept=".pdf,.jpg,.jpeg,.png"
-              onChange={(e) =>
+              onChange={(e) => {
                 setDocuments({
                   ...documents,
                   aadhaar: e.target.files?.[0] || null,
-                })
-              }
+                });
+                setErrors({ ...errors, aadhaar: "" });
+              }}
             />
-
             {errors.aadhaar && (
               <p className="text-sm text-red-500">{errors.aadhaar}</p>
             )}
           </div>
 
-          {/* PAN */}
+          {/* PAN (Optional) */}
           <div className="space-y-1">
             <Label>PAN Card (Optional)</Label>
             <Input
@@ -337,22 +631,30 @@ const passbookRef = useRef<HTMLInputElement | null>(null);
               }
             />
           </div>
+
+          {/* 12th / Degree */}
           <div className="space-y-1">
             <Label>
-              12th Marksheet OR Degree<span className="text-red-500">*</span>
+              12th Marksheet OR Degree <span className="text-red-500">*</span>
             </Label>
             <Input
               ref={marksheet12Ref}
               type="file"
               accept=".pdf,.jpg,.jpeg,.png"
-              onChange={(e) =>
+              onChange={(e) => {
                 setDocuments({
                   ...documents,
                   marksheet12: e.target.files?.[0] || null,
-                })
-              }
+                });
+                setErrors({ ...errors, marksheet12: "" });
+              }}
             />
+            {errors.marksheet12 && (
+              <p className="text-sm text-red-500">{errors.marksheet12}</p>
+            )}
           </div>
+
+          {/* Passbook */}
           <div className="space-y-1">
             <Label>
               Passbook <span className="text-red-500">*</span>
@@ -361,29 +663,29 @@ const passbookRef = useRef<HTMLInputElement | null>(null);
               ref={passbookRef}
               type="file"
               accept=".pdf,.jpg,.jpeg,.png"
-              onChange={(e) =>
+              onChange={(e) => {
                 setDocuments({
                   ...documents,
                   passbook: e.target.files?.[0] || null,
-                })
-              }
+                });
+                setErrors({ ...errors, passbook: "" });
+              }}
             />
+            {errors.passbook && (
+              <p className="text-sm text-red-500">{errors.passbook}</p>
+            )}
           </div>
         </CardContent>
       </Card>
 
-      {/* ================= ADD USER BUTTON (LAST) ================= */}
-
-      <div className="w-full max-w-3xl flex justify-center pt-6">
-        <Button
-          type="submit"
-          form="add-user-form"
-          disabled={loading}
-          className="px-12 h-11"
-        >
-          {loading ? "Adding..." : "Add User"}
+      {/* Tumhara existing Upload Documents section exactly yahin rahega */}
+      <div className="flex justify-center pt-6">
+        <Button onClick={handleSubmit} disabled={loading}>
+          Add User
         </Button>
       </div>
     </div>
   );
 }
+
+

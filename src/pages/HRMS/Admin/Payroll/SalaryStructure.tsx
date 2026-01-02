@@ -100,7 +100,7 @@ const SalaryStructure = () => {
 
       {/* ================= TABLE ================= */}
       <div className="bg-white rounded-lg shadow min-h-[calc(100vh-180px)] overflow-x-auto">
-        <table className="w-full border-collapse">
+        <table className="w-full border-collapse text-center">
           <thead className="bg-gray-100 text-sm">
             <tr>
               <th className="px-4 py-3">No.</th>

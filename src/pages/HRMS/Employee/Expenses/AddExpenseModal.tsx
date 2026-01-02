@@ -1,0 +1,228 @@
+/** @format */
+import axios from "axios";
+import { useEffect, useState } from "react";
+
+const API_BASE = import.meta.env.VITE_API_URL;
+
+const AddExpenseModal = ({
+  open,
+  onClose,
+  onSuccess,
+  expense,
+  readOnly = false,
+}: any) => {
+  const token = localStorage.getItem("token");
+
+  const isEdit = !!expense;
+  const isView = readOnly;
+
+  const [travelRequests, setTravelRequests] = useState<any[]>([]);
+  const [receipt, setReceipt] = useState<File | null>(null);
+
+  const [form, setForm] = useState({
+    expenseType: expense?.expenseType || "",
+    category: expense?.category || "",
+    amount: expense?.amount || "",
+    date: expense?.date
+      ? new Date(expense.date).toISOString().split("T")[0]
+      : "",
+    travelRequestId: expense?.travelRequestId || "",
+    remarks: expense?.remarks || "",
+  });
+
+  /* ================= FETCH APPROVED TRAVEL ================= */
+  useEffect(() => {
+    if (form.expenseType === "TRAVEL") {
+      axios
+        .get(`${API_BASE}/travel-requests/me`, {
+          headers: { Authorization: `Bearer ${token}` },
+        })
+        .then((res) =>
+          setTravelRequests(
+            (res.data || []).filter((t: any) => t.status === "APPROVED")
+          )
+        );
+    }
+  }, [form.expenseType]);
+
+  /* ================= SUBMIT ================= */
+  const submit = async () => {
+    const fd = new FormData();
+
+    Object.entries(form).forEach(([key, value]) => {
+      if (value) fd.append(key, value as string);
+    });
+
+    if (receipt) fd.append("receipt", receipt);
+
+    if (isEdit) {
+      // UPDATE
+      await axios.put(`${API_BASE}/expenses/${expense._id}/status`, fd, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "multipart/form-data",
+        },
+      });
+    } else {
+      // CREATE
+      await axios.post(`${API_BASE}/expenses`, fd, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "multipart/form-data",
+        },
+      });
+    }
+
+    onSuccess();
+    onClose();
+  };
+
+  if (!open) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+      <div className="bg-white w-full max-w-lg rounded-xl p-6">
+        <h3 className="text-lg font-semibold mb-4">
+          {isView ? "View Expense" : isEdit ? "Edit Expense" : "Add Expense"}
+        </h3>
+
+        <div className="space-y-4">
+          {/* Expense Type */}
+          <div>
+            <label className="text-sm font-medium">Expense Type</label>
+            <select
+              disabled={isView}
+              className="w-full border rounded-md p-2 text-sm disabled:bg-gray-100"
+              value={form.expenseType}
+              onChange={(e) =>
+                setForm({ ...form, expenseType: e.target.value })
+              }
+            >
+              <option value="">Select</option>
+              <option value="TRAVEL">Travel</option>
+              <option value="OTHER">Other</option>
+            </select>
+          </div>
+
+          {/* Travel Request */}
+          {form.expenseType === "TRAVEL" && (
+            <div>
+              <label className="text-sm font-medium">
+                Approved Travel Request
+              </label>
+              <select
+                disabled={isView}
+                className="w-full border rounded-md p-2 text-sm disabled:bg-gray-100"
+                value={form.travelRequestId}
+                onChange={(e) =>
+                  setForm({ ...form, travelRequestId: e.target.value })
+                }
+              >
+                <option value="">Select</option>
+                {travelRequests.map((t) => (
+                  <option key={t._id} value={t._id}>
+                    {t.destination} (
+                    {new Date(t.fromDate).toLocaleDateString("en-GB")})
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
+
+          {/* Category */}
+          <div>
+            <label className="text-sm font-medium">Category</label>
+            <input
+              disabled={isView}
+              className="w-full border rounded-md p-2 text-sm disabled:bg-gray-100"
+              value={form.category}
+              onChange={(e) => setForm({ ...form, category: e.target.value })}
+            />
+          </div>
+
+          {/* Amount */}
+          <div>
+            <label className="text-sm font-medium">Amount</label>
+            <input
+              type="number"
+              disabled={isView}
+              className="w-full border rounded-md p-2 text-sm disabled:bg-gray-100"
+              value={form.amount}
+              onChange={(e) => setForm({ ...form, amount: e.target.value })}
+            />
+          </div>
+
+          {/* Date */}
+          <div>
+            <label className="text-sm font-medium">Expense Date</label>
+            <input
+              type="date"
+              disabled={isView}
+              className="w-full border rounded-md p-2 text-sm disabled:bg-gray-100"
+              value={form.date}
+              onChange={(e) => setForm({ ...form, date: e.target.value })}
+            />
+          </div>
+
+          {/* Receipt */}
+          <div>
+            <label className="text-sm font-medium">Upload Bill</label>
+
+            {expense?.receipt && (
+              <a
+                href={expense.receipt}
+                target="_blank"
+                className="block text-xs text-primary underline mb-1"
+              >
+                View Existing Bill
+              </a>
+            )}
+
+            {!isView && (
+              <input
+                type="file"
+                className="w-full text-sm"
+                onChange={(e) =>
+                  setReceipt(e.target.files ? e.target.files[0] : null)
+                }
+              />
+            )}
+          </div>
+
+          {/* Remarks */}
+          <div>
+            <label className="text-sm font-medium">Remarks</label>
+            <textarea
+              disabled={isView}
+              className="w-full border rounded-md p-2 text-sm disabled:bg-gray-100"
+              rows={3}
+              value={form.remarks}
+              onChange={(e) => setForm({ ...form, remarks: e.target.value })}
+            />
+          </div>
+        </div>
+
+        {/* ACTIONS */}
+        <div className="flex justify-end gap-3 mt-6">
+          <button
+            onClick={onClose}
+            className="px-4 py-2 border rounded-md text-sm"
+          >
+            Close
+          </button>
+
+          {!isView && (
+            <button
+              onClick={submit}
+              className="px-4 py-2 bg-primary text-white rounded-md text-sm"
+            >
+              {isEdit ? "Update Expense" : "Submit Expense"}
+            </button>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default AddExpenseModal;
