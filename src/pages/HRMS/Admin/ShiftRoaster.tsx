@@ -1,6 +1,6 @@
 /** @format */
 
-import React, { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import axios from "axios";
 import {
   Dialog,
@@ -16,12 +16,6 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import {
-  Command,
-  CommandInput,
-  CommandItem,
-  CommandList,
-} from "@/components/ui/command";
 
 const API_BASE = import.meta.env.VITE_API_URL;
 
@@ -58,7 +52,7 @@ const ShiftRoster = () => {
 
   const [users, setUsers] = useState<User[]>([]);
   const [shifts, setShifts] = useState<ShiftAssignment[]>([]);
-  const [weekStart, setWeekStart] = useState(getMondayOfWeek(today));
+  const [weekStart] = useState(getMondayOfWeek(today));
   const [editingShiftId, setEditingShiftId] = useState<string | null>(null);
 
 
@@ -107,10 +101,10 @@ const ShiftRoster = () => {
 
   /* ================= MODAL ================= */
 
-const openAssignModal = (date?: string) => {
-  setEditingShiftId(null); // 👈 important
+const openAssignModal = (date?: string, userId?: string) => {
+  setEditingShiftId(null);
   setForm({
-    userIds: [],
+    userIds: userId ? [userId] : [], // 👈 FIX
     date: date || formatDate(today),
     shift: "MORNING",
   });
@@ -241,10 +235,14 @@ const handleSubmit = async () => {
                         </button>
                       ) : (
                         <button
-                          onClick={() => openAssignModal(dateStr)}
-                          className="mx-auto w-10 h-10 border border-dashed rounded flex items-center justify-center hover:bg-gray-50"
+                          onClick={() => openAssignModal(dateStr, u._id)}
+                          className="mx-auto w-10 h-10 border border-dashed border-gray-300 
+             rounded flex items-center justify-center 
+             text-gray-400 hover:text-orange-500 
+             hover:border-orange-400 hover:bg-orange-50 
+             transition"
                         >
-                          <Plus />
+                          <Plus size={18} />
                         </button>
                       )}
                     </td>

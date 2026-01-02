@@ -1,6 +1,6 @@
 /** @format */
 
-import React, { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import axios from "axios";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChevronLeft, ChevronRight, CheckCircle, XCircle } from "lucide-react";
@@ -18,27 +18,46 @@ interface Holiday {
   title: string;
 }
 
-/* 🔹 STATIC ATTENDANCE */
-const STATIC_ATTENDANCE: Record<string, number[]> = {
-  PRESENT: [1, 2, 3, 5, 6, 9, 10, 12, 15, 18],
-};
+interface AttendanceRecord {
+  user: User;
+  date: string;
+  punchIn?: string;
+}
 
 const AttendanceReport = () => {
   const today = new Date();
 
   const [users, setUsers] = useState<User[]>([]);
+  const [attendance, setAttendance] = useState<AttendanceRecord[]>([]);
   const [holidays, setHolidays] = useState<Holiday[]>([]);
   const [month, setMonth] = useState(today.getMonth());
   const [year, setYear] = useState(today.getFullYear());
 
-  /* ================= FETCH USERS ================= */
+  /* ================= FETCH ATTENDANCE (HR / ADMIN) ================= */
   useEffect(() => {
-    axios
-      .get(`${API_BASE}/users`, {
-        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-      })
-      .then((res) => setUsers(res.data));
-  }, []);
+    const fetchAttendance = async () => {
+      const res = await axios.get(`${API_BASE}/attendance/all`, {
+        params: { month, year },
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      });
+
+      setAttendance(res.data || []);
+
+      const uniqueUsers: User[] = Array.from(
+        new Map(
+          (res.data as AttendanceRecord[]).map(
+            (r) => [r.user._id, r.user] as [string, User]
+          )
+        ).values()
+      );
+
+      setUsers(uniqueUsers);
+    };
+
+    fetchAttendance();
+  }, [month, year]);
 
   /* ================= FETCH HOLIDAYS ================= */
   useEffect(() => {
@@ -68,20 +87,26 @@ const AttendanceReport = () => {
 
   const isSunday = (day: number) => new Date(year, month, day).getDay() === 0;
 
-const getHoliday = (day: number) => {
-  const dateStr = `${year}-${String(month + 1).padStart(2, "0")}-${String(
-    day
-  ).padStart(2, "0")}`;
+  const getHoliday = (day: number) => {
+    const dateStr = `${year}-${String(month + 1).padStart(2, "0")}-${String(
+      day
+    ).padStart(2, "0")}`;
 
-  return holidays.find((h) => {
-    const holidayDate = new Date(h.date).toISOString().split("T")[0];
-    return holidayDate === dateStr;
-  });
-};
+    return holidays.find((h) => {
+      const holidayDate = new Date(h.date).toISOString().split("T")[0];
+      return holidayDate === dateStr;
+    });
+  };
 
+  const isPresent = (userId: string, day: number) => {
+    const dateStr = `${year}-${String(month + 1).padStart(2, "0")}-${String(
+      day
+    ).padStart(2, "0")}`;
 
-
-  const isPresent = (day: number) => STATIC_ATTENDANCE.PRESENT.includes(day);
+    return attendance.some(
+      (a) => a.user._id === userId && a.date === dateStr && a.punchIn
+    );
+  };
 
   const isFutureDate = (day: number) =>
     year === today.getFullYear() &&
@@ -124,7 +149,7 @@ const getHoliday = (day: number) => {
           </div>
         </CardHeader>
 
-        <CardContent className="overflow-x-auto">
+        <CardContent className="hidden md:block overflow-x-auto">
           <table className="min-w-max border-collapse border text-sm">
             <thead>
               <tr>
@@ -194,7 +219,7 @@ const getHoliday = (day: number) => {
 
                     return (
                       <td key={day} className="border text-center py-2">
-                        {isPresent(day) ? (
+                        {isPresent(user._id, day) ? (
                           <CheckCircle
                             className="text-green-600 mx-auto"
                             size={18}
@@ -209,6 +234,52 @@ const getHoliday = (day: number) => {
               ))}
             </tbody>
           </table>
+        </CardContent>
+        <CardContent className="block md:hidden space-y-4">
+          {users.map((user) => {
+            const todayDay = today.getDate();
+
+            const todayStatus =
+              isSunday(todayDay) || getHoliday(todayDay)
+                ? "OFF"
+                : isPresent(user._id, todayDay)
+                ? "PRESENT"
+                : "ABSENT";
+
+            return (
+              <Card key={user._id} className="shadow-sm">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-base">{user.name}</CardTitle>
+                  <p className="text-xs text-gray-500">{user.role}</p>
+                </CardHeader>
+
+                <CardContent className="flex items-center justify-between">
+                  <span className="text-sm font-medium">
+                    {new Date(year, month).toLocaleString("default", {
+                      month: "long",
+                    })}{" "}
+                    {todayDay}
+                  </span>
+
+                  {todayStatus === "PRESENT" && (
+                    <span className="flex items-center gap-1 text-green-600 text-sm">
+                      <CheckCircle size={16} /> Present
+                    </span>
+                  )}
+
+                  {todayStatus === "ABSENT" && (
+                    <span className="flex items-center gap-1 text-red-500 text-sm">
+                      <XCircle size={16} /> Absent
+                    </span>
+                  )}
+
+                  {todayStatus === "OFF" && (
+                    <span className="text-gray-400 text-sm">Off</span>
+                  )}
+                </CardContent>
+              </Card>
+            );
+          })}
         </CardContent>
       </Card>
     </div>

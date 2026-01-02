@@ -16,7 +16,6 @@ import {
   Users,
   UserCheck,
   Building2,
-  Bell,
   Briefcase,
   CalendarDays,
   FileText,
@@ -44,7 +43,6 @@ import {
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { LogoutButton } from "@/components/ui/logout-button";
-import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
 import { CRMHeaderUserInfo } from "@/components/crm/CRMHeaderUserInfo";
@@ -76,6 +74,9 @@ export default function HRMSAdminLayout({ children }: HRMSAdminLayoutProps) {
         <SidebarContent className="space-y-4">
           <SidebarGroup label="System Configuration">
             <SidebarNav>
+              <SidebarNavItem to="/hrms/admin/dashboard" icon={Building2}>
+                Dashboard
+              </SidebarNavItem>
               <SidebarNavItem to="/hrms/admin/companies" icon={Building2}>
                 Companies
               </SidebarNavItem>
@@ -94,10 +95,6 @@ export default function HRMSAdminLayout({ children }: HRMSAdminLayoutProps) {
 
               <SidebarNavItem to="/hrms/admin/policies" icon={ShieldCheck}>
                 Company Policies
-              </SidebarNavItem>
-
-              <SidebarNavItem to="/hrms/admin/calendar" icon={CalendarDays}>
-                Holiday Calendar
               </SidebarNavItem>
 
               <SidebarNavItem
@@ -251,15 +248,6 @@ export default function HRMSAdminLayout({ children }: HRMSAdminLayoutProps) {
               </SidebarNavItem>
             </SidebarNav>
           </SidebarGroup>
-
-          {/* Notifications */}
-          {/* <SidebarGroup label="System">
-            <SidebarNav>
-              <SidebarNavItem to="/hrms/admin/notifications" icon={Bell}>
-                Notifications
-              </SidebarNavItem>
-            </SidebarNav>
-          </SidebarGroup> */}
         </SidebarContent>
 
         <SidebarFooter>

@@ -46,6 +46,7 @@ import SchoolAdminAssessmentReportsPage from "../pages/Dashboard/SchoolAdmin/Ass
 import AdminsPage from "../pages/Dashboard/SuperAdmin/Admins";
 import CreateAdminPage from "../pages/Dashboard/SuperAdmin/Admins/Create";
 
+
 // School Management Components
 import SchoolsPage from "../pages/Dashboard/SuperAdmin/Schools";
 import CreateSchoolPage from "../pages/Dashboard/SuperAdmin/Schools/Create";
@@ -160,8 +161,6 @@ import GuestQuizzes from "../pages/Guest/GuestQuizzes";
 import GuestClasses from "../pages/Guest/GuestClasses";
 import GuestPremium from "../pages/Guest/GuestPremium";
 
-//
-import HRMSAdminLayout from "@/pages/HRMS/Admin/Layout";
 import AddUser from "@/pages/HRMS/Admin/AddUser";
 import Employee from "@/pages/HRMS/Admin/Employee";
 import Holiday from "@/pages/HRMS/Admin/Holidays/Holiday";
@@ -174,7 +173,6 @@ import OnboardingTasks from "@/pages/HRMS/Admin/OnboardingTask";
 import FinalSettlement from "@/pages/HRMS/Admin/FinalSattlement";
 import AttendanceReport from "@/pages/HRMS/Admin/AttendanceReport";
 import ShiftRoster from "@/pages/HRMS/Admin/ShiftRoaster";
-import LeaveRequests from "@/pages/HRMS/Admin/LeaveRequests";
 import LeaveType from "@/pages/HRMS/Admin/LeaveManagement/LeaveType";
 import LeaveEncashment from "@/pages/HRMS/Admin/LeaveManagement/LeaveEncashment";
 import SalaryStructure from "@/pages/HRMS/Admin/Payroll/SalaryStructure";
@@ -187,6 +185,42 @@ import RoleBasedLayout from "@/pages/HRMS/Admin/Layout/RoleBasedLayout";
 import Company from "@/pages/HRMS/Admin/SystemConfigration/Company";
 import Branches from "@/pages/HRMS/Admin/SystemConfigration/Branches";
 import DepartmentPage from "@/pages/HRMS/Admin/SystemConfigration/Departments";
+import Designation from "@/pages/HRMS/Admin/SystemConfigration/Desigantion";
+import Policies from "@/pages/HRMS/Admin/SystemConfigration/Policies";
+import TeamMembers from "@/pages/HRMS/Manager/Teams/TeamMembers";
+import Goals from "@/pages/HRMS/Manager/Performance/Goals";
+import ProbationConfirmation from "@/pages/HRMS/Admin/ProbationConfirmation";
+import PersonalInformation from "@/pages/HRMS/Employee/Profile/PersonalInformation";
+import DocumentUpload from "@/pages/HRMS/Employee/Profile/DocumentUpload";
+import EmployeePolicies from "@/pages/HRMS/Employee/Profile/EmployeePolicies";
+import MarkAttendance from "@/pages/HRMS/Employee/Attendance/MarkAttendance";
+import AttendanceCalendar from "@/pages/HRMS/Employee/Attendance/AttendanceCalender";
+import AttendanceRequest from "@/pages/HRMS/Employee/Attendance/AttendanceRequest";
+import Leave from "@/pages/HRMS/Employee/Leave/Leaves";
+import LeaveBalance from "@/pages/HRMS/Employee/Leave/LeaveBalance";
+import EmployeePayslips from "@/pages/HRMS/Payroll/EmployeePayslips";
+import EmployeeSalaryStructure from "@/pages/HRMS/Payroll/EmployeeSallaryStracture";
+import TravelRequests from "@/pages/HRMS/Employee/Travel/TravelRequests";
+import Expense from "@/pages/HRMS/Employee/Expenses/Expenses";
+import EmployeeGoals from "@/pages/HRMS/Employee/Performance/EmployeeGoals";
+import Appraisals from "@/pages/HRMS/Manager/Performance/Appraisals";
+import MyAppraisals from "@/pages/HRMS/Employee/Performance/MyAppraisals";
+import FeedbackAndRatings from "@/pages/HRMS/Manager/Performance/FeedbackandRating";
+import MyFeedback from "@/pages/HRMS/Employee/Performance/PerformanceHistory";
+import EmployeeLetters from "@/pages/HRMS/Employee/Latters/EmployeeLatters";
+import TeamAttendance from "@/pages/HRMS/Manager/Teams/TeamAttendance";
+import HolidayCalendar from "@/pages/HRMS/Manager/Teams/HolidayCalender";
+import LeaveCalendar from "@/pages/HRMS/Manager/Teams/LeaveCalender";
+import LeaveRequest from "@/pages/HRMS/Manager/Approvals/LeaveRequest";
+import EmployeeAttendanceRequest from "@/pages/HRMS/Manager/Approvals/EmployeeAttendanceRequest";
+import ExpenseRequest from "@/pages/HRMS/Manager/Approvals/ExpenseRequest";
+import EmployeeTravelRequest from "@/pages/HRMS/Manager/Approvals/EmployeeTravelRequest";
+import AllAttendanceRequests from "@/pages/HRMS/Admin/AllAttendanceRequests";
+import AdminDashboard from "@/pages/HRMS/Admin/AdminDashboard";
+import EmployeeLeaveRequest from "@/pages/HRMS/Admin/EmployeeLeaveRequests";
+import ManagerDashboard from "@/pages/HRMS/Manager/ManagerDashboard";
+import EmployeeDashboard from "@/pages/HRMS/Employee/Dashboard/EmployeeDashboard";
+import FinancePayroll from "@/pages/HRMS/Finance/FinancePayroll";
 function ProtectedRoute({
   children,
   role,
@@ -364,9 +398,11 @@ export default function AppRouter() {
             </SidebarProvider>
           }
         >
+          <Route path="admin" element={<Navigate to="dashboard" replace />} />
           {/* ADMIN ROUTES */}
           <Route path="admin/addUser" element={<AddUser />} />
           <Route path="admin/employees" element={<Employee />} />
+          <Route path="admin/probation" element={<ProbationConfirmation />} />
           <Route path="admin/holidays" element={<Holiday />} />
           <Route path="admin/documents" element={<Document />} />
           <Route
@@ -384,9 +420,14 @@ export default function AppRouter() {
             path="admin/offboarding/full-final"
             element={<FinalSettlement />}
           />
+          <Route path="admin/dashboard" element={<AdminDashboard />} />
           <Route path="admin/attendance" element={<AttendanceReport />} />
+          <Route
+            path="admin/attendance/requests"
+            element={<AllAttendanceRequests />}
+          />
           <Route path="admin/shifts" element={<ShiftRoster />} />
-          <Route path="admin/leaves" element={<LeaveRequests />} />
+          <Route path="admin/leaves" element={<EmployeeLeaveRequest />} />
           <Route path="admin/leave-types" element={<LeaveType />} />
           <Route path="admin/leave-encashment" element={<LeaveEncashment />} />
           <Route path="admin/salary-structure" element={<SalaryStructure />} />
@@ -398,9 +439,92 @@ export default function AppRouter() {
           <Route path="admin/companies" element={<Company />} />
           <Route path="admin/branches" element={<Branches />} />
           <Route path="admin/departments" element={<DepartmentPage />} />
+          <Route path="admin/designations" element={<Designation />} />
+          <Route path="admin/policies" element={<Policies />} />
 
           {/* MANAGER ROUTES */}
-          <Route path="manager/interviews" element={<InterviewPipeline />} />
+          <Route path="manager" element={<Navigate to="dashboard" replace />} />
+
+          <Route path="manager/dashboard" element={<ManagerDashboard />} />
+          <Route path="manager/team" element={<TeamMembers />} />
+          <Route path="manager/leave-calendar" element={<HolidayCalendar />} />
+          <Route path="manager/performance/goals" element={<Goals />} />
+          <Route
+            path="manager/performance/appraisals"
+            element={<Appraisals />}
+          />
+          <Route
+            path="manager/performance/feedback"
+            element={<FeedbackAndRatings />}
+          />
+          <Route path="manager/team-attendance" element={<TeamAttendance />} />
+          <Route path="manager/leaves" element={<LeaveCalendar />} />
+          <Route path="manager/approvals/leaves" element={<LeaveRequest />} />
+          <Route
+            path="manager/approvals/attendance"
+            element={<EmployeeAttendanceRequest />}
+          />
+          <Route
+            path="manager/approvals/expenses"
+            element={<ExpenseRequest />}
+          />
+          <Route
+            path="manager/approvals/travel"
+            element={<EmployeeTravelRequest />}
+          />
+          {/* Employee ROUTES */}
+          <Route path="employe" element={<Navigate to="dashboard" replace />} />
+
+          <Route path="employee/dashboard" element={<EmployeeDashboard />} />
+          <Route
+            path="employee/profile/personal"
+            element={<PersonalInformation />}
+          />
+          <Route
+            path="employee/profile/documents"
+            element={<DocumentUpload />}
+          />
+          <Route
+            path="employee/profile/organization"
+            element={<EmployeePolicies />}
+          />
+          <Route path="employee/attendance/mark" element={<MarkAttendance />} />
+          <Route
+            path="employee/attendance/calendar"
+            element={<AttendanceCalendar />}
+          />
+          <Route
+            path="employee/attendance/requests"
+            element={<AttendanceRequest />}
+          />
+          <Route path="employee/leave/apply" element={<Leave />} />
+          <Route path="employee/leave/balance" element={<LeaveBalance />} />
+          <Route
+            path="employee/payroll/payslips"
+            element={<EmployeePayslips />}
+          />
+          <Route
+            path="employee/payroll/salary-structure"
+            element={<EmployeeSalaryStructure />}
+          />
+          <Route
+            path="employee/travel/my-requests"
+            element={<TravelRequests />}
+          />
+          <Route path="employee/expenses/submit" element={<Expense />} />
+          <Route
+            path="employee/performance/goals"
+            element={<EmployeeGoals />}
+          />
+          <Route
+            path="employee/performance/self-appraisal"
+            element={<MyAppraisals />}
+          />
+          <Route path="employee/performance/history" element={<MyFeedback />} />
+          <Route path="employee/letters" element={<EmployeeLetters />} />
+
+          <Route path="finance/payroll/review" element={<FinancePayroll/>}/>
+
         </Route>
 
         <Route

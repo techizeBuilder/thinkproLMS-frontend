@@ -89,7 +89,7 @@ export default function Company() {
 
       {/* TABLE */}
       <div className="bg-white rounded-lg shadow min-h-[calc(100vh-180px)] overflow-x-auto">
-        <table className="w-full text-sm">
+        <table className="w-full text-sm text-center">
           <thead className="bg-gray-100">
             <tr>
               <th className="px-4 py-3">No.</th>

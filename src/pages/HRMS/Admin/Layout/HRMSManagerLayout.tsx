@@ -25,16 +25,11 @@ import {
   Target,
   BarChart3,
   Star,
-  TrendingUp,
   GitBranch,
   UserCheck,
   LayoutDashboard,
-  Bell,
-  Building2,
 } from "lucide-react";
 
-import { Button } from "@/components/ui/button";
-import { Link } from "react-router-dom";
 import { LogoutButton } from "@/components/ui/logout-button";
 import { useAuth } from "@/contexts/AuthContext";
 import { CRMHeaderUserInfo } from "@/components/crm/CRMHeaderUserInfo";
@@ -69,7 +64,7 @@ export default function HRMSManagerLayout({ children }: Props) {
         {/* 🔥 PROPER SPACING LIKE ADMIN */}
         <SidebarContent className="space-y-4">
           {/* 📊 Dashboard */}
-          {/* <SidebarGroup label="Dashboard">
+          <SidebarGroup label="Dashboard">
             <SidebarNav>
               <SidebarNavItem
                 to="/hrms/manager/dashboard"
@@ -78,7 +73,7 @@ export default function HRMSManagerLayout({ children }: Props) {
                 Overview
               </SidebarNavItem>
             </SidebarNav>
-          </SidebarGroup> */}
+          </SidebarGroup>
 
           {/* 👥 Team */}
           <SidebarGroup label="Team">
@@ -96,10 +91,10 @@ export default function HRMSManagerLayout({ children }: Props) {
                 to="/hrms/manager/leave-calendar"
                 icon={ClipboardList}
               >
-                Leave Calendar
+                Holiday Calendar
               </SidebarNavItem>
-              <SidebarNavItem to="/hrms/manager/tasks" icon={CheckCircle}>
-                Task Status
+              <SidebarNavItem to="/hrms/manager/leaves" icon={CheckCircle}>
+                Leaves Employee
               </SidebarNavItem>
             </SidebarNav>
           </SidebarGroup>
@@ -164,12 +159,6 @@ export default function HRMSManagerLayout({ children }: Props) {
               >
                 Feedback & Ratings
               </SidebarNavItem>
-              <SidebarNavItem
-                to="/hrms/manager/performance/recommendations"
-                icon={TrendingUp}
-              >
-                Promotion Recommendations
-              </SidebarNavItem>
             </SidebarNav>
           </SidebarGroup>
 
@@ -201,28 +190,6 @@ export default function HRMSManagerLayout({ children }: Props) {
         {/* ❌ FOOTER KE NICHE KUCH CHANGE NAHI */}
         <SidebarFooter>
           <div className="space-y-2">
-            {!isCollapsed ? (
-              <Link to="/superadmin">
-                <Button
-                  variant="ghost"
-                  className="w-full justify-start text-sm bg-[#333A47] hover:bg-[#20252d]"
-                >
-                  <Building2 className="mr-3 h-4 w-4 text-white" />
-                  <span className="text-white">Back to LMS</span>
-                </Button>
-              </Link>
-            ) : (
-              <Link to="/superadmin">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="w-full bg-[#333A47] hover:bg-[#20252d]"
-                >
-                  <Building2 className="h-4 w-4 text-white" />
-                  <span className="sr-only">Back to LMS</span>
-                </Button>
-              </Link>
-            )}
 
             <LogoutButton
               variant="ghost"

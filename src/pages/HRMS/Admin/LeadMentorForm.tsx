@@ -28,7 +28,7 @@ interface LeadMentorFormProps {
 
 export function LeadMentorForm({
   onSuccess,
-  hideHeader = false,
+  // hideHeader = false,
 }: LeadMentorFormProps) {
   const [loading, setLoading] = useState(false);
   const [schools, setSchools] = useState<School[]>([]);

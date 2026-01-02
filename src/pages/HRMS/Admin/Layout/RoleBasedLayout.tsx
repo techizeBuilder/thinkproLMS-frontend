@@ -3,7 +3,9 @@
 import { Outlet } from "react-router-dom";
 import HRMSAdminLayout from "../Layout";
 import HRMSManagerLayout from "./HRMSManagerLayout";
+import HRMSEmployeeLayout from "./HRMSEmployeeLayout";
 import { useAuth } from "@/contexts/AuthContext";
+import HRMSFinanceManagerLayout from "./HRMSFinanceLayout";
 
 export default function RoleBasedLayout() {
   const { user } = useAuth();
@@ -24,6 +26,20 @@ export default function RoleBasedLayout() {
         <HRMSManagerLayout>
           <Outlet />
         </HRMSManagerLayout>
+      );
+
+    case "mentor":
+      return (
+        <HRMSEmployeeLayout>
+          <Outlet />
+        </HRMSEmployeeLayout>
+      );
+
+    case "finance":
+      return (
+        <HRMSFinanceManagerLayout>
+          <Outlet />
+        </HRMSFinanceManagerLayout>
       );
 
     default:

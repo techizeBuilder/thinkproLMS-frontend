@@ -39,8 +39,8 @@ const Payslips = () => {
         headers: { Authorization: `Bearer ${token}` },
       });
 
-      // month filter frontend side
       const filtered = res.data.filter((p: PayslipRow) => p.month === month);
+
       setPayslips(filtered);
     } catch (err) {
       console.error("Failed to fetch payslips");
@@ -51,34 +51,19 @@ const Payslips = () => {
     fetchPayslips();
   }, [month]);
 
-  /* ================= GENERATE PAYSLIPS ================= */
+  /* ================= GENERATE PAYSLIPS (FROM PAYROLL) ================= */
   const generatePayslip = async () => {
     try {
-      // example dummy user payroll (normally payroll module se aayega)
-      const usersRes = await axios.get(`${API_BASE}/users`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-
-      for (const u of usersRes.data) {
-        await axios.post(
-          `${API_BASE}/payslips`,
-          {
-            userId: u._id,
-            month,
-            basic: 20000,
-            hra: 8000,
-            allowance: 2000,
-            deduction: 5000,
-            netSalary: 25000,
-          },
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
-      }
+      await axios.post(
+        `${API_BASE}/payslips/generate-from-payroll`,
+        { month },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
 
       fetchPayslips();
-      alert("Payslips generated successfully");
-    } catch (err) {
-      alert("Payslip generation failed");
+      alert("Payslips generated from payroll successfully");
+    } catch (err: any) {
+      alert(err.response?.data?.message || "Payslip generation failed");
     }
   };
 

@@ -74,10 +74,12 @@ export default function Branch() {
     fetchBranches();
   };
 
-  const getCompanyName = (companyId: string) => {
-    const company = companies.find((c) => c._id === companyId);
-    return company ? company.name : "-";
-  };
+const getCompanyName = (companyId: any) => {
+  const id = typeof companyId === "string" ? companyId : companyId?._id;
+  const company = companies.find((c) => c._id === id);
+  return company ? company.name : "-";
+};
+
 
   return (
     <div className="p-6">
@@ -102,7 +104,7 @@ export default function Branch() {
 
       {/* TABLE */}
       <div className="bg-white rounded-lg shadow min-h-[calc(100vh-180px)] overflow-x-auto">
-        <table className="w-full text-sm">
+        <table className="w-full text-sm text-center">
           <thead className="bg-gray-100">
             <tr>
               <th className="px-4 py-3">No.</th>

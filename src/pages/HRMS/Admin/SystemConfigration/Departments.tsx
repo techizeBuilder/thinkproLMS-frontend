@@ -68,7 +68,7 @@ export default function DepartmentPage() {
       </div>
 
       <div className="bg-white rounded shadow">
-        <table className="w-full text-sm">
+        <table className="w-full text-sm text-center">
           <thead className="bg-gray-100">
             <tr>
               <th className="px-4 py-3">No</th>
@@ -89,7 +89,18 @@ export default function DepartmentPage() {
                 <td className="px-4 py-3">{d.companyId.name}</td>
                 <td className="px-4 py-3">{d.branchId.name}</td>
                 <td className="px-4 py-3">{d.headEmployeeId?.name || "-"}</td>
-                <td className="px-4 py-3">{d.status}</td>
+                <td className="px-4 py-3">
+                  {" "}
+                  <span
+                    className={`px-2 py-1 rounded text-xs ${
+                      d.status === "Active"
+                        ? "bg-green-100 text-green-600"
+                        : "bg-red-100 text-red-600"
+                    }`}
+                  >
+                    {d.status}
+                  </span>
+                </td>
                 <td className="px-4 py-3 relative">
                   <MoreVertical
                     className="cursor-pointer"
