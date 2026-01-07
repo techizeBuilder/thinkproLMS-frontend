@@ -44,6 +44,7 @@ export default function Login() {
         finance:"/hrms/finance",
         student: "/student",
         guest: "/guest",
+        "IT-Admin":"/hrms/IT-Admin",
         "sales-manager": "/crm/sales-manager",
         "sales-executive": "/crm/sales-executive",
       };
@@ -74,6 +75,7 @@ export default function Login() {
         finance: "/hrms/finance",
         student: "/student",
         guest: "/guest",
+        "IT-Admin": "/hrms/IT-Admin",
         "sales-manager": "/crm/sales-manager",
         "sales-executive": "/crm/sales-executive",
       };

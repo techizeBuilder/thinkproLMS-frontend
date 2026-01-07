@@ -110,6 +110,12 @@ export default function HRMSEmployeeLayout({ children }: Props) {
               >
                 Attendance Requests
               </SidebarNavItem>
+              <SidebarNavItem
+                to="/hrms/employee/attendance/shift-schedule"
+                icon={CalendarDays}
+              >
+                Shift and Schdule
+              </SidebarNavItem>
             </SidebarNav>
           </SidebarGroup>
 
@@ -159,13 +165,19 @@ export default function HRMSEmployeeLayout({ children }: Props) {
           </SidebarGroup>
 
           {/* ✈️ Travel */}
-          <SidebarGroup label="Travel">
+          <SidebarGroup label="Requests">
             <SidebarNav>
               <SidebarNavItem
-                to="/hrms/employee/travel/my-requests"
+                to="/hrms/employee/request/my-requests"
                 icon={ClipboardList}
               >
                 My Travel Requests
+              </SidebarNavItem>
+              <SidebarNavItem
+                to="/hrms/employee/request/resign"
+                icon={ClipboardList}
+              >
+                My Resign Request
               </SidebarNavItem>
             </SidebarNav>
           </SidebarGroup>
