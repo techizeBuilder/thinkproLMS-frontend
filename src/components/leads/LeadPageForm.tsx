@@ -26,7 +26,12 @@ import { type Lead } from "@/api/leadService";
 import { isValidPhoneNumber, getPhoneNumberError } from "@/utils/validation";
 import StateDistrictSelector from "@/components/StateDistrictSelector";
 import { REQUIRED_LABEL_CLASS } from "@/constants/forms";
-
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 const REQUIRED_FIELDS = new Set([
   "schoolName",
   "postalAddress",
@@ -279,6 +284,7 @@ export default function LeadPageForm({
     }
     const payload: any = {
       ...form,
+      leadRemarks: undefined,
       noOfStudents: form.noOfStudents ? Number(form.noOfStudents) : null,
       avgFeesPerYear: form.avgFeesPerYear ? Number(form.avgFeesPerYear) : null,
       annualContractValue: form.annualContractValue
@@ -931,7 +937,7 @@ export default function LeadPageForm({
 
                   {latestRemark ? (
                     <div className="rounded-md border p-3 bg-muted">
-                      <p className="text-sm">{latestRemark.remark}</p>
+                      <p className="text-sm">{latestRemark.text}</p>
                       <p className="text-xs text-muted-foreground mt-1">
                         — {latestRemark.createdBy?.name || "Unknown"} •{" "}
                         {new Date(latestRemark.createdAt).toLocaleString()}
@@ -1044,6 +1050,29 @@ export default function LeadPageForm({
           )}
         </div>
       </div>
+      <Dialog open={remarksOpen} onOpenChange={setRemarksOpen}>
+        <DialogContent className="max-w-xl">
+          <DialogHeader>
+            <DialogTitle>All Lead Remarks</DialogTitle>
+          </DialogHeader>
+
+          <div className="space-y-3 max-h-[400px] overflow-y-auto">
+            {form.leadRemarks.length === 0 && (
+              <p className="text-sm text-muted-foreground">No remarks found</p>
+            )}
+
+            {form.leadRemarks.map((r: any, idx: number) => (
+              <div key={idx} className="border rounded-md p-3">
+                <p className="text-sm">{r.text}</p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  {r.createdBy?.name || "Unknown"} •{" "}
+                  {new Date(r.createdAt).toLocaleString()}
+                </p>
+              </div>
+            ))}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

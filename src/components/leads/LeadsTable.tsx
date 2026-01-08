@@ -1171,7 +1171,9 @@ const sortedLeads = [...leads].sort((a: any, b: any) => {
                   {l.leadSource || "-"}
                 </TableCell>
                 <TableCell className="whitespace-nowrap max-w-[200px] truncate">
-                  {l.leadRemarks || "-"}
+                  {Array.isArray(l.leadRemarks) && l.leadRemarks.length > 0
+                    ? l.leadRemarks[l.leadRemarks.length - 1]?.text
+                    : "-"}
                 </TableCell>
                 <TableCell className="whitespace-nowrap max-w-[200px] truncate">
                   {l.teamRemarks || "-"}
