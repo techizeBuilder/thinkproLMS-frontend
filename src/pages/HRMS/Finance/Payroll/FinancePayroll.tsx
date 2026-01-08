@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { MoreVertical } from "lucide-react";
-import ViewPayrollModal from "../Admin/Payroll/ViewPayrollModal";
+import ViewPayrollModal from "../../Admin/Payroll/ViewPayrollModal";
 
 const API_BASE = import.meta.env.VITE_API_URL;
 

@@ -1,9 +1,20 @@
+/** @format */
+
 import axios from "axios";
+import qs from "qs";
 
 export const API_URL =
   import.meta.env.VITE_API_URL || "http://localhost:8000/api";
+
 const axiosInstance = axios.create({
   baseURL: API_URL,
+
+  // 🔥 YAHI MAIN FIX HAI
+  paramsSerializer: (params) =>
+    qs.stringify(params, {
+      arrayFormat: "repeat", // phase=a&phase=b
+      skipNulls: true,
+    }),
 });
 
 console.log("API_URL:", API_URL);
@@ -17,27 +28,31 @@ axiosInstance.interceptors.request.use(
     }
     return config;
   },
-  (error) => {
-    return Promise.reject(error);
-  }
+  (error) => Promise.reject(error)
 );
 
-// Interceptor to check if any request returned 401 or 403 and logout the user by clearing localStorage
+// Response interceptor
 axiosInstance.interceptors.response.use(
   (response) => response,
   (error) => {
-    // Handle 401s (unauthorized) and 403s (forbidden - account deactivated) if we have a token
     if (error.response?.status === 401 && localStorage.getItem("token")) {
       localStorage.removeItem("user");
       localStorage.removeItem("token");
-      window.location.reload(); // forces reloading the app and redirecting to login
+      window.location.reload();
     }
-    if (error.response?.status === 403 && error.response?.data?.isAccountDeactivated) {
+
+    if (
+      error.response?.status === 403 &&
+      error.response?.data?.isAccountDeactivated
+    ) {
       localStorage.removeItem("user");
       localStorage.removeItem("token");
-      alert("Your account has been deactivated. Please contact your administrator.");
-      window.location.reload(); // forces reloading the app and redirecting to login
+      alert(
+        "Your account has been deactivated. Please contact your administrator."
+      );
+      window.location.reload();
     }
+
     return Promise.reject(error);
   }
 );

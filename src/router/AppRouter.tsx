@@ -202,7 +202,7 @@ import Leave from "@/pages/HRMS/Employee/Leave/Leaves";
 import LeaveBalance from "@/pages/HRMS/Employee/Leave/LeaveBalance";
 import EmployeePayslips from "@/pages/HRMS/Payroll/EmployeePayslips";
 import EmployeeSalaryStructure from "@/pages/HRMS/Payroll/EmployeeSallaryStracture";
-import TravelRequests from "@/pages/HRMS/Employee/Travel/TravelRequests";
+import TravelRequests from "@/pages/HRMS/Employee/Request/TravelRequests";
 import Expense from "@/pages/HRMS/Employee/Expenses/Expenses";
 import EmployeeGoals from "@/pages/HRMS/Employee/Performance/EmployeeGoals";
 import Appraisals from "@/pages/HRMS/Manager/Performance/Appraisals";
@@ -222,7 +222,19 @@ import AdminDashboard from "@/pages/HRMS/Admin/AdminDashboard";
 import EmployeeLeaveRequest from "@/pages/HRMS/Admin/EmployeeLeaveRequests";
 import ManagerDashboard from "@/pages/HRMS/Manager/ManagerDashboard";
 import EmployeeDashboard from "@/pages/HRMS/Employee/Dashboard/EmployeeDashboard";
-import FinancePayroll from "@/pages/HRMS/Finance/FinancePayroll";
+import FinancePayroll from "@/pages/HRMS/Finance/Payroll/FinancePayroll";
+import ShiftSchedule from "@/pages/HRMS/Employee/Attendance/Shift";
+import SalaryDisbursement from "@/pages/HRMS/Finance/Payroll/SalaryDistributment";
+import FinanceExpenseRequest from "@/pages/HRMS/Finance/Exprense&Remibusment/FinanceExpense";
+import FinanceTravelRequest from "@/pages/HRMS/Finance/Travel/FinanceTravelRequests";
+import FinanceReimbursementRequests from "@/pages/HRMS/Finance/Exprense&Remibusment/FinanceReimbursements";
+import EmployeeOnboardingTask from "@/pages/HRMS/IT Admin/EmployeeOnboardingTask";
+import AccountManagement from "@/pages/HRMS/IT Admin/AccountManagement";
+import SoftwareAndLicenseAssignment from "@/pages/HRMS/IT Admin/SoftwearManagement";
+import AssetInventory from "@/pages/HRMS/IT Admin/AsestInventory";
+import AssignReassignAsset from "@/pages/HRMS/IT Admin/AssignAsset";
+import ResignationRequest from "@/pages/HRMS/Employee/Request/ResignRequest";
+import SAViewLeadPage from "@/pages/CRM/SuperAdmin/Leads/view";
 function ProtectedRoute({
   children,
   role,
@@ -353,6 +365,7 @@ export default function AppRouter() {
                     <Route path="leads" element={<SASalesLeadsPage />} />
                     <Route path="leads/add" element={<SAAddLeadPage />} />
                     <Route path="leads/:id/edit" element={<SAEditLeadPage />} />
+                    <Route path="leads/:id/view" element={<SAViewLeadPage />} />
                     <Route path="summary" element={<CRMSummaryPage />} />
                     <Route
                       path="sales-managers"
@@ -510,8 +523,12 @@ export default function AppRouter() {
             element={<EmployeeSalaryStructure />}
           />
           <Route
-            path="employee/travel/my-requests"
+            path="employee/request/my-requests"
             element={<TravelRequests />}
+          />
+          <Route
+            path="employee/request/resign"
+            element={<ResignationRequest />}
           />
           <Route path="employee/expenses/submit" element={<Expense />} />
           <Route
@@ -522,11 +539,36 @@ export default function AppRouter() {
             path="employee/performance/self-appraisal"
             element={<MyAppraisals />}
           />
+          <Route
+            path="employee/attendance/shift-schedule"
+            element={<ShiftSchedule />}
+          />
           <Route path="employee/performance/history" element={<MyFeedback />} />
           <Route path="employee/letters" element={<EmployeeLetters />} />
 
-          <Route path="finance/payroll/review" element={<FinancePayroll/>}/>
-
+          <Route path="finance/payroll/review" element={<FinancePayroll />} />
+          <Route
+            path="finance/payroll/disbursement"
+            element={<SalaryDisbursement />}
+          />
+          <Route path="finance/expenses" element={<FinanceExpenseRequest />} />
+          <Route
+            path="finance/travel/advances"
+            element={<FinanceTravelRequest />}
+          />
+          <Route
+            path="finance/reimbursements"
+            element={<FinanceReimbursementRequests />}
+          />
+          {/* MANAGER ROUTES */}
+          <Route path="it/onboarding" element={<EmployeeOnboardingTask />} />
+          <Route path="it/accounts" element={<AccountManagement />} />
+          <Route
+            path="it/software"
+            element={<SoftwareAndLicenseAssignment />}
+          />
+          <Route path="it/assets" element={<AssetInventory />} />
+          <Route path="it/assets/assign" element={<AssignReassignAsset />} />
         </Route>
 
         <Route
@@ -540,6 +582,10 @@ export default function AppRouter() {
                     <Route path="leads" element={<SMSalesLeadsPage />} />
                     <Route path="leads/add" element={<SMAddLeadPage />} />
                     <Route path="leads/:id/edit" element={<SMEditLeadPage />} />
+                    <Route
+                      path="leads/:id/view"
+                      element={<SAViewLeadPage />}
+                    />
                     <Route path="summary" element={<CRMSummaryPage />} />
                     <Route
                       path="sales-executives"

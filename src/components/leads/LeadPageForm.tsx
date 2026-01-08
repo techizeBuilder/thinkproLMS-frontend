@@ -26,7 +26,12 @@ import { type Lead } from "@/api/leadService";
 import { isValidPhoneNumber, getPhoneNumberError } from "@/utils/validation";
 import StateDistrictSelector from "@/components/StateDistrictSelector";
 import { REQUIRED_LABEL_CLASS } from "@/constants/forms";
-
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 const REQUIRED_FIELDS = new Set([
   "schoolName",
   "postalAddress",
@@ -59,13 +64,16 @@ interface LeadPageFormProps {
   lead?: Lead | null;
   saving?: boolean;
   onCancel: () => void;
-  onSubmit: (payload: any) => Promise<void> | void;
+  readOnly?: boolean;
+  onSubmit?: (payload: any) => Promise<void> | void;
 }
+
 
 export default function LeadPageForm({
   lead,
   saving = false,
   onCancel,
+  readOnly = false,
   onSubmit,
 }: LeadPageFormProps) {
   const isEdit = Boolean(lead?._id);
@@ -77,7 +85,10 @@ export default function LeadPageForm({
   const [keyPersonPhoneError, setKeyPersonPhoneError] = useState<string | null>(
     null
   );
-  const [openDatePopovers, setOpenDatePopovers] = useState<Record<string, boolean>>({});
+  const [openDatePopovers, setOpenDatePopovers] = useState<
+    Record<string, boolean>
+  >({});
+  const [remarksOpen, setRemarksOpen] = useState(false);
   const [form, setForm] = useState<any>({
     schoolName: "",
     postalAddress: "",
@@ -103,7 +114,8 @@ export default function LeadPageForm({
     salesExecutive: "none",
     salesManager: "none",
     leadSource: "Internal",
-    leadRemarks: "",
+    leadRemarks: [],
+    newRemark: "",
     phase: "Lead",
     programType: "Pilot",
     qualityOfLead: "Cold",
@@ -136,6 +148,8 @@ export default function LeadPageForm({
     setForm((prev: any) => ({
       ...prev,
       ...lead,
+      leadRemarks: lead.leadRemarks || [],
+      newRemark: "",
       noOfStudents: lead.noOfStudents ?? "",
       avgFeesPerYear: lead.avgFeesPerYear ?? "",
       annualContractValue: lead.annualContractValue ?? "",
@@ -210,6 +224,12 @@ export default function LeadPageForm({
     /^\d+$/.test(v) && (len ? v.length === len : true);
 
   const submit = async () => {
+      if (readOnly) return;
+        if (!onSubmit) {
+          console.warn("onSubmit is not provided");
+          return;
+        }
+
     if (!form.schoolName?.trim()) {
       alert("School Name is required");
       return;
@@ -264,6 +284,7 @@ export default function LeadPageForm({
     }
     const payload: any = {
       ...form,
+      leadRemarks: undefined,
       noOfStudents: form.noOfStudents ? Number(form.noOfStudents) : null,
       avgFeesPerYear: form.avgFeesPerYear ? Number(form.avgFeesPerYear) : null,
       annualContractValue: form.annualContractValue
@@ -284,6 +305,11 @@ export default function LeadPageForm({
     await onSubmit(payload);
   };
 
+  const latestRemark =
+  form.leadRemarks && form.leadRemarks.length > 0
+    ? form.leadRemarks[form.leadRemarks.length - 1]
+    : null;
+
   const dateField = (label: string, name: string) => {
     const formatDateToLocal = (date: Date): string => {
       const year = date.getFullYear();
@@ -303,7 +329,9 @@ export default function LeadPageForm({
           <PopoverTrigger asChild>
             <Button variant="outline" className="justify-start">
               <CalendarIcon className="h-4 w-4 mr-2" />
-              {form[name] ? format(new Date(form[name]), "PPP") : `Pick ${label}`}
+              {form[name]
+                ? format(new Date(form[name]), "PPP")
+                : `Pick ${label}`}
             </Button>
           </PopoverTrigger>
           <PopoverContent className="p-0 bg-card border border-[var(--border)]">
@@ -327,9 +355,13 @@ export default function LeadPageForm({
         <Button variant="outline" size="icon" onClick={onCancel}>
           <ArrowLeft className="h-4 w-4" />
         </Button>
-        <div>
+        <div className={readOnly ? "pointer-events-none opacity-90" : ""}>
           <h1 className="text-2xl font-semibold">
-            {isEdit ? `Edit Lead ${lead?.leadNo}` : "Create Lead"}
+            {readOnly
+              ? `View Lead ${lead?.leadNo}`
+              : isEdit
+              ? `Edit Lead ${lead?.leadNo}`
+              : "Create Lead"}
           </h1>
           <p className="text-[var(--muted-foreground)]">
             Fill the details below.
@@ -677,12 +709,12 @@ export default function LeadPageForm({
                       <SelectContent>
                         <SelectItem value="none">None</SelectItem>
                         {executives
-                        .filter((e) => e.isActive === true)
-                        .map((e) => (
-                          <SelectItem key={e._id} value={e._id}>
-                            {e.name}
-                          </SelectItem>
-                        ))}
+                          .filter((e) => e.isActive === true)
+                          .map((e) => (
+                            <SelectItem key={e._id} value={e._id}>
+                              {e.name}
+                            </SelectItem>
+                          ))}
                       </SelectContent>
                     </Select>
                   </div>
@@ -901,15 +933,42 @@ export default function LeadPageForm({
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-2">
-                  <Label>Lead Remarks</Label>
+                  <Label>Recent Remark</Label>
+
+                  {latestRemark ? (
+                    <div className="rounded-md border p-3 bg-muted">
+                      <p className="text-sm">{latestRemark.text}</p>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        — {latestRemark.createdBy?.name || "Unknown"} •{" "}
+                        {new Date(latestRemark.createdAt).toLocaleString()}
+                      </p>
+                    </div>
+                  ) : (
+                    <p className="text-sm text-muted-foreground">
+                      No remarks added yet
+                    </p>
+                  )}
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Add New Remark</Label>
                   <Textarea
-                    name="leadRemarks"
-                    placeholder="Key notes about this lead..."
-                    value={form.leadRemarks}
-                    onChange={handleChange}
+                    placeholder="Type a new remark..."
+                    value={form.newRemark}
+                    onChange={(e) =>
+                      setForm((p: any) => ({ ...p, newRemark: e.target.value }))
+                    }
                     rows={3}
                   />
                 </div>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setRemarksOpen(true)}
+                >
+                  View All Remarks
+                </Button>
+
                 <div className="space-y-2">
                   <Label className="text-[var(--muted-foreground)]">
                     Remarks - From Team (Optional)
@@ -983,11 +1042,37 @@ export default function LeadPageForm({
           <Button variant="outline" onClick={onCancel}>
             Cancel
           </Button>
-          <Button onClick={submit} disabled={saving}>
-            {saving ? "Saving..." : isEdit ? "Save Changes" : "Create Lead"}
-          </Button>
+
+          {!readOnly && (
+            <Button onClick={submit} disabled={saving}>
+              {saving ? "Saving..." : isEdit ? "Save Changes" : "Create Lead"}
+            </Button>
+          )}
         </div>
       </div>
+      <Dialog open={remarksOpen} onOpenChange={setRemarksOpen}>
+        <DialogContent className="max-w-xl">
+          <DialogHeader>
+            <DialogTitle>All Lead Remarks</DialogTitle>
+          </DialogHeader>
+
+          <div className="space-y-3 max-h-[400px] overflow-y-auto">
+            {form.leadRemarks.length === 0 && (
+              <p className="text-sm text-muted-foreground">No remarks found</p>
+            )}
+
+            {form.leadRemarks.map((r: any, idx: number) => (
+              <div key={idx} className="border rounded-md p-3">
+                <p className="text-sm">{r.text}</p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  {r.createdBy?.name || "Unknown"} •{" "}
+                  {new Date(r.createdAt).toLocaleString()}
+                </p>
+              </div>
+            ))}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

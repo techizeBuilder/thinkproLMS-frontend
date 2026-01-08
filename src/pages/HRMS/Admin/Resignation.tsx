@@ -1,6 +1,7 @@
 /** @format */
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import axios from "axios";
 import {
   Table,
   TableBody,
@@ -17,6 +18,8 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 
+const API = import.meta.env.VITE_API_URL;
+
 /* ================= TYPES ================= */
 
 type ResignationStatus =
@@ -27,13 +30,15 @@ type ResignationStatus =
   | "COMPLETED";
 
 interface Resignation {
-  id: string;
-  employeeName: string;
-  role: string;
-  department: string;
-  lastWorkingDay: string;
-  appliedOn: string;
-  reason: string;
+  _id: string;
+  employee: {
+    name: string;
+    role: string;
+    departmentId?: { name: string };
+  };
+  expectedLastWorkingDay: string;
+  createdAt: string;
+  reasonText: string;
   status: ResignationStatus;
 }
 
@@ -58,60 +63,67 @@ const StatusBadge = ({ status }: { status: ResignationStatus }) => {
   );
 };
 
-/* ================= STATIC DATA ================= */
-
-const RESIGNATION_DATA: Resignation[] = [
-  {
-    id: "1",
-    employeeName: "Rahul Sharma",
-    role: "Software Engineer",
-    department: "IT",
-    lastWorkingDay: "2025-01-30",
-    appliedOn: "2025-01-01",
-    reason: "Better opportunity",
-    status: "PENDING",
-  },
-  {
-    id: "2",
-    employeeName: "Neha Verma",
-    role: "HR Executive",
-    department: "HR",
-    lastWorkingDay: "2025-02-10",
-    appliedOn: "2025-01-05",
-    reason: "Personal reasons",
-    status: "APPROVED",
-  },
-  {
-    id: "3",
-    employeeName: "Amit Singh",
-    role: "Accountant",
-    department: "Finance",
-    lastWorkingDay: "2025-01-25",
-    appliedOn: "2024-12-28",
-    reason: "Relocation",
-    status: "IN_CLEARANCE",
-  },
-  {
-    id: "4",
-    employeeName: "Pooja Gupta",
-    role: "Mentor",
-    department: "Academics",
-    lastWorkingDay: "2025-01-20",
-    appliedOn: "2024-12-20",
-    reason: "Higher studies",
-    status: "COMPLETED",
-  },
-];
-
 /* ================= MAIN COMPONENT ================= */
 
 const Resignation = () => {
+  const [data, setData] = useState<Resignation[]>([]);
   const [open, setOpen] = useState(false);
   const [selected, setSelected] = useState<Resignation | null>(null);
+
+  /* ================= FETCH ================= */
+
+  const fetchResignations = async () => {
+    const res = await axios.get(`${API}/resignation/all`, {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+      },
+    });
+    setData(res.data);
+  };
+
+  useEffect(() => {
+    fetchResignations();
+  }, []);
+
+  /* ================= ACTIONS ================= */
 
   const handleView = (item: Resignation) => {
     setSelected(item);
     setOpen(true);
+  };
+
+  const handleApprove = async () => {
+    if (!selected) return;
+
+    await axios.patch(
+      `${API}/resignation/status/${selected._id}`,
+      { status: "APPROVED" },
+      {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      }
+    );
+
+    setOpen(false);
+    fetchResignations();
+  };
+
+  const handleReject = async () => {
+    if (!selected) return;
+
+    await axios.patch(
+      `${API}/resignation/status/${selected._id}`,
+      { status: "REJECTED" },
+      {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      }
+    );
+
+    setOpen(false);
+    fetchResignations();
   };
 
   return (
@@ -140,15 +152,17 @@ const Resignation = () => {
           </TableHeader>
 
           <TableBody>
-            {RESIGNATION_DATA.map((item, index) => (
-              <TableRow key={item.id}>
+            {data.map((item, index) => (
+              <TableRow key={item._id}>
                 <TableCell>{index + 1}</TableCell>
                 <TableCell className="font-medium">
-                  {item.employeeName}
+                  {item.employee.name}
                 </TableCell>
-                <TableCell>{item.role}</TableCell>
-                <TableCell>{item.department}</TableCell>
-                <TableCell>{item.lastWorkingDay}</TableCell>
+                <TableCell>{item.employee.role}</TableCell>
+                <TableCell>{item.employee.departmentId?.name}</TableCell>
+                <TableCell>
+                  {new Date(item.expectedLastWorkingDay).toLocaleDateString()}
+                </TableCell>
                 <TableCell>
                   <StatusBadge status={item.status} />
                 </TableCell>
@@ -178,35 +192,45 @@ const Resignation = () => {
           {selected && (
             <div className="space-y-3 text-sm">
               <p>
-                <strong>Employee:</strong> {selected.employeeName}
+                <strong>Employee:</strong> {selected.employee.name}
               </p>
               <p>
-                <strong>Role:</strong> {selected.role}
+                <strong>Role:</strong> {selected.employee.role}
               </p>
               <p>
-                <strong>Department:</strong> {selected.department}
+                <strong>Department:</strong> {selected.employee.departmentId?.name || "N/A"}
               </p>
               <p>
-                <strong>Applied On:</strong> {selected.appliedOn}
+                <strong>Applied On:</strong>{" "}
+                {new Date(selected.createdAt).toLocaleDateString()}
               </p>
               <p>
-                <strong>Last Working Day:</strong> {selected.lastWorkingDay}
+                <strong>Last Working Day:</strong>{" "}
+                {new Date(selected.expectedLastWorkingDay).toLocaleDateString()}
               </p>
               <p>
-                <strong>Reason:</strong> {selected.reason}
+                <strong>Reason:</strong> {selected.reasonText}
               </p>
               <p>
                 <strong>Status:</strong>{" "}
                 <StatusBadge status={selected.status} />
               </p>
 
-              {/* Future actions */}
-              <div className="flex gap-2 pt-3">
-                <Button size="sm">Approve</Button>
-                <Button size="sm" variant="destructive">
-                  Reject
-                </Button>
-              </div>
+              {/* ACTIONS */}
+              {selected.status === "PENDING" && (
+                <div className="flex gap-2 pt-3">
+                  <Button size="sm" onClick={handleApprove}>
+                    Approve
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="destructive"
+                    onClick={handleReject}
+                  >
+                    Reject
+                  </Button>
+                </div>
+              )}
             </div>
           )}
         </DialogContent>

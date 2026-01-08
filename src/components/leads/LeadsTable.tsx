@@ -3,6 +3,7 @@ import { leadService, type Lead } from "@/api/leadService";
 import axiosInstance from "@/api/axiosInstance";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import qs from "qs";
 import {
   Table,
   TableBody,
@@ -27,6 +28,7 @@ import {
   RotateCcw,
   Calendar as CalendarIcon,
   Download,
+  Eye,
 } from "lucide-react";
 import { useDebounce } from "@/hooks/useDebounce";
 import {
@@ -52,10 +54,13 @@ import {
 } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { useAuth } from "@/contexts/AuthContext";
-
+import { Check } from "lucide-react";
+import { useSearchParams, useLocation, useNavigate } from "react-router-dom";
+import { ArrowUp, ArrowDown } from "lucide-react";
 interface LeadsTableProps {
   onAddNew?: () => void;
   onEdit?: (lead: Lead) => void;
+  onView?: (lead: Lead) => void;
 }
 type SalesManager = {
   _id: string;
@@ -70,7 +75,85 @@ type SalesExecutive = {
   isActive: boolean;
 };
 
-export default function LeadsTable({ onAddNew, onEdit }: LeadsTableProps) {
+type MultiSelectOption = {
+  label: string;
+  value: string;
+};
+
+type MultiSelectProps = {
+  label: string;
+  options: MultiSelectOption[];
+  value: string[];
+  onChange: (val: string[]) => void;
+  placeholder?: string;
+};
+
+export function MultiSelect({
+  label,
+  options,
+  value,
+  onChange,
+  placeholder = "Select",
+}: MultiSelectProps) {
+  const toggleValue = (item: string) => {
+    if (value.includes(item)) {
+      onChange(value.filter((v) => v !== item)); // ❌ untick
+    } else {
+      onChange([...value, item]); // ✅ tick
+    }
+  };
+
+  return (
+    <div className="space-y-1">
+      <label className="text-sm font-medium">{label}</label>
+
+      <Popover>
+        <PopoverTrigger asChild>
+          <Button
+            variant="outline"
+            className="w-full justify-start text-left h-10"
+          >
+            {value.length ? `${value.length} selected` : placeholder}
+          </Button>
+        </PopoverTrigger>
+
+        <PopoverContent className="w-64 p-0">
+          <div className="max-h-64 overflow-y-auto">
+            <div className="p-2">
+              {options.map((item) => {
+                const checked = value.includes(item.value);
+
+                return (
+                  <div
+                    key={item.value}
+                    onClick={() => {
+                      if (checked) {
+                        onChange(value.filter((v) => v !== item.value));
+                      } else {
+                        onChange([...value, item.value]);
+                      }
+                    }}
+                    className="flex items-center gap-2 px-2 py-1.5 rounded cursor-pointer hover:bg-muted"
+                  >
+                    <div className="h-4 w-4 border rounded flex items-center justify-center">
+                      {checked && <Check className="h-3 w-3" />}
+                    </div>
+                    <span className="text-sm">{item.label}</span>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </PopoverContent>
+      </Popover>
+    </div>
+  );
+}
+
+export default function LeadsTable({ onAddNew, onEdit,onView }: LeadsTableProps) {
+  const [searchParams, setSearchParams] = useSearchParams();
+   const loggedInUser = JSON.parse(localStorage.getItem("user") || "{}");
+   const loggedInRole = loggedInUser?.role;
   const { user } = useAuth();
   const [loading, setLoading] = useState(true);
   const [tableLoading, setTableLoading] = useState(false);
@@ -82,21 +165,27 @@ export default function LeadsTable({ onAddNew, onEdit }: LeadsTableProps) {
   const [search, setSearch] = useState("");
   const [stateFilter, setStateFilter] = useState("all");
   const [districtFilter, setDistrictFilter] = useState("");
-  const [phaseFilter, setPhaseFilter] = useState("all");
-  const [qualityFilter, setQualityFilter] = useState("all");
-  const [programFilter, setProgramFilter] = useState("all");
-  const [leadSourceFilter, setLeadSourceFilter] = useState("all");
-  const [deliveryModelFilter, setDeliveryModelFilter] = useState("all");
-  const [salesCycleFilter, setSalesCycleFilter] = useState("all");
-  const [boardFilter, setBoardFilter] = useState("all");
-  const [pocRoleFilter, setPocRoleFilter] = useState("all");
-  const [actionOnFilter, setActionOnFilter] = useState<string>("all");
+  const [phaseFilter, setPhaseFilter] = useState<string[]>([]);
+  const [qualityFilter, setQualityFilter] = useState<string[]>([]);
+  const [programFilter, setProgramFilter] = useState<string[]>([]);
+  const [leadSourceFilter, setLeadSourceFilter] = useState<string[]>([]);
+  const [deliveryModelFilter, setDeliveryModelFilter] = useState<string[]>([]);
+  const [salesCycleFilter, setSalesCycleFilter] = useState<string[]>([]);
+  const [boardFilter, setBoardFilter] = useState<string[]>([]);
+  const [pocRoleFilter, setPocRoleFilter] = useState<string[]>([]);
+  const [actionOnFilter, setActionOnFilter] = useState<string[]>([]);
+  const [managerFilter, setManagerFilter] = useState<string[]>([]);
+  const [executiveFilter, setExecutiveFilter] = useState<string[]>([]);
+
   const [actionDueDateFrom, setActionDueDateFrom] = useState<string>("");
   const [actionDueDateTo, setActionDueDateTo] = useState<string>("");
   const [actionDueDateExact, setActionDueDateExact] = useState<string>("");
   const [actionDueOpen, setActionDueOpen] = useState(false);
   const [managers, setManagers] = useState<SalesManager[]>([]);
   const [executives, setExecutives] = useState<SalesExecutive[]>([]);
+  const [sortKey, setSortKey] = useState<string | null>(null);
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
+
   const [actionDueRange, setActionDueRange] = useState<{
     from?: Date;
     to?: Date;
@@ -130,6 +219,16 @@ export default function LeadsTable({ onAddNew, onEdit }: LeadsTableProps) {
         } catch {}
       })();
     }, []);
+
+    const handleSort = (key: string) => {
+      if (sortKey === key) {
+        setSortOrder((prev) => (prev === "asc" ? "desc" : "asc"));
+      } else {
+        setSortKey(key);
+        setSortOrder("asc");
+      }
+    };
+
 
   useEffect(() => {
     fetchLeads();
@@ -195,31 +294,44 @@ export default function LeadsTable({ onAddNew, onEdit }: LeadsTableProps) {
     try {
       if (initial) setLoading(true);
       else setTableLoading(true);
+
       const res = await leadService.list({
         search: debouncedSearch || undefined,
         state: stateFilter && stateFilter !== "all" ? stateFilter : undefined,
         district: districtFilter || undefined,
-        phase: phaseFilter !== "all" ? phaseFilter : undefined,
-        quality: qualityFilter !== "all" ? qualityFilter : undefined,
-        programType: programFilter !== "all" ? programFilter : undefined,
-        leadSource: leadSourceFilter !== "all" ? leadSourceFilter : undefined,
-        deliveryModel:
-          deliveryModelFilter !== "all" ? deliveryModelFilter : undefined,
-        salesCycle: salesCycleFilter !== "all" ? salesCycleFilter : undefined,
-        boardAffiliated: boardFilter !== "all" ? boardFilter : undefined,
-        pocRole: pocRoleFilter !== "all" ? pocRoleFilter : undefined,
-        actionOn: actionOnFilter !== "all" ? actionOnFilter : undefined,
+
+        phase: phaseFilter.length ? phaseFilter : undefined,
+        quality: qualityFilter.length ? qualityFilter : undefined,
+        programType: programFilter.length ? programFilter : undefined,
+        leadSource: leadSourceFilter.length ? leadSourceFilter : undefined,
+        deliveryModel: deliveryModelFilter.length
+          ? deliveryModelFilter
+          : undefined,
+        salesCycle: salesCycleFilter.length ? salesCycleFilter : undefined,
+        boardAffiliated: boardFilter.length ? boardFilter : undefined,
+
+        // ✅ YAHI MAIN FIX HAI
+        salesManager: managerFilter.length ? managerFilter : undefined,
+
+        salesExecutive: executiveFilter.length ? executiveFilter : undefined,
+
+        actionOn: actionOnFilter.length ? actionOnFilter : undefined,
+
         actionDueDateFrom: actionDueDateFrom
           ? startOfDay(new Date(actionDueDateFrom)).toISOString()
           : undefined,
+
         actionDueDateTo: actionDueDateTo
           ? endOfDay(new Date(actionDueDateTo)).toISOString()
           : undefined,
+
         actionDueDate: actionDueDateExact || undefined,
         status: statusFilter,
+
         page,
         limit: pageSize,
       });
+
       setLeads(res.data || []);
       setTotal(res.total || 0);
       setPages(res.pages || 1);
@@ -228,6 +340,56 @@ export default function LeadsTable({ onAddNew, onEdit }: LeadsTableProps) {
       else setTableLoading(false);
     }
   };
+  const updateParam = (
+    key: string,
+    value?: string | string[] | number | boolean
+  ) => {
+    const params = new URLSearchParams(searchParams);
+
+    if (
+      value === undefined ||
+      value === "" ||
+      (Array.isArray(value) && value.length === 0)
+    ) {
+      params.delete(key);
+    } else if (Array.isArray(value)) {
+      params.set(key, value.join(","));
+    } else {
+      params.set(key, String(value));
+    }
+
+    setSearchParams(params, { replace: true });
+  };
+
+
+  useEffect(() => {
+    setSearch(searchParams.get("search") || "");
+    setStateFilter(searchParams.get("state") || "all");
+    setDistrictFilter(searchParams.get("district") || "");
+    setStatusFilter(
+      (searchParams.get("status") as "active" | "inactive" | "all") || "active"
+    );
+
+    setPhaseFilter(searchParams.get("phase")?.split(",") || []);
+    setQualityFilter(searchParams.get("quality")?.split(",") || []);
+    setProgramFilter(searchParams.get("program")?.split(",") || []);
+    setLeadSourceFilter(searchParams.get("leadSource")?.split(",") || []);
+    setDeliveryModelFilter(searchParams.get("deliveryModel")?.split(",") || []);
+    setSalesCycleFilter(searchParams.get("salesCycle")?.split(",") || []);
+    setBoardFilter(searchParams.get("board")?.split(",") || []);
+    setManagerFilter(searchParams.get("manager")?.split(",") || []);
+    setExecutiveFilter(searchParams.get("executive")?.split(",") || []);
+    setActionOnFilter(searchParams.get("actionOn")?.split(",") || []);
+
+    setActionDueDateFrom(searchParams.get("dueFrom") || "");
+    setActionDueDateTo(searchParams.get("dueTo") || "");
+    setActionDueDateExact(searchParams.get("dueExact") || "");
+
+    setPage(Number(searchParams.get("page") || 1));
+  }, [searchParams]);
+
+
+ 
 
   const getLeadCreatorId = (lead: Lead): string | null => {
     if (!lead?.createdBy) return null;
@@ -299,6 +461,37 @@ export default function LeadsTable({ onAddNew, onEdit }: LeadsTableProps) {
     }
   };
 
+  const SortHead = ({
+    label,
+    sortBy,
+    className = "",
+  }: {
+    label: string;
+    sortBy: string;
+    className?: string;
+  }) => (
+    <TableHead
+      className={`cursor-pointer select-none ${className}`}
+      onClick={() => handleSort(sortBy)}
+    >
+      <div className="flex items-center gap-1">
+        {label}
+        {sortKey === sortBy ? (
+          sortOrder === "asc" ? (
+            <ArrowUp className="h-3 w-3" />
+          ) : (
+            <ArrowDown className="h-3 w-3" />
+          )
+        ) : (
+          <span className="text-gray-300">
+            <ArrowUp className="h-3 w-3" />
+          </span>
+        )}
+      </div>
+    </TableHead>
+  );
+
+
   const handleExportToExcel = async () => {
     try {
       setExporting(true);
@@ -306,16 +499,17 @@ export default function LeadsTable({ onAddNew, onEdit }: LeadsTableProps) {
         search: debouncedSearch || undefined,
         state: stateFilter && stateFilter !== "all" ? stateFilter : undefined,
         district: districtFilter || undefined,
-        phase: phaseFilter !== "all" ? phaseFilter : undefined,
-        quality: qualityFilter !== "all" ? qualityFilter : undefined,
-        programType: programFilter !== "all" ? programFilter : undefined,
-        leadSource: leadSourceFilter !== "all" ? leadSourceFilter : undefined,
-        deliveryModel:
-          deliveryModelFilter !== "all" ? deliveryModelFilter : undefined,
-        salesCycle: salesCycleFilter !== "all" ? salesCycleFilter : undefined,
-        boardAffiliated: boardFilter !== "all" ? boardFilter : undefined,
-        pocRole: pocRoleFilter !== "all" ? pocRoleFilter : undefined,
-        actionOn: actionOnFilter !== "all" ? actionOnFilter : undefined,
+        phase: phaseFilter.length ? phaseFilter : undefined,
+        quality: qualityFilter.length ? qualityFilter : undefined,
+        programType: programFilter.length ? programFilter : undefined,
+        leadSource: leadSourceFilter.length ? leadSourceFilter : undefined,
+        deliveryModel: deliveryModelFilter.length
+          ? deliveryModelFilter
+          : undefined,
+        salesCycle: salesCycleFilter.length ? salesCycleFilter : undefined,
+        boardAffiliated: boardFilter.length ? boardFilter : undefined,
+        pocRole: pocRoleFilter.length ? pocRoleFilter : undefined,
+        actionOn: actionOnFilter.length ? actionOnFilter : undefined,
         actionDueDateFrom: actionDueDateFrom
           ? startOfDay(new Date(actionDueDateFrom)).toISOString()
           : undefined,
@@ -352,6 +546,60 @@ export default function LeadsTable({ onAddNew, onEdit }: LeadsTableProps) {
     [indiaStates]
   );
 
+  const clearAllFilters = () => {
+    setSearchParams({});
+  };
+
+
+const actionOnOptions = [
+  ...managers.map((m) => ({
+    label: `Manager - ${m.name}`,
+    value: m._id,
+  })),
+  ...executives.map((e) => ({
+    label: `Executive - ${e.name}`,
+    value: e._id,
+  })),
+];
+const managerOptions = managers
+  .filter((m) => m.isActive)
+  .map((m) => ({
+    label: m.name,
+    value: m._id,
+  }));
+const executiveOptions = executives
+  .filter((e) => e.isActive)
+  .map((e) => ({
+    label: e.name,
+    value: e._id,
+  }));
+
+const toOptions = (arr: string[]) =>
+  arr.map((item) => ({
+    label: item,
+    value: item,
+  }));
+
+
+const sortedLeads = [...leads].sort((a: any, b: any) => {
+  if (!sortKey) return 0;
+
+  const aVal = a[sortKey];
+  const bVal = b[sortKey];
+
+  if (aVal == null) return 1;
+  if (bVal == null) return -1;
+
+  if (typeof aVal === "number" && typeof bVal === "number") {
+    return sortOrder === "asc" ? aVal - bVal : bVal - aVal;
+  }
+
+  return sortOrder === "asc"
+    ? String(aVal).localeCompare(String(bVal))
+    : String(bVal).localeCompare(String(aVal));
+});
+
+
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between gap-3 flex-wrap">
@@ -359,25 +607,28 @@ export default function LeadsTable({ onAddNew, onEdit }: LeadsTableProps) {
           <h1 className="text-2xl font-semibold">Leads</h1>
           <p className="text-gray-600">Manage and track school leads</p>
         </div>
-        <div className="flex items-center gap-2">
-          <Button
-            variant="outline"
-            onClick={handleExportToExcel}
-            disabled={exporting}
-          >
-            {exporting ? (
-              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-            ) : (
-              <Download className="h-4 w-4 mr-2" />
-            )}
-            Export to Excel
-          </Button>
-          {onAddNew && (
-            <Button onClick={onAddNew}>
-              <Plus className="h-4 w-4 mr-2" /> New Lead
+        {(loggedInRole === "superadmin" || loggedInRole === "manager") && (
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              onClick={handleExportToExcel}
+              disabled={exporting}
+            >
+              {exporting ? (
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              ) : (
+                <Download className="h-4 w-4 mr-2" />
+              )}
+              Export to Excel
             </Button>
-          )}
-        </div>
+
+            {onAddNew && (
+              <Button onClick={onAddNew}>
+                <Plus className="h-4 w-4 mr-2" /> New Lead
+              </Button>
+            )}
+          </div>
+        )}
       </div>
 
       <div className="flex flex-col gap-2 items-start">
@@ -388,12 +639,15 @@ export default function LeadsTable({ onAddNew, onEdit }: LeadsTableProps) {
             <Input
               placeholder="Lead No / School Name"
               value={search}
-              onChange={(e) => setSearch(e.target.value)}
+              onChange={(e) => updateParam("search", e.target.value)}
             />
           </div>
           <div className="space-y-1 sm:space-y-2">
             <Label>State</Label>
-            <Select value={stateFilter} onValueChange={setStateFilter}>
+            <Select
+              value={stateFilter}
+              onValueChange={(v) => updateParam("state", v)}
+            >
               <SelectTrigger className="h-10">
                 <SelectValue placeholder="State" />
               </SelectTrigger>
@@ -443,7 +697,7 @@ export default function LeadsTable({ onAddNew, onEdit }: LeadsTableProps) {
               <PopoverTrigger asChild>
                 <Button
                   variant="outline"
-                  className="w-full justify-start text-left font-normal"
+                  className="w-full justify-start text-left font-normal truncate whitespace-nowrap overflow-hidden"
                 >
                   <CalendarIcon className="mr-2 h-4 w-4" />
                   {(() => {
@@ -526,226 +780,139 @@ export default function LeadsTable({ onAddNew, onEdit }: LeadsTableProps) {
             </Popover>
           </div>
           <div className="space-y-1 sm:space-y-2">
-            <Label>Action On</Label>
-            <Select value={actionOnFilter} onValueChange={setActionOnFilter}>
-              <SelectTrigger className="h-10">
-                <SelectValue placeholder="Action On" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All</SelectItem>
-                <SelectItem value="none" disabled>
-                  Managers
-                </SelectItem>
-                {managers.map((m) => (
-                  <SelectItem key={`manager-${m._id}`} value={m._id}>
-                    {m.name}
-                  </SelectItem>
-                ))}
-                <SelectItem value="none2" disabled>
-                  Executives
-                </SelectItem>
-                {executives.map((e) => (
-                  <SelectItem key={`exec-${e._id}`} value={e._id}>
-                    {e.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="space-y-1 sm:space-y-2">
-            <Label>TPA Sales POC (Manager)</Label>
-
-            <Select value={pocRoleFilter} onValueChange={setPocRoleFilter}>
-              <SelectTrigger className="h-10">
-                <SelectValue placeholder="Select Manager" />
-              </SelectTrigger>
-
-              <SelectContent>
-                <SelectItem value="all">All</SelectItem>
-
-                {managers
-                  .filter((m) => m.isActive === true)
-                  .map((m) => (
-                    <SelectItem key={m._id} value={m._id}>
-                      {m.name}
-                    </SelectItem>
-                  ))}
-              </SelectContent>
-            </Select>
+            <MultiSelect
+              label="Action On"
+              value={actionOnFilter}
+              onChange={(v) => updateParam("actionOn", v)}
+              options={actionOnOptions}
+            />
           </div>
 
           <div className="space-y-1 sm:space-y-2">
-            <Label>TPA Sales POC (Executive)</Label>
-
-            <Select value={pocRoleFilter} onValueChange={setPocRoleFilter}>
-              <SelectTrigger className="h-10">
-                <SelectValue placeholder="Select Executive" />
-              </SelectTrigger>
-
-              <SelectContent>
-                <SelectItem value="all">All</SelectItem>
-
-                {executives
-                  .filter((e) => e.isActive === true)
-                  .map((e) => (
-                    <SelectItem key={e._id} value={e._id}>
-                      {e.name}
-                    </SelectItem>
-                  ))}
-              </SelectContent>
-            </Select>
+            <MultiSelect
+              label="TPA Sales POC (Manager)"
+              value={managerFilter}
+              onChange={(v) => updateParam("manager", v)}
+              options={managerOptions}
+            />
           </div>
 
           <div className="space-y-1 sm:space-y-2">
-            <Label>Phase</Label>
-            <Select value={phaseFilter} onValueChange={setPhaseFilter}>
-              <SelectTrigger className="h-10">
-                <SelectValue placeholder="Phase" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All</SelectItem>
-                {[
-                  "Lead",
-                  "Visit to be scheduled",
-                  "Visited",
-                  "Demo / PTM etc to be Scheduled",
-                  "Proposal to be shared",
-                  "Proposal Shared",
-                  "Commercial Negotiations underway",
-                  "Decision Awaited",
-                  "LOI Awaited",
-                  "LOI Received",
-                  "Contract to be shared",
-                  "Contract Shared",
-                  "Contract Review underway",
-                  "Contract Signed",
-                  "Deal Lost",
-                  "On Hold",
-                  "Pursue next AY",
-                  "Invoiced",
-                  "Payment Awaited",
-                  "Payment Received",
-                  "Kits to be Shipped",
-                  "Kits Shipped",
-                  "Training to be Scheduled",
-                  "Training Scheduled",
-                  "Training Completed",
-                  "Kickoff to be scheduded",
-                  "Kickoff Complete",
-                ].map((p) => (
-                  <SelectItem key={p} value={p}>
-                    {p}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <div className="space-y-1 sm:space-y-2">
+              <MultiSelect
+                label="TPA Sales POC (Executive)"
+                value={executiveFilter}
+                onChange={setExecutiveFilter}
+                options={executiveOptions}
+              />
+            </div>
+          </div>
+
+          <div className="space-y-1 sm:space-y-2">
+            <MultiSelect
+              label="Phase"
+              value={phaseFilter}
+              onChange={(v) => updateParam("phase", v)}
+              options={toOptions([
+                "Lead",
+                "Visit to be scheduled",
+                "Visited",
+                "Demo / PTM etc to be Scheduled",
+                "Proposal to be shared",
+                "Proposal Shared",
+                "Commercial Negotiations underway",
+                "Decision Awaited",
+                "LOI Awaited",
+                "LOI Received",
+                "Contract to be shared",
+                "Contract Shared",
+                "Contract Review underway",
+                "Contract Signed",
+                "Deal Lost",
+                "On Hold",
+                "Pursue next AY",
+                "Invoiced",
+                "Payment Awaited",
+                "Payment Received",
+                "Kits to be Shipped",
+                "Kits Shipped",
+                "Training to be Scheduled",
+                "Training Scheduled",
+                "Training Completed",
+                "Kickoff to be scheduded",
+                "Kickoff Complete",
+              ])}
+            />
           </div>
           <div className="space-y-1 sm:space-y-2">
-            <Label>Lead Source</Label>
-            <Select
+            <MultiSelect
+              label="Lead Source"
               value={leadSourceFilter}
-              onValueChange={setLeadSourceFilter}
-            >
-              <SelectTrigger className="h-10">
-                <SelectValue placeholder="Lead Source" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All</SelectItem>
-                {["Internal", "Channel Partner"].map((s) => (
-                  <SelectItem key={s} value={s}>
-                    {s}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+              onChange={(v) => updateParam("leadSource", v)}
+              options={toOptions(["Internal", "Channel Partner"])}
+            />
           </div>
           <div className="space-y-1 sm:space-y-2">
-            <Label>Program</Label>
-            <Select value={programFilter} onValueChange={setProgramFilter}>
-              <SelectTrigger className="h-10">
-                <SelectValue placeholder="Program" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All</SelectItem>
-                {["Pilot", "Full"].map((v) => (
-                  <SelectItem key={v} value={v}>
-                    {v}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <MultiSelect
+              label="Program"
+              value={programFilter}
+              onChange={(v) => updateParam("program", v)}
+              options={toOptions(["Pilot", "Full"])}
+            />
           </div>
           <div className="space-y-1 sm:space-y-2">
-            <Label>Quality Of Lead</Label>
-            <Select value={qualityFilter} onValueChange={setQualityFilter}>
-              <SelectTrigger className="h-10">
-                <SelectValue placeholder="Quality" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All</SelectItem>
-                {["Cold", "Warm", "Hot"].map((q) => (
-                  <SelectItem key={q} value={q}>
-                    {q}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <MultiSelect
+              label="Quality Of Lead"
+              value={qualityFilter}
+              onChange={(v) => updateParam("quality", v)}
+              options={toOptions(["Cold", "Warm", "Hot"])}
+            />
           </div>
           <div className="space-y-1 sm:space-y-2">
-            <Label>Delivery Model</Label>
-            <Select
+            <MultiSelect
+              label="Delivery Model"
               value={deliveryModelFilter}
-              onValueChange={setDeliveryModelFilter}
-            >
-              <SelectTrigger className="h-10">
-                <SelectValue placeholder="Delivery Model" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All</SelectItem>
-                {["TPA Managed", "School Managed", "Hybrid"].map((m) => (
-                  <SelectItem key={m} value={m}>
-                    {m}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+              onChange={(v) => updateParam("deliveryModel", v)}
+              options={toOptions(["TPA Managed", "School Managed", "Hybrid"])}
+            />
           </div>
           <div className="space-y-1 sm:space-y-2">
-            <Label>Sales Cycle</Label>
-            <Select
+            <MultiSelect
+              label="Sales Cycle"
               value={salesCycleFilter}
-              onValueChange={setSalesCycleFilter}
-            >
-              <SelectTrigger className="h-10">
-                <SelectValue placeholder="Sales Cycle" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All</SelectItem>
-                {["2025-2026", "2026-2027"].map((c) => (
-                  <SelectItem key={c} value={c}>
-                    {c}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+              onChange={(v) => updateParam("salesCycle", v)}
+              options={toOptions(["2025-2026", "2026-2027"])}
+            />
           </div>
           <div className="space-y-1 sm:space-y-2">
-            <Label>Board Affiliated</Label>
-            <Select value={boardFilter} onValueChange={setBoardFilter}>
-              <SelectTrigger className="h-10">
-                <SelectValue placeholder="Board" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All</SelectItem>
-                {["CBSE", "ICSE", "State Board", "IGCSE", "IB", "Other"].map(
-                  (b) => (
-                    <SelectItem key={b} value={b}>
-                      {b}
-                    </SelectItem>
-                  )
-                )}
-              </SelectContent>
-            </Select>
+            <MultiSelect
+              label="Board Affiliated"
+              value={boardFilter}
+              onChange={(v) => updateParam("board", v)}
+              options={toOptions([
+                "CBSE",
+                "ICSE",
+                "State Board",
+                "IGCSE",
+                "IB",
+                "Other",
+              ])}
+            />
+          </div>
+          <div className="space-y-1 sm:space-y-2 flex items-end justify-end mb-1 mr-6">
+            <Button
+              onClick={clearAllFilters}
+              size="sm"
+              className="
+      flex items-center gap-2
+      bg-blue-50
+      text-blue-700
+      hover:bg-blue-100
+    "
+            >
+              <RotateCcw className="h-4 w-4" />
+              Clear All
+            </Button>
           </div>
         </div>
       </div>
@@ -753,41 +920,135 @@ export default function LeadsTable({ onAddNew, onEdit }: LeadsTableProps) {
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead className="min-w-[100px]">Lead No</TableHead>
-            <TableHead className="min-w-[200px]">School Name</TableHead>
-            <TableHead className="min-w-[150px]">Action On</TableHead>
-            <TableHead className="min-w-[130px]">Action Due date</TableHead>
-            <TableHead className="min-w-[200px]">
-              Action needed - From Team
-            </TableHead>
-            <TableHead className="min-w-[180px]">Phase</TableHead>
-            <TableHead className="min-w-[150px]">TPA Sales POC</TableHead>
-            <TableHead className="min-w-[120px]">City / Town</TableHead>
-            <TableHead className="min-w-[120px]">State</TableHead>
-            <TableHead className="min-w-[120px]">District</TableHead>
-            <TableHead className="min-w-[100px]">Quality</TableHead>
-            <TableHead className="min-w-[100px]">Program Type</TableHead>
-            <TableHead className="min-w-[150px]">Principal Name</TableHead>
-            <TableHead className="min-w-[150px]">Principal Contact</TableHead>
-            <TableHead className="min-w-[200px]">Principal Email</TableHead>
-            <TableHead className="min-w-[150px]">Key Person Name</TableHead>
-            <TableHead className="min-w-[150px]">Key Person Contact</TableHead>
-            <TableHead className="min-w-[200px]">Key Person Email</TableHead>
-            <TableHead className="min-w-[120px]">No of Students</TableHead>
-            <TableHead className="min-w-[120px]">Avg Fees Per Year</TableHead>
-            <TableHead className="min-w-[120px]">
-              Annual Contract Value
-            </TableHead>
-            <TableHead className="min-w-[120px]">Sales Start Date</TableHead>
-            <TableHead className="min-w-[120px]">Sales Closed Date</TableHead>
-            <TableHead className="min-w-[120px]">Lead Source</TableHead>
-            <TableHead className="min-w-[150px]">Lead Remarks</TableHead>
-            <TableHead className="min-w-[150px]">Team Remarks</TableHead>
+            <SortHead
+              label="Lead No"
+              sortBy="leadNo"
+              className="min-w-[100px]"
+            />
+            <SortHead
+              label="School Name"
+              sortBy="schoolName"
+              className="min-w-[200px]"
+            />
+            <SortHead
+              label="Action On"
+              sortBy="actionOn"
+              className="min-w-[150px]"
+            />
+            <SortHead
+              label="Action Due Date"
+              sortBy="actionDueDate"
+              className="min-w-[130px]"
+            />
+            <SortHead
+              label="Action Needed - From Team"
+              sortBy="actionNeeded"
+              className="min-w-[200px]"
+            />
+            <SortHead label="Phase" sortBy="phase" className="min-w-[180px]" />
+            <SortHead
+              label="TPA Sales POC"
+              sortBy="salesExecutive"
+              className="min-w-[150px]"
+            />
+            <SortHead
+              label="City / Town"
+              sortBy="city"
+              className="min-w-[120px]"
+            />
+            <SortHead label="State" sortBy="state" className="min-w-[120px]" />
+            <SortHead
+              label="District"
+              sortBy="district"
+              className="min-w-[120px]"
+            />
+            <SortHead
+              label="Quality"
+              sortBy="qualityOfLead"
+              className="min-w-[100px]"
+            />
+            <SortHead
+              label="Program Type"
+              sortBy="programType"
+              className="min-w-[100px]"
+            />
+            <SortHead
+              label="Principal Name"
+              sortBy="principalName"
+              className="min-w-[150px]"
+            />
+            <SortHead
+              label="Principal Contact"
+              sortBy="principalContact"
+              className="min-w-[150px]"
+            />
+            <SortHead
+              label="Principal Email"
+              sortBy="principalEmail"
+              className="min-w-[200px]"
+            />
+            <SortHead
+              label="Key Person Name"
+              sortBy="keyPersonName"
+              className="min-w-[150px]"
+            />
+            <SortHead
+              label="Key Person Contact"
+              sortBy="keyPersonContact"
+              className="min-w-[150px]"
+            />
+            <SortHead
+              label="Key Person Email"
+              sortBy="keyPersonEmail"
+              className="min-w-[200px]"
+            />
+            <SortHead
+              label="No of Students"
+              sortBy="noOfStudents"
+              className="min-w-[120px]"
+            />
+            <SortHead
+              label="Avg Fees Per Year"
+              sortBy="avgFeesPerYear"
+              className="min-w-[120px]"
+            />
+            <SortHead
+              label="Annual Contract Value"
+              sortBy="annualContractValue"
+              className="min-w-[120px]"
+            />
+            <SortHead
+              label="Sales Start Date"
+              sortBy="salesStartDate"
+              className="min-w-[120px]"
+            />
+            <SortHead
+              label="Sales Closed Date"
+              sortBy="salesClosedDate"
+              className="min-w-[120px]"
+            />
+            <SortHead
+              label="Lead Source"
+              sortBy="leadSource"
+              className="min-w-[120px]"
+            />
+            <SortHead
+              label="Lead Remarks"
+              sortBy="leadRemarks"
+              className="min-w-[150px]"
+            />
+            <SortHead
+              label="Team Remarks"
+              sortBy="teamRemarks"
+              className="min-w-[150px]"
+            />
+
             <TableHead className="text-right min-w-[100px] sticky right-0 bg-white z-10">
               Actions
             </TableHead>
           </TableRow>
         </TableHeader>
+
         <TableBody>
           {(loading || tableLoading) && (
             <TableRow>
@@ -799,7 +1060,7 @@ export default function LeadsTable({ onAddNew, onEdit }: LeadsTableProps) {
             </TableRow>
           )}
           {!loading &&
-            leads.map((l) => (
+            sortedLeads.map((l) => (
               <TableRow key={l._id}>
                 <TableCell className="whitespace-nowrap">{l.leadNo}</TableCell>
                 <TableCell className="whitespace-nowrap min-w-[200px]">
@@ -910,7 +1171,9 @@ export default function LeadsTable({ onAddNew, onEdit }: LeadsTableProps) {
                   {l.leadSource || "-"}
                 </TableCell>
                 <TableCell className="whitespace-nowrap max-w-[200px] truncate">
-                  {l.leadRemarks || "-"}
+                  {Array.isArray(l.leadRemarks) && l.leadRemarks.length > 0
+                    ? l.leadRemarks[l.leadRemarks.length - 1]?.text
+                    : "-"}
                 </TableCell>
                 <TableCell className="whitespace-nowrap max-w-[200px] truncate">
                   {l.teamRemarks || "-"}
@@ -918,6 +1181,13 @@ export default function LeadsTable({ onAddNew, onEdit }: LeadsTableProps) {
                 <TableCell className="text-right sticky right-0 bg-white z-10">
                   {canManageLead(l) ? (
                     <div className="flex items-center justify-end gap-1">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => onView && onView(l)}
+                      >
+                        <Eye className="h-4 w-4" />
+                      </Button>
                       <Button
                         variant="ghost"
                         size="icon"

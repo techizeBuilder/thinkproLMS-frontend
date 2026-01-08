@@ -1,6 +1,7 @@
 /** @format */
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import axios from "axios";
 import {
   Table,
   TableBody,
@@ -18,77 +19,34 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 
+const API = import.meta.env.VITE_API_URL;
+
+/* ================= TYPES ================= */
+
 type Status = "PENDING" | "CLEARED" | "ISSUE";
 
 interface DepartmentClearance {
-  department: "IT" | "FINANCE" | "HR";
+  department: {
+    name: string;
+  };
   tasks: string[];
   status: Status;
   remarks?: string;
 }
 
 interface ClearanceRow {
-  id: string;
-  employee: string;
-  role: string;
+  _id: string;
+  employee: {
+    name: string;
+    role: string;
+  };
   lastWorkingDay: string;
   clearances: DepartmentClearance[];
   overallStatus: "IN_PROGRESS" | "COMPLETED";
 }
 
-/* 🔹 STATIC DATA */
-const clearanceData: ClearanceRow[] = [
-  {
-    id: "1",
-    employee: "Rahul Sharma",
-    role: "Software Developer",
-    lastWorkingDay: "30 Jan 2025",
-    overallStatus: "IN_PROGRESS",
-    clearances: [
-      {
-        department: "IT",
-        tasks: ["Laptop Returned", "Email Access Revoked"],
-        status: "CLEARED",
-      },
-      {
-        department: "FINANCE",
-        tasks: ["Final Salary", "Advance Recovery"],
-        status: "PENDING",
-      },
-      {
-        department: "HR",
-        tasks: ["Exit Interview", "ID Card Submitted"],
-        status: "PENDING",
-      },
-    ],
-  },
-  {
-    id: "2",
-    employee: "Neha Verma",
-    role: "HR Executive",
-    lastWorkingDay: "15 Jan 2025",
-    overallStatus: "COMPLETED",
-    clearances: [
-      {
-        department: "IT",
-        tasks: ["Laptop Returned"],
-        status: "CLEARED",
-      },
-      {
-        department: "FINANCE",
-        tasks: ["Full & Final"],
-        status: "CLEARED",
-      },
-      {
-        department: "HR",
-        tasks: ["Documents Handover"],
-        status: "CLEARED",
-      },
-    ],
-  },
-];
+/* ================= STATUS BADGE ================= */
 
-/* 🔹 Status Badge */
 const StatusBadge = ({ status }: { status: Status }) => {
   const color =
     status === "CLEARED"
@@ -104,8 +62,32 @@ const StatusBadge = ({ status }: { status: Status }) => {
   );
 };
 
+/* ================= MAIN ================= */
+
 const Clearance = () => {
+  const [data, setData] = useState<ClearanceRow[]>([]);
   const [selected, setSelected] = useState<ClearanceRow | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  /* 🔹 FETCH APPROVED RESIGNATIONS → CLEARANCE */
+  const fetchClearance = async () => {
+    try {
+      const res = await axios.get(`${API}/clearances`);
+      setData(res.data);
+    } catch (error) {
+      console.error("Clearance fetch error", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchClearance();
+  }, []);
+
+  if (loading) {
+    return <p className="p-6 text-sm text-gray-500">Loading clearance...</p>;
+  }
 
   return (
     <div className="p-6 space-y-6">
@@ -135,47 +117,61 @@ const Clearance = () => {
           </TableHeader>
 
           <TableBody>
-            {clearanceData.map((row, index) => (
-              <TableRow key={row.id}>
-                <TableCell>{index + 1}</TableCell>
-                <TableCell className="font-medium">{row.employee}</TableCell>
-                <TableCell>{row.role}</TableCell>
-                <TableCell>{row.lastWorkingDay}</TableCell>
+            {data.map((row, index) => {
+              const getStatus = (dept: string) =>
+                row.clearances.find((c) => c.department.name === dept)
+                  ?.status || "PENDING";
 
-                {row.clearances.map((c) => (
-                  <TableCell key={c.department}>
-                    <StatusBadge status={c.status} />
+              return (
+                <TableRow key={row._id}>
+                  <TableCell>{index + 1}</TableCell>
+                  <TableCell className="font-medium">
+                    {row.employee.name}
                   </TableCell>
-                ))}
+                  <TableCell>{row.employee.role}</TableCell>
+                  <TableCell>
+                    {new Date(row.lastWorkingDay).toDateString()}
+                  </TableCell>
 
-                <TableCell>
-                  <Badge
-                    variant={
-                      row.overallStatus === "COMPLETED"
-                        ? "default"
-                        : "secondary"
-                    }
-                  >
-                    {row.overallStatus}
-                  </Badge>
-                </TableCell>
+                  <TableCell>
+                    <StatusBadge status={getStatus("IT")} />
+                  </TableCell>
+                  <TableCell>
+                    <StatusBadge status={getStatus("Finance")} />
+                  </TableCell>
+                  <TableCell>
+                    <StatusBadge status={getStatus("HR")} />
+                  </TableCell>
 
-                <TableCell>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => setSelected(row)}
-                  >
-                    View
-                  </Button>
-                </TableCell>
-              </TableRow>
-            ))}
+                  <TableCell>
+                    <Badge
+                      variant={
+                        row.overallStatus === "COMPLETED"
+                          ? "default"
+                          : "secondary"
+                      }
+                    >
+                      {row.overallStatus}
+                    </Badge>
+                  </TableCell>
+
+                  <TableCell>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => setSelected(row)}
+                    >
+                      View
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              );
+            })}
           </TableBody>
         </Table>
       </div>
 
-      {/* 🔍 View Modal */}
+      {/* View Modal */}
       <Dialog open={!!selected} onOpenChange={() => setSelected(null)}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>
@@ -184,30 +180,31 @@ const Clearance = () => {
 
           {selected && (
             <div className="space-y-4">
-              {/* Employee Info */}
               <div className="grid grid-cols-2 gap-4 text-sm">
                 <p>
-                  <b>Employee:</b> {selected.employee}
+                  <b>Employee:</b> {selected.employee.name}
                 </p>
                 <p>
-                  <b>Role:</b> {selected.role}
+                  <b>Role:</b> {selected.employee.role}
                 </p>
                 <p>
-                  <b>Last Working Day:</b> {selected.lastWorkingDay}
+                  <b>Last Working Day:</b>{" "}
+                  {new Date(selected.lastWorkingDay).toDateString()}
                 </p>
                 <p>
                   <b>Status:</b> {selected.overallStatus}
                 </p>
               </div>
 
-              {/* Clearance Sections */}
               {selected.clearances.map((c) => (
                 <div
-                  key={c.department}
+                  key={c.department.name}
                   className="border rounded-lg p-4 space-y-2"
                 >
                   <div className="flex justify-between items-center">
-                    <h3 className="font-semibold">{c.department} Clearance</h3>
+                    <h3 className="font-semibold">
+                      {c.department.name} Clearance
+                    </h3>
                     <StatusBadge status={c.status} />
                   </div>
 

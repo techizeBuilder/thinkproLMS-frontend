@@ -14,7 +14,7 @@ const ROLE_OPTIONS = [
   { label: "HR Admin", value: "hr-admin" },
   { label: "Manager", value: "manager" },
   { label: "Finance", value: "finance" },
-  { label: "IT Admin", value: "it-admin" },
+  { label: "IT Admin", value: "IT-Admin" },
   { label: "Lead Mentor", value: "leadmentor" },
   { label: "Mentor", value: "mentor" },
 ];
@@ -52,17 +52,8 @@ export default function AddUser() {
   const [managers, setManagers] = useState<any[]>([]);
 
   /* ================= DOCUMENTS ================= */
-  const [documents, setDocuments] = useState<any>({
-    aadhaar: null,
-    pan: null,
-    marksheet12: null,
-    passbook: null,
-  });
 
-  const aadhaarRef = useRef<HTMLInputElement>(null);
-  const panRef = useRef<HTMLInputElement>(null);
-  const marksheet12Ref = useRef<HTMLInputElement>(null);
-  const passbookRef = useRef<HTMLInputElement>(null);
+
 
   const [errors, setErrors] = useState<any>({});
   const [loading, setLoading] = useState(false);
@@ -123,9 +114,6 @@ export default function AddUser() {
       if (!v) e[k] = "Required";
     });
 
-    if (!documents.aadhaar) e.aadhaar = "Required";
-    if (!documents.marksheet12) e.marksheet12 = "Required";
-    if (!documents.passbook) e.passbook = "Required";
 
     setErrors(e);
     return Object.keys(e).length === 0;
@@ -169,23 +157,6 @@ const handleSubmit = async (e: any) => {
       }
     );
 
-   const userId = userRes.data.user.id;
-
-    // ✅ STEP 2: UPLOAD DOCUMENTS (SEPARATE API)
-    const docFD = new FormData();
-
-    if (documents.aadhaar) docFD.append("aadhaar", documents.aadhaar);
-    if (documents.pan) docFD.append("pan", documents.pan);
-    if (documents.marksheet12)
-      docFD.append("marksheet12", documents.marksheet12);
-    if (documents.passbook) docFD.append("passbook", documents.passbook);
-
-    await axios.post(`${API_BASE}/documents/upload/${userId}`, docFD, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-
     alert("User created successfully");
 
     setFormData({
@@ -208,20 +179,11 @@ const handleSubmit = async (e: any) => {
       employmentType: "",
     });
 
-    setDocuments({
-      aadhaar: null,
-      pan: null,
-      marksheet12: null,
-      passbook: null,
-    });
+
 
     setErrors({});
 
     // ✅ CLEAR FILE INPUTS
-    if (aadhaarRef.current) aadhaarRef.current.value = "";
-    if (panRef.current) panRef.current.value = "";
-    if (marksheet12Ref.current) marksheet12Ref.current.value = "";
-    if (passbookRef.current) passbookRef.current.value = "";
   } catch (err) {
     console.error(err);
     alert("Something went wrong");
@@ -584,99 +546,6 @@ const handleSubmit = async (e: any) => {
       {/* LEAD MENTOR EXTRA FORM */}
       {formData.role === "leadmentor" && <LeadMentorForm />}
 
-      {/* ================= UPLOAD DOCUMENTS SECTION ================= */}
-
-      <Card className="max-w-3xl">
-        <CardHeader>
-          <CardTitle className="text-lg font-medium">
-            Upload Documents
-          </CardTitle>
-        </CardHeader>
-
-        <CardContent className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-          {/* Aadhaar */}
-          <div className="space-y-1">
-            <Label>
-              Aadhaar Card <span className="text-red-500">*</span>
-            </Label>
-            <Input
-              ref={aadhaarRef}
-              type="file"
-              accept=".pdf,.jpg,.jpeg,.png"
-              onChange={(e) => {
-                setDocuments({
-                  ...documents,
-                  aadhaar: e.target.files?.[0] || null,
-                });
-                setErrors({ ...errors, aadhaar: "" });
-              }}
-            />
-            {errors.aadhaar && (
-              <p className="text-sm text-red-500">{errors.aadhaar}</p>
-            )}
-          </div>
-
-          {/* PAN (Optional) */}
-          <div className="space-y-1">
-            <Label>PAN Card (Optional)</Label>
-            <Input
-              ref={panRef}
-              type="file"
-              accept=".pdf,.jpg,.jpeg,.png"
-              onChange={(e) =>
-                setDocuments({
-                  ...documents,
-                  pan: e.target.files?.[0] || null,
-                })
-              }
-            />
-          </div>
-
-          {/* 12th / Degree */}
-          <div className="space-y-1">
-            <Label>
-              12th Marksheet OR Degree <span className="text-red-500">*</span>
-            </Label>
-            <Input
-              ref={marksheet12Ref}
-              type="file"
-              accept=".pdf,.jpg,.jpeg,.png"
-              onChange={(e) => {
-                setDocuments({
-                  ...documents,
-                  marksheet12: e.target.files?.[0] || null,
-                });
-                setErrors({ ...errors, marksheet12: "" });
-              }}
-            />
-            {errors.marksheet12 && (
-              <p className="text-sm text-red-500">{errors.marksheet12}</p>
-            )}
-          </div>
-
-          {/* Passbook */}
-          <div className="space-y-1">
-            <Label>
-              Passbook <span className="text-red-500">*</span>
-            </Label>
-            <Input
-              ref={passbookRef}
-              type="file"
-              accept=".pdf,.jpg,.jpeg,.png"
-              onChange={(e) => {
-                setDocuments({
-                  ...documents,
-                  passbook: e.target.files?.[0] || null,
-                });
-                setErrors({ ...errors, passbook: "" });
-              }}
-            />
-            {errors.passbook && (
-              <p className="text-sm text-red-500">{errors.passbook}</p>
-            )}
-          </div>
-        </CardContent>
-      </Card>
 
       {/* Tumhara existing Upload Documents section exactly yahin rahega */}
       <div className="flex justify-center pt-6">
