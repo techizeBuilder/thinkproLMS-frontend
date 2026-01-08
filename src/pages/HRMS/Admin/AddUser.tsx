@@ -22,7 +22,7 @@ const ROLE_OPTIONS = [
 export default function AddUser() {
   const token = localStorage.getItem("token");
 
-  /* ================= BASIC ================= */
+  /* ================= BASIC INFORMATION ================= */
   const [formData, setFormData] = useState({
     name: "",
     email: "",
