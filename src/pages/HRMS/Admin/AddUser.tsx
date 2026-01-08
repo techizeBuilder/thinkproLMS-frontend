@@ -1,6 +1,6 @@
 /** @format */
 
-import { useState, useRef, useEffect } from "react";
+import { useState,useEffect } from "react";
 import axios from "axios";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -22,7 +22,7 @@ const ROLE_OPTIONS = [
 export default function AddUser() {
   const token = localStorage.getItem("token");
 
-  /* ================= BASIC INFO ================= */
+  /* ================= BASIC INFORMATION ================= */
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -128,7 +128,7 @@ const handleSubmit = async (e: any) => {
     setLoading(true);
 
     // ✅ STEP 1: CREATE USER (JSON ONLY)
-    const userRes = await axios.post(
+    await axios.post(
       `${API_BASE}/users`,
       {
         // BASIC

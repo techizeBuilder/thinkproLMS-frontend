@@ -234,7 +234,7 @@ import SoftwareAndLicenseAssignment from "@/pages/HRMS/IT Admin/SoftwearManageme
 import AssetInventory from "@/pages/HRMS/IT Admin/AsestInventory";
 import AssignReassignAsset from "@/pages/HRMS/IT Admin/AssignAsset";
 import ResignationRequest from "@/pages/HRMS/Employee/Request/ResignRequest";
-import SAViewLeadPage from "@/pages/CRM/SuperAdmin/Leads/view";
+import SAViewLeadPage from "@/pages/CRM/SuperAdmin/Leads/View";
 function ProtectedRoute({
   children,
   role,
@@ -582,10 +582,6 @@ export default function AppRouter() {
                     <Route path="leads" element={<SMSalesLeadsPage />} />
                     <Route path="leads/add" element={<SMAddLeadPage />} />
                     <Route path="leads/:id/edit" element={<SMEditLeadPage />} />
-                    <Route
-                      path="leads/:id/view"
-                      element={<SAViewLeadPage />}
-                    />
                     <Route path="summary" element={<CRMSummaryPage />} />
                     <Route
                       path="sales-executives"

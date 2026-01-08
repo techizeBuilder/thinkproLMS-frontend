@@ -98,18 +98,18 @@ export default function ResignationRequest() {
     setViewItem(null);
     setEditItem(null);
   };
-  const closeModal = () => {
-    setOpen(false);
-    setViewItem(null);
-    setEditItem(null);
-    setForm({
-      resignationType: "",
-      reasonCategory: "",
-      reasonText: "",
-      expectedLastWorkingDay: "",
-      documents: "",
-    });
-  };
+  // const closeModal = () => {
+  //   setOpen(false);
+  //   setViewItem(null);
+  //   setEditItem(null);
+  //   setForm({
+  //     resignationType: "",
+  //     reasonCategory: "",
+  //     reasonText: "",
+  //     expectedLastWorkingDay: "",
+  //     documents: "",
+  //   });
+  // };
 
 
   /* ---------------- UI ---------------- */
