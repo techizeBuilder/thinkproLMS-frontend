@@ -3,7 +3,6 @@ import { leadService, type Lead } from "@/api/leadService";
 import axiosInstance from "@/api/axiosInstance";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import qs from "qs";
 import {
   Table,
   TableBody,
@@ -55,7 +54,7 @@ import {
 import { Calendar } from "@/components/ui/calendar";
 import { useAuth } from "@/contexts/AuthContext";
 import { Check } from "lucide-react";
-import { useSearchParams, useLocation, useNavigate } from "react-router-dom";
+import { useSearchParams} from "react-router-dom";
 import { ArrowUp, ArrowDown } from "lucide-react";
 interface LeadsTableProps {
   onAddNew?: () => void;
@@ -95,13 +94,7 @@ export function MultiSelect({
   onChange,
   placeholder = "Select",
 }: MultiSelectProps) {
-  const toggleValue = (item: string) => {
-    if (value.includes(item)) {
-      onChange(value.filter((v) => v !== item)); // ❌ untick
-    } else {
-      onChange([...value, item]); // ✅ tick
-    }
-  };
+ 
 
   return (
     <div className="space-y-1">
@@ -172,7 +165,7 @@ export default function LeadsTable({ onAddNew, onEdit,onView }: LeadsTableProps)
   const [deliveryModelFilter, setDeliveryModelFilter] = useState<string[]>([]);
   const [salesCycleFilter, setSalesCycleFilter] = useState<string[]>([]);
   const [boardFilter, setBoardFilter] = useState<string[]>([]);
-  const [pocRoleFilter, setPocRoleFilter] = useState<string[]>([]);
+  const [pocRoleFilter] = useState<string[]>([]);
   const [actionOnFilter, setActionOnFilter] = useState<string[]>([]);
   const [managerFilter, setManagerFilter] = useState<string[]>([]);
   const [executiveFilter, setExecutiveFilter] = useState<string[]>([]);
