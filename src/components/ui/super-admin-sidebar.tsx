@@ -218,7 +218,7 @@ export function SuperAdminSidebar({ className }: SuperAdminSidebarProps) {
               </Link>
 
               {/* Enter HRMS */}
-              <Link to="/hrms/admin">
+              <Link to="/hrms/SuperAdmin">
                 <Button
                   variant="ghost"
                   className="w-full justify-start text-sm bg-[#4b5563] hover:bg-[#374151]"

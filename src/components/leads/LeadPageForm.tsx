@@ -1124,16 +1124,25 @@ const saveEditedRemark = async () => {
             )}
 
             {form.leadRemarks.map((r: any, idx: number) => (
-              <div key={idx} className="border rounded-md p-3">
-                <p className="text-sm">{r.text}</p>
-                <p className="text-xs text-muted-foreground mt-1">
-                  {r.createdBy?.name || "Unknown"} •{" "}
-                  {new Date(r.createdAt).toLocaleString()}
-                </p>
+              <div
+                key={idx}
+                className="border rounded-md p-3 flex justify-between gap-3"
+              >
+                {/* Left content */}
+                <div className="flex-1">
+                  <p className="text-sm">{r.text}</p>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    {r.createdBy?.name || "Unknown"} •{" "}
+                    {new Date(r.createdAt).toLocaleString()}
+                  </p>
+                </div>
+
+                {/* Right icon */}
                 {isSuperAdmin && (
                   <Button
                     size="icon"
                     variant="ghost"
+                    className="shrink-0 h-8 w-8"
                     onClick={() => startEditRemark(r)}
                   >
                     <Pencil className="h-4 w-4" />

@@ -51,7 +51,7 @@ interface HRMSAdminLayoutProps {
   children: React.ReactNode;
 }
 
-export default function HRMSAdminLayout({ children }: HRMSAdminLayoutProps) {
+export default function SuperAdminLayout({ children }: HRMSAdminLayoutProps) {
   const { isCollapsed } = useSidebar();
   const { user } = useAuth();
 
@@ -74,31 +74,31 @@ export default function HRMSAdminLayout({ children }: HRMSAdminLayoutProps) {
         <SidebarContent className="space-y-4">
           <SidebarGroup label="System Configuration">
             <SidebarNav>
-              <SidebarNavItem to="/hrms/admin/dashboard" icon={Building2}>
+              <SidebarNavItem to="/hrms/SuperAdmin/dashboard" icon={Building2}>
                 Dashboard
               </SidebarNavItem>
-              <SidebarNavItem to="/hrms/admin/companies" icon={Building2}>
+              <SidebarNavItem to="/hrms/SuperAdmin/companies" icon={Building2}>
                 Companies
               </SidebarNavItem>
 
-              <SidebarNavItem to="/hrms/admin/branches" icon={MapPin}>
+              <SidebarNavItem to="/hrms/SuperAdmin/branches" icon={MapPin}>
                 Branches
               </SidebarNavItem>
 
-              <SidebarNavItem to="/hrms/admin/departments" icon={Users}>
+              <SidebarNavItem to="/hrms/SuperAdmin/departments" icon={Users}>
                 Departments
               </SidebarNavItem>
 
-              <SidebarNavItem to="/hrms/admin/designations" icon={Briefcase}>
+              <SidebarNavItem to="/hrms/SuperAdmin/designations" icon={Briefcase}>
                 Designations
               </SidebarNavItem>
 
-              <SidebarNavItem to="/hrms/admin/policies" icon={ShieldCheck}>
+              <SidebarNavItem to="/hrms/SuperAdmin/policies" icon={ShieldCheck}>
                 Company Policies
               </SidebarNavItem>
 
               <SidebarNavItem
-                to="/hrms/admin/payroll-settings"
+                to="/hrms/SuperAdmin/payroll-settings"
                 icon={IndianRupee}
               >
                 Payroll Settings
@@ -109,7 +109,7 @@ export default function HRMSAdminLayout({ children }: HRMSAdminLayoutProps) {
           {/* Employee Lifecycle */}
           <SidebarGroup label="User and Roles">
             <SidebarNav>
-              <SidebarNavItem to="/hrms/admin/addUser" icon={Users}>
+              <SidebarNavItem to="/hrms/SuperAdmin/addUser" icon={Users}>
                 Add Users
               </SidebarNavItem>
             </SidebarNav>
@@ -117,16 +117,16 @@ export default function HRMSAdminLayout({ children }: HRMSAdminLayoutProps) {
           {/* Employee Lifecycle */}
           <SidebarGroup label="Employee Management">
             <SidebarNav>
-              <SidebarNavItem to="/hrms/admin/employees" icon={Users}>
+              <SidebarNavItem to="/hrms/SuperAdmin/employees" icon={Users}>
                 All Users
               </SidebarNavItem>
-              <SidebarNavItem to="/hrms/admin/documents" icon={FileText}>
+              <SidebarNavItem to="/hrms/SuperAdmin/documents" icon={FileText}>
                 Documents
               </SidebarNavItem>
-              <SidebarNavItem to="/hrms/admin/letters" icon={NotebookPen}>
+              <SidebarNavItem to="/hrms/SuperAdmin/letters" icon={NotebookPen}>
                 Letters
               </SidebarNavItem>
-              <SidebarNavItem to="/hrms/admin/probation" icon={UserCheck}>
+              <SidebarNavItem to="/hrms/SuperAdmin/probation" icon={UserCheck}>
                 Probation & Confirmation
               </SidebarNavItem>
             </SidebarNav>
@@ -136,13 +136,13 @@ export default function HRMSAdminLayout({ children }: HRMSAdminLayoutProps) {
           <SidebarGroup label="Onboarding">
             <SidebarNav>
               <SidebarNavItem
-                to="/hrms/admin/onboarding/checklist"
+                to="/hrms/SuperAdmin/onboarding/checklist"
                 icon={ListChecks}
               >
                 Onboarding Checklist
               </SidebarNavItem>
               <SidebarNavItem
-                to="/hrms/admin/onboarding/tasks"
+                to="/hrms/SuperAdmin/onboarding/tasks"
                 icon={ClipboardList}
               >
                 Onboarding Tasks
@@ -154,19 +154,19 @@ export default function HRMSAdminLayout({ children }: HRMSAdminLayoutProps) {
           <SidebarGroup label="Offboarding">
             <SidebarNav>
               <SidebarNavItem
-                to="/hrms/admin/offboarding/resignations"
+                to="/hrms/SuperAdmin/offboarding/resignations"
                 icon={LogOut}
               >
                 Resignations
               </SidebarNavItem>
               <SidebarNavItem
-                to="/hrms/admin/offboarding/clearance"
+                to="/hrms/SuperAdmin/offboarding/clearance"
                 icon={Layers}
               >
                 Clearance Workflow
               </SidebarNavItem>
               <SidebarNavItem
-                to="/hrms/admin/offboarding/full-final"
+                to="/hrms/SuperAdmin/offboarding/full-final"
                 icon={Receipt}
               >
                 Full & Final Settlement
@@ -177,19 +177,19 @@ export default function HRMSAdminLayout({ children }: HRMSAdminLayoutProps) {
           {/* Attendance */}
           <SidebarGroup label="Attendance">
             <SidebarNav>
-              <SidebarNavItem to="/hrms/admin/attendance" icon={CalendarDays}>
+              <SidebarNavItem to="/hrms/SuperAdmin/attendance" icon={CalendarDays}>
                 Attendance Records
               </SidebarNavItem>
-              <SidebarNavItem to="/hrms/admin/shifts" icon={Clock}>
+              <SidebarNavItem to="/hrms/SuperAdmin/shifts" icon={Clock}>
                 Shifts & Rosters
               </SidebarNavItem>
               <SidebarNavItem
-                to="/hrms/admin/attendance/requests"
+                to="/hrms/SuperAdmin/attendance/requests"
                 icon={ClipboardCheck}
               >
                 Attendance Requests
               </SidebarNavItem>
-              <SidebarNavItem to="/hrms/admin/holidays" icon={Calendar}>
+              <SidebarNavItem to="/hrms/SuperAdmin/holidays" icon={Calendar}>
                 Holidays
               </SidebarNavItem>
             </SidebarNav>
@@ -198,13 +198,13 @@ export default function HRMSAdminLayout({ children }: HRMSAdminLayoutProps) {
           {/* Leave */}
           <SidebarGroup label="Leave Management">
             <SidebarNav>
-              <SidebarNavItem to="/hrms/admin/leaves" icon={Briefcase}>
+              <SidebarNavItem to="/hrms/SuperAdmin/leaves" icon={Briefcase}>
                 Leave Requests
               </SidebarNavItem>
-              <SidebarNavItem to="/hrms/admin/leave-types" icon={Settings}>
+              <SidebarNavItem to="/hrms/SuperAdmin/leave-types" icon={Settings}>
                 Leave Types & Rules
               </SidebarNavItem>
-              <SidebarNavItem to="/hrms/admin/leave-encashment" icon={Wallet}>
+              <SidebarNavItem to="/hrms/SuperAdmin/leave-encashment" icon={Wallet}>
                 Leave Encashment
               </SidebarNavItem>
             </SidebarNav>
@@ -214,19 +214,19 @@ export default function HRMSAdminLayout({ children }: HRMSAdminLayoutProps) {
           <SidebarGroup label="Payroll">
             <SidebarNav>
               <SidebarNavItem
-                to="/hrms/admin/salary-structure"
+                to="/hrms/SuperAdmin/salary-structure"
                 icon={IndianRupee}
               >
                 Salary Structure
               </SidebarNavItem>
-              <SidebarNavItem to="/hrms/admin/payroll/run" icon={PlayCircle}>
+              <SidebarNavItem to="/hrms/SuperAdmin/payroll/run" icon={PlayCircle}>
                 Payroll Run
               </SidebarNavItem>
-              <SidebarNavItem to="/hrms/admin/payslips" icon={FileText}>
+              <SidebarNavItem to="/hrms/SuperAdmin/payslips" icon={FileText}>
                 Payslips
               </SidebarNavItem>
               <SidebarNavItem
-                to="/hrms/admin/statutory-reports"
+                to="/hrms/SuperAdmin/statutory-reports"
                 icon={FileBarChart}
               >
                 Statutory Reports
@@ -237,13 +237,13 @@ export default function HRMSAdminLayout({ children }: HRMSAdminLayoutProps) {
           {/* Recruitment */}
           <SidebarGroup label="Recruitment (ATS)">
             <SidebarNav>
-              <SidebarNavItem to="/hrms/admin/jobs" icon={Briefcase}>
+              <SidebarNavItem to="/hrms/SuperAdmin/jobs" icon={Briefcase}>
                 Job Openings
               </SidebarNavItem>
-              <SidebarNavItem to="/hrms/admin/candidates" icon={Users}>
+              <SidebarNavItem to="/hrms/SuperAdmin/candidates" icon={Users}>
                 Candidates
               </SidebarNavItem>
-              <SidebarNavItem to="/hrms/admin/interviews" icon={GitBranch}>
+              <SidebarNavItem to="/hrms/SuperAdmin/interviews" icon={GitBranch}>
                 Interview Pipeline
               </SidebarNavItem>
             </SidebarNav>
