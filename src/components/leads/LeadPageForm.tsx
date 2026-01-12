@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Pencil } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -32,6 +33,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { useAuth } from "@/contexts/AuthContext";
 const REQUIRED_FIELDS = new Set([
   "schoolName",
   "postalAddress",
@@ -89,6 +91,14 @@ export default function LeadPageForm({
     Record<string, boolean>
   >({});
   const [remarksOpen, setRemarksOpen] = useState(false);
+  const [editingRemark, setEditingRemark] = useState<any>(null);
+  const [editedText, setEditedText] = useState("");
+
+  const startEditRemark = (remark: any) => {
+    setEditingRemark(remark);
+    setEditedText(remark.text);
+  };
+
   const [form, setForm] = useState<any>({
     schoolName: "",
     postalAddress: "",
@@ -192,6 +202,10 @@ export default function LeadPageForm({
           : "none",
     }));
   }, [lead?._id]);
+
+  const { user } = useAuth();
+  const isSuperAdmin = user?.role === "superadmin";
+  console.log("isSuperAdmin",isSuperAdmin);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -348,6 +362,46 @@ export default function LeadPageForm({
       </div>
     );
   };
+  const handleAddRemark = async () => {
+  if (!lead?._id || !form.newRemark.trim()) return;
+
+  try {
+    const res = await axiosInstance.post(
+      `/leads/${lead._id}/remarks`,
+      { text: form.newRemark }
+    );
+    
+
+
+    // backend updated remarks return karega (best)
+    setForm((prev: any) => ({
+      ...prev,
+      leadRemarks: res.data.data.leadRemarks,
+      newRemark: "",
+    }));
+  } catch (err) {
+    alert("Failed to add remark");
+  }
+};
+const saveEditedRemark = async () => {
+  if (!editingRemark || !lead?._id) return;
+
+  try {
+    const res = await axiosInstance.put(
+      `/leads/${lead._id}/remarks/${editingRemark._id}`,
+      { text: editedText }
+    );
+
+    setForm((prev: any) => ({
+      ...prev,
+      leadRemarks: res.data.data.leadRemarks,
+    }));
+
+    setEditingRemark(null);
+  } catch {
+    alert("Failed to update remark");
+  }
+};
 
   return (
     <div className="p-4">
@@ -963,7 +1017,15 @@ export default function LeadPageForm({
                 </div>
                 <Button
                   type="button"
+                  disabled={!form.newRemark.trim()}
+                  onClick={handleAddRemark}
+                >
+                  Add Remark
+                </Button>
+                <Button
+                  type="button"
                   variant="outline"
+                  className="ml-2"
                   onClick={() => setRemarksOpen(true)}
                 >
                   View All Remarks
@@ -1068,9 +1130,36 @@ export default function LeadPageForm({
                   {r.createdBy?.name || "Unknown"} •{" "}
                   {new Date(r.createdAt).toLocaleString()}
                 </p>
+                {isSuperAdmin && (
+                  <Button
+                    size="icon"
+                    variant="ghost"
+                    onClick={() => startEditRemark(r)}
+                  >
+                    <Pencil className="h-4 w-4" />
+                  </Button>
+                )}
               </div>
             ))}
           </div>
+        </DialogContent>
+      </Dialog>
+      <Dialog
+        open={!!editingRemark}
+        onOpenChange={() => setEditingRemark(null)}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Edit Remark</DialogTitle>
+          </DialogHeader>
+
+          <Textarea
+            value={editedText}
+            onChange={(e) => setEditedText(e.target.value)}
+            rows={4}
+          />
+
+          <Button onClick={saveEditedRemark}>Save</Button>
         </DialogContent>
       </Dialog>
     </div>

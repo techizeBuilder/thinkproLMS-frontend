@@ -1,12 +1,12 @@
 /** @format */
 
 import { Outlet } from "react-router-dom";
-import HRMSAdminLayout from "../Layout";
 import HRMSManagerLayout from "./HRMSManagerLayout";
 import HRMSEmployeeLayout from "./HRMSEmployeeLayout";
 import { useAuth } from "@/contexts/AuthContext";
 import HRMSFinanceManagerLayout from "./HRMSFinanceLayout";
 import HRMSITAdminLayout from "./HRMSITAdminLayout";
+import HRMSAdminLayout from "./HRMSAdminLayout";
 
 export default function RoleBasedLayout() {
   const { user } = useAuth();
@@ -14,7 +14,6 @@ export default function RoleBasedLayout() {
   if (!user) return null;
 
   switch (user.role) {
-    case "admin":
     case "superadmin":
       return (
         <HRMSAdminLayout>
@@ -48,6 +47,12 @@ export default function RoleBasedLayout() {
         <HRMSITAdminLayout>
           <Outlet />
         </HRMSITAdminLayout>
+      );
+    case "Admin":
+      return (
+        <HRMSAdminLayout>
+          <Outlet />
+        </HRMSAdminLayout>
       );
     default:
       return <div>Unauthorized</div>;

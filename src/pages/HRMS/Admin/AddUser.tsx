@@ -11,12 +11,22 @@ import { LeadMentorForm } from "./LeadMentorForm";
 const API_BASE = import.meta.env.VITE_API_URL;
 
 const ROLE_OPTIONS = [
+  { label: "Super Admin", value: "superadmin" },
+  { label: "Admin", value: "Admin" },
+  { label: "School Admin", value: "schooladmin" },
+
+  { label: "Lead Mentor", value: "leadmentor" },
+  { label: "Mentor", value: "mentor" },
+  { label: "Student", value: "student" },
+  { label: "Guest", value: "guest" },
+
+  { label: "Sales Manager", value: "sales-manager" },
+  { label: "Sales Executive", value: "sales-executive" },
+
   { label: "HR Admin", value: "hr-admin" },
   { label: "Manager", value: "manager" },
   { label: "Finance", value: "finance" },
   { label: "IT Admin", value: "IT-Admin" },
-  { label: "Lead Mentor", value: "leadmentor" },
-  { label: "Mentor", value: "mentor" },
 ];
 
 export default function AddUser() {

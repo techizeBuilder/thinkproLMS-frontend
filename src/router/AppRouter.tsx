@@ -235,6 +235,18 @@ import AssetInventory from "@/pages/HRMS/IT Admin/AsestInventory";
 import AssignReassignAsset from "@/pages/HRMS/IT Admin/AssignAsset";
 import ResignationRequest from "@/pages/HRMS/Employee/Request/ResignRequest";
 import SAViewLeadPage from "@/pages/CRM/SuperAdmin/Leads/View";
+import ReturnClerance from "@/pages/HRMS/IT Admin/ReturnClerance";
+import ITClearanceDashboard from "@/pages/HRMS/IT Admin/Clerance";
+import WorkstationDeskAllocation from "@/pages/HRMS/WorkstationDeskAllocation";
+import AccessCardManagement from "@/pages/HRMS/AccessCardManagement";
+import LockerAssignmentPage from "@/pages/HRMS/LockerAssignmentPage";
+import ParkingAssignmentPage from "@/pages/HRMS/ParkingAssingmentPage";
+import NonITAssetInventoryPage from "@/pages/HRMS/NonITAssetInventoryPage";
+import StationerySafety from "@/pages/HRMS/StationerySafety";
+import AccessCardReturn from "@/pages/HRMS/AccessCardReturn";
+import WorkstationDeskDeallocation from "@/pages/HRMS/WorkstationDeskDeallocation";
+import AssetReturn from "@/pages/HRMS/NonITAssetReturn";
+
 function ProtectedRoute({
   children,
   role,
@@ -569,6 +581,49 @@ export default function AppRouter() {
           />
           <Route path="it/assets" element={<AssetInventory />} />
           <Route path="it/assets/assign" element={<AssignReassignAsset />} />
+          <Route path="it/assets/return" element={<ReturnClerance />} />
+          <Route
+            path="it/offboarding/access"
+            element={<ITClearanceDashboard />}
+          />
+          {/* Admin ROUTES */}
+          <Route
+            path="admin/onboarding/workstation"
+            element={<WorkstationDeskAllocation />}
+          />
+          <Route
+            path="admin/onboarding/id-card"
+            element={<AccessCardManagement />}
+          />
+          <Route
+            path="admin/onboarding/locker"
+            element={<LockerAssignmentPage />}
+          />
+          <Route
+            path="admin/onboarding/transport"
+            element={<ParkingAssignmentPage />}
+          />
+          <Route
+            path="admin/assets/non-it"
+            element={<NonITAssetInventoryPage />}
+          />
+          <Route
+            path="admin/assets/stationery"
+            element={<StationerySafety />}
+          />
+          <Route
+            path="admin/assets/stationery"
+            element={<StationerySafety />}
+          />
+          <Route
+            path="admin/offboarding/id-return"
+            element={<AccessCardReturn />}
+          />
+          <Route
+            path="admin/offboarding/workstation"
+            element={<WorkstationDeskDeallocation />}
+          />
+          <Route path="admin/offboarding/assets" element={<AssetReturn />} />
         </Route>
 
         <Route
