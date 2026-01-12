@@ -54,11 +54,11 @@ import {
 import { Calendar } from "@/components/ui/calendar";
 import { useAuth } from "@/contexts/AuthContext";
 import { Check } from "lucide-react";
-import { useSearchParams} from "react-router-dom";
+import { useLocation, useSearchParams} from "react-router-dom";
 import { ArrowUp, ArrowDown } from "lucide-react";
 interface LeadsTableProps {
   onAddNew?: () => void;
-  onEdit?: (lead: Lead) => void;
+  onEdit?: (payload: { lead: Lead; fromUrl: string }) => void;
   onView?: (lead: Lead) => void;
 }
 type SalesManager = {
@@ -142,8 +142,21 @@ export function MultiSelect({
     </div>
   );
 }
+export const getPOCName = (poc?: string | { name?: string } | null): string => {
+  if (!poc) return "-";
+
+  // agar backend ne ObjectId string bhej diya
+  if (typeof poc === "string") return "-";
+
+  if (typeof poc === "object" && poc.name) return poc.name;
+
+  return "-";
+};
+
+
 
 export default function LeadsTable({ onAddNew, onEdit,onView }: LeadsTableProps) {
+  const location = useLocation();
   const [searchParams, setSearchParams] = useSearchParams();
    const loggedInUser = JSON.parse(localStorage.getItem("user") || "{}");
    const loggedInRole = loggedInUser?.role;
@@ -795,7 +808,7 @@ const sortedLeads = [...leads].sort((a: any, b: any) => {
               <MultiSelect
                 label="TPA Sales POC (Executive)"
                 value={executiveFilter}
-                onChange={setExecutiveFilter}
+                onChange={(v) => updateParam("executive", v)}
                 options={executiveOptions}
               />
             </div>
@@ -914,11 +927,6 @@ const sortedLeads = [...leads].sort((a: any, b: any) => {
         <TableHeader>
           <TableRow>
             <SortHead
-              label="Lead No"
-              sortBy="leadNo"
-              className="min-w-[100px]"
-            />
-            <SortHead
               label="School Name"
               sortBy="schoolName"
               className="min-w-[200px]"
@@ -940,8 +948,23 @@ const sortedLeads = [...leads].sort((a: any, b: any) => {
             />
             <SortHead label="Phase" sortBy="phase" className="min-w-[180px]" />
             <SortHead
-              label="TPA Sales POC"
+              label="Team Remarks"
+              sortBy="teamRemarks"
+              className="min-w-[150px]"
+            />
+            <SortHead
+              label="Lead Remarks"
+              sortBy="leadRemarks"
+              className="min-w-[150px]"
+            />
+            <SortHead
+              label="TPA Sales POC(Executive)"
               sortBy="salesExecutive"
+              className="min-w-[150px]"
+            />
+            <SortHead
+              label="TPA Sales POC(Manager)"
+              sortBy="salesManager"
               className="min-w-[150px]"
             />
             <SortHead
@@ -1026,14 +1049,9 @@ const sortedLeads = [...leads].sort((a: any, b: any) => {
               className="min-w-[120px]"
             />
             <SortHead
-              label="Lead Remarks"
-              sortBy="leadRemarks"
-              className="min-w-[150px]"
-            />
-            <SortHead
-              label="Team Remarks"
-              sortBy="teamRemarks"
-              className="min-w-[150px]"
+              label="Lead No"
+              sortBy="leadNo"
+              className="min-w-[100px]"
             />
 
             <TableHead className="text-right min-w-[100px] sticky right-0 bg-white z-10">
@@ -1055,7 +1073,6 @@ const sortedLeads = [...leads].sort((a: any, b: any) => {
           {!loading &&
             sortedLeads.map((l) => (
               <TableRow key={l._id}>
-                <TableCell className="whitespace-nowrap">{l.leadNo}</TableCell>
                 <TableCell className="whitespace-nowrap min-w-[200px]">
                   {l.schoolName}
                 </TableCell>
@@ -1099,12 +1116,20 @@ const sortedLeads = [...leads].sort((a: any, b: any) => {
                 <TableCell className="whitespace-nowrap min-w-[180px]">
                   {l.phase || "-"}
                 </TableCell>
-                <TableCell className="whitespace-nowrap min-w-[150px]">
-                  {l.salesExecutive
-                    ? "Executive"
-                    : l.salesManager
-                    ? "Manager"
+                <TableCell className="whitespace-nowrap max-w-[200px] truncate">
+                  {l.teamRemarks || "-"}
+                </TableCell>
+                <TableCell className="whitespace-nowrap max-w-[200px] truncate">
+                  {Array.isArray(l.leadRemarks) && l.leadRemarks.length > 0
+                    ? l.leadRemarks[l.leadRemarks.length - 1]?.text
                     : "-"}
+                </TableCell>
+                <TableCell className="min-w-[150px]">
+                  {getPOCName(l.salesExecutive)}
+                </TableCell>
+
+                <TableCell className="min-w-[150px]">
+                  {getPOCName(l.salesManager)}
                 </TableCell>
                 <TableCell className="whitespace-nowrap min-w-[120px]">
                   {l.city || "-"}
@@ -1163,14 +1188,7 @@ const sortedLeads = [...leads].sort((a: any, b: any) => {
                 <TableCell className="whitespace-nowrap">
                   {l.leadSource || "-"}
                 </TableCell>
-                <TableCell className="whitespace-nowrap max-w-[200px] truncate">
-                  {Array.isArray(l.leadRemarks) && l.leadRemarks.length > 0
-                    ? l.leadRemarks[l.leadRemarks.length - 1]?.text
-                    : "-"}
-                </TableCell>
-                <TableCell className="whitespace-nowrap max-w-[200px] truncate">
-                  {l.teamRemarks || "-"}
-                </TableCell>
+                <TableCell className="whitespace-nowrap">{l.leadNo}</TableCell>
                 <TableCell className="text-right sticky right-0 bg-white z-10">
                   {canManageLead(l) ? (
                     <div className="flex items-center justify-end gap-1">
@@ -1184,7 +1202,13 @@ const sortedLeads = [...leads].sort((a: any, b: any) => {
                       <Button
                         variant="ghost"
                         size="icon"
-                        onClick={() => onEdit && onEdit(l)}
+                        onClick={() =>
+                          onEdit &&
+                          onEdit({
+                            lead: l,
+                            fromUrl: location.pathname + location.search,
+                          })
+                        }
                         aria-label="Edit lead"
                       >
                         <Pencil className="h-4 w-4" />

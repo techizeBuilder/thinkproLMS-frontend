@@ -1,11 +1,14 @@
 import { useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams,useLocation } from "react-router-dom";
 import LeadPageForm from "@/components/leads/LeadPageForm";
 import { leadService, type Lead } from "@/api/leadService";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
 
 export default function SAEditLeadPage() {
+  const location = useLocation();
+  const backUrl =
+    (location.state as { from?: string })?.from || "/crm/superadmin/leads";
   const navigate = useNavigate();
   const { id } = useParams();
   const [saving, setSaving] = useState(false);
@@ -31,7 +34,7 @@ export default function SAEditLeadPage() {
       setSaving(true);
       await leadService.update(id, payload);
       toast.success("Lead updated");
-      navigate("/crm/superadmin/leads");
+      navigate(backUrl);
     } catch (error: any) {
       toast.error(error?.response?.data?.message || "Failed to update lead");
     } finally {

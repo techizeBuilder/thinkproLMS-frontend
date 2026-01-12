@@ -5,7 +5,10 @@ export default function SMSalesLeadsPage() {
 	const navigate = useNavigate();
 	return (
 		<div className="p-6">
-			<LeadsTable onAddNew={() => navigate("/crm/sales-manager/leads/add")} onEdit={(l) => navigate(`/crm/sales-manager/leads/${l._id}/edit`)} />
+			<LeadsTable onAddNew={() => navigate("/crm/sales-manager/leads/add")} onEdit={({ lead }) =>
+  navigate(`/crm/sales-manager/leads/${lead._id}/edit`)
+}
+ />
 		</div>
 	);
 }

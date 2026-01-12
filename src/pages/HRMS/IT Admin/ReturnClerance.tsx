@@ -26,9 +26,7 @@ const API = import.meta.env.VITE_API_URL;
 type Status = "PENDING" | "CLEARED" | "ISSUE";
 
 interface DepartmentClearance {
-  department: {
-    name: string;
-  };
+  department: string;
   tasks: string[];
   status: Status;
   remarks?: string;
@@ -64,7 +62,7 @@ const StatusBadge = ({ status }: { status: Status }) => {
 
 /* ================= MAIN ================= */
 
-const Clearance = () => {
+const ReturnClerance = () => {
   const [data, setData] = useState<ClearanceRow[]>([]);
   const [selected, setSelected] = useState<ClearanceRow | null>(null);
   const [loading, setLoading] = useState(true);
@@ -88,6 +86,22 @@ const Clearance = () => {
   if (loading) {
     return <p className="p-6 text-sm text-gray-500">Loading clearance...</p>;
   }
+
+
+
+    const updateClearanceStatus = async (
+      clearanceId: string,
+      status: Status
+    ) => {
+      await axios.patch(`${API}/clearances/${clearanceId}/department`, {
+        departmentName: "IT", // 🔥 seedha IT bhej diya
+        status,
+      });
+
+      fetchClearance();
+      setSelected(null);
+    };
+
 
   return (
     <div className="p-6 space-y-6">
@@ -117,55 +131,56 @@ const Clearance = () => {
           </TableHeader>
 
           <TableBody>
-            {data.map((row, index) => {
-              const getStatus = (dept: string) =>
-                row.clearances.find((c) => c.department.name === dept)
-                  ?.status || "PENDING";
-              return (
-                <TableRow key={row._id}>
-                  <TableCell>{index + 1}</TableCell>
-                  <TableCell className="font-medium">
-                    {row.employee.name}
-                  </TableCell>
-                  <TableCell>{row.employee.role}</TableCell>
-                  <TableCell>
-                    {new Date(row.lastWorkingDay).toDateString()}
-                  </TableCell>
+            {data
+              .map((row, index) => {
+                const getStatus = (dept: string) =>
+                  row.clearances.find((c) => c.department === dept)
+                    ?.status || "PENDING";
+                return (
+                  <TableRow key={row._id}>
+                    <TableCell>{index + 1}</TableCell>
+                    <TableCell className="font-medium">
+                      {row.employee.name}
+                    </TableCell>
+                    <TableCell>{row.employee.role}</TableCell>
+                    <TableCell>
+                      {new Date(row.lastWorkingDay).toDateString()}
+                    </TableCell>
 
-                  <TableCell>
-                    <StatusBadge status={getStatus("IT")} />
-                  </TableCell>
-                  <TableCell>
-                    <StatusBadge status={getStatus("Finance")} />
-                  </TableCell>
-                  <TableCell>
-                    <StatusBadge status={getStatus("HR")} />
-                  </TableCell>
+                    <TableCell>
+                      <StatusBadge status={getStatus("IT")} />
+                    </TableCell>
+                    <TableCell>
+                      <StatusBadge status={getStatus("Finance")} />
+                    </TableCell>
+                    <TableCell>
+                      <StatusBadge status={getStatus("HR")} />
+                    </TableCell>
 
-                  <TableCell>
-                    <Badge
-                      variant={
-                        row.overallStatus === "COMPLETED"
-                          ? "default"
-                          : "secondary"
-                      }
-                    >
-                      {row.overallStatus}
-                    </Badge>
-                  </TableCell>
+                    <TableCell>
+                      <Badge
+                        variant={
+                          row.overallStatus === "COMPLETED"
+                            ? "default"
+                            : "secondary"
+                        }
+                      >
+                        {row.overallStatus}
+                      </Badge>
+                    </TableCell>
 
-                  <TableCell>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => setSelected(row)}
-                    >
-                      View
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              );
-            })}
+                    <TableCell>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => setSelected(row)}
+                      >
+                        View
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
           </TableBody>
         </Table>
       </div>
@@ -208,32 +223,43 @@ const Clearance = () => {
 
               {/* Department Clearances */}
               <div className="space-y-4">
-                {selected.clearances.map((c, idx) => (
-                  <div key={idx} className="border rounded-lg p-4 space-y-2">
-                    <div className="flex justify-between items-center">
-                      <h3 className="font-semibold">
-                        {c.department.name} Department
-                      </h3>
-                      <StatusBadge status={c.status} />
+                {selected.clearances.map((c) => {
+                  const isIT = c.department === "IT";
+
+                  return (
+                    <div
+                      key={c.department}
+                      className="border rounded-lg p-4 space-y-2"
+                    >
+                      <div className="flex justify-between items-center">
+                        <h3 className="font-semibold">{c.department}</h3>
+                        <StatusBadge status={c.status} />
+                      </div>
+
+                      {/* 👇 Only IT admin can update IT department */}
+                      {isIT && c.status === "PENDING" && (
+                        <div className="flex gap-2">
+                          <Button
+                            onClick={() =>
+                              updateClearanceStatus(selected._id, "CLEARED")
+                            }
+                          >
+                            Mark Cleared
+                          </Button>
+
+                          <Button
+                            variant="destructive"
+                            onClick={() =>
+                              updateClearanceStatus(selected._id, "ISSUE")
+                            }
+                          >
+                            Mark Issue
+                          </Button>
+                        </div>
+                      )}
                     </div>
-
-                    {c.tasks && c.tasks.length > 0 ? (
-                      <ul className="list-disc pl-5 text-sm text-gray-600">
-                        {c.tasks.map((task, index) => (
-                          <li key={index}>{task}</li>
-                        ))}
-                      </ul>
-                    ) : (
-                      <p className="text-sm text-gray-400">No tasks assigned</p>
-                    )}
-
-                    {c.remarks && (
-                      <p className="text-sm text-red-600">
-                        <b>Remarks:</b> {c.remarks}
-                      </p>
-                    )}
-                  </div>
-                ))}
+                  );
+                })}
               </div>
 
               <div className="text-right">
@@ -247,4 +273,4 @@ const Clearance = () => {
   );
 };
 
-export default Clearance;
+export default ReturnClerance;
