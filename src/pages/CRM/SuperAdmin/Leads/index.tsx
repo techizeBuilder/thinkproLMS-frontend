@@ -15,7 +15,10 @@ export default function SASalesLeadsPage() {
             state: { from: fromUrl },
           })
         }
-        onView={(l) => navigate(`/crm/superadmin/leads/${l._id}/view`)}
+        onView={(l) => {
+          console.log("Viewing lead:", l);
+          navigate(`/crm/leads/${l._id}/view`);
+        }}
       />
     </div>
   );

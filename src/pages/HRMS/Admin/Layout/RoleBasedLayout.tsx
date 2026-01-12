@@ -7,6 +7,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import HRMSFinanceManagerLayout from "./HRMSFinanceLayout";
 import HRMSITAdminLayout from "./HRMSITAdminLayout";
 import HRMSAdminLayout from "./HRMSAdminLayout";
+import SuperAdminLayout from "../Layout";
 
 export default function RoleBasedLayout() {
   const { user } = useAuth();
@@ -16,9 +17,9 @@ export default function RoleBasedLayout() {
   switch (user.role) {
     case "superadmin":
       return (
-        <HRMSAdminLayout>
+        <SuperAdminLayout>
           <Outlet />
-        </HRMSAdminLayout>
+        </SuperAdminLayout>
       );
 
     case "manager":

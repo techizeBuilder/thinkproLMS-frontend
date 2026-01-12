@@ -234,7 +234,6 @@ import SoftwareAndLicenseAssignment from "@/pages/HRMS/IT Admin/SoftwearManageme
 import AssetInventory from "@/pages/HRMS/IT Admin/AsestInventory";
 import AssignReassignAsset from "@/pages/HRMS/IT Admin/AssignAsset";
 import ResignationRequest from "@/pages/HRMS/Employee/Request/ResignRequest";
-import SAViewLeadPage from "@/pages/CRM/SuperAdmin/Leads/View";
 import ReturnClerance from "@/pages/HRMS/IT Admin/ReturnClerance";
 import ITClearanceDashboard from "@/pages/HRMS/IT Admin/Clerance";
 import WorkstationDeskAllocation from "@/pages/HRMS/WorkstationDeskAllocation";
@@ -246,6 +245,8 @@ import StationerySafety from "@/pages/HRMS/StationerySafety";
 import AccessCardReturn from "@/pages/HRMS/AccessCardReturn";
 import WorkstationDeskDeallocation from "@/pages/HRMS/WorkstationDeskDeallocation";
 import AssetReturn from "@/pages/HRMS/NonITAssetReturn";
+import ViewLeadPage from "@/pages/CRM/Leads/ViewLead";
+import CRMLayout from "@/components/crm/CRMLayout";
 
 function ProtectedRoute({
   children,
@@ -364,6 +365,23 @@ export default function AppRouter() {
         <Route path="/guest/login" element={<GuestLogin />} />
         <Route path="/guest/register" element={<GuestRegister />} />
 
+        <Route
+          path="/crm"
+          element={
+            <ProtectedRoute
+              roles={["superadmin", "sales-manager", "sales-executive"]}
+            >
+              <CRMLayout />
+            </ProtectedRoute>
+          }
+        >
+          {/* COMMON VIEW ROUTE */}
+          <Route path="leads/:id/view" element={<ViewLeadPage />} />
+
+          {/* ROLE BASED LANDING */}
+          <Route index element={<CRMRootRoute />} />
+        </Route>
+
         {/* CRM - Role-based routing */}
         <Route path="/crm" element={<CRMRootRoute />} />
         <Route
@@ -377,7 +395,6 @@ export default function AppRouter() {
                     <Route path="leads" element={<SASalesLeadsPage />} />
                     <Route path="leads/add" element={<SAAddLeadPage />} />
                     <Route path="leads/:id/edit" element={<SAEditLeadPage />} />
-                    <Route path="leads/:id/view" element={<SAViewLeadPage />} />
                     <Route path="summary" element={<CRMSummaryPage />} />
                     <Route
                       path="sales-managers"
@@ -425,49 +442,49 @@ export default function AppRouter() {
             </SidebarProvider>
           }
         >
-          <Route path="admin" element={<Navigate to="dashboard" replace />} />
+          <Route path="SuperAdmin" element={<Navigate to="dashboard" replace />} />
           {/* ADMIN ROUTES */}
-          <Route path="admin/addUser" element={<AddUser />} />
-          <Route path="admin/employees" element={<Employee />} />
-          <Route path="admin/probation" element={<ProbationConfirmation />} />
-          <Route path="admin/holidays" element={<Holiday />} />
-          <Route path="admin/documents" element={<Document />} />
+          <Route path="SuperAdmin/addUser" element={<AddUser />} />
+          <Route path="SuperAdmin/employees" element={<Employee />} />
+          <Route path="SuperAdmin/probation" element={<ProbationConfirmation />} />
+          <Route path="SuperAdmin/holidays" element={<Holiday />} />
+          <Route path="SuperAdmin/documents" element={<Document />} />
           <Route
-            path="admin/onboarding/checklist"
+            path="SuperAdmin/onboarding/checklist"
             element={<OnboardingChecklist />}
           />
-          <Route path="admin/letters" element={<Letters />} />
+          <Route path="SuperAdmin/letters" element={<Letters />} />
           <Route
-            path="admin/offboarding/resignations"
+            path="SuperAdmin/offboarding/resignations"
             element={<Resignation />}
           />
-          <Route path="admin/offboarding/clearance" element={<Clearance />} />
-          <Route path="admin/onboarding/tasks" element={<OnboardingTasks />} />
+          <Route path="SuperAdmin/offboarding/clearance" element={<Clearance />} />
+          <Route path="SuperAdmin/onboarding/tasks" element={<OnboardingTasks />} />
           <Route
-            path="admin/offboarding/full-final"
+            path="SuperAdmin/offboarding/full-final"
             element={<FinalSettlement />}
           />
-          <Route path="admin/dashboard" element={<AdminDashboard />} />
-          <Route path="admin/attendance" element={<AttendanceReport />} />
+          <Route path="SuperAdmin/dashboard" element={<AdminDashboard />} />
+          <Route path="SuperAdmin/attendance" element={<AttendanceReport />} />
           <Route
-            path="admin/attendance/requests"
+            path="SuperAdmin/attendance/requests"
             element={<AllAttendanceRequests />}
           />
-          <Route path="admin/shifts" element={<ShiftRoster />} />
-          <Route path="admin/leaves" element={<EmployeeLeaveRequest />} />
-          <Route path="admin/leave-types" element={<LeaveType />} />
-          <Route path="admin/leave-encashment" element={<LeaveEncashment />} />
-          <Route path="admin/salary-structure" element={<SalaryStructure />} />
-          <Route path="admin/payroll/run" element={<PayrollRun />} />
-          <Route path="admin/payslips" element={<Payslips />} />
-          <Route path="admin/jobs" element={<JobOpening />} />
-          <Route path="admin/candidates" element={<Candidates />} />
-          <Route path="admin/interviews" element={<InterviewPipeline />} />
-          <Route path="admin/companies" element={<Company />} />
-          <Route path="admin/branches" element={<Branches />} />
-          <Route path="admin/departments" element={<DepartmentPage />} />
-          <Route path="admin/designations" element={<Designation />} />
-          <Route path="admin/policies" element={<Policies />} />
+          <Route path="SuperAdmin/shifts" element={<ShiftRoster />} />
+          <Route path="SuperAdmin/leaves" element={<EmployeeLeaveRequest />} />
+          <Route path="SuperAdmin/leave-types" element={<LeaveType />} />
+          <Route path="SuperAdmin/leave-encashment" element={<LeaveEncashment />} />
+          <Route path="SuperAdmin/salary-structure" element={<SalaryStructure />} />
+          <Route path="SuperAdmin/payroll/run" element={<PayrollRun />} />
+          <Route path="SuperAdmin/payslips" element={<Payslips />} />
+          <Route path="SuperAdmin/jobs" element={<JobOpening />} />
+          <Route path="SuperAdmin/candidates" element={<Candidates />} />
+          <Route path="SuperAdmin/interviews" element={<InterviewPipeline />} />
+          <Route path="SuperAdmin/companies" element={<Company />} />
+          <Route path="SuperAdmin/branches" element={<Branches />} />
+          <Route path="SuperAdmin/departments" element={<DepartmentPage />} />
+          <Route path="SuperAdmin/designations" element={<Designation />} />
+          <Route path="SuperAdmin/policies" element={<Policies />} />
 
           {/* MANAGER ROUTES */}
           <Route path="manager" element={<Navigate to="dashboard" replace />} />

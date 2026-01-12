@@ -54,7 +54,7 @@ import {
 import { Calendar } from "@/components/ui/calendar";
 import { useAuth } from "@/contexts/AuthContext";
 import { Check } from "lucide-react";
-import { useLocation, useSearchParams} from "react-router-dom";
+import { useLocation, useNavigate, useSearchParams} from "react-router-dom";
 import { ArrowUp, ArrowDown } from "lucide-react";
 interface LeadsTableProps {
   onAddNew?: () => void;
@@ -155,7 +155,8 @@ export const getPOCName = (poc?: string | { name?: string } | null): string => {
 
 
 
-export default function LeadsTable({ onAddNew, onEdit,onView }: LeadsTableProps) {
+export default function LeadsTable({ onAddNew, onEdit}: LeadsTableProps) {
+  const navigate = useNavigate();
   const location = useLocation();
   const [searchParams, setSearchParams] = useSearchParams();
    const loggedInUser = JSON.parse(localStorage.getItem("user") || "{}");
@@ -1190,49 +1191,54 @@ const sortedLeads = [...leads].sort((a: any, b: any) => {
                 </TableCell>
                 <TableCell className="whitespace-nowrap">{l.leadNo}</TableCell>
                 <TableCell className="text-right sticky right-0 bg-white z-10">
-                  {canManageLead(l) ? (
-                    <div className="flex items-center justify-end gap-1">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => onView && onView(l)}
-                      >
-                        <Eye className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() =>
-                          onEdit &&
-                          onEdit({
-                            lead: l,
-                            fromUrl: location.pathname + location.search,
-                          })
-                        }
-                        aria-label="Edit lead"
-                      >
-                        <Pencil className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => openStatusChangeDialog(l)}
-                        aria-label={
-                          l.isActive === false
-                            ? "Activate lead"
-                            : "Deactivate lead"
-                        }
-                      >
-                        {l.isActive === false ? (
-                          <RotateCcw className="h-4 w-4 text-green-600" />
-                        ) : (
-                          <Archive className="h-4 w-4 text-red-600" />
-                        )}
-                      </Button>
-                    </div>
-                  ) : (
-                    <span className="text-xs text-muted-foreground">-</span>
-                  )}
+                  <div className="flex items-center justify-end gap-1">
+                    {/* ✅ VIEW – no restriction */}
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => navigate(`/crm/leads/${l._id}/view`)}
+                      aria-label="View lead"
+                    >
+                      <Eye className="h-4 w-4" />
+                    </Button>
+
+                    {/* 🔒 EDIT + STATUS – restricted */}
+                    {canManageLead(l) && (
+                      <>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() =>
+                            onEdit &&
+                            onEdit({
+                              lead: l,
+                              fromUrl: location.pathname + location.search,
+                            })
+                          }
+                          aria-label="Edit lead"
+                        >
+                          <Pencil className="h-4 w-4" />
+                        </Button>
+
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => openStatusChangeDialog(l)}
+                          aria-label={
+                            l.isActive === false
+                              ? "Activate lead"
+                              : "Deactivate lead"
+                          }
+                        >
+                          {l.isActive === false ? (
+                            <RotateCcw className="h-4 w-4 text-green-600" />
+                          ) : (
+                            <Archive className="h-4 w-4 text-red-600" />
+                          )}
+                        </Button>
+                      </>
+                    )}
+                  </div>
                 </TableCell>
               </TableRow>
             ))}
