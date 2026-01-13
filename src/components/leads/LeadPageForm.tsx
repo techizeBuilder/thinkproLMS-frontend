@@ -987,24 +987,6 @@ const saveEditedRemark = async () => {
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-2">
-                  <Label>Recent Remark</Label>
-
-                  {latestRemark ? (
-                    <div className="rounded-md border p-3 bg-muted">
-                      <p className="text-sm">{latestRemark.text}</p>
-                      <p className="text-xs text-muted-foreground mt-1">
-                        — {latestRemark.createdBy?.name || "Unknown"} •{" "}
-                        {new Date(latestRemark.createdAt).toLocaleString()}
-                      </p>
-                    </div>
-                  ) : (
-                    <p className="text-sm text-muted-foreground">
-                      No remarks added yet
-                    </p>
-                  )}
-                </div>
-
-                <div className="space-y-2">
                   <Label>Add New Remark</Label>
                   <Textarea
                     placeholder="Type a new remark..."
@@ -1031,18 +1013,37 @@ const saveEditedRemark = async () => {
                   View All Remarks
                 </Button>
 
-                <div className="space-y-2">
-                  <Label className="text-[var(--muted-foreground)]">
-                    Remarks - From Team (Optional)
-                  </Label>
+                <div className="border rounded-md bg-muted p-3 space-y-3">
+                  {/* 🔥 Latest Remark */}
+                  {latestRemark ? (
+                    <div>
+                      <p className="text-sm">{latestRemark.text}</p>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        — {latestRemark.createdBy?.name || "Unknown"} •{" "}
+                        {new Date(latestRemark.createdAt).toLocaleString()}
+                      </p>
+                    </div>
+                  ) : (
+                    <p className="text-sm text-muted-foreground">
+                      No remarks added yet
+                    </p>
+                  )}
+
+                  {/* 🔒 Read-only Remarks Box */}
                   <Textarea
                     name="teamRemarks"
-                    placeholder="e.g. Follow-up notes, meeting minutes..."
                     value={form.teamRemarks}
-                    onChange={handleChange}
-                    rows={3}
+                    readOnly
+                    className="
+      bg-white
+      resize-none
+      max-h-40
+      overflow-y-auto
+      cursor-default
+    "
                   />
                 </div>
+
                 <div className="space-y-2">
                   <div className="space-y-2 col-span-2">
                     <Label className={getLabelClassName("actionNeeded")}>
