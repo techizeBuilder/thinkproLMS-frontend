@@ -5,10 +5,11 @@ import axios from "axios";
 const API = import.meta.env.VITE_API_URL;
 
 interface AssignedUser {
+  _id: string;
   user: {
     _id: string;
     name: string;
-    employeeCode: string;
+    role: string;
   };
   quantity: number;
 }
@@ -21,138 +22,150 @@ interface Asset {
   quantity: number;
   damagedCount: number;
   location: string;
-  status: "AVAILABLE" | "ASSIGNED" | "DAMAGED" | "DISPOSED";
+  status: string;
   assignedTo: AssignedUser[];
 }
 
 export default function AssetReturn() {
   const [assets, setAssets] = useState<Asset[]>([]);
-  const [loading, setLoading] = useState(false);
-
   const token = localStorage.getItem("token");
 
-  /* ================= FETCH ASSIGNED ASSETS ================= */
+  /* ================= FETCH ================= */
   const fetchAssets = async () => {
-    setLoading(true);
     const res = await axios.get(`${API}/non-it-assets`, {
       headers: { Authorization: `Bearer ${token}` },
     });
 
-    // Sirf assigned assets
-    const assignedAssets = res.data.filter(
-      (a: Asset) => a.assignedTo?.length > 0
-    );
-
-    setAssets(assignedAssets);
-    setLoading(false);
+    setAssets(res.data.filter((a: Asset) => a.assignedTo?.length > 0));
   };
 
   useEffect(() => {
     fetchAssets();
   }, []);
 
-  /* ================= DISPOSE HANDLER ================= */
+  /* ================= DISPOSE ================= */
   const handleDispose = async (
     assetId: string,
+    assignId: string,
     userId: string,
     quantity: number
   ) => {
-    if (!window.confirm("Are you sure you want to DISPOSE this asset?")) return;
+    if (!confirm("Dispose asset for this employee?")) return;
 
     await axios.patch(
       `${API}/non-it-assets/${assetId}/dispose`,
-      { userId, quantity },
       {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        assignId,
+        userId,
+        quantity,
+      },
+      {
+        headers: { Authorization: `Bearer ${token}` },
       }
     );
 
     fetchAssets();
   };
 
-  if (loading) return <p>Loading assets...</p>;
-
   return (
-    <div className="p-6 bg-white rounded-xl shadow">
-      <h2 className="text-xl font-semibold mb-4">
+    <div className="p-6">
+      <h2 className="text-2xl font-semibold mb-5">
         Asset Return & Verification
       </h2>
 
-      <div className="overflow-x-auto">
-        <table className="w-full text-sm border">
-          <thead className="bg-gray-100">
-            <tr>
-              <th className="p-3">Asset</th>
-              <th className="p-3">Code</th>
-              <th className="p-3">Employee</th>
-              <th className="p-3">Quantity</th>
-              <th className="p-3">Location</th>
-              <th className="p-3">Status</th>
-              <th className="p-3">Action</th>
-            </tr>
-          </thead>
+      <div className="space-y-5">
+        {assets.map((asset) => {
+          const issued = asset.assignedTo.reduce(
+            (sum, a) => sum + a.quantity,
+            0
+          );
 
-          <tbody>
-            {assets.map((asset) =>
-              asset.assignedTo.map((assign, idx) => (
-                <tr key={asset._id + idx} className="border-t">
-                  <td className="p-3 font-medium">{asset.assetName}</td>
-                  <td className="p-3">{asset.assetCode}</td>
+          const available = asset.quantity - issued - (asset.damagedCount || 0);
 
-                  <td className="p-3">
-                    {assign.user.name} ({assign.user.employeeCode})
-                  </td>
+          return (
+            <div
+              key={asset._id}
+              className="bg-white border rounded-xl shadow-sm p-4"
+            >
+              {/* ASSET HEADER */}
+              <div className="flex justify-between items-start mb-3">
+                <div>
+                  <h3 className="text-lg font-semibold">{asset.assetName}</h3>
+                  <p className="text-sm text-gray-500">
+                    {asset.assetCode} • {asset.assetCategory}
+                  </p>
+                  <p className="text-sm text-gray-500">
+                    Location: {asset.location}
+                  </p>
+                </div>
 
-                  <td className="p-3">{assign.quantity}</td>
-
-                  <td className="p-3">{asset.location}</td>
-
-                  {/* STATUS */}
-                  <td className="p-3">
-                    <span className="px-2 py-1 rounded text-xs font-medium bg-green-100 text-green-700">
-                      ASSIGNED
-                    </span>
-                  </td>
-
-                  {/* ACTION */}
-                  <td className="p-3">
-                    <select
-                      onChange={(e) => {
-                        if (e.target.value === "DISPOSED") {
-                          handleDispose(
-                            asset._id,
-                            assign.user._id,
-                            assign.quantity
-                          );
-                        }
-                      }}
-                      className="border rounded px-2 py-1 text-sm"
-                      defaultValue=""
+                <div className="text-sm text-right">
+                  <p>
+                    Total: <b>{asset.quantity}</b>
+                  </p>
+                  <p>
+                    Issued: <b>{issued}</b>
+                  </p>
+                  <p>
+                    Damaged: <b>{asset.damagedCount}</b>
+                  </p>
+                  <p>
+                    Available:{" "}
+                    <b
+                      className={
+                        available > 0 ? "text-green-600" : "text-red-600"
+                      }
                     >
-                      <option value="" disabled>
-                        Select Action
-                      </option>
+                      {available}
+                    </b>
+                  </p>
+                </div>
+              </div>
 
+              {/* ASSIGNED USERS */}
+              <div className="border-t pt-3 space-y-2">
+                {asset.assignedTo.map((a) => (
+                  <div
+                    key={a._id}
+                    className="flex items-center justify-between bg-gray-50 rounded-lg px-3 py-2"
+                  >
+                    <div>
+                      <p className="font-medium">
+                        {a.user.name}
+                        <span className="text-sm text-gray-500">
+                          {" "}
+                          ({a.user.role})
+                        </span>
+                      </p>
+                      <p className="text-sm text-gray-500">
+                        Quantity: {a.quantity}
+                      </p>
+                    </div>
+
+                    {/* STATUS DROPDOWN */}
+                    <select
+                      defaultValue="ASSIGNED"
+                      onChange={(e) =>
+                        e.target.value === "DISPOSED" &&
+                        handleDispose(asset._id, a._id, a.user._id, a.quantity)
+                      }
+                      className="border rounded px-2 py-1 text-sm"
+                    >
+                      <option value="ASSIGNED">ASSIGNED</option>
                       <option value="DISPOSED" className="text-red-600">
-                        Dispose Asset
+                        DISPOSED
                       </option>
                     </select>
-                  </td>
-                </tr>
-              ))
-            )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          );
+        })}
 
-            {assets.length === 0 && (
-              <tr>
-                <td colSpan={7} className="p-4 text-center text-gray-500">
-                  No assigned assets found
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
+        {assets.length === 0 && (
+          <p className="text-center text-gray-500">No assigned assets found</p>
+        )}
       </div>
     </div>
   );
