@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { leadService, type Lead } from "@/api/leadService";
 import axiosInstance from "@/api/axiosInstance";
 import { Input } from "@/components/ui/input";
@@ -158,6 +158,7 @@ export const getPOCName = (poc?: string | { name?: string } | null): string => {
 export default function LeadsTable({ onAddNew, onEdit}: LeadsTableProps) {
   const navigate = useNavigate();
   const location = useLocation();
+  const isUrlSyncDone = useRef(false);
   const [searchParams, setSearchParams] = useSearchParams();
    const loggedInUser = JSON.parse(localStorage.getItem("user") || "{}");
    const loggedInRole = loggedInUser?.role;
@@ -209,10 +210,11 @@ export default function LeadsTable({ onAddNew, onEdit}: LeadsTableProps) {
 
   const debouncedSearch = useDebounce(search, 400);
 
-  useEffect(() => {
-    fetchLeads(true);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+
+  // useEffect(() => {
+  //   fetchLeads(true);
+  //   // eslint-disable-next-line react-hooks/exhaustive-deps
+  // }, []);
 
     useEffect(() => {
       (async () => {
@@ -238,8 +240,10 @@ export default function LeadsTable({ onAddNew, onEdit}: LeadsTableProps) {
 
 
   useEffect(() => {
+    if (!isUrlSyncDone.current) return;
     fetchLeads();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-n
+    // ext-line react-hooks/exhaustive-deps
   }, [
     debouncedSearch,
     stateFilter,
@@ -370,6 +374,7 @@ export default function LeadsTable({ onAddNew, onEdit}: LeadsTableProps) {
 
 
   useEffect(() => {
+      isUrlSyncDone.current = false; 
     setSearch(searchParams.get("search") || "");
     setStateFilter(searchParams.get("state") || "all");
     setDistrictFilter(searchParams.get("district") || "");
@@ -393,6 +398,8 @@ export default function LeadsTable({ onAddNew, onEdit}: LeadsTableProps) {
     setActionDueDateExact(searchParams.get("dueExact") || "");
 
     setPage(Number(searchParams.get("page") || 1));
+      isUrlSyncDone.current = true;
+        fetchLeads(true);
   }, [searchParams]);
 
 

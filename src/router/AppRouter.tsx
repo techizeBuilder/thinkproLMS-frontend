@@ -247,6 +247,7 @@ import WorkstationDeskDeallocation from "@/pages/HRMS/WorkstationDeskDeallocatio
 import AssetReturn from "@/pages/HRMS/NonITAssetReturn";
 import ViewLeadPage from "@/pages/CRM/Leads/ViewLead";
 import CRMLayout from "@/components/crm/CRMLayout";
+import FullFinalClearance from "@/pages/HRMS/FullFinalClerance";
 
 function ProtectedRoute({
   children,
@@ -442,11 +443,17 @@ export default function AppRouter() {
             </SidebarProvider>
           }
         >
-          <Route path="SuperAdmin" element={<Navigate to="dashboard" replace />} />
+          <Route
+            path="SuperAdmin"
+            element={<Navigate to="dashboard" replace />}
+          />
           {/* ADMIN ROUTES */}
           <Route path="SuperAdmin/addUser" element={<AddUser />} />
           <Route path="SuperAdmin/employees" element={<Employee />} />
-          <Route path="SuperAdmin/probation" element={<ProbationConfirmation />} />
+          <Route
+            path="SuperAdmin/probation"
+            element={<ProbationConfirmation />}
+          />
           <Route path="SuperAdmin/holidays" element={<Holiday />} />
           <Route path="SuperAdmin/documents" element={<Document />} />
           <Route
@@ -458,8 +465,14 @@ export default function AppRouter() {
             path="SuperAdmin/offboarding/resignations"
             element={<Resignation />}
           />
-          <Route path="SuperAdmin/offboarding/clearance" element={<Clearance />} />
-          <Route path="SuperAdmin/onboarding/tasks" element={<OnboardingTasks />} />
+          <Route
+            path="SuperAdmin/offboarding/clearance"
+            element={<Clearance />}
+          />
+          <Route
+            path="SuperAdmin/onboarding/tasks"
+            element={<OnboardingTasks />}
+          />
           <Route
             path="SuperAdmin/offboarding/full-final"
             element={<FinalSettlement />}
@@ -473,8 +486,14 @@ export default function AppRouter() {
           <Route path="SuperAdmin/shifts" element={<ShiftRoster />} />
           <Route path="SuperAdmin/leaves" element={<EmployeeLeaveRequest />} />
           <Route path="SuperAdmin/leave-types" element={<LeaveType />} />
-          <Route path="SuperAdmin/leave-encashment" element={<LeaveEncashment />} />
-          <Route path="SuperAdmin/salary-structure" element={<SalaryStructure />} />
+          <Route
+            path="SuperAdmin/leave-encashment"
+            element={<LeaveEncashment />}
+          />
+          <Route
+            path="SuperAdmin/salary-structure"
+            element={<SalaryStructure />}
+          />
           <Route path="SuperAdmin/payroll/run" element={<PayrollRun />} />
           <Route path="SuperAdmin/payslips" element={<Payslips />} />
           <Route path="SuperAdmin/jobs" element={<JobOpening />} />
@@ -641,6 +660,7 @@ export default function AppRouter() {
             element={<WorkstationDeskDeallocation />}
           />
           <Route path="admin/offboarding/assets" element={<AssetReturn />} />
+          <Route path="admin/offboarding/final-clearance" element={<FullFinalClearance/>} />
         </Route>
 
         <Route
