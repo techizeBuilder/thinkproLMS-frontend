@@ -134,7 +134,8 @@ const getDayStatus = (date: string): AttendanceStatus => {
   };
 
   /* ================= UI ================= */
-if(loading){
+if(loading) return <div className="p-4 md:p-6 space-y-6">Loading...</div>;
+{
   return (
     <div className="p-4 md:p-6 space-y-6">
       <h1 className="text-2xl font-semibold flex items-center gap-2">

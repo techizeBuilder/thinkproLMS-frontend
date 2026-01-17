@@ -8,6 +8,7 @@ import HRMSFinanceManagerLayout from "./HRMSFinanceLayout";
 import HRMSITAdminLayout from "./HRMSITAdminLayout";
 import HRMSAdminLayout from "./HRMSAdminLayout";
 import SuperAdminLayout from "../Layout";
+import HRMSAuditorLayout from "./HRMSAuditorLayout";
 
 export default function RoleBasedLayout() {
   const { user } = useAuth();
@@ -54,6 +55,12 @@ export default function RoleBasedLayout() {
         <HRMSAdminLayout>
           <Outlet />
         </HRMSAdminLayout>
+      );
+    case "auditor":
+      return (
+        <HRMSAuditorLayout>
+          <Outlet />
+        </HRMSAuditorLayout>
       );
     default:
       return <div>Unauthorized</div>;

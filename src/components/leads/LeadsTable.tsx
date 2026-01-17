@@ -185,9 +185,11 @@ export default function LeadsTable({ onAddNew, onEdit}: LeadsTableProps) {
   const [managerFilter, setManagerFilter] = useState<string[]>([]);
   const [executiveFilter, setExecutiveFilter] = useState<string[]>([]);
 
-  const [actionDueDateFrom, setActionDueDateFrom] = useState<string>("");
-  const [actionDueDateTo, setActionDueDateTo] = useState<string>("");
-  const [actionDueDateExact, setActionDueDateExact] = useState<string>("");
+  const [actionDueDateFrom, setActionDueDateFrom] = useState<Date | null>(null);
+  const [actionDueDateTo, setActionDueDateTo] = useState<Date | null>(null);
+  const [actionDueDateExact, setActionDueDateExact] = useState<Date | null>(
+    null
+  );
   const [actionDueOpen, setActionDueOpen] = useState(false);
   const [managers, setManagers] = useState<SalesManager[]>([]);
   const [executives, setExecutives] = useState<SalesExecutive[]>([]);
@@ -329,15 +331,16 @@ export default function LeadsTable({ onAddNew, onEdit}: LeadsTableProps) {
         actionOn: actionOnFilter.length ? actionOnFilter : undefined,
 
         actionDueDateFrom: actionDueDateFrom
-          ? startOfDay(new Date(actionDueDateFrom)).toISOString()
+          ? format(actionDueDateFrom, "yyyy-MM-dd")
           : undefined,
 
         actionDueDateTo: actionDueDateTo
-          ? endOfDay(new Date(actionDueDateTo)).toISOString()
+          ? format(actionDueDateTo, "yyyy-MM-dd")
           : undefined,
 
-        actionDueDate: actionDueDateExact || undefined,
-        status: statusFilter,
+        actionDueDate: actionDueDateExact
+          ? format(actionDueDateExact, "yyyy-MM-dd")
+          : undefined,
 
         page,
         limit: pageSize,
@@ -393,9 +396,13 @@ export default function LeadsTable({ onAddNew, onEdit}: LeadsTableProps) {
     setExecutiveFilter(searchParams.get("executive")?.split(",") || []);
     setActionOnFilter(searchParams.get("actionOn")?.split(",") || []);
 
-    setActionDueDateFrom(searchParams.get("dueFrom") || "");
-    setActionDueDateTo(searchParams.get("dueTo") || "");
-    setActionDueDateExact(searchParams.get("dueExact") || "");
+    const dueFrom = searchParams.get("dueFrom");
+    const dueTo = searchParams.get("dueTo");
+    const dueExact = searchParams.get("dueExact");
+
+    setActionDueDateFrom(dueFrom ? new Date(dueFrom) : null);
+    setActionDueDateTo(dueTo ? new Date(dueTo) : null);
+    setActionDueDateExact(dueExact ? new Date(dueExact) : null);
 
     setPage(Number(searchParams.get("page") || 1));
       isUrlSyncDone.current = true;
@@ -716,25 +723,14 @@ const sortedLeads = [...leads].sort((a: any, b: any) => {
                   <CalendarIcon className="mr-2 h-4 w-4" />
                   {(() => {
                     if (actionDueDateExact) {
-                      return `${format(
-                        new Date(actionDueDateExact),
-                        "MMM dd, yyyy"
-                      )}`;
+                      return format(actionDueDateExact, "MMM dd, yyyy");
                     }
+
                     if (actionDueDateFrom && actionDueDateTo) {
                       return `${format(
-                        new Date(actionDueDateFrom),
+                        actionDueDateFrom,
                         "MMM dd, yyyy"
-                      )} - ${format(
-                        new Date(actionDueDateTo),
-                        "MMM dd, yyyy"
-                      )}`;
-                    }
-                    if (actionDueDateFrom && !actionDueDateTo) {
-                      return `${format(
-                        new Date(actionDueDateFrom),
-                        "MMM dd, yyyy"
-                      )} -`;
+                      )} - ${format(actionDueDateTo, "MMM dd, yyyy")}`;
                     }
                     return "Select date or range";
                   })()}
@@ -749,38 +745,53 @@ const sortedLeads = [...leads].sort((a: any, b: any) => {
                     onSelect={(range) => {
                       const from = range?.from;
                       const to = range?.to;
-                      setActionDueRange({ from: from, to: to });
-                      if (from && to) {
-                        const sameDay =
-                          from.toDateString() === to.toDateString();
-                        if (sameDay) {
-                          setActionDueDateExact(from.toISOString());
-                          setActionDueDateFrom("");
-                          setActionDueDateTo("");
-                        } else {
-                          setActionDueDateExact("");
-                          setActionDueDateFrom(from.toISOString());
-                          setActionDueDateTo(to.toISOString());
-                        }
-                      } else if (from && !to) {
-                        setActionDueDateExact("");
-                        setActionDueDateFrom(from.toISOString());
-                        setActionDueDateTo("");
-                      } else {
-                        setActionDueDateExact("");
-                        setActionDueDateFrom("");
-                        setActionDueDateTo("");
+
+                      setActionDueRange({ from, to });
+
+                      // SAME DATE (single day selection)
+                      if (
+                        from &&
+                        to &&
+                        from.toDateString() === to.toDateString()
+                      ) {
+                        setActionDueDateExact(from); // ✅ Date object
+                        setActionDueDateFrom(null);
+                        setActionDueDateTo(null);
+                        return;
                       }
+
+                      // DATE RANGE
+                      if (from && to) {
+                        setActionDueDateExact(null);
+                        setActionDueDateFrom(from); // ✅ Date object
+                        setActionDueDateTo(to);
+                        return;
+                      }
+
+                      // ONLY FROM SELECTED
+                      if (from && !to) {
+                        setActionDueDateExact(null);
+                        setActionDueDateFrom(from);
+                        setActionDueDateTo(null);
+                        return;
+                      }
+
+                      // CLEAR
+                      setActionDueDateExact(null);
+                      setActionDueDateFrom(null);
+                      setActionDueDateTo(null);
                     }}
                   />
+
                   <div className="flex items-center justify-between gap-2 p-2 pt-0">
                     <Button
                       variant="ghost"
                       onClick={() => {
                         setActionDueRange({});
-                        setActionDueDateExact("");
-                        setActionDueDateFrom("");
-                        setActionDueDateTo("");
+                        setActionDueDateExact(null);
+                        setActionDueDateFrom(null);
+                        setActionDueDateTo(null);
+
                       }}
                     >
                       Clear

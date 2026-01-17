@@ -5,7 +5,7 @@ import axios from "axios";
 import { FileText, Upload, Eye, CheckCircle, AlertCircle } from "lucide-react";
 
 const API = import.meta.env.VITE_API_URL;
-const ViewAPI = "http://localhost:8000";
+const ViewAPI = API.replace("/api", "");
 
 /* ================= TYPES ================= */
 

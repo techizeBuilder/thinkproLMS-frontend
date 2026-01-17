@@ -26,33 +26,33 @@ export default function DepartmentModal({
   const [branches, setBranches] = useState<any[]>([]);
   const [managers, setManagers] = useState<any[]>([]);
 
-  const [form, setForm] = useState({
+  const initialForm = {
     companyId: "",
     branchId: "",
     name: "",
     headEmployeeId: "",
     status: "Active",
-  });
+  };
+
+  const [form, setForm] = useState(initialForm);
+  const [errors, setErrors] = useState<any>({});
 
   /* =========================
      INITIAL API CALLS
   ==========================*/
   useEffect(() => {
-    // Companies
     axios
       .get(`${API_BASE}/companies`, {
         headers: { Authorization: `Bearer ${token}` },
       })
       .then((r) => setCompanies(r.data));
 
-    // Branches (simple call – no filter)
     axios
       .get(`${API_BASE}/branches`, {
         headers: { Authorization: `Bearer ${token}` },
       })
       .then((r) => setAllBranches(r.data));
 
-    // Users → only managers
     axios
       .get(`${API_BASE}/users`, {
         headers: { Authorization: `Bearer ${token}` },
@@ -66,7 +66,17 @@ export default function DepartmentModal({
   }, []);
 
   /* =========================
-     FILTER BRANCHES ON COMPANY CHANGE
+     RESET ON ADD / CLOSE
+  ==========================*/
+  useEffect(() => {
+    if (mode === "add" && isOpen) {
+      setForm(initialForm);
+      setErrors({});
+    }
+  }, [mode, isOpen]);
+
+  /* =========================
+     FILTER BRANCHES
   ==========================*/
   useEffect(() => {
     if (!form.companyId) {
@@ -84,24 +94,43 @@ export default function DepartmentModal({
   }, [form.companyId, allBranches]);
 
   /* =========================
-     EDIT MODE DATA SET
+     EDIT / VIEW DATA SET
   ==========================*/
   useEffect(() => {
-    if (department) {
+    if ((mode === "edit" || mode === "view") && department) {
       setForm({
         companyId: department.companyId?._id || department.companyId,
         branchId: department.branchId?._id || department.branchId,
-        name: department.name,
+        name: department.name || "",
         headEmployeeId: department.headEmployeeId?._id || "",
-        status: department.status,
+        status: department.status || "Active",
       });
+      setErrors({});
     }
-  }, [department]);
+  }, [mode, department]);
+
+  /* =========================
+     VALIDATION
+  ==========================*/
+  const validate = () => {
+    const newErrors: any = {};
+
+    if (!form.companyId) newErrors.companyId = "Company is required";
+    if (!form.branchId) newErrors.branchId = "Branch is required";
+    if (!form.name.trim()) newErrors.name = "Department name is required";
+    if (!form.headEmployeeId)
+      newErrors.headEmployeeId = "Department head is required";
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
   /* =========================
      SAVE
   ==========================*/
   const save = async () => {
+    if (!validate()) return;
+
     if (mode === "add") {
       await axios.post(`${API_BASE}/departments`, form, {
         headers: { Authorization: `Bearer ${token}` },
@@ -114,14 +143,26 @@ export default function DepartmentModal({
       });
     }
 
+    handleClose();
+  };
+
+  const handleClose = () => {
+    setForm(initialForm);
+    setErrors({});
     onClose();
   };
 
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-      <div className="bg-white p-6 rounded-lg w-full max-w-lg">
+    <div
+      className="fixed inset-0 bg-black/40 flex items-center justify-center z-50"
+      onClick={handleClose}
+    >
+      <div
+        className="bg-white p-6 rounded-lg w-full max-w-lg"
+        onClick={(e) => e.stopPropagation()}
+      >
         <h2 className="text-lg font-semibold mb-4 capitalize">
           {mode} Department
         </h2>
@@ -129,7 +170,9 @@ export default function DepartmentModal({
         <div className="grid grid-cols-2 gap-4 text-sm">
           {/* Company */}
           <div>
-            <label className="block mb-1">Company</label>
+            <label className="block mb-1">
+              Company <span className="text-red-500">*</span>
+            </label>
             <select
               disabled={disabled}
               value={form.companyId}
@@ -140,7 +183,9 @@ export default function DepartmentModal({
                   branchId: "",
                 })
               }
-              className="w-full border px-3 py-2 rounded"
+              className={`w-full border px-3 py-2 rounded ${
+                errors.companyId ? "border-red-500" : ""
+              }`}
             >
               <option value="">Select</option>
               {companies.map((c) => (
@@ -149,16 +194,23 @@ export default function DepartmentModal({
                 </option>
               ))}
             </select>
+            {errors.companyId && (
+              <p className="text-red-500 text-xs mt-1">{errors.companyId}</p>
+            )}
           </div>
 
           {/* Branch */}
           <div>
-            <label className="block mb-1">Branch</label>
+            <label className="block mb-1">
+              Branch <span className="text-red-500">*</span>
+            </label>
             <select
               disabled={disabled || !form.companyId}
               value={form.branchId}
               onChange={(e) => setForm({ ...form, branchId: e.target.value })}
-              className="w-full border px-3 py-2 rounded"
+              className={`w-full border px-3 py-2 rounded ${
+                errors.branchId ? "border-red-500" : ""
+              }`}
             >
               <option value="">Select</option>
               {branches.map((b) => (
@@ -167,29 +219,43 @@ export default function DepartmentModal({
                 </option>
               ))}
             </select>
+            {errors.branchId && (
+              <p className="text-red-500 text-xs mt-1">{errors.branchId}</p>
+            )}
           </div>
 
           {/* Department Name */}
           <div className="col-span-2">
-            <label className="block mb-1">Department Name</label>
+            <label className="block mb-1">
+              Department Name <span className="text-red-500">*</span>
+            </label>
             <input
               disabled={disabled}
               value={form.name}
               onChange={(e) => setForm({ ...form, name: e.target.value })}
-              className="w-full border px-3 py-2 rounded"
+              className={`w-full border px-3 py-2 rounded ${
+                errors.name ? "border-red-500" : ""
+              }`}
             />
+            {errors.name && (
+              <p className="text-red-500 text-xs mt-1">{errors.name}</p>
+            )}
           </div>
 
           {/* Department Head */}
           <div className="col-span-2">
-            <label className="block mb-1">Department Head</label>
+            <label className="block mb-1">
+              Department Head <span className="text-red-500">*</span>
+            </label>
             <select
               disabled={disabled}
               value={form.headEmployeeId}
               onChange={(e) =>
                 setForm({ ...form, headEmployeeId: e.target.value })
               }
-              className="w-full border px-3 py-2 rounded"
+              className={`w-full border px-3 py-2 rounded ${
+                errors.headEmployeeId ? "border-red-500" : ""
+              }`}
             >
               <option value="">Select Manager</option>
               {managers.map((m) => (
@@ -198,6 +264,11 @@ export default function DepartmentModal({
                 </option>
               ))}
             </select>
+            {errors.headEmployeeId && (
+              <p className="text-red-500 text-xs mt-1">
+                {errors.headEmployeeId}
+              </p>
+            )}
           </div>
 
           {/* Status */}
@@ -216,7 +287,7 @@ export default function DepartmentModal({
         </div>
 
         <div className="flex justify-end gap-3 mt-6">
-          <button onClick={onClose} className="border px-4 py-2 rounded">
+          <button onClick={handleClose} className="border px-4 py-2 rounded">
             Close
           </button>
           {mode !== "view" && (

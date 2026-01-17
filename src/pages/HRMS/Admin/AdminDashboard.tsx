@@ -14,6 +14,7 @@ import {
   ClipboardCheck,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import Loader from "../Loader";
 
 const API_BASE = import.meta.env.VITE_API_URL;
 
@@ -141,8 +142,18 @@ const AdminDashboard = () => {
     }
   };
 
-  if (loading) return <div className="p-6">Loading...</div>;
-  if (!stats) return <div className="p-6 text-red-500">Failed</div>;
+  if (loading) {
+    return (
+      <div className="relative min-h-screen">
+        <Loader />
+      </div>
+    );
+  }
+
+  if (!stats) {
+    return <div className="p-6 text-red-500">Failed</div>;
+  }
+
 
   return (
     <div className="p-6 bg-white min-h-screen space-y-8">

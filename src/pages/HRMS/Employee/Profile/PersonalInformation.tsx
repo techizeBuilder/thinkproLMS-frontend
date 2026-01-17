@@ -283,19 +283,27 @@ const Info = ({ label, value, icon }: any) => (
 );
 
 const Modal = ({ title, children, onClose }: any) => (
-  <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-    <div className="bg-white w-full max-w-md rounded-xl p-6 relative">
+  <div
+    className="fixed inset-0 bg-black/40 flex items-center justify-center z-50"
+    onClick={onClose} // 👈 outside click
+  >
+    <div
+      className="bg-white w-full max-w-md rounded-xl p-6 relative"
+      onClick={(e) => e.stopPropagation()} // 👈 inside click stop
+    >
       <button
         onClick={onClose}
         className="absolute top-4 right-4 text-gray-400"
       >
         <X size={18} />
       </button>
+
       <h2 className="text-lg font-semibold mb-4">{title}</h2>
       <div className="space-y-4">{children}</div>
     </div>
   </div>
 );
+
 
 const Input = ({ label, ...props }: any) => (
   <div>

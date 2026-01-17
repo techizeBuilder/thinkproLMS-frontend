@@ -49,6 +49,8 @@ export default function BranchModal({ isOpen, mode, branch, onClose }: Props) {
     status: "Active",
   });
 
+  const [errors, setErrors] = useState<Record<string, string>>({});
+
   /* ================= FETCH COMPANIES ================= */
   const fetchCompanies = async () => {
     const res = await axios.get(`${API_BASE}/companies`, {
@@ -63,20 +65,11 @@ export default function BranchModal({ isOpen, mode, branch, onClose }: Props) {
     }
   }, [isOpen]);
 
+  /* ================= RESET / FILL FORM ================= */
   useEffect(() => {
-    if (branch) {
-      setForm({
-        companyId: branch.companyId,
-        name: branch.name,
-        code: branch.code || "",
-        city: branch.city,
-        state: branch.state,
-        country: branch.country,
-        address: branch.address || "",
-        pincode: branch.pincode || "",
-        status: branch.status,
-      });
-    } else {
+    if (!isOpen) return;
+
+    if (mode === "add") {
       setForm({
         companyId: "",
         name: "",
@@ -88,16 +81,53 @@ export default function BranchModal({ isOpen, mode, branch, onClose }: Props) {
         pincode: "",
         status: "Active",
       });
+      setErrors({});
     }
-  }, [branch]);
+
+    if ((mode === "edit" || mode === "view") && branch) {
+      setForm({
+        companyId: branch.companyId,
+        name: branch.name,
+        code: branch.code || "",
+        city: branch.city,
+        state: branch.state,
+        country: branch.country,
+        address: branch.address || "",
+        pincode: branch.pincode || "",
+        status: branch.status,
+      });
+      setErrors({});
+    }
+  }, [isOpen, mode, branch]);
+
+  /* ================= VALIDATION ================= */
+  const validateForm = () => {
+    const newErrors: Record<string, string> = {};
+
+    if (!form.companyId) newErrors.companyId = "Company is required";
+
+    if (!form.name.trim()) newErrors.name = "Branch name is required";
+
+    if (!form.code.trim()) newErrors.code = "Branch code is required";
+
+    if (!form.city.trim()) newErrors.city = "City is required";
+
+    if (!form.state.trim()) newErrors.state = "State is required";
+
+    if (!form.country.trim()) newErrors.country = "Country is required";
+
+    if (!form.pincode.trim()) newErrors.pincode = "Pincode is required";
+
+    if (!form.address.trim()) newErrors.address = "Address is required";
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
   const handleSubmit = async () => {
     if (mode === "view") return;
 
-    if (!form.companyId) {
-      alert("Please select company");
-      return;
-    }
+    if (!validateForm()) return;
 
     if (mode === "add") {
       await axios.post(`${API_BASE}/branches`, form, {
@@ -119,12 +149,22 @@ export default function BranchModal({ isOpen, mode, branch, onClose }: Props) {
   const disabled = mode === "view";
 
   return (
-    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-      <div className="bg-white w-full max-w-xl rounded-lg p-6">
-        <h2 className="text-lg font-semibold mb-4 capitalize">{mode} Branch</h2>
+    <div
+      className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center px-4 py-8"
+      onClick={onClose}
+    >
+      <div
+        className="bg-white w-full max-w-xl rounded-lg shadow-lg flex flex-col max-h-[90vh]"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* HEADER */}
+        <div className="px-6 py-4 border-b shrink-0">
+          <h2 className="text-lg font-semibold capitalize">{mode} Branch</h2>
+        </div>
 
-        <div className="grid grid-cols-2 gap-4 text-sm">
-          {/* COMPANY DROPDOWN */}
+        {/* BODY */}
+        <div className="p-6 grid grid-cols-2 gap-4 text-sm overflow-y-auto">
+          {/* COMPANY */}
           <div className="col-span-2">
             <label className="block mb-1 font-medium">
               Company <span className="text-red-500">*</span>
@@ -132,8 +172,13 @@ export default function BranchModal({ isOpen, mode, branch, onClose }: Props) {
             <select
               disabled={disabled}
               value={form.companyId}
-              onChange={(e) => setForm({ ...form, companyId: e.target.value })}
-              className="w-full border rounded px-3 py-2"
+              onChange={(e) => {
+                setForm({ ...form, companyId: e.target.value });
+                setErrors({ ...errors, companyId: "" });
+              }}
+              className={`w-full border rounded px-3 py-2 ${
+                errors.companyId ? "border-red-500" : ""
+              }`}
             >
               <option value="">Select Company</option>
               {companies.map((c) => (
@@ -142,6 +187,9 @@ export default function BranchModal({ isOpen, mode, branch, onClose }: Props) {
                 </option>
               ))}
             </select>
+            {errors.companyId && (
+              <p className="text-xs text-red-500 mt-1">{errors.companyId}</p>
+            )}
           </div>
 
           {[
@@ -153,24 +201,45 @@ export default function BranchModal({ isOpen, mode, branch, onClose }: Props) {
             ["Pincode", "pincode"],
           ].map(([label, key]) => (
             <div key={key}>
-              <label className="block mb-1 font-medium">{label}</label>
+              <label className="block mb-1 font-medium">
+                {label} <span className="text-red-500">*</span>
+              </label>
               <input
                 disabled={disabled}
                 value={(form as any)[key]}
-                onChange={(e) => setForm({ ...form, [key]: e.target.value })}
-                className="w-full border rounded px-3 py-2"
+                onChange={(e) => {
+                  setForm({ ...form, [key]: e.target.value });
+                  setErrors({ ...errors, [key]: "" });
+                }}
+                className={`w-full border rounded px-3 py-2 ${
+                  errors[key] ? "border-red-500" : ""
+                }`}
               />
+              {errors[key] && (
+                <p className="text-xs text-red-500 mt-1">{errors[key]}</p>
+              )}
             </div>
           ))}
 
           <div className="col-span-2">
-            <label className="block mb-1 font-medium">Address</label>
+            <label className="block mb-1 font-medium">
+              Address <span className="text-red-500">*</span>
+            </label>
             <textarea
               disabled={disabled}
               value={form.address}
-              onChange={(e) => setForm({ ...form, address: e.target.value })}
-              className="w-full border rounded px-3 py-2"
+              onChange={(e) => {
+                setForm({ ...form, address: e.target.value });
+                setErrors({ ...errors, address: "" });
+              }}
+              className={`w-full border rounded px-3 py-2 ${
+                errors.address ? "border-red-500" : ""
+              }`}
+              rows={3}
             />
+            {errors.address && (
+              <p className="text-xs text-red-500 mt-1">{errors.address}</p>
+            )}
           </div>
 
           <div>
@@ -187,7 +256,8 @@ export default function BranchModal({ isOpen, mode, branch, onClose }: Props) {
           </div>
         </div>
 
-        <div className="flex justify-end gap-3 mt-6">
+        {/* FOOTER */}
+        <div className="px-6 py-4 border-t flex justify-end gap-3 shrink-0">
           <button onClick={onClose} className="px-4 py-2 border rounded">
             Close
           </button>

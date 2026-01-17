@@ -17,17 +17,23 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import Loader from "../Loader";
 
 const API_BASE = import.meta.env.VITE_API_URL;
+const ViewAPI = API_BASE.replace("/api", "");
 
 interface DocumentFile {
   _id: string;
   type: "AADHAAR" | "PAN" | "MARKSHEET_12" | "PASSBOOK";
   fileName: string;
   filePath: string;
-  mimeType?: string;
-  size?: number;
   status: "PENDING" | "VERIFIED" | "REJECTED";
+}
+
+interface User {
+  _id: string;
+  name: string;
+  role: string;
 }
 
 const DOCUMENT_LABELS: Record<string, string> = {
@@ -36,14 +42,6 @@ const DOCUMENT_LABELS: Record<string, string> = {
   MARKSHEET_12: "12th Marksheet",
   PASSBOOK: "Bank Passbook",
 };
-
-
-
-interface User {
-  _id: string;
-  name: string;
-  role: string;
-}
 
 /* ================= STATUS BADGE ================= */
 
@@ -62,7 +60,7 @@ const StatusBadge = ({ status }: { status: string }) => {
   );
 };
 
-const Document = () => {
+export default function Document() {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(false);
   const [open, setOpen] = useState(false);
@@ -71,17 +69,27 @@ const Document = () => {
   );
   const [search, setSearch] = useState("");
 
+  // 🔥 Pagination states
+  const [page, setPage] = useState(1);
+  const [totalUsers, setTotalUsers] = useState(0);
+  const limit = 15;
+
   /* ================= FETCH USERS ================= */
 
-  const fetchUsers = async () => {
+  const fetchUsers = async (pageNumber = 1) => {
     try {
       setLoading(true);
-      const res = await axios.get(`${API_BASE}/users`, {
+
+      const res = await axios.get(`${API_BASE}/users?page=${pageNumber}`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
       });
-      setUsers(res.data);
+
+      // pagination response
+      setUsers(res.data.data);
+      setTotalUsers(res.data.totalUsers);
+      setPage(pageNumber);
     } catch (error) {
       console.error("Failed to fetch users", error);
     } finally {
@@ -90,10 +98,19 @@ const Document = () => {
   };
 
   useEffect(() => {
-    fetchUsers();
+    fetchUsers(1);
   }, []);
 
-  /* ================= FETCH DOCUMENTS BY USER ================= */
+  /* ================= SEARCH FILTER ================= */
+
+  const filteredUsers = users.filter((user) => {
+    const q = search.toLowerCase();
+    return (
+      user.name.toLowerCase().includes(q) || user.role.toLowerCase().includes(q)
+    );
+  });
+
+  /* ================= FETCH DOCUMENTS ================= */
 
   const handleViewDocuments = async (userId: string) => {
     try {
@@ -105,8 +122,7 @@ const Document = () => {
 
       setSelectedDocuments(res.data);
       setOpen(true);
-    } catch (err) {
-      console.error("Failed to fetch documents", err);
+    } catch {
       setSelectedDocuments([]);
       setOpen(true);
     }
@@ -118,60 +134,90 @@ const Document = () => {
     documentId: string,
     status: "VERIFIED" | "REJECTED"
   ) => {
-    try {
-      await axios.patch(
-        `${API_BASE}/documents/verify/${documentId}`,
-        { status },
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-        }
-      );
+    await axios.patch(
+      `${API_BASE}/documents/verify/${documentId}`,
+      { status },
+      {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      }
+    );
 
-      // 🔥 Update UI without refetch
-      setSelectedDocuments((prev) =>
-        prev.map((doc) => (doc._id === documentId ? { ...doc, status } : doc))
-      );
-    } catch (err) {
-      alert("Failed to update document status");
-    }
+    setSelectedDocuments((prev) =>
+      prev.map((doc) => (doc._id === documentId ? { ...doc, status } : doc))
+    );
   };
 
-  const filteredUsers = users.filter((user) => {
-    const q = search.toLowerCase();
-    return (
-      user.name?.toLowerCase().includes(q) ||
-      user.role?.toLowerCase().includes(q)
-    );
-  });
-const groupedDocuments = selectedDocuments.reduce(
-  (acc: Record<string, DocumentFile[]>, doc) => {
-    if (!acc[doc.type]) acc[doc.type] = [];
-    acc[doc.type].push(doc);
-    return acc;
-  },
-  {}
-);
+  /* ================= GROUP DOCUMENTS ================= */
 
+  const groupedDocuments = selectedDocuments.reduce(
+    (acc: Record<string, DocumentFile[]>, doc) => {
+      if (!acc[doc.type]) acc[doc.type] = [];
+      acc[doc.type].push(doc);
+      return acc;
+    },
+    {}
+  );
+
+  /* ================= PAGINATION ================= */
+
+  const totalPages = Math.ceil(totalUsers / limit);
+
+  const getPaginationPages = () => {
+    const pages: (number | string)[] = [];
+
+    if (totalPages <= 5) {
+      for (let i = 1; i <= totalPages; i++) pages.push(i);
+      return pages;
+    }
+
+    pages.push(1);
+    if (page > 3) pages.push("...");
+    const start = Math.max(2, page - 1);
+    const end = Math.min(totalPages - 1, page + 1);
+
+    for (let i = start; i <= end; i++) pages.push(i);
+    if (page < totalPages - 2) pages.push("...");
+    pages.push(totalPages);
+
+    return pages;
+  };
+
+  /* ================= LOADER ================= */
+
+  if (loading) {
+    return (
+      <div className="relative min-h-[300px]">
+        <Loader />
+      </div>
+    );
+  }
 
   return (
     <div className="p-6 space-y-6">
       <h1 className="text-xl font-semibold">Uploaded Documents</h1>
 
+      {/* ================= SEARCH ================= */}
+
       <input
         type="text"
         placeholder="Search by user name or role..."
         value={search}
-        onChange={(e) => setSearch(e.target.value)}
-        className="w-full sm:w-80 h-10 px-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+        onChange={(e) => {
+          setSearch(e.target.value);
+          setPage(1);
+        }}
+        className="w-full sm:w-80 h-10 px-3 border rounded-md focus:ring-2 focus:ring-orange-400"
       />
+
+      {/* ================= USER TABLE ================= */}
 
       <div className="border rounded-lg overflow-hidden">
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="w-[80px]">Sr. No.</TableHead>
+              <TableHead className="w-[80px]">#</TableHead>
               <TableHead>User Name</TableHead>
               <TableHead>User Role</TableHead>
               <TableHead>Documents</TableHead>
@@ -179,13 +225,7 @@ const groupedDocuments = selectedDocuments.reduce(
           </TableHeader>
 
           <TableBody>
-            {loading ? (
-              <TableRow>
-                <TableCell colSpan={4} className="text-center py-6">
-                  Loading...
-                </TableCell>
-              </TableRow>
-            ) : filteredUsers.length === 0 ? (
+            {filteredUsers.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={4} className="text-center py-6">
                   No users found
@@ -194,13 +234,13 @@ const groupedDocuments = selectedDocuments.reduce(
             ) : (
               filteredUsers.map((user, index) => (
                 <TableRow key={user._id}>
-                  <TableCell>{index + 1}</TableCell>
+                  <TableCell>{(page - 1) * limit + index + 1}</TableCell>
                   <TableCell>{user.name}</TableCell>
                   <TableCell className="capitalize">{user.role}</TableCell>
                   <TableCell>
                     <Button
-                      variant="outline"
                       size="sm"
+                      variant="outline"
                       onClick={() => handleViewDocuments(user._id)}
                     >
                       View Documents
@@ -213,6 +253,35 @@ const groupedDocuments = selectedDocuments.reduce(
         </Table>
       </div>
 
+      {/* ================= PAGINATION ================= */}
+
+      {totalUsers > 15 && search.trim() === "" && (
+        <div className="flex justify-end">
+          <div className="flex gap-2 bg-white shadow-md rounded-xl px-4 py-3">
+            {getPaginationPages().map((p, i) =>
+              p === "..." ? (
+                <span key={i} className="px-3 text-gray-400">
+                  …
+                </span>
+              ) : (
+                <button
+                  key={p}
+                  onClick={() => fetchUsers(p as number)}
+                  className={`min-w-[38px] h-9 rounded-md text-sm font-medium
+                    ${
+                      page === p
+                        ? "bg-orange-500 text-white"
+                        : "bg-orange-50 text-orange-600 hover:bg-orange-100"
+                    }`}
+                >
+                  {p}
+                </button>
+              )
+            )}
+          </div>
+        </div>
+      )}
+
       {/* ================= DOCUMENT MODAL ================= */}
 
       <Dialog open={open} onOpenChange={setOpen}>
@@ -221,72 +290,61 @@ const groupedDocuments = selectedDocuments.reduce(
             <DialogTitle>Uploaded Documents</DialogTitle>
           </DialogHeader>
 
-          {selectedDocuments.length === 0 ? (
-            <p className="text-sm text-gray-500">No documents uploaded</p>
-          ) : (
-            <div className="space-y-6">
-              {Object.keys(DOCUMENT_LABELS).map((type) => {
-                const docs = groupedDocuments[type] || [];
+          {Object.keys(DOCUMENT_LABELS).map((type) => {
+            const docs = groupedDocuments[type] || [];
 
-                return (
-                  <div key={type}>
-                    <h3 className="font-semibold mb-2">
-                      {DOCUMENT_LABELS[type]}
-                    </h3>
+            return (
+              <div key={type} className="mb-4">
+                <h3 className="font-semibold mb-2">{DOCUMENT_LABELS[type]}</h3>
 
-                    {docs.length === 0 ? (
-                      <p className="text-sm text-gray-500">Not uploaded</p>
-                    ) : (
-                      docs.map((doc) => (
-                        <div
-                          key={doc._id}
-                          className="flex items-center justify-between border p-3 rounded mb-2"
+                {docs.length === 0 ? (
+                  <p className="text-sm text-gray-500">Not uploaded</p>
+                ) : (
+                  docs.map((doc) => (
+                    <div
+                      key={doc._id}
+                      className="flex justify-between border p-3 rounded mb-2"
+                    >
+                      <div>
+                        <p className="text-sm">{doc.fileName}</p>
+                        <StatusBadge status={doc.status} />
+                      </div>
+
+                      <div className="flex gap-2">
+                        <a
+                          href={`${ViewAPI}/uploads/user-documents/${doc.fileName}`}
+                          target="_blank"
                         >
-                          <div className="space-y-1">
-                            <p className="text-sm truncate">{doc.fileName}</p>
-                            <StatusBadge status={doc.status} />
-                          </div>
+                          <Button size="sm" variant="outline">
+                            View
+                          </Button>
+                        </a>
 
-                          <div className="flex gap-2">
-                            <a
-                              href={`http://localhost:8000/uploads/user-documents/${doc.fileName}`}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                            >
-                              <Button size="sm" variant="outline">
-                                View
-                              </Button>
-                            </a>
+                        <Button
+                          size="sm"
+                          disabled={doc.status !== "PENDING"}
+                          onClick={() => handleVerify(doc._id, "VERIFIED")}
+                        >
+                          ✔
+                        </Button>
 
-                            <Button
-                              size="sm"
-                              disabled={doc.status !== "PENDING"}
-                              onClick={() => handleVerify(doc._id, "VERIFIED")}
-                            >
-                              ✔
-                            </Button>
-
-                            <Button
-                              size="sm"
-                              variant="destructive"
-                              disabled={doc.status !== "PENDING"}
-                              onClick={() => handleVerify(doc._id, "REJECTED")}
-                            >
-                              ✖
-                            </Button>
-                          </div>
-                        </div>
-                      ))
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-          )}
+                        <Button
+                          size="sm"
+                          variant="destructive"
+                          disabled={doc.status !== "PENDING"}
+                          onClick={() => handleVerify(doc._id, "REJECTED")}
+                        >
+                          ✖
+                        </Button>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+            );
+          })}
         </DialogContent>
       </Dialog>
     </div>
   );
-};
-
-export default Document;
+}

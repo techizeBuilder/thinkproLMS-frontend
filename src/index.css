@@ -345,3 +345,38 @@
   background-clip: padding-box;
 }
 
+@layer utilities {
+  .animate-rotate-loader {
+    animation: rotateAnimation 3s linear infinite;
+    transform: rotate(30deg) scale(0.77);
+  }
+}
+
+.paper-leaf {
+  width: 0;
+  height: 0;
+  border-left: 30px solid transparent;
+  border-right: 30px solid transparent;
+  border-bottom: 50px solid;
+  clip-path: ellipse(50% 50% at 50% 109%);
+  border-top-left-radius: 222px;
+  border-top-right-radius: 222px;
+}
+
+.paper-base {
+  position: absolute;
+  right: -1px;
+  bottom: 0;
+  width: 30px;
+  height: 20.5px;
+  border-bottom-right-radius: 2px;
+}
+
+@keyframes rotateAnimation {
+  from {
+    transform: rotate(30deg) scale(0.77);
+  }
+  to {
+    transform: rotate(390deg) scale(0.77);
+  }
+}

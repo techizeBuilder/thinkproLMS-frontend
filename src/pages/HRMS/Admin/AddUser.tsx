@@ -27,6 +27,7 @@ const ROLE_OPTIONS = [
   { label: "Manager", value: "manager" },
   { label: "Finance", value: "finance" },
   { label: "IT Admin", value: "IT-Admin" },
+  { label: "Auditor", value: "auditor" },
 ];
 
 export default function AddUser() {
@@ -98,8 +99,9 @@ export default function AddUser() {
       .get(`${API_BASE}/users?role=manager`, {
         headers: { Authorization: `Bearer ${token}` },
       })
-      .then((res) => setManagers(res.data));
+      .then((res) => setManagers(res.data || []));
   }, []);
+
 
   /* ================= FILTER ================= */
   const filteredBranches = branches.filter(
@@ -515,7 +517,7 @@ const handleSubmit = async (e: any) => {
               }`}
             >
               <option value="">Select Manager</option>
-              {managers.map((m) => (
+              {managers?.map((m) => (
                 <option key={m._id} value={m._id}>
                   {m.name}
                 </option>

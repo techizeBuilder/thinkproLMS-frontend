@@ -62,91 +62,95 @@ const AddLeaveTypeModal = ({ isOpen, onClose, editData }: Props) => {
     }
   };
 
-  return (
-    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-      <div className="bg-white w-full max-w-md rounded-lg p-6">
-        <h2 className="text-lg font-semibold mb-6">
-          {editData ? "Edit Leave Type" : "Add Leave Type"}
-        </h2>
+return (
+  <div className="fixed inset-0 z-50 flex items-center justify-center">
+    {/* BACKDROP */}
+    <div className="absolute inset-0 bg-black/40" onClick={onClose} />
 
-        <div className="space-y-4">
-          {/* Leave Name */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Leave Name
-            </label>
-            <input
-              className="w-full border px-3 py-2 rounded"
-              placeholder="e.g. Casual Leave"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-            />
-          </div>
+    {/* MODAL */}
+    <div
+      className="relative z-10 bg-white w-full max-w-md rounded-lg p-6"
+      onClick={(e) => e.stopPropagation()}
+    >
+      <h2 className="text-lg font-semibold mb-6">
+        {editData ? "Edit Leave Type" : "Add Leave Type"}
+      </h2>
 
-          {/* Code */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Leave Code
-            </label>
-            <input
-              className="w-full border px-3 py-2 rounded"
-              placeholder="e.g. CL, SL"
-              value={code}
-              onChange={(e) => setCode(e.target.value)}
-            />
-          </div>
-
-          {/* Max Days */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Maximum Days Per Year
-            </label>
-            <input
-              type="number"
-              className="w-full border px-3 py-2 rounded"
-              placeholder="e.g. 12"
-              value={maxDays}
-              onChange={(e) => setMaxDays(Number(e.target.value))}
-            />
-          </div>
-
-          {/* Paid */}
-          <div className="flex items-center gap-2">
-            <input
-              type="checkbox"
-              checked={paid}
-              onChange={(e) => setPaid(e.target.checked)}
-            />
-            <label className="text-sm text-gray-700">Paid Leave</label>
-          </div>
-
-          {/* Carry Forward */}
-          <div className="flex items-center gap-2">
-            <input
-              type="checkbox"
-              checked={carryForward}
-              onChange={(e) => setCarryForward(e.target.checked)}
-            />
-            <label className="text-sm text-gray-700">Allow Carry Forward</label>
-          </div>
+      <div className="space-y-4">
+        {/* Leave Name */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Leave Name
+          </label>
+          <input
+            className="w-full border px-3 py-2 rounded"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+          />
         </div>
 
-        {/* Actions */}
-        <div className="flex justify-end gap-3 mt-6">
-          <button onClick={onClose} className="px-4 py-2 border rounded">
-            Cancel
-          </button>
+        {/* Code */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Leave Code
+          </label>
+          <input
+            className="w-full border px-3 py-2 rounded"
+            value={code}
+            onChange={(e) => setCode(e.target.value)}
+          />
+        </div>
 
-          <button
-            onClick={handleSubmit}
-            className="px-4 py-2 bg-orange-500 text-white rounded"
-          >
-            {editData ? "Update" : "Save"}
-          </button>
+        {/* Max Days */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Maximum Days Per Year
+          </label>
+          <input
+            type="number"
+            className="w-full border px-3 py-2 rounded"
+            value={maxDays}
+            onChange={(e) => setMaxDays(Number(e.target.value))}
+          />
+        </div>
+
+        {/* Paid */}
+        <div className="flex items-center gap-2">
+          <input
+            type="checkbox"
+            checked={paid}
+            onChange={(e) => setPaid(e.target.checked)}
+          />
+          <label className="text-sm text-gray-700">Paid Leave</label>
+        </div>
+
+        {/* Carry Forward */}
+        <div className="flex items-center gap-2">
+          <input
+            type="checkbox"
+            checked={carryForward}
+            onChange={(e) => setCarryForward(e.target.checked)}
+          />
+          <label className="text-sm text-gray-700">Allow Carry Forward</label>
         </div>
       </div>
+
+      {/* Actions */}
+      <div className="flex justify-end gap-3 mt-6">
+        <button onClick={onClose} className="px-4 py-2 border rounded">
+          Cancel
+        </button>
+
+        <button
+          onClick={handleSubmit}
+          className="px-4 py-2 bg-orange-500 text-white rounded"
+        >
+          {editData ? "Update" : "Save"}
+        </button>
+      </div>
     </div>
-  );
+  </div>
+);
 };
 
 export default AddLeaveTypeModal;
