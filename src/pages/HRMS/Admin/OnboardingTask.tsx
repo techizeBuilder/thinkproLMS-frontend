@@ -69,13 +69,22 @@ const OnboardingTasks = () => {
     task: "",
   });
 
+  const [errors, setErrors] = useState({
+    employeeId: "",
+    departmentId: "",
+    task: "",
+  });
+
   /* ================= FETCH ALL ================= */
 
   const fetchAll = async () => {
     try {
       const empRes = await axios.get(`${API_BASE}/users`, getAuthHeaders());
 
-      const deptRes = await axios.get(`${API_BASE}/departments`, getAuthHeaders());
+      const deptRes = await axios.get(
+        `${API_BASE}/departments`,
+        getAuthHeaders()
+      );
 
       const taskRes = await axios.get(
         `${API_BASE}/onboarding-tasks`,
@@ -97,7 +106,19 @@ const OnboardingTasks = () => {
   /* ================= ADD TASK ================= */
 
   const addTask = async () => {
-    if (!form.employeeId || !form.departmentId || !form.task) return;
+    let newErrors = {
+      employeeId: "",
+      departmentId: "",
+      task: "",
+    };
+
+    if (!form.employeeId) newErrors.employeeId = "Employee is required";
+    if (!form.departmentId) newErrors.departmentId = "Department is required";
+    if (!form.task.trim()) newErrors.task = "Task is required";
+
+    setErrors(newErrors);
+
+    if (Object.values(newErrors).some((e) => e !== "")) return;
 
     try {
       await axios.post(
@@ -112,6 +133,7 @@ const OnboardingTasks = () => {
 
       setOpen(false);
       setForm({ employeeId: "", departmentId: "", task: "" });
+      setErrors({ employeeId: "", departmentId: "", task: "" });
       fetchAll();
     } catch (error) {
       console.error("Failed to add task", error);
@@ -193,12 +215,19 @@ const OnboardingTasks = () => {
           <div className="space-y-4">
             {/* EMPLOYEE */}
             <div>
-              <Label>Employee</Label>
+              <Label>
+                Employee <span className="text-red-500">*</span>
+              </Label>
               <Select
                 value={form.employeeId}
-                onValueChange={(v) => setForm({ ...form, employeeId: v })}
+                onValueChange={(v) => {
+                  setForm({ ...form, employeeId: v });
+                  setErrors({ ...errors, employeeId: "" });
+                }}
               >
-                <SelectTrigger>
+                <SelectTrigger
+                  className={errors.employeeId ? "border-red-500" : ""}
+                >
                   <SelectValue placeholder="Select employee" />
                 </SelectTrigger>
                 <SelectContent>
@@ -209,16 +238,26 @@ const OnboardingTasks = () => {
                   ))}
                 </SelectContent>
               </Select>
+              {errors.employeeId && (
+                <p className="text-xs text-red-500 mt-1">{errors.employeeId}</p>
+              )}
             </div>
 
             {/* DEPARTMENT */}
             <div>
-              <Label>Department</Label>
+              <Label>
+                Department <span className="text-red-500">*</span>
+              </Label>
               <Select
                 value={form.departmentId}
-                onValueChange={(v) => setForm({ ...form, departmentId: v })}
+                onValueChange={(v) => {
+                  setForm({ ...form, departmentId: v });
+                  setErrors({ ...errors, departmentId: "" });
+                }}
               >
-                <SelectTrigger>
+                <SelectTrigger
+                  className={errors.departmentId ? "border-red-500" : ""}
+                >
                   <SelectValue placeholder="Select department" />
                 </SelectTrigger>
                 <SelectContent>
@@ -232,16 +271,30 @@ const OnboardingTasks = () => {
                   ))}
                 </SelectContent>
               </Select>
+              {errors.departmentId && (
+                <p className="text-xs text-red-500 mt-1">
+                  {errors.departmentId}
+                </p>
+              )}
             </div>
 
             {/* TASK */}
             <div>
-              <Label>Task</Label>
+              <Label>
+                Task <span className="text-red-500">*</span>
+              </Label>
               <Input
                 placeholder="e.g. Laptop Allocation"
                 value={form.task}
-                onChange={(e) => setForm({ ...form, task: e.target.value })}
+                onChange={(e) => {
+                  setForm({ ...form, task: e.target.value });
+                  setErrors({ ...errors, task: "" });
+                }}
+                className={errors.task ? "border-red-500" : ""}
               />
+              {errors.task && (
+                <p className="text-xs text-red-500 mt-1">{errors.task}</p>
+              )}
             </div>
 
             {/* ACTIONS */}

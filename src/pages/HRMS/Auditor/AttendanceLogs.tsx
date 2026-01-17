@@ -2,9 +2,8 @@
 
 import { useEffect, useMemo, useState } from "react";
 import axios from "axios";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChevronLeft, ChevronRight, CheckCircle, XCircle } from "lucide-react";
-import Loader from "../Loader";
 
 const API_BASE = import.meta.env.VITE_API_URL;
 
@@ -25,9 +24,7 @@ interface AttendanceRecord {
   punchIn?: string;
 }
 
-const ITEMS_PER_PAGE = 15;
-
-const AttendanceReport = () => {
+const AttendanceLogs = () => {
   const today = new Date();
 
   const [users, setUsers] = useState<User[]>([]);
@@ -35,38 +32,28 @@ const AttendanceReport = () => {
   const [holidays, setHolidays] = useState<Holiday[]>([]);
   const [month, setMonth] = useState(today.getMonth());
   const [year, setYear] = useState(today.getFullYear());
-  const [loading, setLoading] = useState(false);
 
-  const [search, setSearch] = useState("");
-  const [page, setPage] = useState(1);
-
-  /* ================= FETCH ATTENDANCE ================= */
+  /* ================= FETCH ATTENDANCE (HR / ADMIN) ================= */
   useEffect(() => {
     const fetchAttendance = async () => {
-      try {
-        setLoading(true);
+      const res = await axios.get(`${API_BASE}/attendance/all`, {
+        params: { month, year },
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      });
 
-        const res = await axios.get(`${API_BASE}/attendance/all`, {
-          params: { month, year },
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-        });
+      setAttendance(res.data || []);
 
-        setAttendance(res.data || []);
+      const uniqueUsers: User[] = Array.from(
+        new Map(
+          (res.data as AttendanceRecord[]).map(
+            (r) => [r.user._id, r.user] as [string, User]
+          )
+        ).values()
+      );
 
-        const uniqueUsers: User[] = Array.from(
-          new Map(
-            (res.data as AttendanceRecord[]).map(
-              (r) => [r.user._id, r.user] as [string, User]
-            )
-          ).values()
-        );
-
-        setUsers(uniqueUsers);
-      } finally {
-        setLoading(false);
-      }
+      setUsers(uniqueUsers);
     };
 
     fetchAttendance();
@@ -79,6 +66,15 @@ const AttendanceReport = () => {
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       })
       .then((res) => setHolidays(res.data));
+  }, []);
+
+  /* ================= AUTO CURRENT MONTH ================= */
+  useEffect(() => {
+    const now = new Date();
+    if (now.getMonth() !== month || now.getFullYear() !== year) {
+      setMonth(now.getMonth());
+      setYear(now.getFullYear());
+    }
   }, []);
 
   /* ================= DAYS ================= */
@@ -117,25 +113,6 @@ const AttendanceReport = () => {
     month === today.getMonth() &&
     day > today.getDate();
 
-  /* ================= SEARCH ================= */
-  const filteredUsers = useMemo(() => {
-    return users.filter((u) =>
-      u.name.toLowerCase().includes(search.toLowerCase())
-    );
-  }, [users, search]);
-
-  /* ================= PAGINATION ================= */
-  const totalPages = Math.ceil(filteredUsers.length / ITEMS_PER_PAGE);
-
-  const paginatedUsers = useMemo(() => {
-    const start = (page - 1) * ITEMS_PER_PAGE;
-    return filteredUsers.slice(start, start + ITEMS_PER_PAGE);
-  }, [filteredUsers, page]);
-
-  useEffect(() => {
-    setPage(1);
-  }, [search]);
-
   /* ================= MONTH CHANGE ================= */
   const handlePrevMonth = () => {
     if (month === 0) {
@@ -151,27 +128,13 @@ const AttendanceReport = () => {
     } else setMonth((m) => m + 1);
   };
 
-  /* ================= LOADER ================= */
-  if (loading) {
-    return (
-      <div className="p-10 flex justify-center">
-        <Loader />
-      </div>
-    );
-  }
-
   return (
-    <div className="p-6 space-y-4">
+    <div className="p-6">
       <Card>
-        <CardHeader className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-          <div>
-            <h1 className="text-2xl font-semibold">Attendance Report</h1>
-            <p className="text-sm text-gray-500">
-              Monthly employee attendance overview
-            </p>
-          </div>
+        <CardHeader className="flex justify-between items-center">
+          <h1 className="text-2xl font-semibold">Attendance Report</h1>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
             <ChevronLeft onClick={handlePrevMonth} className="cursor-pointer" />
             <span className="font-medium">
               {new Date(year, month).toLocaleString("default", {
@@ -186,17 +149,6 @@ const AttendanceReport = () => {
           </div>
         </CardHeader>
 
-        {/* ================= SEARCH ================= */}
-        <div className="px-6 pb-4">
-          <input
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search employee..."
-            className="w-full md:w-72 h-10 px-3 border rounded-md focus:ring-2 focus:ring-orange-400"
-          />
-        </div>
-
-        {/* ================= DESKTOP ================= */}
         <CardContent className="hidden md:block overflow-x-auto">
           <table className="min-w-max border-collapse border text-sm">
             <thead>
@@ -212,18 +164,28 @@ const AttendanceReport = () => {
                   <th
                     key={day}
                     className={`border px-2 py-2 text-xs text-center
-                      ${isSunday(day) ? "bg-gray-100 text-gray-500" : ""}
-                      ${getHoliday(day) ? "bg-blue-100 text-blue-700" : ""}
-                    `}
+    ${isSunday(day) ? "bg-gray-100 text-gray-500" : ""}
+    ${getHoliday(day) ? "bg-blue-100 text-blue-700" : ""}
+  `}
                   >
                     {day}
+
+                    {isSunday(day) && (
+                      <div className="text-[10px] font-medium">WO</div>
+                    )}
+
+                    {getHoliday(day) && (
+                      <div className="text-[10px] font-medium">
+                        {getHoliday(day)?.title}
+                      </div>
+                    )}
                   </th>
                 ))}
               </tr>
             </thead>
 
             <tbody>
-              {paginatedUsers.map((user) => (
+              {users.map((user) => (
                 <tr key={user._id}>
                   <td className="border px-3 py-2 sticky left-0 bg-white font-medium">
                     {user.name}
@@ -233,7 +195,7 @@ const AttendanceReport = () => {
                   </td>
 
                   {datesArray.map((day) => {
-                    if (isFutureDate(day) || isSunday(day) || getHoliday(day)) {
+                    if (isFutureDate(day)) {
                       return (
                         <td
                           key={day}
@@ -244,8 +206,19 @@ const AttendanceReport = () => {
                       );
                     }
 
+                    if (isSunday(day) || getHoliday(day)) {
+                      return (
+                        <td
+                          key={day}
+                          className="border text-center text-gray-400"
+                        >
+                          —
+                        </td>
+                      );
+                    }
+
                     return (
-                      <td key={day} className="border text-center">
+                      <td key={day} className="border text-center py-2">
                         {isPresent(user._id, day) ? (
                           <CheckCircle
                             className="text-green-600 mx-auto"
@@ -262,26 +235,55 @@ const AttendanceReport = () => {
             </tbody>
           </table>
         </CardContent>
+        <CardContent className="block md:hidden space-y-4">
+          {users.map((user) => {
+            const todayDay = today.getDate();
 
-        {/* ================= PAGINATION ================= */}
-        {filteredUsers.length > ITEMS_PER_PAGE && (
-          <div className="flex justify-center gap-2 py-4">
-            {Array.from({ length: totalPages }).map((_, i) => (
-              <button
-                key={i}
-                onClick={() => setPage(i + 1)}
-                className={`px-3 py-1 rounded-md border ${
-                  page === i + 1 ? "bg-orange-500 text-white" : "bg-white"
-                }`}
-              >
-                {i + 1}
-              </button>
-            ))}
-          </div>
-        )}
+            const todayStatus =
+              isSunday(todayDay) || getHoliday(todayDay)
+                ? "OFF"
+                : isPresent(user._id, todayDay)
+                ? "PRESENT"
+                : "ABSENT";
+
+            return (
+              <Card key={user._id} className="shadow-sm">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-base">{user.name}</CardTitle>
+                  <p className="text-xs text-gray-500">{user.role}</p>
+                </CardHeader>
+
+                <CardContent className="flex items-center justify-between">
+                  <span className="text-sm font-medium">
+                    {new Date(year, month).toLocaleString("default", {
+                      month: "long",
+                    })}{" "}
+                    {todayDay}
+                  </span>
+
+                  {todayStatus === "PRESENT" && (
+                    <span className="flex items-center gap-1 text-green-600 text-sm">
+                      <CheckCircle size={16} /> Present
+                    </span>
+                  )}
+
+                  {todayStatus === "ABSENT" && (
+                    <span className="flex items-center gap-1 text-red-500 text-sm">
+                      <XCircle size={16} /> Absent
+                    </span>
+                  )}
+
+                  {todayStatus === "OFF" && (
+                    <span className="text-gray-400 text-sm">Off</span>
+                  )}
+                </CardContent>
+              </Card>
+            );
+          })}
+        </CardContent>
       </Card>
     </div>
   );
 };
 
-export default AttendanceReport;
+export default AttendanceLogs;

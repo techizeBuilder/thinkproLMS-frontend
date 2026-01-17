@@ -86,14 +86,16 @@ export default function Designation() {
                   </span>
                 </td>
                 <td className="text-center relative">
-                  <MoreVertical
-                    className="inline cursor-pointer"
+                  <span
+                    className="cursor-pointer"
                     onClick={() =>
                       setOpenMenu(openMenu === d._id ? null : d._id)
                     }
-                  />
+                  >
+                    <MoreVertical size={18} />
+                  </span>
                   {openMenu === d._id && (
-                    <div className="absolute right-4 bg-white border rounded shadow">
+                    <div className="absolute right-6 mt-2 w-36 bg-white border rounded-md shadow z-50">
                       <button
                         className="block px-4 py-2 w-full text-left"
                         onClick={() => {

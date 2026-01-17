@@ -1,121 +1,157 @@
 /** @format */
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import axios from "axios";
 import { X } from "lucide-react";
+
+interface Holiday {
+  _id?: string;
+  title: string;
+  date: string;
+}
 
 interface Props {
   isOpen: boolean;
   onClose: () => void;
+  mode: "add" | "edit";
+  holiday: Holiday | null;
+  onSuccess: () => void;
 }
 
 const API_BASE = import.meta.env.VITE_API_URL;
 
-const AddHolidayModal = ({ isOpen, onClose }: Props) => {
-  const [title, setTitle] = useState("");
-  const [date, setDate] = useState("");
+const AddHolidayModal = ({
+  isOpen,
+  onClose,
+  mode,
+  holiday,
+  onSuccess,
+}: Props) => {
+  const token = localStorage.getItem("token");
+
+  const [form, setForm] = useState<Holiday>({
+    title: "",
+    date: "",
+  });
+
+  const [errors, setErrors] = useState<any>({});
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (!isOpen) return;
+
+    if (mode === "edit" && holiday) {
+      setForm({
+        title: holiday.title,
+        date: holiday.date.split("T")[0],
+      });
+    } else {
+      setForm({ title: "", date: "" });
+    }
+
+    setErrors({});
+  }, [isOpen, mode, holiday]);
 
   if (!isOpen) return null;
 
-  const token = localStorage.getItem("token");
+  const validate = () => {
+    const e: any = {};
+    if (!form.title.trim()) e.title = "Holiday is required";
+    if (!form.date) e.date = "Date is required";
+    setErrors(e);
+    return Object.keys(e).length === 0;
+  };
 
-  /* ================= SUBMIT HANDLER ================= */
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    if (!title || !date) {
-      alert("Holiday and Date are required");
-      return;
-    }
+    if (!validate()) return;
 
     try {
       setLoading(true);
 
-      await axios.post(
-        `${API_BASE}/holidays`,
-        {
-          title,
-          date,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      if (mode === "add") {
+        await axios.post(`${API_BASE}/holidays`, form, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+      } else {
+        await axios.put(`${API_BASE}/holidays/${holiday?._id}`, form, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+      }
 
-      setTitle("");
-      setDate("");
+      onSuccess();
       onClose();
-    } catch (error: any) {
-      alert(error?.response?.data?.message || "Failed to add holiday");
+    } catch (err: any) {
+      alert(err?.response?.data?.message || "Something went wrong");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <>
-      {/* Overlay with BLUR only */}
+    <div className="fixed inset-0 z-50 flex items-center justify-center">
+      {/* BACKDROP */}
+      <div className="absolute inset-0 bg-black/40" onClick={onClose} />
+
+      {/* MODAL */}
       <div
-        className="fixed inset-0 backdrop-blur-[3px] z-20"
-        onClick={onClose}
-      />
-
-      {/* Modal */}
-      <div className="fixed inset-0 z-50 flex items-center justify-center">
-        <div
-          className="bg-white w-[420px] rounded-lg shadow-xl relative p-6"
-          onClick={(e) => e.stopPropagation()}
+        className="relative z-10 w-full max-w-md rounded-lg bg-white p-6 shadow-xl"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <button
+          onClick={onClose}
+          className="absolute top-4 right-4 text-gray-500 hover:text-gray-700"
         >
-          {/* Close button */}
+          <X size={20} />
+        </button>
+
+        <h2 className="mb-6 text-center text-xl font-semibold">
+          {mode === "add" ? "Add Holiday" : "Edit Holiday"}
+        </h2>
+
+        <form className="space-y-4" onSubmit={handleSubmit}>
+          <div>
+            <label className="text-sm font-medium">Holiday *</label>
+            <input
+              value={form.title}
+              onChange={(e) => setForm({ ...form, title: e.target.value })}
+              className={`w-full rounded border px-3 py-2 ${
+                errors.title ? "border-red-500" : ""
+              }`}
+            />
+            {errors.title && (
+              <p className="text-xs text-red-500">{errors.title}</p>
+            )}
+          </div>
+
+          <div>
+            <label className="text-sm font-medium">Date *</label>
+            <input
+              type="date"
+              value={form.date}
+              onChange={(e) => setForm({ ...form, date: e.target.value })}
+              className={`w-full rounded border px-3 py-2 ${
+                errors.date ? "border-red-500" : ""
+              }`}
+            />
+            {errors.date && (
+              <p className="text-xs text-red-500">{errors.date}</p>
+            )}
+          </div>
+
           <button
-            onClick={onClose}
-            className="absolute top-4 right-4 text-gray-500 hover:text-black"
+            disabled={loading}
+            className="w-full rounded bg-orange-500 py-2 text-white"
           >
-            <X size={20} />
+            {loading
+              ? "Please wait..."
+              : mode === "add"
+              ? "Add Holiday"
+              : "Update Holiday"}
           </button>
-
-          {/* Heading */}
-          <h2 className="text-xl font-semibold mb-6 text-center">
-            Add Holiday
-          </h2>
-
-          {/* Form */}
-          <form className="space-y-4" onSubmit={handleSubmit}>
-            <div>
-              <label className="block text-sm font-medium mb-1">Holiday</label>
-              <input
-                type="text"
-                placeholder="Admin Holiday"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                className="w-full border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-400"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium mb-1">Date</label>
-              <input
-                type="date"
-                value={date}
-                onChange={(e) => setDate(e.target.value)}
-                className="w-full border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-400"
-              />
-            </div>
-
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full bg-orange-500 text-white py-2 rounded-md font-medium hover:bg-orange-600 transition disabled:opacity-60"
-            >
-              {loading ? "Adding..." : "Submit"}
-            </button>
-          </form>
-        </div>
+        </form>
       </div>
-    </>
+    </div>
   );
 };
 

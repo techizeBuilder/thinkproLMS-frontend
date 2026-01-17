@@ -61,7 +61,7 @@ export default function DepartmentPage() {
             setSelected(null);
             setOpenModal(true);
           }}
-          className="bg-orange-500 text-white px-4 py-2 rounded"
+          className="bg-orange-500 text-white px-4 py-2 rounded-md"
         >
           + Add Department
         </button>
@@ -102,13 +102,15 @@ export default function DepartmentPage() {
                   </span>
                 </td>
                 <td className="px-4 py-3 relative">
-                  <MoreVertical
+                  <span
                     className="cursor-pointer"
                     onClick={() => setMenu(menu === d._id ? null : d._id)}
-                  />
+                  >
+                    <MoreVertical size={18} />
+                  </span>
 
                   {menu === d._id && (
-                    <div className="absolute right-4 bg-white border rounded shadow w-32">
+                    <div className="absolute right-6 mt-2 w-36 bg-white border rounded-md shadow z-50">
                       <button
                         className="block w-full px-4 py-2 text-left hover:bg-gray-100"
                         onClick={() => {

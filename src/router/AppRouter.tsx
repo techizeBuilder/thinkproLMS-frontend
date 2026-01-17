@@ -248,6 +248,16 @@ import AssetReturn from "@/pages/HRMS/NonITAssetReturn";
 import ViewLeadPage from "@/pages/CRM/Leads/ViewLead";
 import CRMLayout from "@/components/crm/CRMLayout";
 import FullFinalClearance from "@/pages/HRMS/FullFinalClerance";
+import AutiorEmployee from "@/pages/HRMS/Auditor/AutiorEmployee";
+import AuditorPayroll from "@/pages/HRMS/Auditor/AuditorPayroll";
+import AttendanceLogs from "@/pages/HRMS/Auditor/AttendanceLogs";
+import AuditorLeave from "@/pages/HRMS/Auditor/AuditorLeave";
+import ComplianceReport from "@/pages/HRMS/Auditor/ComplianceReport";
+import AuditorDashboard from "@/pages/HRMS/Auditor/AuditorDashboard";
+import ITAdminDashboard from "@/pages/HRMS/IT Admin/ITAdminDashboard";
+import Dashboard from "@/pages/HRMS/Dashboard";
+import FinanceDashboard from "@/pages/HRMS/Finance/FinanaceManagerDashboard";
+import Profile from "@/pages/HRMS/Admin/Profile";
 
 function ProtectedRoute({
   children,
@@ -450,6 +460,7 @@ export default function AppRouter() {
           {/* ADMIN ROUTES */}
           <Route path="SuperAdmin/addUser" element={<AddUser />} />
           <Route path="SuperAdmin/employees" element={<Employee />} />
+          <Route path="SuperAdmin/employees/profile/:id" element={<Profile />} />
           <Route
             path="SuperAdmin/probation"
             element={<ProbationConfirmation />}
@@ -593,7 +604,7 @@ export default function AppRouter() {
           />
           <Route path="employee/performance/history" element={<MyFeedback />} />
           <Route path="employee/letters" element={<EmployeeLetters />} />
-
+          <Route path="finance/dashboard" element={<FinanceDashboard />} />
           <Route path="finance/payroll/review" element={<FinancePayroll />} />
           <Route
             path="finance/payroll/disbursement"
@@ -609,6 +620,8 @@ export default function AppRouter() {
             element={<FinanceReimbursementRequests />}
           />
           {/* MANAGER ROUTES */}
+          <Route path="it" element={<Navigate to="onboarding" replace />} />
+          <Route path="it/dashboard" element={<ITAdminDashboard />} />
           <Route path="it/onboarding" element={<EmployeeOnboardingTask />} />
           <Route path="it/accounts" element={<AccountManagement />} />
           <Route
@@ -623,6 +636,7 @@ export default function AppRouter() {
             element={<ITClearanceDashboard />}
           />
           {/* Admin ROUTES */}
+          <Route path="admin/dashboard" element={<Dashboard />} />
           <Route
             path="admin/onboarding/workstation"
             element={<WorkstationDeskAllocation />}
@@ -660,7 +674,18 @@ export default function AppRouter() {
             element={<WorkstationDeskDeallocation />}
           />
           <Route path="admin/offboarding/assets" element={<AssetReturn />} />
-          <Route path="admin/offboarding/final-clearance" element={<FullFinalClearance/>} />
+          <Route
+            path="admin/offboarding/final-clearance"
+            element={<FullFinalClearance />}
+          />
+
+          {/* Auditor ROUTES */}
+          <Route path="auditor/employees" element={<AutiorEmployee />} />
+          <Route path="auditor/payroll" element={<AuditorPayroll />} />
+          <Route path="auditor/attendance" element={<AttendanceLogs />} />
+          <Route path="auditor/leaves" element={<AuditorLeave />} />
+          <Route path="auditor/compliance" element={<ComplianceReport />} />
+          <Route path="auditor/dashboard" element={<AuditorDashboard />} />
         </Route>
 
         <Route

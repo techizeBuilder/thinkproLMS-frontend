@@ -16,11 +16,12 @@ const API_BASE = import.meta.env.VITE_API_URL;
 
 const Holiday = () => {
   const [openMenu, setOpenMenu] = useState<string | null>(null);
-  const [openAddHoliday, setOpenAddHoliday] = useState(false);
   const [holidays, setHolidays] = useState<Holiday[]>([]);
   const [loading, setLoading] = useState(false);
   const [openViewModal, setOpenViewModal] = useState(false);
   const [selectedHoliday, setSelectedHoliday] = useState<Holiday | null>(null);
+  const [mode, setMode] = useState<"add" | "edit">("add");
+  const [openFormModal, setOpenFormModal] = useState(false);
 
   const token = localStorage.getItem("token");
 
@@ -68,7 +69,11 @@ const Holiday = () => {
         <h1 className="text-2xl font-semibold">Holiday</h1>
 
         <button
-          onClick={() => setOpenAddHoliday(true)}
+          onClick={() => {
+            setMode("add");
+            setSelectedHoliday(null);
+            setOpenFormModal(true);
+          }}
           className="bg-orange-500 text-white px-4 py-2 rounded-md font-medium hover:bg-orange-600"
         >
           + Add Holiday
@@ -154,7 +159,9 @@ const Holiday = () => {
                           className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100"
                           onClick={() => {
                             setOpenMenu(null);
-                            alert(`Edit ${holiday.title}`);
+                            setMode("edit");
+                            setSelectedHoliday(holiday);
+                            setOpenFormModal(true);
                           }}
                         >
                           Edit
@@ -180,12 +187,13 @@ const Holiday = () => {
 
       {/* Add Holiday Modal */}
       <AddHolidayModal
-        isOpen={openAddHoliday}
-        onClose={() => {
-          setOpenAddHoliday(false);
-          fetchHolidays();
-        }}
+        isOpen={openFormModal}
+        mode={mode}
+        holiday={selectedHoliday}
+        onClose={() => setOpenFormModal(false)}
+        onSuccess={fetchHolidays}
       />
+
       <ViewHolidayModal
         isOpen={openViewModal}
         holiday={selectedHoliday}

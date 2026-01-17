@@ -23,6 +23,36 @@ const ViewEditJobModal = ({ isOpen, onClose, job, mode }: Props) => {
     status: "Open",
   });
 
+  const [errors, setErrors] = useState({
+    jobTitle: "",
+    department: "",
+    location: "",
+  });
+
+  /* ================= RESET FORM ================= */
+  const resetForm = () => {
+    setForm({
+      jobTitle: "",
+      department: "",
+      location: "",
+      openings: 1,
+      status: "Open",
+    });
+
+    setErrors({
+      jobTitle: "",
+      department: "",
+      location: "",
+    });
+  };
+
+  /* ================= SAFE CLOSE ================= */
+  const handleClose = () => {
+    resetForm();
+    onClose();
+  };
+
+  /* ================= PREFILL ================= */
   useEffect(() => {
     if ((mode === "edit" || mode === "view") && job) {
       setForm({
@@ -34,22 +64,48 @@ const ViewEditJobModal = ({ isOpen, onClose, job, mode }: Props) => {
       });
     }
 
-    if (mode === "add") {
-      setForm({
-        jobTitle: "",
-        department: "",
-        location: "",
-        openings: 1,
-        status: "Open",
-      });
+    if (mode === "add" && isOpen) {
+      resetForm();
     }
-  }, [job, mode]);
+  }, [job, mode, isOpen]);
 
   if (!isOpen) return null;
 
   const disabled = mode === "view";
 
+  /* ================= VALIDATION ================= */
+  const validate = () => {
+    let valid = true;
+
+    const newErrors = {
+      jobTitle: "",
+      department: "",
+      location: "",
+    };
+
+    if (!form.jobTitle.trim()) {
+      newErrors.jobTitle = "Job title is required";
+      valid = false;
+    }
+
+    if (!form.department.trim()) {
+      newErrors.department = "Department is required";
+      valid = false;
+    }
+
+    if (!form.location.trim()) {
+      newErrors.location = "Location is required";
+      valid = false;
+    }
+
+    setErrors(newErrors);
+    return valid;
+  };
+
+  /* ================= SUBMIT ================= */
   const handleSubmit = async () => {
+    if (!validate()) return;
+
     if (mode === "add") {
       await axios.post(`${API_BASE}/job-openings`, form, {
         headers: { Authorization: `Bearer ${token}` },
@@ -62,12 +118,19 @@ const ViewEditJobModal = ({ isOpen, onClose, job, mode }: Props) => {
       });
     }
 
-    onClose();
+    handleClose();
   };
 
   return (
-    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-      <div className="bg-white w-[460px] rounded-lg p-6">
+    <div className="fixed inset-0 z-50 flex items-center justify-center">
+      {/* BACKDROP */}
+      <div className="absolute inset-0 bg-black/40" onClick={handleClose} />
+
+      {/* MODAL */}
+      <div
+        className="relative z-10 bg-white w-[460px] rounded-xl p-6"
+        onClick={(e) => e.stopPropagation()}
+      >
         <h2 className="text-lg font-semibold mb-5">
           {mode === "add" && "Add Job Opening"}
           {mode === "view" && "View Job Opening"}
@@ -76,59 +139,83 @@ const ViewEditJobModal = ({ isOpen, onClose, job, mode }: Props) => {
 
         {/* Job Title */}
         <div className="mb-3">
-          <label className="block text-sm font-medium mb-1">Job Title</label>
+          <label className="block text-sm font-medium">
+            Job Title <span className="text-red-500">*</span>
+          </label>
           <input
             disabled={disabled}
             value={form.jobTitle}
             onChange={(e) => setForm({ ...form, jobTitle: e.target.value })}
-            className="w-full border px-3 py-2 rounded"
+            className={`w-full border px-3 py-2 rounded mt-1 text-sm ${
+              errors.jobTitle ? "border-red-500" : ""
+            }`}
           />
+          {errors.jobTitle && (
+            <p className="text-xs text-red-500 mt-1">{errors.jobTitle}</p>
+          )}
         </div>
 
         {/* Department */}
         <div className="mb-3">
-          <label className="block text-sm font-medium mb-1">Department</label>
+          <label className="block text-sm font-medium">
+            Department <span className="text-red-500">*</span>
+          </label>
           <input
             disabled={disabled}
             value={form.department}
             onChange={(e) => setForm({ ...form, department: e.target.value })}
-            className="w-full border px-3 py-2 rounded"
+            className={`w-full border px-3 py-2 rounded mt-1 text-sm ${
+              errors.department ? "border-red-500" : ""
+            }`}
           />
+          {errors.department && (
+            <p className="text-xs text-red-500 mt-1">{errors.department}</p>
+          )}
         </div>
 
         {/* Location */}
         <div className="mb-3">
-          <label className="block text-sm font-medium mb-1">Location</label>
+          <label className="block text-sm font-medium">
+            Location <span className="text-red-500">*</span>
+          </label>
           <input
             disabled={disabled}
             value={form.location}
             onChange={(e) => setForm({ ...form, location: e.target.value })}
-            className="w-full border px-3 py-2 rounded"
+            className={`w-full border px-3 py-2 rounded mt-1 text-sm ${
+              errors.location ? "border-red-500" : ""
+            }`}
           />
+          {errors.location && (
+            <p className="text-xs text-red-500 mt-1">{errors.location}</p>
+          )}
         </div>
 
         {/* Openings */}
         <div className="mb-3">
-          <label className="block text-sm font-medium mb-1">Openings</label>
+          <label className="block text-sm font-medium">Openings</label>
           <input
             type="number"
             disabled={disabled}
             value={form.openings}
             onChange={(e) =>
-              setForm({ ...form, openings: Number(e.target.value) })
+              setForm({
+                ...form,
+                openings: Number(e.target.value),
+              })
             }
-            className="w-full border px-3 py-2 rounded"
+            className="w-full border px-3 py-2 rounded mt-1 text-sm"
           />
         </div>
 
         {/* Status */}
         <div className="mb-5">
-          <label className="block text-sm font-medium mb-1">Status</label>
+          <label className="block text-sm font-medium">Status</label>
           <select
             disabled={disabled}
             value={form.status}
             onChange={(e) => setForm({ ...form, status: e.target.value })}
-            className="w-full border px-3 py-2 rounded"
+            className="w-full border px-3 py-2 rounded mt-1 text-sm"
           >
             <option value="Open">Open</option>
             <option value="Closed">Closed</option>
@@ -137,14 +224,17 @@ const ViewEditJobModal = ({ isOpen, onClose, job, mode }: Props) => {
 
         {/* ACTION BUTTONS */}
         <div className="flex justify-end gap-3">
-          <button onClick={onClose} className="px-4 py-2 text-gray-600">
-            Close
+          <button
+            onClick={handleClose}
+            className="px-4 py-2 border rounded-md text-sm"
+          >
+            {mode === "view" ? "Close" : "Cancel"}
           </button>
 
           {mode !== "view" && (
             <button
               onClick={handleSubmit}
-              className="bg-orange-500 text-white px-4 py-2 rounded"
+              className="bg-orange-500 text-white px-4 py-2 rounded-md text-sm"
             >
               {mode === "add" ? "Save" : "Update"}
             </button>
