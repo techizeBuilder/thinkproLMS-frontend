@@ -25,20 +25,21 @@ interface AttendanceRecord {
   punchIn?: string;
 }
 
-const ITEMS_PER_PAGE = 15;
-
 const AttendanceReport = () => {
   const today = new Date();
 
   const [users, setUsers] = useState<User[]>([]);
   const [attendance, setAttendance] = useState<AttendanceRecord[]>([]);
   const [holidays, setHolidays] = useState<Holiday[]>([]);
+
   const [month, setMonth] = useState(today.getMonth());
   const [year, setYear] = useState(today.getFullYear());
-  const [loading, setLoading] = useState(false);
+
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
 
   const [search, setSearch] = useState("");
-  const [page, setPage] = useState(1);
+  const [loading, setLoading] = useState(false);
 
   /* ================= FETCH ATTENDANCE ================= */
   useEffect(() => {
@@ -47,30 +48,24 @@ const AttendanceReport = () => {
         setLoading(true);
 
         const res = await axios.get(`${API_BASE}/attendance/all`, {
-          params: { month, year },
+          params: { month, year, page },
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
           },
         });
 
-        setAttendance(res.data || []);
+        const { users, attendance, totalPages } = res.data;
 
-        const uniqueUsers: User[] = Array.from(
-          new Map(
-            (res.data as AttendanceRecord[]).map(
-              (r) => [r.user._id, r.user] as [string, User]
-            )
-          ).values()
-        );
-
-        setUsers(uniqueUsers);
+        setUsers(users || []);
+        setAttendance(attendance || []);
+        setTotalPages(totalPages || 1);
       } finally {
         setLoading(false);
       }
     };
 
     fetchAttendance();
-  }, [month, year]);
+  }, [month, year, page]);
 
   /* ================= FETCH HOLIDAYS ================= */
   useEffect(() => {
@@ -78,59 +73,59 @@ const AttendanceReport = () => {
       .get(`${API_BASE}/holidays`, {
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       })
-      .then((res) => setHolidays(res.data));
+      .then((res) => setHolidays(res.data || []));
   }, []);
 
   /* ================= DAYS ================= */
   const daysInMonth = useMemo(
     () => new Date(year, month + 1, 0).getDate(),
-    [month, year]
+    [month, year],
   );
 
   const datesArray = Array.from({ length: daysInMonth }, (_, i) => i + 1);
 
   const isSunday = (day: number) => new Date(year, month, day).getDay() === 0;
 
-  const getHoliday = (day: number) => {
-    const dateStr = `${year}-${String(month + 1).padStart(2, "0")}-${String(
-      day
-    ).padStart(2, "0")}`;
-
-    return holidays.find((h) => {
-      const holidayDate = new Date(h.date).toISOString().split("T")[0];
-      return holidayDate === dateStr;
-    });
-  };
-
-  const isPresent = (userId: string, day: number) => {
-    const dateStr = `${year}-${String(month + 1).padStart(2, "0")}-${String(
-      day
-    ).padStart(2, "0")}`;
-
-    return attendance.some(
-      (a) => a.user._id === userId && a.date === dateStr && a.punchIn
-    );
-  };
-
   const isFutureDate = (day: number) =>
     year === today.getFullYear() &&
     month === today.getMonth() &&
     day > today.getDate();
 
-  /* ================= SEARCH ================= */
+  const getHoliday = (day: number) => {
+    const dateStr = `${year}-${String(month + 1).padStart(2, "0")}-${String(
+      day,
+    ).padStart(2, "0")}`;
+
+    return holidays.find(
+      (h) => new Date(h.date).toISOString().split("T")[0] === dateStr,
+    );
+  };
+
+  /* ================= ATTENDANCE MAP ================= */
+  const attendanceMap = useMemo(() => {
+    const map = new Map<string, AttendanceRecord>();
+
+    attendance.forEach((a) => {
+      map.set(`${a.user._id}_${a.date}`, a);
+    });
+
+    return map;
+  }, [attendance]);
+
+  const isPresent = (userId: string, day: number) => {
+    const dateStr = `${year}-${String(month + 1).padStart(2, "0")}-${String(
+      day,
+    ).padStart(2, "0")}`;
+
+    return !!attendanceMap.get(`${userId}_${dateStr}`)?.punchIn;
+  };
+
+  /* ================= SEARCH (CURRENT PAGE USERS) ================= */
   const filteredUsers = useMemo(() => {
     return users.filter((u) =>
-      u.name.toLowerCase().includes(search.toLowerCase())
+      u.name.toLowerCase().includes(search.toLowerCase()),
     );
   }, [users, search]);
-
-  /* ================= PAGINATION ================= */
-  const totalPages = Math.ceil(filteredUsers.length / ITEMS_PER_PAGE);
-
-  const paginatedUsers = useMemo(() => {
-    const start = (page - 1) * ITEMS_PER_PAGE;
-    return filteredUsers.slice(start, start + ITEMS_PER_PAGE);
-  }, [filteredUsers, page]);
 
   useEffect(() => {
     setPage(1);
@@ -138,6 +133,7 @@ const AttendanceReport = () => {
 
   /* ================= MONTH CHANGE ================= */
   const handlePrevMonth = () => {
+    setPage(1);
     if (month === 0) {
       setMonth(11);
       setYear((y) => y - 1);
@@ -145,6 +141,7 @@ const AttendanceReport = () => {
   };
 
   const handleNextMonth = () => {
+    setPage(1);
     if (month === 11) {
       setMonth(0);
       setYear((y) => y + 1);
@@ -196,7 +193,7 @@ const AttendanceReport = () => {
           />
         </div>
 
-        {/* ================= DESKTOP ================= */}
+        {/* ================= TABLE ================= */}
         <CardContent className="hidden md:block overflow-x-auto">
           <table className="min-w-max border-collapse border text-sm">
             <thead>
@@ -208,22 +205,27 @@ const AttendanceReport = () => {
                   Role
                 </th>
 
-                {datesArray.map((day) => (
-                  <th
-                    key={day}
-                    className={`border px-2 py-2 text-xs text-center
-                      ${isSunday(day) ? "bg-gray-100 text-gray-500" : ""}
-                      ${getHoliday(day) ? "bg-blue-100 text-blue-700" : ""}
-                    `}
-                  >
-                    {day}
-                  </th>
-                ))}
+                {datesArray.map((day) => {
+                  const holiday = getHoliday(day);
+                  const sunday = isSunday(day);
+
+                  return (
+                    <th
+                      key={day}
+                      className={`border px-2 py-2 text-xs text-center
+          ${sunday ? "bg-orange-100 text-orange-700" : ""}
+        ${holiday ? "bg-blue-100 text-blue-700" : ""}
+      `}
+                    >
+                      {holiday ? `${holiday.title}` : sunday ? "Off" : day}
+                    </th>
+                  );
+                })}
               </tr>
             </thead>
 
             <tbody>
-              {paginatedUsers.map((user) => (
+              {filteredUsers.map((user) => (
                 <tr key={user._id}>
                   <td className="border px-3 py-2 sticky left-0 bg-white font-medium">
                     {user.name}
@@ -264,21 +266,19 @@ const AttendanceReport = () => {
         </CardContent>
 
         {/* ================= PAGINATION ================= */}
-        {filteredUsers.length > ITEMS_PER_PAGE && (
-          <div className="flex justify-center gap-2 py-4">
-            {Array.from({ length: totalPages }).map((_, i) => (
-              <button
-                key={i}
-                onClick={() => setPage(i + 1)}
-                className={`px-3 py-1 rounded-md border ${
-                  page === i + 1 ? "bg-orange-500 text-white" : "bg-white"
-                }`}
-              >
-                {i + 1}
-              </button>
-            ))}
-          </div>
-        )}
+        <div className="flex justify-center gap-2 py-4">
+          {Array.from({ length: totalPages }).map((_, i) => (
+            <button
+              key={i}
+              onClick={() => setPage(i + 1)}
+              className={`px-3 py-1 rounded-md border ${
+                page === i + 1 ? "bg-orange-500 text-white" : "bg-white"
+              }`}
+            >
+              {i + 1}
+            </button>
+          ))}
+        </div>
       </Card>
     </div>
   );

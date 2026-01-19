@@ -5,7 +5,7 @@ import axios from "axios";
 import { MoreVertical } from "lucide-react";
 import CompanyModal from "./CompanyModal";
 import DeleteCompanyModal from "./DeleteCompanyModel";
-import LoaderInner from "../../LoaderInner";
+import Loader from "../../Loader";
 
 const API_BASE = import.meta.env.VITE_API_URL;
 
@@ -64,6 +64,14 @@ export default function Company() {
     setCompanyToDelete(null);
     fetchCompanies();
   };
+    if (loading) {
+      return (
+        <div className="relative min-h-screen">
+          <Loader />
+        </div>
+      );
+    }
+
 
   return (
     <div className="p-6">
@@ -90,11 +98,6 @@ export default function Company() {
 
       {/* TABLE */}
       <div className="bg-white rounded-lg shadow min-h-[calc(100vh-180px)] overflow-x-auto relative">
-        {loading && (
-          <div className="absolute inset-0 z-20 flex items-center justify-center bg-white/70">
-            <LoaderInner />
-          </div>
-        )}
 
         <table className="w-full text-sm text-center">
           <thead className="bg-gray-100">

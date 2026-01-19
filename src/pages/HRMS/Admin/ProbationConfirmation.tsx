@@ -10,6 +10,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import Loader from "../Loader";
 
 const API = import.meta.env.VITE_API_URL;
 
@@ -20,6 +21,7 @@ export default function ProbationConfirmation() {
   const [menu, setMenu] = useState<string | null>(null);
   const [open, setOpen] = useState(false);
   const [selected, setSelected] = useState<any>(null);
+  const [loading,setLoading]=useState(true);
 
   /* ================= FETCH PROBATION USERS ================= */
 
@@ -33,6 +35,7 @@ export default function ProbationConfirmation() {
     );
 
     setData(probationUsers);
+    setLoading(false);
   };
 
   useEffect(() => {
@@ -64,6 +67,13 @@ export default function ProbationConfirmation() {
     setOpen(true);
     setMenu(null);
   };
+    if (loading) {
+      return (
+        <div className="relative min-h-screen">
+          <Loader />
+        </div>
+      );
+    }
 
   return (
     <div className="p-6 bg-white rounded shadow">

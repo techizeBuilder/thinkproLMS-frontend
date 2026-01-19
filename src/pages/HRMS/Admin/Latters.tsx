@@ -14,6 +14,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import Loader from "../Loader";
 
 const API_BASE = import.meta.env.VITE_API_URL;
 const ViewAPI = API_BASE.replace("/api", "");
@@ -90,7 +91,7 @@ const LETTER_TYPES = [
 const Letters = () => {
   const [users, setUsers] = useState<User[]>([]);
   const [letters, setLetters] = useState<LetterHistory[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [openSendModal, setOpenSendModal] = useState(false);
   const [viewLetter, setViewLetter] = useState<LetterHistory | null>(null);
 
@@ -121,6 +122,7 @@ const Letters = () => {
       headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
     });
     setLetters(res.data);
+    setLoading(false);
   };
 
   useEffect(() => {
@@ -164,7 +166,13 @@ const Letters = () => {
     fetchLetters();
     setLoading(false);
   };
-
+    if (loading) {
+      return (
+        <div className="relative min-h-screen">
+          <Loader />
+        </div>
+      );
+    }
   return (
     <div className="p-6 max-w-6xl mx-auto space-y-6">
       {/* ================= HEADER ================= */}

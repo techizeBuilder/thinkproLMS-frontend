@@ -2,8 +2,9 @@
 
 import { useEffect, useState } from "react";
 import axios from "axios";
-import { MoreVertical } from "lucide-react";
+import {MoreVertical } from "lucide-react";
 import BranchModal from "./BranchModal";
+import Loader from "../../Loader";
 
 const API_BASE = import.meta.env.VITE_API_URL;
 
@@ -31,13 +32,12 @@ export default function Branch() {
 
   const [branches, setBranches] = useState<Branch[]>([]);
   const [companies, setCompanies] = useState<Company[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [openMenu, setOpenMenu] = useState<string | null>(null);
 
   const [openModal, setOpenModal] = useState(false);
   const [mode, setMode] = useState<"add" | "view" | "edit">("add");
   const [selectedBranch, setSelectedBranch] = useState<Branch | null>(null);
-
   /* ================= FETCH COMPANIES ================= */
   const fetchCompanies = async () => {
     const res = await axios.get(`${API_BASE}/companies`, {
@@ -49,7 +49,6 @@ export default function Branch() {
   /* ================= FETCH BRANCHES ================= */
   const fetchBranches = async () => {
     try {
-      setLoading(true);
       const res = await axios.get(`${API_BASE}/branches`, {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -79,7 +78,13 @@ const getCompanyName = (companyId: any) => {
   const company = companies.find((c) => c._id === id);
   return company ? company.name : "-";
 };
-
+    if (loading) {
+      return (
+        <div className="relative min-h-screen">
+          <Loader />
+        </div>
+      );
+    }
 
   return (
     <div className="p-6">

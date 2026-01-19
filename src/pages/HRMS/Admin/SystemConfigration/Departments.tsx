@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import { MoreVertical } from "lucide-react";
 import DepartmentModal from "./DepartmentModal";
+import Loader from "../../Loader";
 
 const API_BASE = import.meta.env.VITE_API_URL;
 
@@ -25,12 +26,13 @@ export default function DepartmentPage() {
   const [mode, setMode] = useState<"add" | "view" | "edit">("add");
   const [selected, setSelected] = useState<Department | null>(null);
   const [menu, setMenu] = useState<string | null>(null);
-
+  const [loading,setLoading]=useState(true);
   const fetchDepartments = async () => {
     const res = await axios.get(`${API_BASE}/departments`, {
       headers: { Authorization: `Bearer ${token}` },
     });
     setDepartments(res.data);
+    setLoading(false);
   };
 
   useEffect(() => {
@@ -44,6 +46,13 @@ export default function DepartmentPage() {
     });
     fetchDepartments();
   };
+    if (loading) {
+      return (
+        <div className="relative min-h-screen">
+          <Loader />
+        </div>
+      );
+    }
 
   return (
     <div className="p-6">

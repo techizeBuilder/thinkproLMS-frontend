@@ -1,4 +1,5 @@
 /** @format */
+/** @format */
 
 import { useEffect, useMemo, useState } from "react";
 import axios from "axios";
@@ -16,7 +17,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-
+import Loader from "../Loader";
 const API_BASE = import.meta.env.VITE_API_URL;
 
 /* ================= TYPES ================= */
@@ -52,11 +53,16 @@ const ShiftRoster = () => {
 
   const [users, setUsers] = useState<User[]>([]);
   const [shifts, setShifts] = useState<ShiftAssignment[]>([]);
+
   const [weekStart] = useState(getMondayOfWeek(today));
+
   const [editingShiftId, setEditingShiftId] = useState<string | null>(null);
-
-
   const [open, setOpen] = useState(false);
+  const [loading,setLoading]=useState(true);
+  /* 🔹 PAGINATION STATES */
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const LIMIT = 15;
 
   const [form, setForm] = useState<{
     userIds: string[];
@@ -68,26 +74,39 @@ const ShiftRoster = () => {
     shift: "MORNING",
   });
 
-  /* ================= FETCH USERS ================= */
+  /* ================= FETCH USERS (PAGINATED) ================= */
 
   useEffect(() => {
     axios
       .get(`${API_BASE}/users`, {
+        params: { page, limit: LIMIT },
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       })
-      .then((res) => setUsers(res.data));
-  }, []);
+      .then((res) => {
+        setUsers(res.data.data || []);
+        if (res.data.totalPages) setTotalPages(res.data.totalPages);
+      });
+  }, [page]);
 
-  /* ================= FETCH SHIFTS ================= */
+  /* ================= FETCH SHIFTS (PAGINATED) ================= */
 
   useEffect(() => {
     axios
-      .get(`${API_BASE}/shifts/week?start=${formatDate(weekStart)}`, {
+      .get(`${API_BASE}/shifts/week`, {
+        params: {
+          start: formatDate(weekStart),
+          page,
+          limit: LIMIT,
+        },
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       })
-      .then((res) => setShifts(res.data))
+      .then((res) => {
+        setShifts(res.data.shifts || []);
+        setLoading(false);
+        if (res.data.totalPages) setTotalPages(res.data.totalPages);
+      })
       .catch(() => setShifts([]));
-  }, [weekStart]);
+  }, [weekStart, page]);
 
   /* ================= WEEK DAYS ================= */
 
@@ -101,73 +120,80 @@ const ShiftRoster = () => {
 
   /* ================= MODAL ================= */
 
-const openAssignModal = (date?: string, userId?: string) => {
-  setEditingShiftId(null);
-  setForm({
-    userIds: userId ? [userId] : [], // 👈 FIX
-    date: date || formatDate(today),
-    shift: "MORNING",
-  });
-  setOpen(true);
-};
-
+  const openAssignModal = (date?: string, userId?: string) => {
+    setEditingShiftId(null);
+    setForm({
+      userIds: userId ? [userId] : [],
+      date: date || formatDate(today),
+      shift: "MORNING",
+    });
+    setOpen(true);
+  };
 
   /* ================= SUBMIT ================= */
 
-const handleSubmit = async () => {
-  try {
-    if (editingShiftId) {
-      // UPDATE
-      await axios.put(
-        `${API_BASE}/shifts/${editingShiftId}`,
-        {
-          date: form.date,
-          shift: form.shift,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
+  const handleSubmit = async () => {
+    try {
+      if (editingShiftId) {
+        await axios.put(
+          `${API_BASE}/shifts/${editingShiftId}`,
+          {
+            date: form.date,
+            shift: form.shift,
           },
-        }
-      );
-    } else {
-      // CREATE
-      await axios.post(
-        `${API_BASE}/shifts/bulk`,
-        {
-          userIds: form.userIds,
-          date: form.date,
-          shift: form.shift,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+          }
+        );
+      } else {
+        await axios.post(
+          `${API_BASE}/shifts/bulk`,
+          {
+            userIds: form.userIds,
+            date: form.date,
+            shift: form.shift,
           },
-        }
-      );
-    }
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+          }
+        );
+      }
 
-    setOpen(false);
+      setOpen(false);
 
-    const res = await axios.get(
-      `${API_BASE}/shifts/week?start=${formatDate(weekStart)}`,
-      {
+      const res = await axios.get(`${API_BASE}/shifts/week`, {
+        params: {
+          start: formatDate(weekStart),
+          page,
+          limit: LIMIT,
+        },
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
-      }
-    );
-    setShifts(res.data);
-  } catch {
-    alert("Failed to save shift");
-  }
-};
+      });
 
+      setShifts(res.data.shifts || []);
+    } catch {
+      alert("Failed to save shift");
+    }
+  };
 
   const getShiftForCell = (userId: string, date: string) =>
     shifts.find((s) => s.userId === userId && s.date === date);
 
   /* ================= RENDER ================= */
+
+    if (loading) {
+      return (
+        <div className="p-10 flex justify-center">
+          <Loader />
+        </div>
+      );
+    }
 
   return (
     <div className="p-6 space-y-6">
@@ -222,14 +248,14 @@ const handleSubmit = async () => {
                           onClick={() => {
                             setEditingShiftId(shift._id!);
                             setForm({
-                              userIds: [u._id], // single user edit
+                              userIds: [u._id],
                               date: shift.date,
                               shift: shift.shift,
                             });
                             setOpen(true);
                           }}
                           className="mx-auto w-24 py-2 border-2 border-dashed border-green-500 rounded 
-               text-green-600 font-medium hover:bg-green-50 cursor-pointer"
+                          text-green-600 font-medium hover:bg-green-50"
                         >
                           {shift.shift}
                         </button>
@@ -237,10 +263,9 @@ const handleSubmit = async () => {
                         <button
                           onClick={() => openAssignModal(dateStr, u._id)}
                           className="mx-auto w-10 h-10 border border-dashed border-gray-300 
-             rounded flex items-center justify-center 
-             text-gray-400 hover:text-orange-500 
-             hover:border-orange-400 hover:bg-orange-50 
-             transition"
+                          rounded flex items-center justify-center 
+                          text-gray-400 hover:text-orange-500 
+                          hover:border-orange-400 hover:bg-orange-50"
                         >
                           <Plus size={18} />
                         </button>
@@ -254,7 +279,22 @@ const handleSubmit = async () => {
         </table>
       </div>
 
-      {/* ASSIGN MODAL */}
+      {/* PAGINATION */}
+      <div className="flex justify-center gap-2">
+        {Array.from({ length: totalPages }).map((_, i) => (
+          <button
+            key={i}
+            onClick={() => setPage(i + 1)}
+            className={`px-3 py-1 rounded border ${
+              page === i + 1
+                ? "bg-orange-500 text-white"
+                : "bg-white"
+            }`}
+          >
+            {i + 1}
+          </button>
+        ))}
+      </div>
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="max-w-md">
           <DialogHeader>
@@ -366,9 +406,14 @@ const handleSubmit = async () => {
             </div>
           </div>
         </DialogContent>
-      </Dialog>
+      </Dialog>  
     </div>
   );
 };
 
 export default ShiftRoster;
+
+
+
+
+

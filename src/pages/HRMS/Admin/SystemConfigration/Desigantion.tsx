@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import { MoreVertical } from "lucide-react";
 import DesignationModal from "./DesignationModal";
+import Loader from "../../Loader";
 
 const API_BASE = import.meta.env.VITE_API_URL;
 
@@ -15,12 +16,13 @@ export default function Designation() {
   const [openModal, setOpenModal] = useState(false);
   const [mode, setMode] = useState<"add" | "view" | "edit">("add");
   const [selected, setSelected] = useState<any>(null);
-
+  const [loading,setLoading]=useState(true);
   const fetchData = async () => {
     const res = await axios.get(`${API_BASE}/designations`, {
       headers: { Authorization: `Bearer ${token}` },
     });
     setData(res.data);
+    setLoading(false);
   };
 
   useEffect(() => {
@@ -34,6 +36,13 @@ export default function Designation() {
     });
     fetchData();
   };
+    if (loading) {
+      return (
+        <div className="relative min-h-screen">
+          <Loader/>
+        </div>
+      );
+    }
 
   return (
     <div className="p-6">
