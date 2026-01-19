@@ -5,6 +5,7 @@ import axios from "axios";
 import { MoreVertical } from "lucide-react";
 import AddSalaryStructureModal from "./AddSalaryStructureModal";
 import DeleteSalaryStructureModal from "./DeleteSalaryStructureModal";
+import Loader from "../../Loader";
 
 
 interface Employee {
@@ -28,7 +29,7 @@ const SalaryStructure = () => {
   const token = localStorage.getItem("token");
 
   const [salaryList, setSalaryList] = useState<SalaryStructure[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   const [openMenu, setOpenMenu] = useState<string | null>(null);
   const [openAddModal, setOpenAddModal] = useState(false);
@@ -40,7 +41,6 @@ const SalaryStructure = () => {
   /* ================= FETCH ================= */
   const fetchSalary = async () => {
     try {
-      setLoading(true);
       const res = await axios.get(`${API_BASE}/salary-structures`, {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -75,7 +75,13 @@ const SalaryStructure = () => {
 
   const netSalary = (s: SalaryStructure) =>
     s.basic + s.hra + s.allowance - (s.pf + s.tax);
-
+   if (loading) {
+      return (
+        <div className="relative min-h-[300px]">
+          <Loader />
+        </div>
+      );
+    }
   return (
     <div className="p-6">
       {/* ================= HEADER ================= */}

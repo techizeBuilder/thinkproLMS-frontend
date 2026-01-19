@@ -5,6 +5,7 @@ import axios from "axios";
 import { MoreVertical } from "lucide-react";
 import AddLeaveTypeModal from "./AddLeaveType";
 import DeleteLeaveTypeModal from "./DeleteLeaveTypeModal";
+import Loader from "../../Loader";
 
 interface LeaveType {
   _id: string;
@@ -19,7 +20,7 @@ const API_BASE = import.meta.env.VITE_API_URL;
 
 const LeaveType = () => {
   const [leaveTypes, setLeaveTypes] = useState<LeaveType[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   const [openMenu, setOpenMenu] = useState<string | null>(null);
   const [openAddModal, setOpenAddModal] = useState(false);
@@ -63,7 +64,13 @@ const LeaveType = () => {
       console.error("Delete failed", error);
     }
   };
-
+   if (loading) {
+      return (
+        <div className="relative min-h-[300px]">
+          <Loader/>
+        </div>
+      );
+    }
   return (
     <div className="p-6">
       {/* Heading */}

@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import LeaveViewModal from "../Manager/Approvals/LeaveViewModal";
+import Loader from "../Loader";
 const EmployeeLeaveRequest = () => {
   const API_BASE = import.meta.env.VITE_API_URL;
   const token = localStorage.getItem("token");
@@ -9,7 +10,7 @@ const EmployeeLeaveRequest = () => {
   const [leaves, setLeaves] = useState<any[]>([]);
   const [viewOpen, setViewOpen] = useState(false);
   const [selectedLeave, setSelectedLeave] = useState<any>(null);
-
+  const [loading,setLoading]=useState(true);
 
   /* ================= FETCH ALL LEAVES ================= */
   const fetchLeaves = async () => {
@@ -18,6 +19,7 @@ const EmployeeLeaveRequest = () => {
         headers: { Authorization: `Bearer ${token}` },
       });
       setLeaves(res.data || []);
+      setLoading(false);
     } catch (error) {
       console.error("Failed to fetch leave requests", error);
     }
@@ -49,6 +51,14 @@ const EmployeeLeaveRequest = () => {
     if (status === "REJECTED") return "text-red-600";
     return "text-yellow-600";
   };
+   if (loading) {
+      return (
+        <div className="relative min-h-[300px]">
+          <Loader/>
+        </div>
+      );
+    }
+  
 
   return (
     <div className="p-4">

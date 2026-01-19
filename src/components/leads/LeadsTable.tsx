@@ -629,16 +629,14 @@ const sortedLeads = [...leads].sort((a: any, b: any) => {
             <Input
               placeholder="District"
               value={districtFilter}
-              onChange={(e) => setDistrictFilter(e.target.value)}
+              onChange={(e) => updateParam("district", e.target.value)}
             />
           </div>
           <div className="space-y-1 sm:space-y-2">
             <Label>Status</Label>
             <Select
               value={statusFilter}
-              onValueChange={(v) =>
-                setStatusFilter(v as "active" | "inactive" | "all")
-              }
+              onValueChange={(v) => updateParam("status", v)}
             >
               <SelectTrigger className="h-10">
                 <SelectValue placeholder="Status" />

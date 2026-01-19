@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { MoreVertical, Download, Send } from "lucide-react";
+import Loader from "../../Loader";
 
 interface PayslipRow {
   _id: string;
@@ -31,6 +32,7 @@ const Payslips = () => {
   /* ================= CURRENT MONTH ================= */
   const currentMonth = new Date().toISOString().slice(0, 7);
   const [month, setMonth] = useState(currentMonth);
+  const [loading,setLoading]=useState(true);
 
   /* ================= FETCH PAYSLIPS ================= */
   const fetchPayslips = async () => {
@@ -42,6 +44,7 @@ const Payslips = () => {
       const filtered = res.data.filter((p: PayslipRow) => p.month === month);
 
       setPayslips(filtered);
+      setLoading(false);
     } catch (err) {
       console.error("Failed to fetch payslips");
     }
@@ -92,7 +95,15 @@ const Payslips = () => {
     setPayslips((prev) =>
       prev.map((p) => (p._id === id ? { ...p, status: "Sent" } : p))
     );
+    setLoading(false);
   };
+   if (loading) {
+      return (
+        <div className="relative min-h-[300px]">
+          <Loader />
+        </div>
+      );
+    }
 
   return (
     <div className="p-6">

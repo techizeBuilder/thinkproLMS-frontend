@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import axios from "axios";
+import { useSearchParams } from "react-router-dom";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { ChevronLeft, ChevronRight, CheckCircle, XCircle } from "lucide-react";
 import Loader from "../Loader";
@@ -38,8 +39,28 @@ const AttendanceReport = () => {
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
 
-  const [search, setSearch] = useState("");
+  const [searchParams, setSearchParams] = useSearchParams();
+  const searchParam = searchParams.get("search") || "";
+
+  const [searchInput, setSearchInput] = useState(searchParam);
+  const [debouncedSearch, setDebouncedSearch] = useState(searchParam);
+
   const [loading, setLoading] = useState(false);
+
+  /* ================= DEBOUNCE ================= */
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchInput);
+    }, 400);
+
+    return () => clearTimeout(timer);
+  }, [searchInput]);
+
+  /* ================= URL PARAM SYNC ================= */
+  useEffect(() => {
+    setSearchParams(debouncedSearch ? { search: debouncedSearch } : {});
+    setPage(1);
+  }, [debouncedSearch, setSearchParams]);
 
   /* ================= FETCH ATTENDANCE ================= */
   useEffect(() => {
@@ -48,7 +69,12 @@ const AttendanceReport = () => {
         setLoading(true);
 
         const res = await axios.get(`${API_BASE}/attendance/all`, {
-          params: { month, year, page },
+          params: {
+            month,
+            year,
+            page,
+            search: debouncedSearch,
+          },
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
           },
@@ -65,7 +91,7 @@ const AttendanceReport = () => {
     };
 
     fetchAttendance();
-  }, [month, year, page]);
+  }, [month, year, page, debouncedSearch]);
 
   /* ================= FETCH HOLIDAYS ================= */
   useEffect(() => {
@@ -119,17 +145,6 @@ const AttendanceReport = () => {
 
     return !!attendanceMap.get(`${userId}_${dateStr}`)?.punchIn;
   };
-
-  /* ================= SEARCH (CURRENT PAGE USERS) ================= */
-  const filteredUsers = useMemo(() => {
-    return users.filter((u) =>
-      u.name.toLowerCase().includes(search.toLowerCase()),
-    );
-  }, [users, search]);
-
-  useEffect(() => {
-    setPage(1);
-  }, [search]);
 
   /* ================= MONTH CHANGE ================= */
   const handlePrevMonth = () => {
@@ -186,8 +201,8 @@ const AttendanceReport = () => {
         {/* ================= SEARCH ================= */}
         <div className="px-6 pb-4">
           <input
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
             placeholder="Search employee..."
             className="w-full md:w-72 h-10 px-3 border rounded-md focus:ring-2 focus:ring-orange-400"
           />
@@ -213,11 +228,10 @@ const AttendanceReport = () => {
                     <th
                       key={day}
                       className={`border px-2 py-2 text-xs text-center
-          ${sunday ? "bg-orange-100 text-orange-700" : ""}
-        ${holiday ? "bg-blue-100 text-blue-700" : ""}
-      `}
+                        ${sunday ? "bg-orange-100 text-orange-700" : ""}
+                        ${holiday ? "bg-blue-100 text-blue-700" : ""}`}
                     >
-                      {holiday ? `${holiday.title}` : sunday ? "Off" : day}
+                      {holiday ? holiday.title : sunday ? "Off" : day}
                     </th>
                   );
                 })}
@@ -225,7 +239,7 @@ const AttendanceReport = () => {
             </thead>
 
             <tbody>
-              {filteredUsers.map((user) => (
+              {users.map((user) => (
                 <tr key={user._id}>
                   <td className="border px-3 py-2 sticky left-0 bg-white font-medium">
                     {user.name}
@@ -265,7 +279,7 @@ const AttendanceReport = () => {
           </table>
         </CardContent>
 
-        {/* ================= PAGINATION ================= */}
+        {/* ================= PAGINATION (UNCHANGED) ================= */}
         <div className="flex justify-center gap-2 py-4">
           {Array.from({ length: totalPages }).map((_, i) => (
             <button
