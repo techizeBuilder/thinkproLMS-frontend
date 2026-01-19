@@ -62,6 +62,7 @@ const SuperStatCard = ({ title, value, icon: Icon, iconBg }: StatCardProps) => (
 const AdminDashboard = () => {
   const navigate = useNavigate();
   const [stats, setStats] = useState<DashboardStats | null>(null);
+  console.log("stats",stats);
   const [loading, setLoading] = useState(true);
 
   const token = localStorage.getItem("token");
@@ -93,11 +94,7 @@ const AdminDashboard = () => {
 
       const employeesCount = empRes.data.length;
 
-      const todayAttendance = attendanceRes.data.filter(
-        (a: any) => a.date === today
-      );
-
-      const present = todayAttendance.filter((a: any) => a.punchIn).length;
+      
 
       const approvedLeavesToday = leaveRes.data.filter((lv: any) => {
         const from = lv.fromDate.split("T")[0];
@@ -105,7 +102,7 @@ const AdminDashboard = () => {
         return lv.status === "APPROVED" && today >= from && today <= to;
       }).length;
 
-      const absent = employeesCount - present - approvedLeavesToday;
+      
 
       let payrollStatus: "Draft" | "Processed" | "Paid" = "Draft";
       if (payrollRes.data.some((p: any) => p.status === "Paid"))
@@ -121,8 +118,8 @@ const AdminDashboard = () => {
       setStats({
         employees: employeesCount,
         attendance: {
-          present,
-          absent,
+          present: attendanceRes.data.totalTodayPresent,
+          absent: employeesCount - attendanceRes.data.totalTodayPresent,
           leave: approvedLeavesToday,
         },
         leaves: {

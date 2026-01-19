@@ -166,6 +166,7 @@ export default function LeadsTable({ onAddNew, onEdit}: LeadsTableProps) {
   const [loading, setLoading] = useState(true);
   const [tableLoading, setTableLoading] = useState(false);
   const [leads, setLeads] = useState<Lead[]>([]);
+  console.log("leads",leads);
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [total, setTotal] = useState(0);
@@ -241,53 +242,8 @@ export default function LeadsTable({ onAddNew, onEdit}: LeadsTableProps) {
     };
 
 
-  useEffect(() => {
-    if (!isUrlSyncDone.current) return;
-    fetchLeads();
-    // eslint-disable-n
-    // ext-line react-hooks/exhaustive-deps
-  }, [
-    debouncedSearch,
-    stateFilter,
-    districtFilter,
-    phaseFilter,
-    qualityFilter,
-    programFilter,
-    leadSourceFilter,
-    deliveryModelFilter,
-    salesCycleFilter,
-    boardFilter,
-    pocRoleFilter,
-    actionOnFilter,
-    actionDueDateFrom,
-    actionDueDateTo,
-    actionDueDateExact,
-    statusFilter,
-    page,
-    pageSize,
-  ]);
+  
 
-  // Reset to page 1 when filters (except page/pageSize) change
-  useEffect(() => {
-    setPage(1);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [
-    debouncedSearch,
-    stateFilter,
-    districtFilter,
-    phaseFilter,
-    qualityFilter,
-    programFilter,
-    leadSourceFilter,
-    deliveryModelFilter,
-    salesCycleFilter,
-    boardFilter,
-    pocRoleFilter,
-    actionDueDateFrom,
-    actionDueDateTo,
-    actionDueDateExact,
-    statusFilter,
-  ]);
 
   useEffect(() => {
     const loadStates = async () => {
@@ -303,77 +259,63 @@ export default function LeadsTable({ onAddNew, onEdit}: LeadsTableProps) {
 
 
 
-  const fetchLeads = async (initial = false) => {
-    try {
-      if (initial) setLoading(true);
-      else setTableLoading(true);
+   const fetchLeads = async (initial = false) => {
+     try {
+       if (initial) setLoading(true);
+       else setTableLoading(true);
 
       const res = await leadService.list({
-        search: debouncedSearch || undefined,
-        state: stateFilter && stateFilter !== "all" ? stateFilter : undefined,
-        district: districtFilter || undefined,
+        search: searchParams.get("search") || undefined,
+        state: searchParams.get("state") || undefined,
+        district: searchParams.get("district") || undefined,
+        status: searchParams.get("status") || undefined,
 
-        phase: phaseFilter.length ? phaseFilter : undefined,
-        quality: qualityFilter.length ? qualityFilter : undefined,
-        programType: programFilter.length ? programFilter : undefined,
-        leadSource: leadSourceFilter.length ? leadSourceFilter : undefined,
-        deliveryModel: deliveryModelFilter.length
-          ? deliveryModelFilter
-          : undefined,
-        salesCycle: salesCycleFilter.length ? salesCycleFilter : undefined,
-        boardAffiliated: boardFilter.length ? boardFilter : undefined,
+        actionOn: searchParams.getAll("actionOn"),
+        salesManager: searchParams.getAll("manager"),
+        salesExecutive: searchParams.getAll("executive"),
 
-        // ✅ YAHI MAIN FIX HAI
-        salesManager: managerFilter.length ? managerFilter : undefined,
+        phase: searchParams.getAll("phase"),
+        quality: searchParams.getAll("quality"),
+        programType: searchParams.getAll("program"),
+        leadSource: searchParams.getAll("leadSource"),
+        deliveryModel: searchParams.getAll("deliveryModel"),
+        salesCycle: searchParams.getAll("salesCycle"),
+        boardAffiliated: searchParams.getAll("board"),
 
-        salesExecutive: executiveFilter.length ? executiveFilter : undefined,
+        actionDueDateFrom: searchParams.get("dueFrom") || undefined,
+        actionDueDateTo: searchParams.get("dueTo") || undefined,
+        actionDueDate: searchParams.get("dueExact") || undefined,
 
-        actionOn: actionOnFilter.length ? actionOnFilter : undefined,
-
-        actionDueDateFrom: actionDueDateFrom
-          ? format(actionDueDateFrom, "yyyy-MM-dd")
-          : undefined,
-
-        actionDueDateTo: actionDueDateTo
-          ? format(actionDueDateTo, "yyyy-MM-dd")
-          : undefined,
-
-        actionDueDate: actionDueDateExact
-          ? format(actionDueDateExact, "yyyy-MM-dd")
-          : undefined,
-
-        page,
+        page: Number(searchParams.get("page") || 1),
         limit: pageSize,
       });
 
-      setLeads(res.data || []);
-      setTotal(res.total || 0);
-      setPages(res.pages || 1);
-    } finally {
-      if (initial) setLoading(false);
-      else setTableLoading(false);
-    }
-  };
-  const updateParam = (
-    key: string,
-    value?: string | string[] | number | boolean
-  ) => {
-    const params = new URLSearchParams(searchParams);
+       setLeads(res.data || []);
+       setTotal(res.total || 0);
+       setPages(res.pages || 1);
+     } finally {
+       if (initial) setLoading(false);
+       else setTableLoading(false);
+     }
+   };
 
-    if (
-      value === undefined ||
-      value === "" ||
-      (Array.isArray(value) && value.length === 0)
-    ) {
-      params.delete(key);
-    } else if (Array.isArray(value)) {
-      params.set(key, value.join(","));
-    } else {
-      params.set(key, String(value));
-    }
 
-    setSearchParams(params, { replace: true });
-  };
+   const updateParam = (key: string, value: string | string[]) => {
+     const params = new URLSearchParams(searchParams);
+
+     params.delete(key);
+
+     if (Array.isArray(value)) {
+       value.forEach((v) => params.append(key, v));
+     } else if (value) {
+       params.set(key, value);
+     }
+
+     params.set("page", "1");
+     setSearchParams(params);
+   };
+
+
 
 
   useEffect(() => {
@@ -385,16 +327,16 @@ export default function LeadsTable({ onAddNew, onEdit}: LeadsTableProps) {
       (searchParams.get("status") as "active" | "inactive" | "all") || "active"
     );
 
-    setPhaseFilter(searchParams.get("phase")?.split(",") || []);
-    setQualityFilter(searchParams.get("quality")?.split(",") || []);
-    setProgramFilter(searchParams.get("program")?.split(",") || []);
-    setLeadSourceFilter(searchParams.get("leadSource")?.split(",") || []);
-    setDeliveryModelFilter(searchParams.get("deliveryModel")?.split(",") || []);
-    setSalesCycleFilter(searchParams.get("salesCycle")?.split(",") || []);
-    setBoardFilter(searchParams.get("board")?.split(",") || []);
-    setManagerFilter(searchParams.get("manager")?.split(",") || []);
-    setExecutiveFilter(searchParams.get("executive")?.split(",") || []);
-    setActionOnFilter(searchParams.get("actionOn")?.split(",") || []);
+    setPhaseFilter(searchParams.getAll("phase"));
+    setQualityFilter(searchParams.getAll("quality"));
+    setProgramFilter(searchParams.getAll("program"));
+    setLeadSourceFilter(searchParams.getAll("leadSource"));
+    setDeliveryModelFilter(searchParams.getAll("deliveryModel"));
+    setSalesCycleFilter(searchParams.getAll("salesCycle"));
+    setBoardFilter(searchParams.getAll("board"));
+    setManagerFilter(searchParams.getAll("manager"));
+    setExecutiveFilter(searchParams.getAll("executive"));
+    setActionOnFilter(searchParams.getAll("actionOn"));
 
     const dueFrom = searchParams.get("dueFrom");
     const dueTo = searchParams.get("dueTo");
@@ -406,7 +348,7 @@ export default function LeadsTable({ onAddNew, onEdit}: LeadsTableProps) {
 
     setPage(Number(searchParams.get("page") || 1));
       isUrlSyncDone.current = true;
-        fetchLeads(true);
+      fetchLeads(true);
   }, [searchParams]);
 
 
@@ -729,7 +671,7 @@ const sortedLeads = [...leads].sort((a: any, b: any) => {
                     if (actionDueDateFrom && actionDueDateTo) {
                       return `${format(
                         actionDueDateFrom,
-                        "MMM dd, yyyy"
+                        "MMM dd, yyyy",
                       )} - ${format(actionDueDateTo, "MMM dd, yyyy")}`;
                     }
                     return "Select date or range";
@@ -791,12 +733,43 @@ const sortedLeads = [...leads].sort((a: any, b: any) => {
                         setActionDueDateExact(null);
                         setActionDueDateFrom(null);
                         setActionDueDateTo(null);
-
                       }}
                     >
                       Clear
                     </Button>
-                    <Button onClick={() => setActionDueOpen(false)}>
+                    <Button
+                      onClick={() => {
+                        const params = new URLSearchParams(searchParams);
+
+                        params.delete("dueFrom");
+                        params.delete("dueTo");
+                        params.delete("dueExact");
+
+                        if (actionDueDateExact) {
+                          params.set(
+                            "dueExact",
+                            format(actionDueDateExact, "yyyy-MM-dd"),
+                          );
+                        } else {
+                          if (actionDueDateFrom) {
+                            params.set(
+                              "dueFrom",
+                              format(actionDueDateFrom, "yyyy-MM-dd"),
+                            );
+                          }
+                          if (actionDueDateTo) {
+                            params.set(
+                              "dueTo",
+                              format(actionDueDateTo, "yyyy-MM-dd"),
+                            );
+                          }
+                        }
+
+                        params.set("page", "1");
+                        setSearchParams(params);
+                        setActionDueOpen(false);
+                      }}
+                    >
                       Apply
                     </Button>
                   </div>
@@ -1105,8 +1078,8 @@ const sortedLeads = [...leads].sort((a: any, b: any) => {
                         l.actionOnModel === "SalesManager"
                           ? "Manager"
                           : l.actionOnModel === "SalesExecutive"
-                          ? "Executive"
-                          : undefined;
+                            ? "Executive"
+                            : undefined;
                       // Fallback to legacy type if present
                       const legacyType =
                         typeof (l.actionOn as any).type === "string"
@@ -1116,8 +1089,8 @@ const sortedLeads = [...leads].sort((a: any, b: any) => {
                         legacyType === "manager"
                           ? "Manager"
                           : legacyType === "executive"
-                          ? "Executive"
-                          : undefined;
+                            ? "Executive"
+                            : undefined;
                       const role = byModel || byLegacy;
                       return name ? (role ? `${name} (${role})` : name) : "-";
                     }

@@ -2,10 +2,9 @@
 
 import { useEffect, useState } from "react";
 import axios from "axios";
-import {MoreVertical } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { MoreVertical } from "lucide-react";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import Loader from "../Loader";
-
 
 const API_BASE = import.meta.env.VITE_API_URL;
 
@@ -18,42 +17,86 @@ interface Employee {
 
 export default function Employee() {
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
+
   const [employees, setEmployees] = useState<Employee[]>([]);
-  const [search, setSearch] = useState("");
   const [openMenu, setOpenMenu] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [page, setPage] = useState(1);
+  const [loading, setLoading] = useState(false);
   const [totalPages, setTotalPages] = useState(1);
   const [totalUsers, setTotalUsers] = useState(0);
 
+  // 🔑 URL state
+  const page = Number(searchParams.get("page")) || 1;
+  const urlSearch = searchParams.get("search") || "";
 
+  // 🔑 INPUT state (typing ke liye)
+  const [searchInput, setSearchInput] = useState(urlSearch);
+
+  // 🔑 DEBOUNCED search (API call ke liye)
+  const [debouncedSearch, setDebouncedSearch] = useState(urlSearch);
+
+  // 🔄 URL → input sync (back / reload case)
   useEffect(() => {
-    fetchEmployees(1);
-  }, []);
+    setSearchInput(urlSearch);
+    setDebouncedSearch(urlSearch);
+  }, [urlSearch]);
 
-const fetchEmployees = async (pageNumber = 1) => {
-  try {
-    const token = localStorage.getItem("token");
-    setLoading(true);
+  // ⏳ DEBOUNCE logic (LIVE FILTER)
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchInput.trim());
+    }, 400);
 
-    const res = await axios.get(`${API_BASE}/users?page=${pageNumber}`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
+    return () => clearTimeout(timer);
+  }, [searchInput]);
+
+  // 🔄 URL update AFTER debounce
+  useEffect(() => {
+    setSearchParams({
+      page: "1",
+      search: debouncedSearch,
     });
+  }, [debouncedSearch, setSearchParams]);
 
-    setEmployees(res.data.data); // 👈 backend se data
-    setTotalPages(res.data.totalPages || 1);
-    setTotalUsers(res.data.totalUsers);
-    setPage(pageNumber);
-    setLoading(false);
-  } catch (err) {
-    console.error("Failed to fetch employees", err);
-    setLoading(false);
-  }
-};
+  // 🔄 API CALL
+  const fetchEmployees = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      setLoading(true);
 
+      const res = await axios.get(
+        `${API_BASE}/users?page=${page}&search=${debouncedSearch}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      );
 
+      setEmployees(res.data.data);
+      setTotalPages(res.data.totalPages || 1);
+      setTotalUsers(res.data.totalUsers || 0);
+      setLoading(false);
+    } catch (err) {
+      console.error("Failed to fetch employees", err);
+      setLoading(false);
+    }
+  };
+
+  // 🔁 FETCH on page / search change
+  useEffect(() => {
+    fetchEmployees();
+  }, [page, debouncedSearch]);
+
+  // 📄 Pagination click
+  const handlePageChange = (p: number) => {
+    setSearchParams({
+      page: p.toString(),
+      search: debouncedSearch,
+    });
+  };
+
+  // ❌ Delete
   const handleDelete = async (id: string) => {
     try {
       const token = localStorage.getItem("token");
@@ -64,52 +107,37 @@ const fetchEmployees = async (pageNumber = 1) => {
         },
       });
 
-      // UI se turant remove
-      setEmployees((prev) => prev.filter((emp) => emp._id !== id));
+      fetchEmployees();
     } catch (error) {
       console.error("Failed to delete user", error);
       alert("Failed to delete user");
     }
   };
 
-  const filteredEmployees = employees.filter((emp) =>
-    emp.name.toLowerCase().includes(search.toLowerCase())
-  );
+  // 📄 Pagination UI logic
+  const getPaginationPages = () => {
+    const pages: (number | string)[] = [];
 
-const getPaginationPages = () => {
-  const pages: (number | string)[] = [];
+    if (totalPages <= 5) {
+      for (let i = 1; i <= totalPages; i++) pages.push(i);
+      return pages;
+    }
 
-  if (totalPages <= 5) {
-    for (let i = 1; i <= totalPages; i++) pages.push(i);
+    pages.push(1);
+
+    if (page > 3) pages.push("...");
+
+    const start = Math.max(2, page - 1);
+    const end = Math.min(totalPages - 1, page + 1);
+
+    for (let i = start; i <= end; i++) pages.push(i);
+
+    if (page < totalPages - 2) pages.push("...");
+
+    pages.push(totalPages);
+
     return pages;
-  }
-
-  pages.push(1);
-
-  if (page > 3) pages.push("...");
-
-  const start = Math.max(2, page - 1);
-  const end = Math.min(totalPages - 1, page + 1);
-
-  for (let i = start; i <= end; i++) {
-    pages.push(i);
-  }
-
-  if (page < totalPages - 2) pages.push("...");
-
-  pages.push(totalPages);
-
-  return pages;
-};
-
-
-   if (loading) {
-     return (
-       <div className="relative min-h-screen">
-         <Loader/>
-       </div>
-     );
-   }
+  };
 
   return (
     <div className="p-6">
@@ -119,20 +147,27 @@ const getPaginationPages = () => {
         <p className="text-sm text-gray-500 mt-1">Dashboard / Employee</p>
       </div>
 
-      {/* Search */}
+      {/* 🔍 LIVE SEARCH (NO BUTTON) */}
       <div className="mb-8 max-w-sm">
         <input
           type="text"
           placeholder="Search by Employee ID or Name"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
+          value={searchInput}
+          onChange={(e) => setSearchInput(e.target.value)}
           className="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-400"
         />
       </div>
 
+      {/* Loader (NON-BLOCKING) */}
+      {loading && (
+        <div className="mb-6">
+          <Loader />
+        </div>
+      )}
+
       {/* Employee Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-        {filteredEmployees.map((emp) => (
+        {employees.map((emp) => (
           <div
             key={emp._id}
             className="bg-white rounded-xl shadow-sm p-6 relative"
@@ -174,7 +209,6 @@ const getPaginationPages = () => {
                     className="w-full text-left px-4 py-2 text-sm text-red-500 hover:bg-red-50"
                     onClick={() => {
                       setOpenMenu(null);
-
                       if (
                         confirm(`Are you sure you want to delete ${emp.name}?`)
                       ) {
@@ -213,8 +247,8 @@ const getPaginationPages = () => {
           </div>
         ))}
       </div>
+
       {/* Pagination */}
-      {/* Stylish Pagination */}
       {totalUsers > 15 && totalPages > 1 && (
         <div className="flex justify-end mt-12">
           <div className="flex items-center gap-2 bg-white shadow-md rounded-xl px-4 py-3">
@@ -226,17 +260,17 @@ const getPaginationPages = () => {
               ) : (
                 <button
                   key={p}
-                  onClick={() => fetchEmployees(p as number)}
+                  onClick={() => handlePageChange(p as number)}
                   className={`min-w-[40px] h-10 rounded-lg text-sm font-medium transition-all duration-200
-              ${
-                page === p
-                  ? "bg-orange-500 text-white shadow-lg scale-105"
-                  : "bg-orange-50 text-orange-600 hover:bg-orange-100"
-              }`}
+                  ${
+                    page === p
+                      ? "bg-orange-500 text-white shadow-lg scale-105"
+                      : "bg-orange-50 text-orange-600 hover:bg-orange-100"
+                  }`}
                 >
                   {p}
                 </button>
-              )
+              ),
             )}
           </div>
         </div>

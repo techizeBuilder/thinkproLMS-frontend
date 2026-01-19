@@ -21,6 +21,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
+import Loader from "../Loader";
 
 /* ================= TYPES ================= */
 const API_BASE = import.meta.env.VITE_API_URL;
@@ -62,6 +63,7 @@ const OnboardingTasks = () => {
   const [departments, setDepartments] = useState<Department[]>([]);
   const [tasks, setTasks] = useState<Task[]>([]);
   const [open, setOpen] = useState(false);
+  const [loading,setLoading]=useState(true);
 
   const [form, setForm] = useState({
     employeeId: "",
@@ -94,6 +96,7 @@ const OnboardingTasks = () => {
       setEmployees(empRes.data || []);
       setDepartments(deptRes.data || []);
       setTasks(taskRes.data || []);
+      setLoading(false);
     } catch (error) {
       console.error("Fetch failed", error);
     }
@@ -146,6 +149,13 @@ const OnboardingTasks = () => {
     if (status === "COMPLETED") return "success";
     return "secondary";
   };
+    if (loading) {
+      return (
+        <div className="relative min-h-screen">
+          <Loader />
+        </div>
+      );
+    }
 
   return (
     <div className="p-4 md:p-6 max-w-7xl mx-auto space-y-6">

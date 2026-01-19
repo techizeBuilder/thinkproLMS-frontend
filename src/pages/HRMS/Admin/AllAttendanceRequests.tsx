@@ -9,6 +9,7 @@ const AllAttendanceRequests = () => {
 
   const [requests, setRequests] = useState<any[]>([]);
   const [view, setView] = useState<any>(null);
+  
 
   const fetchRequests = async () => {
     const res = await axios.get(`${API_BASE}/attendance-request/all`, {
