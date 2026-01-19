@@ -5,6 +5,7 @@ import axios from "axios";
 import { MoreVertical } from "lucide-react";
 import AddHolidayModal from "./AddHolidayModel";
 import ViewHolidayModal from "./ViewHolidayModel";
+import Loader from "../../Loader";
 interface Holiday {
   _id: string;
   title: string;
@@ -17,7 +18,7 @@ const API_BASE = import.meta.env.VITE_API_URL;
 const Holiday = () => {
   const [openMenu, setOpenMenu] = useState<string | null>(null);
   const [holidays, setHolidays] = useState<Holiday[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [openViewModal, setOpenViewModal] = useState(false);
   const [selectedHoliday, setSelectedHoliday] = useState<Holiday | null>(null);
   const [mode, setMode] = useState<"add" | "edit">("add");
@@ -61,7 +62,13 @@ const Holiday = () => {
       console.error("Delete failed", error);
     }
   };
-
+    if (loading) {
+      return (
+        <div className="p-10 flex justify-center">
+          <Loader />
+        </div>
+      );
+    }
   return (
     <div className="p-6">
       {/* Page Heading */}

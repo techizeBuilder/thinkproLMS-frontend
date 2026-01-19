@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import { MoreVertical } from "lucide-react";
 import ViewEditJobModal from "./ViewEditJobModal";
+import Loader from "../../Loader";
 
 interface JobOpening {
   _id: string;
@@ -52,7 +53,13 @@ const JobOpening = () => {
     );
     fetchJobs();
   };
-
+   if (loading) {
+     return (
+       <div className="relative min-h-[300px]">
+         <Loader />
+       </div>
+     );
+   }
   return (
     <div className="p-6">
       {/* HEADER */}

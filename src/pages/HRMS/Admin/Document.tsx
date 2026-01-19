@@ -50,8 +50,8 @@ const StatusBadge = ({ status }: { status: string }) => {
     status === "VERIFIED"
       ? "bg-green-100 text-green-700"
       : status === "REJECTED"
-      ? "bg-red-100 text-red-700"
-      : "bg-yellow-100 text-yellow-700";
+        ? "bg-red-100 text-red-700"
+        : "bg-yellow-100 text-yellow-700";
 
   return (
     <span className={`px-2 py-1 text-xs rounded font-medium ${color}`}>
@@ -65,28 +65,44 @@ export default function Document() {
   const [loading, setLoading] = useState(false);
   const [open, setOpen] = useState(false);
   const [selectedDocuments, setSelectedDocuments] = useState<DocumentFile[]>(
-    []
+    [],
   );
-  const [search, setSearch] = useState("");
 
-  // 🔥 Pagination states
+  // 🔍 search
+  const [searchInput, setSearchInput] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+
+  // 🔥 pagination
   const [page, setPage] = useState(1);
   const [totalUsers, setTotalUsers] = useState(0);
   const limit = 15;
 
-  /* ================= FETCH USERS ================= */
+  /* ================= DEBOUNCE SEARCH ================= */
 
-  const fetchUsers = async (pageNumber = 1) => {
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchInput.trim());
+      setPage(1);
+    }, 400);
+
+    return () => clearTimeout(timer);
+  }, [searchInput]);
+
+  /* ================= FETCH USERS (BACKEND FILTER) ================= */
+
+  const fetchUsers = async (pageNumber = 1, search = "") => {
     try {
       setLoading(true);
 
-      const res = await axios.get(`${API_BASE}/users?page=${pageNumber}`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
+      const res = await axios.get(
+        `${API_BASE}/users?page=${pageNumber}&search=${search}`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
         },
-      });
+      );
 
-      // pagination response
       setUsers(res.data.data);
       setTotalUsers(res.data.totalUsers);
       setPage(pageNumber);
@@ -97,18 +113,11 @@ export default function Document() {
     }
   };
 
+  /* ================= FETCH ON PAGE / SEARCH ================= */
+
   useEffect(() => {
-    fetchUsers(1);
-  }, []);
-
-  /* ================= SEARCH FILTER ================= */
-
-  const filteredUsers = users.filter((user) => {
-    const q = search.toLowerCase();
-    return (
-      user.name.toLowerCase().includes(q) || user.role.toLowerCase().includes(q)
-    );
-  });
+    fetchUsers(page, debouncedSearch);
+  }, [page, debouncedSearch]);
 
   /* ================= FETCH DOCUMENTS ================= */
 
@@ -132,7 +141,7 @@ export default function Document() {
 
   const handleVerify = async (
     documentId: string,
-    status: "VERIFIED" | "REJECTED"
+    status: "VERIFIED" | "REJECTED",
   ) => {
     await axios.patch(
       `${API_BASE}/documents/verify/${documentId}`,
@@ -141,11 +150,11 @@ export default function Document() {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
-      }
+      },
     );
 
     setSelectedDocuments((prev) =>
-      prev.map((doc) => (doc._id === documentId ? { ...doc, status } : doc))
+      prev.map((doc) => (doc._id === documentId ? { ...doc, status } : doc)),
     );
   };
 
@@ -157,7 +166,7 @@ export default function Document() {
       acc[doc.type].push(doc);
       return acc;
     },
-    {}
+    {},
   );
 
   /* ================= PAGINATION ================= */
@@ -203,11 +212,8 @@ export default function Document() {
       <input
         type="text"
         placeholder="Search by user name or role..."
-        value={search}
-        onChange={(e) => {
-          setSearch(e.target.value);
-          setPage(1);
-        }}
+        value={searchInput}
+        onChange={(e) => setSearchInput(e.target.value)}
         className="w-full sm:w-80 h-10 px-3 border rounded-md focus:ring-2 focus:ring-orange-400"
       />
 
@@ -225,14 +231,14 @@ export default function Document() {
           </TableHeader>
 
           <TableBody>
-            {filteredUsers.length === 0 ? (
+            {users.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={4} className="text-center py-6">
                   No users found
                 </TableCell>
               </TableRow>
             ) : (
-              filteredUsers.map((user, index) => (
+              users.map((user, index) => (
                 <TableRow key={user._id}>
                   <TableCell>{(page - 1) * limit + index + 1}</TableCell>
                   <TableCell>{user.name}</TableCell>
@@ -255,7 +261,7 @@ export default function Document() {
 
       {/* ================= PAGINATION ================= */}
 
-      {totalUsers > 15 && search.trim() === "" && (
+      {totalUsers > limit && (
         <div className="flex justify-end">
           <div className="flex gap-2 bg-white shadow-md rounded-xl px-4 py-3">
             {getPaginationPages().map((p, i) =>
@@ -266,7 +272,7 @@ export default function Document() {
               ) : (
                 <button
                   key={p}
-                  onClick={() => fetchUsers(p as number)}
+                  onClick={() => setPage(p as number)}
                   className={`min-w-[38px] h-9 rounded-md text-sm font-medium
                     ${
                       page === p
@@ -276,7 +282,7 @@ export default function Document() {
                 >
                   {p}
                 </button>
-              )
+              ),
             )}
           </div>
         </div>

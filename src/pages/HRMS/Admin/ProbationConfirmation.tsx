@@ -10,6 +10,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { useSearchParams } from "react-router-dom";
 import Loader from "../Loader";
 
 const API = import.meta.env.VITE_API_URL;
@@ -17,48 +18,87 @@ const API = import.meta.env.VITE_API_URL;
 export default function ProbationConfirmation() {
   const token = localStorage.getItem("token");
 
+  const [searchParams, setSearchParams] = useSearchParams();
+
   const [data, setData] = useState<any[]>([]);
   const [menu, setMenu] = useState<string | null>(null);
   const [open, setOpen] = useState(false);
   const [selected, setSelected] = useState<any>(null);
-  const [loading,setLoading]=useState(true);
+  const [loading, setLoading] = useState(true);
+
+  // 🔍 URL params
+  const page = Number(searchParams.get("page")) || 1;
+  const search = searchParams.get("search") || "";
+
+  // 🔍 local input (typing)
+  const [searchInput, setSearchInput] = useState(search);
+
+  // 🔥 pagination
+  const limit = 15;
+  const [totalUsers, setTotalUsers] = useState(0);
+  const totalPages = Math.ceil(totalUsers / limit);
+
+  /* ================= SYNC INPUT ================= */
+
+  useEffect(() => {
+    setSearchInput(search);
+  }, [search]);
+
+  /* ================= DEBOUNCE SEARCH ================= */
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setSearchParams({
+        page: "1",
+        search: searchInput.trim(),
+      });
+    }, 400);
+
+    return () => clearTimeout(timer);
+  }, [searchInput]);
 
   /* ================= FETCH PROBATION USERS ================= */
 
   const fetchData = async () => {
-    const res = await axios.get(`${API}/users`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
+    try {
+      setLoading(true);
 
-    const probationUsers = res.data.filter(
-      (u: any) => u.employmentStatus === "PROBATION"
-    );
+      const res = await axios.get(
+        `${API}/users?page=${page}&search=${search}&employmentStatus=PROBATION`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        },
+      );
 
-    setData(probationUsers);
-    setLoading(false);
+      setData(res.data.data);
+      setTotalUsers(res.data.totalUsers || 0);
+    } catch (err) {
+      console.error("Failed to fetch probation users", err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
     fetchData();
-  }, []);
+  }, [page, search]);
 
   /* ================= STATUS CHANGE ================= */
 
- const changeStatus = async (id: string, status: string) => {
-   await axios.patch(
-     `${API}/users/${id}`,
-     {
-       employmentStatus: status,
-       confirmationDate: status === "CONFIRMED" ? new Date() : null,
-     },
-     {
-       headers: { Authorization: `Bearer ${token}` },
-     }
-   );
+  const changeStatus = async (id: string, status: string) => {
+    await axios.patch(
+      `${API}/users/${id}`,
+      {
+        employmentStatus: status,
+        confirmationDate: status === "CONFIRMED" ? new Date() : null,
+      },
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      },
+    );
 
-   fetchData();
- };
-
+    fetchData();
+  };
 
   /* ================= VIEW ================= */
 
@@ -67,17 +107,50 @@ export default function ProbationConfirmation() {
     setOpen(true);
     setMenu(null);
   };
-    if (loading) {
-      return (
-        <div className="relative min-h-screen">
-          <Loader />
-        </div>
-      );
+
+  /* ================= PAGINATION ================= */
+
+  const getPaginationPages = () => {
+    const pages: (number | string)[] = [];
+
+    if (totalPages <= 5) {
+      for (let i = 1; i <= totalPages; i++) pages.push(i);
+      return pages;
     }
 
+    pages.push(1);
+    if (page > 3) pages.push("...");
+    const start = Math.max(2, page - 1);
+    const end = Math.min(totalPages - 1, page + 1);
+
+    for (let i = start; i <= end; i++) pages.push(i);
+    if (page < totalPages - 2) pages.push("...");
+    pages.push(totalPages);
+
+    return pages;
+  };
+
+  if (loading) {
+    return (
+      <div className="relative min-h-screen">
+        <Loader />
+      </div>
+    );
+  }
+
   return (
-    <div className="p-6 bg-white rounded shadow">
-      <h2 className="text-xl font-semibold mb-4">Probation & Confirmation</h2>
+    <div className="p-6 bg-white rounded shadow space-y-6">
+      <h2 className="text-xl font-semibold">Probation & Confirmation</h2>
+
+      {/* ================= SEARCH ================= */}
+
+      <input
+        type="text"
+        placeholder="Search employee, department, manager..."
+        value={searchInput}
+        onChange={(e) => setSearchInput(e.target.value)}
+        className="w-full sm:w-80 h-10 px-3 border rounded-md focus:ring-2 focus:ring-orange-400"
+      />
 
       {/* ================= TABLE ================= */}
 
@@ -97,51 +170,88 @@ export default function ProbationConfirmation() {
           </thead>
 
           <tbody>
-            {data.map((u) => (
-              <tr key={u._id} className="border-t">
-                <td className="p-3 font-medium">{u.name}</td>
-                <td>{u.designationId?.name}</td>
-                <td>{u.departmentId?.name}</td>
-                <td>{new Date(u.joiningDate).toDateString()}</td>
-                <td>{new Date(u.probationEndDate).toDateString()}</td>
-                <td>{u.managerId?.name || "-"}</td>
-
-                {/* STATUS DROPDOWN */}
-                <td>
-                  <select
-                    value={u.employmentStatus}
-                    onChange={(e) => changeStatus(u._id, e.target.value)}
-                    className="border rounded px-2 py-1"
-                  >
-                    <option value="PROBATION">Probation</option>
-                    <option value="CONFIRMED">Confirmed</option>
-                    <option value="TERMINATED">Terminated</option>
-                  </select>
-                </td>
-
-                {/* ACTION */}
-                <td className="relative">
-                  <MoreVertical
-                    className="cursor-pointer mx-auto"
-                    onClick={() => setMenu(menu === u._id ? null : u._id)}
-                  />
-
-                  {menu === u._id && (
-                    <div className="absolute right-0 bg-white border rounded shadow z-10">
-                      <button
-                        className="block px-4 py-2 w-full text-left hover:bg-gray-100"
-                        onClick={() => handleView(u)}
-                      >
-                        View
-                      </button>
-                    </div>
-                  )}
+            {data.length === 0 ? (
+              <tr>
+                <td colSpan={8} className="py-6 text-gray-500">
+                  No probation users found
                 </td>
               </tr>
-            ))}
+            ) : (
+              data.map((u) => (
+                <tr key={u._id} className="border-t">
+                  <td className="p-3 font-medium">{u.name}</td>
+                  <td>{u.designationId?.name}</td>
+                  <td>{u.departmentId?.name}</td>
+                  <td>{new Date(u.joiningDate).toDateString()}</td>
+                  <td>{new Date(u.probationEndDate).toDateString()}</td>
+                  <td>{u.managerId?.name || "-"}</td>
+
+                  <td>
+                    <select
+                      value={u.employmentStatus}
+                      onChange={(e) => changeStatus(u._id, e.target.value)}
+                      className="border rounded px-2 py-1"
+                    >
+                      <option value="PROBATION">Probation</option>
+                      <option value="CONFIRMED">Confirmed</option>
+                      <option value="TERMINATED">Terminated</option>
+                    </select>
+                  </td>
+
+                  <td className="relative">
+                    <MoreVertical
+                      className="cursor-pointer mx-auto"
+                      onClick={() => setMenu(menu === u._id ? null : u._id)}
+                    />
+
+                    {menu === u._id && (
+                      <div className="absolute right-0 bg-white border rounded shadow z-10">
+                        <button
+                          className="block px-4 py-2 w-full text-left hover:bg-gray-100"
+                          onClick={() => handleView(u)}
+                        >
+                          View
+                        </button>
+                      </div>
+                    )}
+                  </td>
+                </tr>
+              ))
+            )}
           </tbody>
         </table>
       </div>
+
+      {/* ================= PAGINATION ================= */}
+
+      {totalUsers > limit && (
+        <div className="flex justify-end">
+          <div className="flex gap-2 bg-white shadow-md rounded-xl px-4 py-3">
+            {getPaginationPages().map((p, i) =>
+              p === "..." ? (
+                <span key={i} className="px-3 text-gray-400">
+                  …
+                </span>
+              ) : (
+                <button
+                  key={p}
+                  onClick={() =>
+                    setSearchParams({ page: p.toString(), search })
+                  }
+                  className={`min-w-[38px] h-9 rounded-md text-sm font-medium
+                    ${
+                      page === p
+                        ? "bg-orange-500 text-white"
+                        : "bg-orange-50 text-orange-600 hover:bg-orange-100"
+                    }`}
+                >
+                  {p}
+                </button>
+              ),
+            )}
+          </div>
+        </div>
+      )}
 
       {/* ================= VIEW MODAL ================= */}
 
@@ -153,7 +263,6 @@ export default function ProbationConfirmation() {
 
           {selected && (
             <div className="space-y-4 text-sm">
-              {/* EMPLOYEE INFO */}
               <div>
                 <h3 className="font-semibold text-gray-700">
                   Employee Details
@@ -177,7 +286,6 @@ export default function ProbationConfirmation() {
                 </p>
               </div>
 
-              {/* MANAGER RECOMMENDATION (STATIC) */}
               <div className="border-t pt-3">
                 <h3 className="font-semibold text-gray-700">
                   Manager Recommendation
@@ -196,7 +304,6 @@ export default function ProbationConfirmation() {
                 </p>
               </div>
 
-              {/* HR ACTION */}
               <div className="border-t pt-3">
                 <h3 className="font-semibold text-gray-700">HR Action</h3>
 

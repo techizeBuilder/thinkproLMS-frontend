@@ -58,7 +58,7 @@ const ShiftRoster = () => {
 
   const [editingShiftId, setEditingShiftId] = useState<string | null>(null);
   const [open, setOpen] = useState(false);
-  const [loading,setLoading]=useState(true);
+  const [loading, setLoading] = useState(true);
   /* 🔹 PAGINATION STATES */
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
@@ -103,7 +103,6 @@ const ShiftRoster = () => {
       .then((res) => {
         setShifts(res.data.shifts || []);
         setLoading(false);
-        if (res.data.totalPages) setTotalPages(res.data.totalPages);
       })
       .catch(() => setShifts([]));
   }, [weekStart, page]);
@@ -145,7 +144,7 @@ const ShiftRoster = () => {
             headers: {
               Authorization: `Bearer ${localStorage.getItem("token")}`,
             },
-          }
+          },
         );
       } else {
         await axios.post(
@@ -159,7 +158,7 @@ const ShiftRoster = () => {
             headers: {
               Authorization: `Bearer ${localStorage.getItem("token")}`,
             },
-          }
+          },
         );
       }
 
@@ -187,13 +186,13 @@ const ShiftRoster = () => {
 
   /* ================= RENDER ================= */
 
-    if (loading) {
-      return (
-        <div className="p-10 flex justify-center">
-          <Loader />
-        </div>
-      );
-    }
+  if (loading) {
+    return (
+      <div className="p-10 flex justify-center">
+        <Loader />
+      </div>
+    );
+  }
 
   return (
     <div className="p-6 space-y-6">
@@ -286,9 +285,7 @@ const ShiftRoster = () => {
             key={i}
             onClick={() => setPage(i + 1)}
             className={`px-3 py-1 rounded border ${
-              page === i + 1
-                ? "bg-orange-500 text-white"
-                : "bg-white"
+              page === i + 1 ? "bg-orange-500 text-white" : "bg-white"
             }`}
           >
             {i + 1}
@@ -406,14 +403,9 @@ const ShiftRoster = () => {
             </div>
           </div>
         </DialogContent>
-      </Dialog>  
+      </Dialog>
     </div>
   );
 };
 
 export default ShiftRoster;
-
-
-
-
-

@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import { MoreVertical } from "lucide-react";
 import ViewPayrollModal from "./ViewPayrollModal";
+import Loader from "../../Loader";
 
 const API_BASE = import.meta.env.VITE_API_URL;
 
@@ -32,6 +33,7 @@ const PayrollRun = () => {
   const currentMonth = new Date().toISOString().slice(0, 7);
   const [month, setMonth] = useState(currentMonth);
   const [rejectViewModal, setRejectViewModal] = useState(false);
+  const [loading,setLoading]=useState(true);
   const [rejectDetails, setRejectDetails] = useState<{
     reason: string;
     rejectedAt: string;
@@ -151,6 +153,7 @@ const PayrollRun = () => {
       });
 
       setPayroll(rows.filter(Boolean));
+      setLoading(false);
       setIsPayrollRun(false);
     } catch (error) {
       console.error("Payroll generation failed", error);
@@ -178,6 +181,7 @@ const PayrollRun = () => {
 
 
         setPayroll(mapped);
+        setLoading(false);
         setIsPayrollRun(true);
         return true;
       }
@@ -248,7 +252,13 @@ const PayrollRun = () => {
     }
   };
 
-
+   if (loading) {
+      return (
+        <div className="relative min-h-[300px]">
+          <Loader />
+        </div>
+      );
+    }
 
   /* ================= UI ================= */
   return (

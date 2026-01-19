@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 
+
 /* ================= TYPES ================= */
 
 type LeaveStatus = "PENDING" | "APPROVED" | "REJECTED";
@@ -54,7 +55,6 @@ const initialLeaves: LeaveRequest[] = [
 
 const LeaveRequests = () => {
   const [leaves, setLeaves] = useState<LeaveRequest[]>(initialLeaves);
-
   const updateStatus = (id: string, status: LeaveStatus) => {
     setLeaves((prev) => prev.map((l) => (l.id === id ? { ...l, status } : l)));
   };
