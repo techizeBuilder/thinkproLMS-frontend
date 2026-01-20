@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import { MoreVertical } from "lucide-react";
 import AddGoalModal from "./AddGoalModal";
+import Loader from "../../Loader";
 
 const API_BASE = import.meta.env.VITE_API_URL;
 
@@ -32,6 +33,7 @@ export default function Goals() {
 
   const [openDelete, setOpenDelete] = useState(false);
   const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [loading,setLoading]=useState(true);
 
   useEffect(() => {
     fetchGoals();
@@ -43,6 +45,7 @@ export default function Goals() {
         headers: { Authorization: `Bearer ${token}` },
       });
       setGoals(res.data);
+      setLoading(false);
     } catch (err) {
       console.error("Failed to fetch goals", err);
     }
@@ -63,7 +66,7 @@ export default function Goals() {
       console.error("Delete failed", err);
     }
   };
-
+  if(loading)return<Loader/>
   return (
     <div className="space-y-6">
       {/* Header */}
