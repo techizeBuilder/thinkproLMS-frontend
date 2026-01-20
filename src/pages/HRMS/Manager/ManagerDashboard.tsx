@@ -11,6 +11,7 @@ import {
   Receipt,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import Loader from "../Loader";
 
 const API_BASE = import.meta.env.VITE_API_URL;
 
@@ -89,11 +90,10 @@ export default function ManagerDashboard() {
       const teamCount = teamRes.data.length;
 
       // 🔹 TODAY ATTENDANCE
-      const todayAttendance = attendanceRes.data.filter(
-        (a: any) => a.date === today
-      );
+      const present = attendanceRes.data.totalTodayPresent;
+     
 
-      const present = todayAttendance.filter((a: any) => a.punchIn).length;
+      
 
       const approvedLeavesToday = leaveRes.data.filter((lv: any) => {
         const from = lv.fromDate.split("T")[0];
@@ -135,7 +135,7 @@ export default function ManagerDashboard() {
     }
   };
 
-  if (loading) return <div className="p-6">Loading...</div>;
+  if (loading) return <Loader/>;
   if (!stats) return <div className="p-6 text-red-500">Failed</div>;
 
   return (

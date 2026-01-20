@@ -55,6 +55,8 @@ export default function CRMSummaryPage() {
   const [executives, setExecutives] = useState<Array<{ _id: string; name: string }>>([]);
 
   const debouncedSearch = useDebounce(search, 400);
+  const debouncedDistrict = useDebounce(districtFilter, 500);
+
 
   const fetchSummary = async () => {
     try {
@@ -62,7 +64,7 @@ export default function CRMSummaryPage() {
       const res = await leadService.getPhaseSummary({
         search: debouncedSearch || undefined,
         state: stateFilter && stateFilter !== "all" ? stateFilter : undefined,
-        district: districtFilter || undefined,
+        district: debouncedDistrict || undefined,
         city: cityFilter || undefined,
         phase: phaseFilter !== "all" ? phaseFilter : undefined,
         quality: qualityFilter !== "all" ? qualityFilter : undefined,
@@ -96,7 +98,7 @@ export default function CRMSummaryPage() {
   }, [
     debouncedSearch,
     stateFilter,
-    districtFilter,
+    debouncedDistrict,
     cityFilter,
     phaseFilter,
     qualityFilter,

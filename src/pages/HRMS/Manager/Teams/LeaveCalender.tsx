@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { CalendarOff } from "lucide-react";
+import Loader from "../../Loader";
 
 const API_BASE = import.meta.env.VITE_API_URL;
 
@@ -43,7 +44,7 @@ const LeaveCalendar = () => {
 
     fetchLeaves();
   }, []);
-
+ if(loading)return<Loader/>
   return (
     <div className="p-6">
       <Card>

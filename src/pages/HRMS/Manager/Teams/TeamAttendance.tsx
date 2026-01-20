@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import axios from "axios";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { ChevronLeft, ChevronRight, CheckCircle, XCircle } from "lucide-react";
+import Loader from "../../Loader";
 
 const API_BASE = import.meta.env.VITE_API_URL;
 
@@ -33,6 +34,7 @@ const TeamAttendance = () => {
   const [holidays, setHolidays] = useState<Holiday[]>([]);
   const [month, setMonth] = useState(today.getMonth());
   const [year, setYear] = useState(today.getFullYear());
+  const [loading,setLoading]=useState(true);
 
   /* ================= FETCH TEAM ATTENDANCE ================= */
   useEffect(() => {
@@ -43,6 +45,7 @@ const TeamAttendance = () => {
       });
 
       setAttendance(res.data || []);
+      setLoading(false);
 
      const uniqueUsers: User[] = Array.from(
        new Map(
@@ -116,7 +119,7 @@ const TeamAttendance = () => {
       setYear((y) => y + 1);
     } else setMonth((m) => m + 1);
   };
-
+  if(loading)return<Loader/>;
   return (
     <div className="p-6">
       <Card>

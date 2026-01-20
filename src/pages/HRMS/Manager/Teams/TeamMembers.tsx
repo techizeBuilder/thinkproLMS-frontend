@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import Loader from "../../Loader";
 
 const API_BASE = import.meta.env.VITE_API_URL;
 
@@ -50,7 +51,7 @@ export default function TeamMembers() {
       setLoading(false);
     }
   };
-
+  if(loading)return<Loader/>
   return (
     <div className="p-6">
       <Card>

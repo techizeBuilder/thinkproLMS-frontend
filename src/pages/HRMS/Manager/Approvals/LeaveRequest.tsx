@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import LeaveViewModal from "./LeaveViewModal";
+import Loader from "../../Loader";
 const LeaveRequest = () => {
   const API_BASE = import.meta.env.VITE_API_URL;
   const token = localStorage.getItem("token");
@@ -9,6 +10,7 @@ const LeaveRequest = () => {
   const [leaves, setLeaves] = useState<any[]>([]);
   const [viewOpen, setViewOpen] = useState(false);
   const [selectedLeave, setSelectedLeave] = useState<any>(null);
+  const [loading,setLoading]=useState(true);
 
 
   /* ================= FETCH ALL LEAVES ================= */
@@ -18,6 +20,7 @@ const LeaveRequest = () => {
         headers: { Authorization: `Bearer ${token}` },
       });
       setLeaves(res.data || []);
+      setLoading(false);
     } catch (error) {
       console.error("Failed to fetch leave requests", error);
     }
@@ -49,7 +52,7 @@ const LeaveRequest = () => {
     if (status === "REJECTED") return "text-red-600";
     return "text-yellow-600";
   };
-
+  if(loading)return<Loader/>;
   return (
     <div className="p-4">
       <h2 className="text-xl font-semibold mb-4">Leave Requests</h2>
