@@ -10,6 +10,7 @@ import {
   CalendarDays,
   Clock,
 } from "lucide-react";
+import Loader from "../../Loader";
 
 const API = import.meta.env.VITE_API_URL;
 
@@ -79,6 +80,8 @@ export default function AttendanceCalendar() {
   const year = currentMonth.getFullYear();
   const month = currentMonth.getMonth();
 
+
+
   const firstDay = new Date(year, month, 1);
   const lastDay = new Date(year, month + 1, 0);
 
@@ -90,6 +93,8 @@ export default function AttendanceCalendar() {
 
   const normalizeDate = (date: string | Date) =>
     new Date(date).toISOString().split("T")[0];
+  
+  const today = normalizeDate(new Date());
 
 
   const isHoliday = (date: string) =>
@@ -99,8 +104,11 @@ export default function AttendanceCalendar() {
 
   /* ================= STATUS LOGIC ================= */
 
-const getDayStatus = (date: string): AttendanceStatus => {
+const getDayStatus = (date: string): AttendanceStatus | null => {
   const d = new Date(date);
+
+  // 👉 FUTURE DATE → kuch bhi mat dikhao
+  if (date > today) return null;
 
   // Sunday
   if (d.getDay() === 0) return "WEEKEND";
@@ -114,6 +122,7 @@ const getDayStatus = (date: string): AttendanceStatus => {
 
   return record.status || "PRESENT";
 };
+
 
 
   const statusColor: Record<AttendanceStatus, string> = {
@@ -134,7 +143,7 @@ const getDayStatus = (date: string): AttendanceStatus => {
   };
 
   /* ================= UI ================= */
-if(loading) return <div className="p-4 md:p-6 space-y-6">Loading...</div>;
+if(loading) return <Loader/>;
 {
   return (
     <div className="p-4 md:p-6 space-y-6">
@@ -189,17 +198,20 @@ if(loading) return <div className="p-4 md:p-6 space-y-6">Loading...</div>;
             )}-${String(day).padStart(2, "0")}`;
 
             const status = getDayStatus(date);
+            const safeStatus = status ?? "WEEKEND";
             const record = getAttendanceByDate(date);
 
             return (
               <div
                 key={date}
-                className={`rounded-lg p-2 min-h-[90px] border ${statusColor[status]}`}
+                className={`rounded-lg p-2 min-h-[90px] border ${
+                  status ? statusColor[safeStatus] : "bg-gray-50 text-gray-400"
+                }`}
               >
                 <div className="text-sm font-semibold">{day}</div>
 
                 <div className="mt-1 text-xs capitalize">
-                  {status.replace("_", " ")}
+                  {status ? status.replace("_", " ") : ""}
                 </div>
 
                 {record && (

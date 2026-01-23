@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import AddAppraisalModal from "./AddAppraisalModal";
+import Loader from "../../Loader";
 
 const API_BASE = import.meta.env.VITE_API_URL;
 
@@ -23,6 +24,7 @@ export default function Appraisals() {
   const [open, setOpen] = useState(false);
   const [editData, setEditData] = useState<Appraisal | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [loading,setLoading]=useState(true);
 
   /* ================= FETCH ================= */
   const fetchAppraisals = async () => {
@@ -30,6 +32,7 @@ export default function Appraisals() {
       headers: { Authorization: `Bearer ${token}` },
     });
     setData(res.data || []);
+    setLoading(false);
   };
 
   useEffect(() => {
@@ -45,7 +48,7 @@ export default function Appraisals() {
     setDeleteId(null);
     fetchAppraisals();
   };
-
+  if(loading)return <Loader/>;
   /* ================= UI ================= */
   return (
     <div className="p-4 max-w-7xl mx-auto">

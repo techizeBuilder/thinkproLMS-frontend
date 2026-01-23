@@ -11,6 +11,7 @@ import {
   Clock,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import Loader from "../Loader";
 
 /* ================= TYPES ================= */
 
@@ -73,15 +74,14 @@ export default function FinanceDashboard() {
       ]);
 
       // ✅ REAL DATA ARRAYS
-      const payrolls = payrollRes.data.data || [];
-      const expenses = expenseRes.data.data || [];
-      const travels = travelRes.data.data || [];
+      const payrolls = payrollRes.data || [];
+      const expenses = expenseRes.data || [];
+      const travels = travelRes.data || [];
 
       /* ================= PAYROLL ================= */
       const payrollPaid = payrolls.filter(
         (p: any) => p.status === "Paid"
       ).length;
-
       const payrollProcessed = payrolls.filter(
         (p: any) => p.status === "Processed"
       ).length;
@@ -128,7 +128,7 @@ export default function FinanceDashboard() {
     }
   };
 
-  if (loading) return <div className="p-6">Loading...</div>;
+  if (loading) return <Loader/>;
   if (!stats) return <div className="p-6 text-red-500">Failed</div>;
 
   return (

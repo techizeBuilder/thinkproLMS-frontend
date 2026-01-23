@@ -24,7 +24,9 @@ import {
   Receipt,
   Target,
   FileText,
-  LayoutDashboard
+  LayoutDashboard,
+  LogOut,
+  UserCog
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -175,9 +177,21 @@ export default function HRMSEmployeeLayout({ children }: Props) {
               </SidebarNavItem>
               <SidebarNavItem
                 to="/hrms/employee/request/resign"
-                icon={ClipboardList}
+                icon={LogOut}
               >
-                My Resign Request
+                My Resign Requests
+              </SidebarNavItem>
+              <SidebarNavItem
+                to="/hrms/employee/request/overtime"
+                icon={Clock}
+              >
+                Overtime Requests
+              </SidebarNavItem>
+              <SidebarNavItem
+                to="/hrms/employee/request/profileUpdate"
+                icon={UserCog}
+              >
+                Profile Update Requests
               </SidebarNavItem>
             </SidebarNav>
           </SidebarGroup>
@@ -247,7 +261,7 @@ export default function HRMSEmployeeLayout({ children }: Props) {
               size={isCollapsed ? "icon" : "default"}
               className={cn(
                 "w-full justify-start text-[var(--sidebar-text-muted)] hover:text-[var(--sidebar-foreground)] hover:bg-[var(--sidebar-hover-bg)]",
-                isCollapsed && "justify-center"
+                isCollapsed && "justify-center",
               )}
               isCollapsed={isCollapsed}
             />

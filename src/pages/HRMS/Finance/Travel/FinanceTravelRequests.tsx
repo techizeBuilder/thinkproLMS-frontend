@@ -1,12 +1,14 @@
 /** @format */
 import { useEffect, useState } from "react";
 import axios from "axios";
+import Loader from "../../Loader";
 
 const API_BASE = import.meta.env.VITE_API_URL;
 
 export default function FinanceTravelRequest() {
   const [requests, setRequests] = useState<any[]>([]);
   const [viewData, setViewData] = useState<any>(null);
+  const [loading,setLoading]=useState(true);
 
   const token = localStorage.getItem("token");
 
@@ -17,6 +19,7 @@ export default function FinanceTravelRequest() {
       },
     });
     setRequests(res.data || []);
+    setLoading(false);
   };
 
   useEffect(() => {
@@ -41,7 +44,7 @@ export default function FinanceTravelRequest() {
     if (status === "REJECTED") return "bg-red-100 text-red-700";
     return "bg-yellow-100 text-yellow-700";
   };
-
+  if(loading)return<Loader/>;
   return (
     <div className="p-4">
       <h2 className="text-xl font-semibold mb-4">Travel Requests</h2>

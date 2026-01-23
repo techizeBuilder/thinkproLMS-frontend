@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import ApplyLeaveModal from "./ApplyLeaveModal";
 import axios from "axios";
+import Loader from "../../Loader";
 
 const Leave = () => {
   const API_BASE = import.meta.env.VITE_API_URL;
@@ -13,6 +14,7 @@ const Leave = () => {
 
   const [deleteModal, setDeleteModal] = useState(false);
   const [deleteLeave, setDeleteLeave] = useState<any>(null);
+  const [loading,setLoading]=useState(true);
 
   /* ================= FETCH LEAVES ================= */
 
@@ -25,6 +27,7 @@ const Leave = () => {
       });
 
       setLeaves(res.data || []);
+      setLoading(false);
     } catch (error) {
       console.error("Failed to fetch leaves", error);
       setLeaves([]);
@@ -64,7 +67,7 @@ const Leave = () => {
       console.error("Failed to delete leave", error);
     }
   };
-
+  if(loading)return<Loader/>;
   return (
     <div className="p-4">
       <div className="flex justify-between items-center mb-4">

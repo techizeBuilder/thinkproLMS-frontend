@@ -3,6 +3,7 @@
 import { useEffect, useState, useRef } from "react";
 import axios from "axios";
 import { Play,  LogIn, LogOut, Coffee,  } from "lucide-react";
+import Loader from "../../Loader";
 
 const API = import.meta.env.VITE_API_URL;
 
@@ -26,6 +27,7 @@ export default function MarkAttendance() {
 
   const [isWorking, setIsWorking] = useState(false);
   const [onBreak, setOnBreak] = useState(false);
+  const [loading,setLoading]=useState(true);
 
   const workTimer = useRef<NodeJS.Timeout | null>(null);
   const breakTimer = useRef<NodeJS.Timeout | null>(null);
@@ -92,6 +94,7 @@ export default function MarkAttendance() {
     }));
 
     setHistory(records);
+    setLoading(false);
 
     const today = new Date().toISOString().split("T")[0];
     const todayRecord = res.data.find((a: any) => a.date === today);
@@ -196,6 +199,7 @@ const punchIn = async () => {
     );
   };
 
+  if(loading)return<Loader/>;
   /* ================= UI ================= */
 
   return (

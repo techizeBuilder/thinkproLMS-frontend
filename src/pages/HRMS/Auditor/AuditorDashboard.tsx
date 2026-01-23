@@ -11,6 +11,7 @@ import {
   FileText,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import Loader from "../Loader";
 
 const API_BASE = import.meta.env.VITE_API_URL;
 
@@ -78,7 +79,7 @@ export default function AuditorDashboard() {
 
       const totalEmployees = userRes.data.length;
 
-      const present = attendanceRes.data.filter(
+      const present = attendanceRes.data.attendance.filter(
         (a: any) => a.punchIn && a.punchOut
       ).length;
 
@@ -114,7 +115,7 @@ export default function AuditorDashboard() {
     }
   };
 
-  if (loading) return <div className="p-6">Loading...</div>;
+  if (loading) return <Loader/>;
   if (!stats) return <div className="p-6 text-red-500">Failed to load</div>;
 
   return (

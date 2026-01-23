@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import FeedbackModal from "./FeedbackModal";
 import SelfAppraisalViewModal from "./SelfAppraisalViewModal";
+import Loader from "../../Loader";
 
 const API = import.meta.env.VITE_API_URL;
 
@@ -36,18 +37,19 @@ export default function FeedbackAndRatings() {
   const [list, setList] = useState<any[]>([]);
   const [selected, setSelected] = useState<any>(null);
   const [viewSelf, setViewSelf] = useState<any>(null);
-
+  const [loading,setLoading]=useState(true);
   const fetchList = async () => {
     const res = await axios.get(`${API}/feedback/pending`, {
       headers: { Authorization: `Bearer ${token}` },
     });
     setList(res.data || []);
+    setLoading(false);
   };
 
   useEffect(() => {
     fetchList();
   }, []);
-
+  if(loading)return<Loader/>;
   return (
     <div className="p-6 space-y-6">
       <h1 className="text-2xl font-semibold">Ratings & Feedback</h1>

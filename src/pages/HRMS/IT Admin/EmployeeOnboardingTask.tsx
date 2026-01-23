@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import axios from "axios";
+import Loader from "../Loader";
 
 const API = import.meta.env.VITE_API_URL;
 
@@ -88,7 +89,7 @@ export default function EmployeeOnboardingTask() {
         return "";
     }
   };
-
+  if(loading)return<Loader/>;
   // ================= UI =================
   return (
     <div className="p-6">

@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import { MoreVertical } from "lucide-react";
 import ViewPayrollModal from "../../Admin/Payroll/ViewPayrollModal";
+import Loader from "../../Loader";
 
 const API_BASE = import.meta.env.VITE_API_URL;
 
@@ -35,6 +36,7 @@ const FinancePayroll = () => {
   const token = localStorage.getItem("token");
   const currentMonth = new Date().toISOString().slice(0, 7);
   const [month, setMonth] = useState(currentMonth);
+  const [loading,setLoading]=useState(true);
 
   /* ================= FETCH PAYROLL (ONLY HR RUN DATA) ================= */
   const fetchPayrollFromServer = async () => {
@@ -54,6 +56,7 @@ const FinancePayroll = () => {
       }));
 
       setPayroll(mapped);
+      setLoading(false);
     } catch (err) {
       console.error(err);
     }
@@ -79,6 +82,7 @@ const FinancePayroll = () => {
       setPayroll((prev) =>
         prev.map((p) => (p.payrollId === payrollId ? { ...p, status } : p))
       );
+      setLoading(false);
     } catch (error) {
       console.error(error);
       alert("Status update failed");
@@ -104,7 +108,7 @@ const FinancePayroll = () => {
     }
   };
 
-
+  if(loading)return<Loader/>;
   /* ================= UI ================= */
   return (
     <div className="p-6">

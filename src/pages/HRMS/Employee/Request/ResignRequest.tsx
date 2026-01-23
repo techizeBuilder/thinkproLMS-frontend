@@ -124,7 +124,7 @@ export default function ResignationRequest() {
             resetState();
             setOpen(true);
           }}
-          className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
+          className="flex items-center gap-2 bg-primary text-white px-4 py-2 rounded-lg"
         >
           <Plus size={18} />
           Add Request
@@ -160,8 +160,8 @@ export default function ResignationRequest() {
                       item.status === "PENDING"
                         ? "bg-yellow-100 text-yellow-700"
                         : item.status === "APPROVED"
-                        ? "bg-green-100 text-green-700"
-                        : "bg-red-100 text-red-700"
+                          ? "bg-green-100 text-green-700"
+                          : "bg-red-100 text-red-700"
                     }`}
                   >
                     {item.status}
@@ -244,8 +244,14 @@ export default function ResignationRequest() {
 
       {/* ADD / VIEW / EDIT MODAL */}
       {open && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-white w-full max-w-xl rounded-xl p-6 relative">
+        <div
+          className="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
+          onClick={() => setOpen(false)} // ✅ OUTSIDE CLICK CLOSE
+        >
+          <div
+            className="bg-white w-full max-w-xl rounded-xl p-6 relative"
+            onClick={(e) => e.stopPropagation()} // ✅ INSIDE CLICK SAFE
+          >
             <button
               onClick={() => setOpen(false)}
               className="absolute top-4 right-4"
@@ -257,8 +263,8 @@ export default function ResignationRequest() {
               {viewItem
                 ? "View Resignation"
                 : editItem
-                ? "Edit Resignation"
-                : "Add Resignation"}
+                  ? "Edit Resignation"
+                  : "Add Resignation"}
             </h2>
 
             <div className="grid grid-cols-1 gap-4">
@@ -339,7 +345,7 @@ export default function ResignationRequest() {
                 </button>
                 <button
                   onClick={handleSubmit}
-                  className="bg-blue-600 text-white px-4 py-2 rounded"
+                  className="bg-primary text-white px-4 py-2 rounded"
                 >
                   {editItem ? "Update" : "Submit"}
                 </button>

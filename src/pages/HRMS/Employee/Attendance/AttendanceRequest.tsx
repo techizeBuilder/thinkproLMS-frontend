@@ -2,13 +2,15 @@
 
 import { useEffect, useState } from "react";
 import axios from "axios";
-import { Plus, Eye, Edit, Trash2,MoreVertical } from "lucide-react";
+import { Plus, Eye, Edit, Trash2, MoreVertical } from "lucide-react";
 import AttendanceRequestModal from "./AttendanceRequestModel";
+import Loader from "../../Loader";
 
 const API = import.meta.env.VITE_API_URL;
 
 export default function AttendanceRequest() {
   const token = localStorage.getItem("token");
+
   const api = axios.create({
     baseURL: API,
     headers: { Authorization: `Bearer ${token}` },
@@ -16,21 +18,24 @@ export default function AttendanceRequest() {
 
   const [requests, setRequests] = useState<any[]>([]);
   const [open, setOpen] = useState(false);
-  const [mode, setMode] = useState<any>("ADD");
+  const [mode, setMode] = useState<"ADD" | "EDIT" | "VIEW" | "DELETE">("ADD");
   const [form, setForm] = useState<any>({});
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [openMenu, setOpenMenu] = useState<string | null>(null);
+  const [loading,setLoading]=useState(true);
 
-
+  /* ---------- fetch ---------- */
   const fetchRequests = async () => {
     const res = await api.get("/attendance-request/me");
     setRequests(res.data);
+    setLoading(false);
   };
 
   useEffect(() => {
     fetchRequests();
   }, []);
 
+  /* ---------- open modal ---------- */
   const openModal = (type: any, data?: any) => {
     setMode(type);
     setSelectedId(data?._id || null);
@@ -38,18 +43,26 @@ export default function AttendanceRequest() {
     setOpen(true);
   };
 
+  /* ---------- submit ---------- */
   const submit = async () => {
     if (mode === "ADD") {
       await api.post("/attendance-request", form);
-    } else if (mode === "EDIT") {
+    }
+
+    if (mode === "EDIT") {
       await api.put(`/attendance-request/${selectedId}`, form);
-    } else if (mode === "DELETE") {
+    }
+
+    if (mode === "DELETE") {
       await api.delete(`/attendance-request/${selectedId}`);
     }
+
     setOpen(false);
+    setSelectedId(null);
+    setForm({});
     fetchRequests();
   };
-
+  if(loading)return<Loader/>;
   return (
     <div className="p-6 space-y-4">
       {/* HEADER */}
@@ -58,13 +71,12 @@ export default function AttendanceRequest() {
 
         <button
           onClick={() => openModal("ADD")}
-          className="bg-orange-500 text-white px-4 py-2 rounded-lg flex gap-2"
+          className="bg-orange-500 text-white px-4 py-2 rounded-lg flex gap-2 items-center"
         >
           <Plus size={16} /> Add Request
         </button>
       </div>
 
-      {/* TABLE */}
       {/* TABLE */}
       <div className="bg-white rounded-lg shadow min-h-[calc(100vh-180px)] overflow-x-auto">
         <table className="w-full text-sm text-center">
@@ -74,7 +86,7 @@ export default function AttendanceRequest() {
               <th className="px-4 py-3">Date</th>
               <th className="px-4 py-3">Request Type</th>
               <th className="px-4 py-3">Status</th>
-              <th className="px-4 py-3 text-center">Action</th>
+              <th className="px-4 py-3">Action</th>
             </tr>
           </thead>
 
@@ -103,8 +115,8 @@ export default function AttendanceRequest() {
                       r.status === "PENDING"
                         ? "bg-yellow-100 text-yellow-700"
                         : r.status === "APPROVED"
-                        ? "bg-green-100 text-green-700"
-                        : "bg-red-100 text-red-700"
+                          ? "bg-green-100 text-green-700"
+                          : "bg-red-100 text-red-700"
                     }`}
                   >
                     {r.status}
@@ -112,7 +124,7 @@ export default function AttendanceRequest() {
                 </td>
 
                 {/* ACTION */}
-                <td className="px-4 py-3 text-center relative">
+                <td className="px-4 py-3 relative">
                   <span
                     className="cursor-pointer inline-block"
                     onClick={() =>

@@ -39,8 +39,8 @@ const AddExpenseModal = ({
         })
         .then((res) =>
           setTravelRequests(
-            (res.data || []).filter((t: any) => t.status === "APPROVED")
-          )
+            (res.data || []).filter((t: any) => t.status === "APPROVED"),
+          ),
         );
     }
   }, [form.expenseType]);
@@ -56,7 +56,6 @@ const AddExpenseModal = ({
     if (receipt) fd.append("receipt", receipt);
 
     if (isEdit) {
-      // UPDATE
       await axios.put(`${API_BASE}/expenses/${expense._id}/status`, fd, {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -64,7 +63,6 @@ const AddExpenseModal = ({
         },
       });
     } else {
-      // CREATE
       await axios.post(`${API_BASE}/expenses`, fd, {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -80,13 +78,20 @@ const AddExpenseModal = ({
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-      <div className="bg-white w-full max-w-lg rounded-xl p-6">
+    <div
+      className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 px-4"
+      onClick={onClose}
+    >
+      <div
+        className="bg-white w-full max-w-lg rounded-xl p-6 max-h-[90vh] flex flex-col"
+        onClick={(e) => e.stopPropagation()}
+      >
         <h3 className="text-lg font-semibold mb-4">
           {isView ? "View Expense" : isEdit ? "Edit Expense" : "Add Expense"}
         </h3>
 
-        <div className="space-y-4">
+        {/* SCROLLABLE CONTENT */}
+        <div className="space-y-4 overflow-y-auto pr-1 flex-1">
           {/* Expense Type */}
           <div>
             <label className="text-sm font-medium">Expense Type</label>
@@ -203,7 +208,7 @@ const AddExpenseModal = ({
         </div>
 
         {/* ACTIONS */}
-        <div className="flex justify-end gap-3 mt-6">
+        <div className="flex justify-end gap-3 mt-6 pt-4 border-t">
           <button
             onClick={onClose}
             className="px-4 py-2 border rounded-md text-sm"

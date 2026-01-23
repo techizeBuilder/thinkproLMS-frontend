@@ -13,6 +13,7 @@ import {
   Pencil,
   X,
 } from "lucide-react";
+import Loader from "../../Loader";
 
 const API = import.meta.env.VITE_API_URL;
 
@@ -87,7 +88,7 @@ export default function PersonalInformation() {
   }, []);
 
   if (loading)
-    return <div className="p-6 text-gray-500">Loading profile...</div>;
+    return <Loader/>
   if (!user) return <div className="p-6 text-red-500">User not found</div>;
 
   const initials = user.name

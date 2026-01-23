@@ -1,6 +1,7 @@
 /** @format */
 import { useEffect, useState } from "react";
 import axios from "axios";
+import Loader from "../Loader";
 
 const API_BASE = import.meta.env.VITE_API_URL;
 
@@ -34,7 +35,7 @@ const EmployeeSalaryStructure = () => {
   }, []);
 
   if (loading) {
-    return <p className="p-6 text-gray-500">Loading salary structure...</p>;
+    return <Loader/>;
   }
 
   if (!structure) {
@@ -63,7 +64,7 @@ const EmployeeSalaryStructure = () => {
   );
 
   const netSalary = totalEarnings - totalDeductions;
-
+  if(loading)return<Loader/>;
   /* ================= UI ================= */
   return (
     <div className="p-4 max-w-4xl">

@@ -15,6 +15,7 @@ import {
   Building2,
   Search,
 } from "lucide-react";
+import Loader from "../../Loader";
 
 const API = import.meta.env.VITE_API_URL;
 
@@ -127,7 +128,7 @@ export default function EmployeePolicies() {
   );
 
   if (!user) {
-    return <div className="p-6 text-gray-500">Loading policies...</div>;
+    return <Loader/>;
   }
 
   /* ================= UI ================= */

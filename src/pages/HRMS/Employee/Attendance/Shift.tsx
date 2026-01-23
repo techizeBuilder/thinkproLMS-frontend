@@ -5,6 +5,7 @@ import axios from "axios";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { CalendarDays, Clock } from "lucide-react";
+import Loader from "../../Loader";
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL;
 
@@ -73,7 +74,7 @@ export default function ShiftSchedule() {
         return <Badge>NA</Badge>;
     }
   };
-
+  if(loading)return<Loader/>;
   return (
     <div className="p-4 md:p-6 max-w-6xl mx-auto">
       <Card className="shadow-xl rounded-2xl">
