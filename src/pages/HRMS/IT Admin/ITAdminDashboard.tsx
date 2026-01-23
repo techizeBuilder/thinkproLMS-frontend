@@ -11,6 +11,7 @@ import {
   Laptop,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import Loader from "../Loader";
 
 const API = import.meta.env.VITE_API_URL;
 
@@ -105,7 +106,7 @@ export default function ITAdminDashboard() {
     (o) => o.status === "PENDING"
   ).length;
 
-  if (loading) return <div className="p-6">Loading IT Dashboard...</div>;
+  if (loading) return <Loader/>;
 
   return (
     <div className="p-6 bg-gray-50 min-h-screen space-y-8">

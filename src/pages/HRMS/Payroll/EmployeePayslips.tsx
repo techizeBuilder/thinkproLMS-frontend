@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import ViewPayslipModal from "./ViewPayslipModal";
 import { Download, Eye, Building2 } from "lucide-react";
+import Loader from "../Loader";
 
 const API_BASE = import.meta.env.VITE_API_URL;
 
@@ -16,6 +17,7 @@ const EmployeePayslips = () => {
   const [year, setYear] = useState("");
   const [selected, setSelected] = useState<any>(null);
   const [company, setCompany] = useState("");
+  const [loading,setLoading]=useState(true);
 
   /* ================= FETCH ================= */
   const fetchPayslips = async () => {
@@ -24,6 +26,7 @@ const EmployeePayslips = () => {
     });
     setPayslips(res.data || []);
     setFiltered(res.data || []);
+    setLoading(false);
   };
 
   const fetchCompany = async () => {
@@ -78,7 +81,7 @@ const EmployeePayslips = () => {
     link.click();
     link.remove();
   };
-
+ if(loading)return <Loader/>;
   /* ================= UI ================= */
   return (
     <div className="p-4">

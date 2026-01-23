@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { Eye, CheckCircle } from "lucide-react";
+import Loader from "../../Loader";
 
 type PayrollStatus = "Draft" | "Processed" | "Paid" | "Rejected";
 
@@ -109,7 +110,7 @@ const SalaryDisbursement = () => {
       alert("Failed to update status");
     }
   };
-
+  if(loading)return<Loader/>
   /* ================= UI ================= */
   return (
     <div className="p-6">

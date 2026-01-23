@@ -1,6 +1,7 @@
 /** @format */
 import { useEffect, useMemo, useState } from "react";
 import axios from "axios";
+import Loader from "../Loader";
 
 const API = import.meta.env.VITE_API_URL;
 
@@ -94,7 +95,7 @@ export default function AuditorLeave() {
   }, [filteredLeaves]);
 
   if (loading) {
-    return <p className="p-6">Loading leave records...</p>;
+    return <Loader/>;
   }
 
   return (

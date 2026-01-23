@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { X } from "lucide-react";
+import Loader from "../Loader";
 
 const API = import.meta.env.VITE_API_URL;
 
@@ -28,6 +29,7 @@ export default function SoftwareAndLicenseAssignment() {
   const [users, setUsers] = useState<UserType[]>([]);
   const [assignments, setAssignments] = useState<AssignmentType[]>([]);
   const [open, setOpen] = useState(false);
+  const [loading,setLoading]=useState(true);
 
   /* Fetch Users */
   const fetchUsers = async () => {
@@ -47,6 +49,7 @@ export default function SoftwareAndLicenseAssignment() {
       },
     });
     setAssignments(res.data);
+    setLoading(false);
   };
 
   useEffect(() => {
@@ -59,7 +62,7 @@ export default function SoftwareAndLicenseAssignment() {
     await axios.patch(`${API}/license/revoke/${id}`);
     fetchAssignments();
   };
-
+  if(loading)return<Loader/>;
   return (
     <div className="p-6">
       {/* HEADER */}

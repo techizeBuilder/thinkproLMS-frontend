@@ -1,6 +1,7 @@
 /** @format */
 import { useEffect, useState } from "react";
 import axios from "axios";
+import Loader from "../../Loader";
 
 const API_BASE = import.meta.env.VITE_API_URL;
 
@@ -24,6 +25,7 @@ const LeaveBalance = () => {
 
   const [leaveTypes, setLeaveTypes] = useState<LeaveType[]>([]);
   const [leaves, setLeaves] = useState<Leave[]>([]);
+  const [loading,setLoading]=useState(true);
 
   /* ================= FETCH ================= */
 
@@ -44,6 +46,7 @@ const LeaveBalance = () => {
       headers: { Authorization: `Bearer ${token}` },
     });
     setLeaves(res.data || []);
+    setLoading(false);
   };
 
   /* ================= HELPERS ================= */
@@ -61,7 +64,7 @@ const LeaveBalance = () => {
     new Date(date).toLocaleDateString("en-GB");
 
   /* ================= UI ================= */
-
+  if(loading)return<Loader/>;
   return (
     <div className="p-5 space-y-6">
       {/* HEADER */}

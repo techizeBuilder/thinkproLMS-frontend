@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import AccountViewModal from "./AccountViewModal";
+import Loader from "../Loader";
 
 const API = import.meta.env.VITE_API_URL;
 
@@ -22,6 +23,7 @@ export default function AccountManagement() {
   const [users, setUsers] = useState<UserType[]>([]);
   const [selectedUser, setSelectedUser] = useState<UserType | null>(null);
   const [mode, setMode] = useState<"view" | "edit">("view");
+  const [loading,setLoading]=useState(true);
 
   const fetchUsers = async () => {
     const res = await axios.get(`${API}/users`, {
@@ -30,12 +32,13 @@ export default function AccountManagement() {
       },
     });
     setUsers(res.data);
+    setLoading(false);
   };
 
   useEffect(() => {
     fetchUsers();
   }, []);
-
+  if(loading)return<Loader/>;
   return (
     <div className="p-6">
       <h1 className="text-2xl font-bold mb-6">Account Management</h1>

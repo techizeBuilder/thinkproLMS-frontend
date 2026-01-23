@@ -1,6 +1,7 @@
 /** @format */
 import { useEffect, useState } from "react";
 import axios from "axios";
+import Loader from "../../Loader";
 
 const API_BASE = import.meta.env.VITE_API_URL;
 
@@ -9,6 +10,7 @@ const STATUS_OPTIONS = ["PENDING", "APPROVED", "REJECTED"];
 export default function FinanceExpenseRequest() {
   const [expenses, setExpenses] = useState<any[]>([]);
   const [selectedExpense, setSelectedExpense] = useState<any>(null);
+  const [loading,setLoading]=useState(true);
 
   const token = localStorage.getItem("token");
 
@@ -17,6 +19,7 @@ export default function FinanceExpenseRequest() {
       headers: { Authorization: `Bearer ${token}` },
     });
     setExpenses(res.data || []);
+    setLoading(false);
   };
 
   useEffect(() => {
@@ -44,7 +47,7 @@ export default function FinanceExpenseRequest() {
         return "bg-yellow-100 text-yellow-700 border-yellow-300";
     }
   };
-
+ if(loading)return<Loader/>;
   return (
     <div className="p-4">
       <h2 className="text-xl font-semibold mb-4">Expense Requests</h2>

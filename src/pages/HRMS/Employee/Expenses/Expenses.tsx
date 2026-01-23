@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import AddExpenseModal from "./AddExpenseModal";
+import Loader from "../../Loader";
 
 const API_BASE = import.meta.env.VITE_API_URL;
 
@@ -14,13 +15,14 @@ const Expense = () => {
   const [selectedExpense, setSelectedExpense] = useState<any>(null);
   const [mode, setMode] = useState<"view" | "edit" | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
-
+  const [loading,setLoading]=useState(true);
   /* ================= FETCH ================= */
   const fetchExpenses = async () => {
     const res = await axios.get(`${API_BASE}/expenses/me`, {
       headers: { Authorization: `Bearer ${token}` },
     });
     setExpenses(res.data || []);
+    setLoading(false);
   };
 
   useEffect(() => {
@@ -35,7 +37,7 @@ const Expense = () => {
     setDeleteId(null);
     fetchExpenses();
   };
-
+  if(loading)return<Loader/>;
   return (
     <div className="p-4">
       {/* HEADER */}

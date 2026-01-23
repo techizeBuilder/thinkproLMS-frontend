@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { Eye } from "lucide-react";
+import Loader from "../../Loader";
 
 const API_BASE = import.meta.env.VITE_API_URL as string;
 
@@ -111,7 +112,7 @@ const FinanceReimbursementRequests = () => {
   };
 
   /* ================= UI ================= */
-
+ if(loading)return<Loader/>;
   return (
     <div className="p-6 space-y-10">
       <div>

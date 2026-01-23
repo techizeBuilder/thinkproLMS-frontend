@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import AddTravelRequestModal from "./AddTravelRequestModal";
-
+import UploadReceiptModal from "./UploadReciptModal";
 const API_BASE = import.meta.env.VITE_API_URL;
 
 const TravelRequests = () => {
@@ -12,6 +12,8 @@ const TravelRequests = () => {
   const [open, setOpen] = useState(false);
   const [selected, setSelected] = useState<any>(null);
   const [deleteItem, setDeleteItem] = useState<any>(null);
+  const [receiptModal, setReceiptModal] = useState<any>(null);
+
 
   /* ================= FETCH ================= */
   const fetchRequests = async () => {
@@ -111,6 +113,16 @@ const TravelRequests = () => {
                       >
                         View / Edit
                       </button>
+                      {r.status === "APPROVED" && (
+                        <button
+                          className="block w-full text-left px-3 py-2 text-xs hover:bg-gray-50"
+                          onClick={() => setReceiptModal(r)}
+                        >
+                          {r.receiptUrl
+                            ? "View Receipt"
+                            : "Upload Receipt"}
+                        </button>
+                      )}
                       <button
                         className="block w-full text-left px-3 py-2 text-xs text-red-600 hover:bg-gray-50"
                         onClick={() => setDeleteItem(r)}
@@ -140,6 +152,15 @@ const TravelRequests = () => {
           open={open}
           data={selected}
           onClose={() => setOpen(false)}
+          onSuccess={fetchRequests}
+        />
+      )}
+
+      {receiptModal && (
+        <UploadReceiptModal
+          open={true}
+          travel={receiptModal}
+          onClose={() => setReceiptModal(null)}
           onSuccess={fetchRequests}
         />
       )}

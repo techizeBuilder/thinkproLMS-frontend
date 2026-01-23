@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { FileText, Upload, Eye, CheckCircle, AlertCircle } from "lucide-react";
+import Loader from "../../Loader";
 
 const API = import.meta.env.VITE_API_URL;
 const ViewAPI = API.replace("/api", "");
@@ -121,7 +122,7 @@ const handleUpload = async (file: File, field: string, type: DocumentType) => {
   /* ================= UI STATES ================= */
 
   if (loading) {
-    return <div className="p-6 text-gray-500">Loading documents...</div>;
+    return <Loader/>;
   }
 
   if (!user) {

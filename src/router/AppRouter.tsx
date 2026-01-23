@@ -258,6 +258,12 @@ import ITAdminDashboard from "@/pages/HRMS/IT Admin/ITAdminDashboard";
 import Dashboard from "@/pages/HRMS/Dashboard";
 import FinanceDashboard from "@/pages/HRMS/Finance/FinanaceManagerDashboard";
 import Profile from "@/pages/HRMS/Admin/Profile";
+import EmployeeOvertimeRequestPage from "@/pages/HRMS/Employee/Request/OverTimeRequests";
+import OvertimeRequestPage from "@/pages/HRMS/Employee/Request/OverTimeRequests";
+import ProfileUpdateRequest from "@/pages/HRMS/Employee/Request/ProfileUpdateRequest";
+import EmployeeOvertimeRequests from "@/pages/HRMS/Manager/Approvals/EmployeeOvertimeRequest";
+import EmployeeProfileUpdateRequest from "@/pages/HRMS/Manager/Approvals/EmployeeProfileUpdateRequest";
+import TravelReconciliation from "@/pages/HRMS/Finance/Travel/TravelReconciliation";
 
 function ProtectedRoute({
   children,
@@ -460,7 +466,10 @@ export default function AppRouter() {
           {/* ADMIN ROUTES */}
           <Route path="SuperAdmin/addUser" element={<AddUser />} />
           <Route path="SuperAdmin/employees" element={<Employee />} />
-          <Route path="SuperAdmin/employees/profile/:id" element={<Profile />} />
+          <Route
+            path="SuperAdmin/employees/profile/:id"
+            element={<Profile />}
+          />
           <Route
             path="SuperAdmin/probation"
             element={<ProbationConfirmation />}
@@ -546,6 +555,15 @@ export default function AppRouter() {
             path="manager/approvals/travel"
             element={<EmployeeTravelRequest />}
           />
+          <Route
+            path="manager/approvals/overtime"
+            element={<EmployeeOvertimeRequests />}
+          />
+          <Route
+            path="manager/approvals/profile-updates"
+            element={<EmployeeProfileUpdateRequest />}
+          />
+
           {/* Employee ROUTES */}
           <Route path="employe" element={<Navigate to="dashboard" replace />} />
 
@@ -589,6 +607,14 @@ export default function AppRouter() {
             path="employee/request/resign"
             element={<ResignationRequest />}
           />
+          <Route
+            path="employee/request/overtime"
+            element={<OvertimeRequestPage />}
+          />
+          <Route
+            path="employee/request/profileUpdate"
+            element={<ProfileUpdateRequest />}
+          />
           <Route path="employee/expenses/submit" element={<Expense />} />
           <Route
             path="employee/performance/goals"
@@ -614,6 +640,10 @@ export default function AppRouter() {
           <Route
             path="finance/travel/advances"
             element={<FinanceTravelRequest />}
+          />
+          <Route
+            path="finance/travel/reconciliation"
+            element={<TravelReconciliation />}
           />
           <Route
             path="finance/reimbursements"

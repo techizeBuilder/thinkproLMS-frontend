@@ -118,8 +118,14 @@ const ApplyLeaveModal = ({ open, onClose, data, onSuccess }: any) => {
   const isInvalid = requestedDays === 0 || requestedDays > remainingLeaves;
 
   return (
-    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-      <div className="bg-white w-full max-w-md rounded-lg p-6">
+    <div
+      className="fixed inset-0 bg-black/40 flex items-center justify-center z-50"
+      onClick={onClose}
+    >
+      <div
+        className="bg-white w-full max-w-md rounded-lg p-6"
+        onClick={(e) => e.stopPropagation()}
+      >
         <h3 className="text-lg font-semibold mb-5">
           {data ? "View / Edit Leave Request" : "Apply Leave"}
         </h3>

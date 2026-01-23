@@ -1,312 +1,253 @@
 /** @format */
 
-import React, { useEffect, useMemo, useState} from "react";
+import { useEffect, useMemo, useState } from "react";
 import axios from "axios";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Users, CalendarCheck, IndianRupee, FileWarning } from "lucide-react";
-import jsPDF from "jspdf";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Users, ShieldCheck, ShieldX, Percent } from "lucide-react";
+import Loader from "../Loader";
+
 const API = import.meta.env.VITE_API_URL;
 
-export default function ComplianceReport() {
-  /* ================= MONTH ================= */
-  const now = new Date();
-  const [month, setMonth] = useState(
-    now.toISOString().slice(0, 7) // YYYY-MM
-  );
+/* ================= TYPES ================= */
 
-  const year = Number(month.slice(0, 4));
-  const monthIndex = Number(month.slice(5, 7)) - 1;
+interface User {
+  _id: string;
+  name: string;
+  employeeId: string;
+}
 
-  /* ================= DATA ================= */
-  const [employees, setEmployees] = useState<any[]>([]);
-  const [payroll, setPayroll] = useState<any[]>([]);
-  const [attendance, setAttendance] = useState<any[]>([]);
-  const [leaves, setLeaves] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  const headers = {
-    Authorization: `Bearer ${localStorage.getItem("token")}`,
+/* 🔴 ATTENDANCE TYPE FIX */
+interface Attendance {
+  user: {
+    _id: string;
   };
+}
 
-  /* ================= FETCH ALL ================= */
-  useEffect(() => {
-    fetchAll();
-  }, [month]);
+interface Leave {
+  employee: {
+    _id: string;
+  };
+  status: string;
+}
+
+interface Payroll {
+  employee: {
+    _id: string;
+  };
+  status: string;
+}
+
+interface ComplianceRow {
+  employee: User;
+  attendanceOk: boolean;
+  leaveOk: boolean;
+  payrollOk: boolean;
+  compliant: boolean;
+}
+
+/* ================= COMPONENT ================= */
+
+export default function Compliance() {
+  const token = localStorage.getItem("token");
+
+  const [users, setUsers] = useState<User[]>([]);
+  const [attendance, setAttendance] = useState<Attendance[]>([]);
+  const [leaves, setLeaves] = useState<Leave[]>([]);
+  const [payroll, setPayroll] = useState<Payroll[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState("");
+
+  /* ================= FETCH ================= */
 
   const fetchAll = async () => {
     try {
-      setLoading(true);
-
-      const [empRes, payrollRes, attendanceRes, leaveRes] = await Promise.all([
-        axios.get(`${API}/users`, { headers }),
-        axios.get(`${API}/payroll?month=${month}`, { headers }),
-        axios.get(`${API}/attendance/all`, {
-          headers,
-          params: { month: monthIndex, year },
+      const [u, a, l, p] = await Promise.all([
+        axios.get(`${API}/users`, {
+          headers: { Authorization: `Bearer ${token}` },
         }),
-        axios.get(`${API}/employee/leaves/all`, { headers }),
+        axios.get(`${API}/attendance/all?month=0&year=2026`, {
+          headers: { Authorization: `Bearer ${token}` },
+        }),
+        axios.get(`${API}/employee/leaves/all`, {
+          headers: { Authorization: `Bearer ${token}` },
+        }),
+        axios.get(`${API}/payroll?month=2026-01`, {
+          headers: { Authorization: `Bearer ${token}` },
+        }),
       ]);
 
-      setEmployees(empRes.data || []);
-      setPayroll(payrollRes.data || []);
-      setAttendance(attendanceRes.data || []);
-      setLeaves(leaveRes.data || []);
-    } catch (err) {
-      console.error(err);
+      setUsers(u.data || []);
+      /* 🔴 ATTENDANCE RESPONSE FIX */
+      setAttendance(a.data.attendance || []);
+      setLeaves(l.data || []);
+      setPayroll(p.data || []);
     } finally {
       setLoading(false);
     }
   };
 
-  /* ================= COMPLIANCE CALCULATIONS ================= */
+  useEffect(() => {
+    fetchAll();
+  }, []);
 
-  // 1️⃣ Employee Compliance
-  const employeeCompliance = useMemo(() => {
-    const total = employees.length;
-    const verified = employees.filter((e) => e.isVerified).length;
-    const missingProfile = employees.filter((e) => !e.email || !e.name).length;
+  /* ================= COMPLIANCE LOGIC ================= */
 
-    return {
-      total,
-      verified,
-      missingProfile,
-      status: missingProfile > 0 ? "PARTIAL" : "OK",
-    };
-  }, [employees]);
+  const complianceData: ComplianceRow[] = useMemo(() => {
+    return users.map((user) => {
+      /* 🔴 ATTENDANCE LOGIC FIX */
+      const hasAttendance = attendance.some((a) => a.user?._id === user._id);
 
-  // 2️⃣ Payroll Compliance
-  const payrollCompliance = useMemo(() => {
-    const totalEmployees = employees.length;
-    const payrollDone = payroll.length;
-    const negativeNet = payroll.filter((p) => p.net < 0).length;
+      const leave = leaves.find((l) => l.employee?._id === user._id);
+      const pay = payroll.find((p) => p.employee?._id === user._id);
 
-    return {
-      payrollDone,
-      totalEmployees,
-      negativeNet,
-      status:
-        payrollDone < totalEmployees || negativeNet > 0 ? "ATTENTION" : "OK",
-    };
-  }, [payroll, employees]);
+      const attendanceOk = hasAttendance;
+      const leaveOk = !leave || leave.status !== "REJECTED";
+      const payrollOk = pay
+        ? ["Paid", "Processed"].includes(pay.status)
+        : false;
 
-  // 3️⃣ Attendance Compliance
-  const attendanceCompliance = useMemo(() => {
-    const totalRecords = attendance.length;
-    const present = attendance.filter((a) => a.punchIn).length;
-    const absent = totalRecords - present;
-
-    return {
-      present,
-      absent,
-      status: absent > present * 0.2 ? "ATTENTION" : "OK",
-    };
-  }, [attendance]);
-
-  // 4️⃣ Leave Compliance (frontend filter by month)
-  const leaveCompliance = useMemo(() => {
-    const monthLeaves = leaves.filter((l) => {
-      const d = new Date(l.fromDate);
-      return d.getFullYear() === year && d.getMonth() === monthIndex;
+      return {
+        employee: user,
+        attendanceOk,
+        leaveOk,
+        payrollOk,
+        compliant: attendanceOk && leaveOk && payrollOk,
+      };
     });
+  }, [users, attendance, leaves, payroll]);
 
-    const pending = monthLeaves.filter((l) => l.status === "PENDING").length;
+  /* ================= FILTER ================= */
 
-    return {
-      total: monthLeaves.length,
-      pending,
-      status: pending > 0 ? "PARTIAL" : "OK",
-    };
-  }, [leaves, month]);
+  const filtered = complianceData.filter((r) =>
+    r.employee.name.toLowerCase().includes(search.toLowerCase()),
+  );
 
-  /* ================= OVERALL ================= */
-  const overallStatus = useMemo(() => {
-    const statuses = [
-      employeeCompliance.status,
-      payrollCompliance.status,
-      attendanceCompliance.status,
-      leaveCompliance.status,
-    ];
+  /* ================= SUMMARY ================= */
 
-    return statuses.some((s) => s !== "OK")
-      ? "PARTIALLY COMPLIANT"
-      : "COMPLIANT";
-  }, [
-    employeeCompliance,
-    payrollCompliance,
-    attendanceCompliance,
-    leaveCompliance,
-  ]);
+  const total = filtered.length;
+  const compliantCount = filtered.filter((r) => r.compliant).length;
+  const nonCompliant = total - compliantCount;
+  const percent = total ? Math.round((compliantCount / total) * 100) : 0;
 
-const handleDownloadPDF = () => {
-  const pdf = new jsPDF("p", "mm", "a4");
+  if (loading) return <Loader />;
 
-  let y = 20;
-
-  pdf.setFontSize(18);
-  pdf.text(`Compliance Report - ${month}`, 20, y);
-
-  y += 12;
-  pdf.setFontSize(12);
-  pdf.text(`Employees: ${employeeCompliance.total}`, 20, y);
-
-  y += 8;
-  pdf.text(`Missing Profile: ${employeeCompliance.missingProfile}`, 20, y);
-
-  y += 8;
-  pdf.text(`Payroll Done: ${payrollCompliance.payrollDone}`, 20, y);
-
-  y += 8;
-  pdf.text(`Negative Net Payrolls: ${payrollCompliance.negativeNet}`, 20, y);
-
-  y += 8;
-  pdf.text(`Attendance Present: ${attendanceCompliance.present}`, 20, y);
-
-  y += 8;
-  pdf.text(`Attendance Absent: ${attendanceCompliance.absent}`, 20, y);
-
-  y += 8;
-  pdf.text(`Total Leaves: ${leaveCompliance.total}`, 20, y);
-
-  y += 8;
-  pdf.text(`Pending Leaves: ${leaveCompliance.pending}`, 20, y);
-
-  y += 12;
-  pdf.setFontSize(14);
-  pdf.text(`Overall Status: ${overallStatus}`, 20, y);
-
-  pdf.save(`Compliance_Report_${month}.pdf`);
-};
-
-
-
-
-  if (loading) return <p className="p-6">Loading compliance report...</p>;
+  /* ================= UI ================= */
 
   return (
-    <div id="compliance-report" className="p-6 space-y-6">
-      {/* ================= HEADER ================= */}
+    <div className="p-4 md:p-6 space-y-6">
+      {/* HEADER */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-        <h1 className="text-2xl font-bold">Compliance Report – {month}</h1>
-
-        <div className="flex items-center gap-3">
-          <input
-            type="month"
-            value={month}
-            onChange={(e) => setMonth(e.target.value)}
-            className="border rounded-md px-3 py-2 text-sm"
-          />
-
-          <button
-            onClick={handleDownloadPDF}
-            className="flex items-center gap-2 px-4 py-2 rounded-md
-                 bg-gradient-to-r from-indigo-500 to-purple-600
-                 text-white text-sm font-semibold
-                 hover:from-indigo-600 hover:to-purple-700
-                 transition shadow-md"
-          >
-            📄 Download PDF
-          </button>
-        </div>
-      </div>
-
-    <div id="pdf-area" className="space-y-6 bg-white p-4">
-
-      {/* ================= SUMMARY CARDS ================= */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <ComplianceCard
-          title="Employee Compliance"
-          icon={<Users />}
-          color="bg-blue-100 text-blue-700"
-          lines={[
-            `Total: ${employeeCompliance.total}`,
-            `Missing Profile: ${employeeCompliance.missingProfile}`,
-          ]}
-          status={employeeCompliance.status}
-        />
-
-        <ComplianceCard
-          title="Payroll Compliance"
-          icon={<IndianRupee />}
-          color="bg-green-100 text-green-700"
-          lines={[
-            `Payroll Done: ${payrollCompliance.payrollDone}`,
-            `Negative Net: ${payrollCompliance.negativeNet}`,
-          ]}
-          status={payrollCompliance.status}
-        />
-
-        <ComplianceCard
-          title="Attendance Compliance"
-          icon={<CalendarCheck />}
-          color="bg-purple-100 text-purple-700"
-          lines={[
-            `Present: ${attendanceCompliance.present}`,
-            `Absent: ${attendanceCompliance.absent}`,
-          ]}
-          status={attendanceCompliance.status}
-        />
-
-        <ComplianceCard
-          title="Leave Compliance"
-          icon={<FileWarning />}
-          color="bg-orange-100 text-orange-700"
-          lines={[
-            `Total Leaves: ${leaveCompliance.total}`,
-            `Pending: ${leaveCompliance.pending}`,
-          ]}
-          status={leaveCompliance.status}
+        <h1 className="text-2xl font-semibold">Compliance Report</h1>
+        <Input
+          placeholder="Search employee..."
+          className="md:w-72"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
         />
       </div>
-    
 
-      {/* ================= OVERALL ================= */}
-      <Card
-        className={`border-l-8 ${
-          overallStatus === "COMPLIANT"
-            ? "border-green-500"
-            : "border-yellow-500"
-        }`}
-      >
-        <CardHeader>
-          <CardTitle>Overall Compliance Status</CardTitle>
-        </CardHeader>
+      {/* SUMMARY CARDS */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <SummaryCard title="Total Employees" value={total} icon={<Users />} />
+        <SummaryCard
+          title="Compliant"
+          value={compliantCount}
+          icon={<ShieldCheck />}
+          color="text-green-600"
+        />
+        <SummaryCard
+          title="Non-Compliant"
+          value={nonCompliant}
+          icon={<ShieldX />}
+          color="text-red-600"
+        />
+        <SummaryCard
+          title="Compliance %"
+          value={`${percent}%`}
+          icon={<Percent />}
+          color="text-blue-600"
+        />
+      </div>
+
+      {/* TABLE */}
+      <Card>
+        <CardHeader className="font-semibold">Employee Compliance</CardHeader>
+
         <CardContent>
-          <p className="text-xl font-semibold">{overallStatus}</p>
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Employee</TableHead>
+                  <TableHead className="text-center">Attendance</TableHead>
+                  <TableHead className="text-center">Leave</TableHead>
+                  <TableHead className="text-center">Payroll</TableHead>
+                  <TableHead className="text-center">Status</TableHead>
+                </TableRow>
+              </TableHeader>
+
+              <TableBody>
+                {filtered.map((r) => (
+                  <TableRow key={r.employee._id}>
+                    <TableCell>
+                      <div className="font-medium">{r.employee.name}</div>
+                      <div className="text-xs text-gray-400">
+                        {r.employee.employeeId}
+                      </div>
+                    </TableCell>
+
+                    <TableCell className="text-center">
+                      {r.attendanceOk ? "✅" : "❌"}
+                    </TableCell>
+
+                    <TableCell className="text-center">
+                      {r.leaveOk ? "✅" : "❌"}
+                    </TableCell>
+
+                    <TableCell className="text-center">
+                      {r.payrollOk ? "✅" : "❌"}
+                    </TableCell>
+
+                    <TableCell className="text-center">
+                      {r.compliant ? (
+                        <Badge variant="success">COMPLIANT</Badge>
+                      ) : (
+                        <Badge variant="destructive">NON-COMPLIANT</Badge>
+                      )}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
         </CardContent>
       </Card>
-     </div> 
     </div>
   );
 }
 
-/* ================= SMALL CARD ================= */
-function ComplianceCard({
-  title,
-  icon,
-  color,
-  lines,
-  status,
-}: {
-  title: string;
-  icon: React.ReactNode;
-  color: string;
-  lines: string[];
-  status: string;
-}) {
+/* ================= SUMMARY CARD ================= */
+
+function SummaryCard({ title, value, icon, color = "text-gray-700" }: any) {
   return (
-    <div className={`rounded-xl p-4 ${color}`}>
-      <div className="flex items-center gap-2 mb-2">
-        {icon}
-        <h3 className="font-semibold">{title}</h3>
-      </div>
-
-      <div className="text-sm space-y-1">
-        {lines.map((l) => (
-          <p key={l}>{l}</p>
-        ))}
-      </div>
-
-      <p className="mt-2 font-bold text-sm">Status: {status}</p>
-    </div>
+    <Card>
+      <CardContent className="flex items-center justify-between p-4">
+        <div>
+          <div className="text-sm text-gray-500">{title}</div>
+          <div className={`text-2xl font-semibold ${color}`}>{value}</div>
+        </div>
+        <div className="text-gray-400">{icon}</div>
+      </CardContent>
+    </Card>
   );
 }
