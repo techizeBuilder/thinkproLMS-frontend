@@ -570,9 +570,8 @@ const sortedLeads = [...leads].sort((a: any, b: any) => {
           <h1 className="text-2xl font-semibold">Leads</h1>
           <p className="text-gray-600">Manage and track school leads</p>
         </div>
-        {(loggedInRole === "superadmin" || loggedInRole === "manager") && (
-          <div className="flex items-center gap-2">
-            <Button
+         <div className="flex items-center gap-2">
+           {loggedInRole === "superadmin"&& <Button
               variant="outline"
               onClick={handleExportToExcel}
               disabled={exporting}
@@ -583,7 +582,7 @@ const sortedLeads = [...leads].sort((a: any, b: any) => {
                 <Download className="h-4 w-4 mr-2" />
               )}
               Export to Excel
-            </Button>
+            </Button>}
 
             {onAddNew && (
               <Button onClick={onAddNew}>
@@ -591,7 +590,7 @@ const sortedLeads = [...leads].sort((a: any, b: any) => {
               </Button>
             )}
           </div>
-        )}
+        
       </div>
 
       <div className="flex flex-col gap-2 items-start">
