@@ -5,6 +5,7 @@ import axios from "axios";
 import {MoreVertical } from "lucide-react";
 import BranchModal from "./BranchModal";
 import Loader from "../../Loader";
+import { toast } from "../../Alert/Toast";
 
 const API_BASE = import.meta.env.VITE_API_URL;
 
@@ -69,7 +70,11 @@ export default function Branch() {
     await axios.delete(`${API_BASE}/branches/${id}`, {
       headers: { Authorization: `Bearer ${token}` },
     });
-
+    toast({
+        type: "success",
+        title: "Branch Deleted",
+        message: "The Branch has been added successfully.",
+      });
     fetchBranches();
   };
 

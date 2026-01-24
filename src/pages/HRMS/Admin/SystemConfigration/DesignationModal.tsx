@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import axios from "axios";
-
+import { toast } from "../../Alert/Toast";
 const API_BASE = import.meta.env.VITE_API_URL;
 
 export default function DesignationModal({
@@ -98,23 +98,52 @@ export default function DesignationModal({
   /* =========================
      SAVE
   ==========================*/
-  const save = async () => {
-    if (!validate()) return;
+ const save = async () => {
+   if (!validate()) return;
 
-    if (mode === "add") {
-      await axios.post(`${API_BASE}/designations`, form, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-    }
+   try {
+     if (mode === "add") {
+       const res = await axios.post(`${API_BASE}/designations`, form, {
+         headers: { Authorization: `Bearer ${token}` },
+       });
 
-    if (mode === "edit") {
-      await axios.put(`${API_BASE}/designations/${designation._id}`, form, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-    }
+       toast({
+         type: "success",
+         title: "Designation Created",
+         message: res.data?.message || "Designation created successfully.",
+       });
+     }
 
-    handleClose();
-  };
+     if (mode === "edit" && designation) {
+       const res = await axios.put(
+         `${API_BASE}/designations/${designation._id}`,
+         form,
+         {
+           headers: { Authorization: `Bearer ${token}` },
+         },
+       );
+
+       toast({
+         type: "success",
+         title: "Designation Updated",
+         message: res.data?.message || "Designation updated successfully.",
+       });
+     }
+
+     handleClose();
+   } catch (error: any) {
+     toast({
+       type: "error",
+       title: "Operation Failed",
+       message:
+         error?.response?.data?.message ||
+         (mode === "add"
+           ? "Unable to create designation. Please try again."
+           : "Unable to update designation. Please try again."),
+     });
+   }
+ };
+
 
   const handleClose = () => {
     setForm(initialForm);

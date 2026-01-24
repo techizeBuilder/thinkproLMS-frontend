@@ -6,7 +6,7 @@ import { MoreVertical } from "lucide-react";
 import AddSalaryStructureModal from "./AddSalaryStructureModal";
 import DeleteSalaryStructureModal from "./DeleteSalaryStructureModal";
 import Loader from "../../Loader";
-
+import { toast } from "../../Alert/Toast";
 
 interface Employee {
   _id: string;
@@ -57,21 +57,36 @@ const SalaryStructure = () => {
   }, []);
 
   /* ================= DELETE ================= */
-  const handleDelete = async () => {
-    if (!selectedSalary) return;
+const handleDelete = async () => {
+  if (!selectedSalary) return;
 
-    try {
-      await axios.delete(
-        `${API_BASE}/salary-structures/${selectedSalary._id}`,
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-      setOpenDeleteModal(false);
-      setSelectedSalary(null);
-      fetchSalary();
-    } catch {
-      alert("Delete failed");
-    }
-  };
+  try {
+    const res = await axios.delete(
+      `${API_BASE}/salary-structures/${selectedSalary._id}`,
+      { headers: { Authorization: `Bearer ${token}` } },
+    );
+
+    toast({
+      type: "success",
+      title: "Salary Deleted",
+      message:
+        res.data?.message || "Salary structure has been deleted successfully.",
+    });
+
+    setOpenDeleteModal(false);
+    setSelectedSalary(null);
+    fetchSalary();
+  } catch (error: any) {
+    toast({
+      type: "error",
+      title: "Delete Failed",
+      message:
+        error?.response?.data?.message ||
+        "Unable to delete salary structure. Please try again.",
+    });
+  }
+};
+
 
   const netSalary = (s: SalaryStructure) =>
     s.basic + s.hra + s.allowance - (s.pf + s.tax);

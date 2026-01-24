@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import Loader from "../Loader";
-
+import { toast } from "../Alert/Toast";
 const API_BASE = import.meta.env.VITE_API_URL;
 
 const AllAttendanceRequests = () => {
@@ -25,14 +25,34 @@ const AllAttendanceRequests = () => {
     fetchRequests();
   }, []);
 
-  const updateStatus = async (id: string, status: string) => {
-    await axios.patch(
+const updateStatus = async (id: string, status: string) => {
+  try {
+    const res = await axios.patch(
       `${API_BASE}/attendance-request/${id}/status`,
       { status },
-      { headers: { Authorization: `Bearer ${token}` } }
+      { headers: { Authorization: `Bearer ${token}` } },
     );
+
+    toast({
+      type: "success",
+      title: "Status Updated",
+      message:
+        res.data?.message ||
+        `Attendance request has been ${status.toLowerCase()} successfully.`,
+    });
+
     fetchRequests();
-  };
+  } catch (error: any) {
+    toast({
+      type: "error",
+      title: "Update Failed",
+      message:
+        error?.response?.data?.message ||
+        "Failed to update attendance request status.",
+    });
+  }
+};
+
 
   const formatDate = (d: string) => new Date(d).toLocaleDateString("en-GB");
   

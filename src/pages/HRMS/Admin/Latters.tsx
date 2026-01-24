@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import Loader from "../Loader";
+import { toast } from "../Alert/Toast";
 
 const API_BASE = import.meta.env.VITE_API_URL;
 const ViewAPI = API_BASE.replace("/api", "");
@@ -144,28 +145,47 @@ const Letters = () => {
   };
 
   /* ================= SUBMIT ================= */
-  const handleSubmit = async () => {
-    if (!validate()) return;
+const handleSubmit = async () => {
+  if (!validate()) return;
 
+  try {
     setLoading(true);
+
     const fd = new FormData();
     fd.append("letterType", form.letterType);
     fd.append("userId", form.userId);
     fd.append("message", form.message);
     fd.append("file", form.file as File);
 
-    await axios.post(`${API_BASE}/letters`, fd, {
+    const res = await axios.post(`${API_BASE}/letters`, fd, {
       headers: {
         Authorization: `Bearer ${localStorage.getItem("token")}`,
         "Content-Type": "multipart/form-data",
       },
     });
 
+    toast({
+      type: "success",
+      title: "Letter Sent",
+      message: res.data?.message || "Letter has been sent successfully.",
+    });
+
     setForm({ letterType: "", userId: "", message: "", file: null });
     setOpenSendModal(false);
     fetchLetters();
+  } catch (error: any) {
+    toast({
+      type: "error",
+      title: "Failed to Send Letter",
+      message:
+        error?.response?.data?.message ||
+        "Unable to send the letter. Please try again.",
+    });
+  } finally {
     setLoading(false);
-  };
+  }
+};
+
     if (loading) {
       return (
         <div className="relative min-h-screen">

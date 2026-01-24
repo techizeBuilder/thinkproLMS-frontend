@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import axios from "axios";
-
+import { toast } from "../../Alert/Toast";
 interface Props {
   isOpen: boolean;
   onClose: () => void;
@@ -40,27 +40,50 @@ const AddLeaveTypeModal = ({ isOpen, onClose, editData }: Props) => {
   if (!isOpen) return null;
 
   /* ===== SUBMIT ===== */
-  const handleSubmit = async () => {
-    try {
-      if (editData) {
-        await axios.put(
-          `${API_BASE}/leave-types/${editData._id}`,
-          { name, code, maxDays, paid, carryForward },
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
-      } else {
-        await axios.post(
-          `${API_BASE}/leave-types`,
-          { name, code, maxDays, paid, carryForward },
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
-      }
+const handleSubmit = async () => {
+  try {
+    let res;
 
-      onClose();
-    } catch (err) {
-      alert("Something went wrong");
+    if (editData) {
+      res = await axios.put(
+        `${API_BASE}/leave-types/${editData._id}`,
+        { name, code, maxDays, paid, carryForward },
+        { headers: { Authorization: `Bearer ${token}` } },
+      );
+
+      toast({
+        type: "success",
+        title: "Leave Type Updated",
+        message:
+          res.data?.message || "Leave type has been updated successfully.",
+      });
+    } else {
+      res = await axios.post(
+        `${API_BASE}/leave-types`,
+        { name, code, maxDays, paid, carryForward },
+        { headers: { Authorization: `Bearer ${token}` } },
+      );
+
+      toast({
+        type: "success",
+        title: "Leave Type Created",
+        message:
+          res.data?.message || "Leave type has been created successfully.",
+      });
     }
-  };
+
+    onClose();
+  } catch (err: any) {
+    toast({
+      type: "error",
+      title: "Operation Failed",
+      message:
+        err?.response?.data?.message ||
+        "Unable to save leave type. Please try again.",
+    });
+  }
+};
+
 
 return (
   <div className="fixed inset-0 z-50 flex items-center justify-center">

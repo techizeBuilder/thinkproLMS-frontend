@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { X } from "lucide-react";
-
+import { toast } from "../../Alert/Toast";
 interface Holiday {
   _id?: string;
   title: string;
@@ -62,31 +62,47 @@ const AddHolidayModal = ({
     return Object.keys(e).length === 0;
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!validate()) return;
+const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+  if (!validate()) return;
 
-    try {
-      setLoading(true);
+  try {
+    setLoading(true);
 
-      if (mode === "add") {
-        await axios.post(`${API_BASE}/holidays`, form, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-      } else {
-        await axios.put(`${API_BASE}/holidays/${holiday?._id}`, form, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-      }
+    const res =
+      mode === "add"
+        ? await axios.post(`${API_BASE}/holidays`, form, {
+            headers: { Authorization: `Bearer ${token}` },
+          })
+        : await axios.put(`${API_BASE}/holidays/${holiday?._id}`, form, {
+            headers: { Authorization: `Bearer ${token}` },
+          });
 
-      onSuccess();
-      onClose();
-    } catch (err: any) {
-      alert(err?.response?.data?.message || "Something went wrong");
-    } finally {
-      setLoading(false);
-    }
-  };
+    toast({
+      type: "success",
+      title: mode === "add" ? "Holiday Added" : "Holiday Updated",
+      message:
+        res.data?.message ||
+        (mode === "add"
+          ? "Holiday has been added successfully."
+          : "Holiday has been updated successfully."),
+    });
+
+    onSuccess();
+    onClose();
+  } catch (err: any) {
+    toast({
+      type: "error",
+      title: "Operation Failed",
+      message:
+        err?.response?.data?.message ||
+        "Something went wrong. Please try again.",
+    });
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">

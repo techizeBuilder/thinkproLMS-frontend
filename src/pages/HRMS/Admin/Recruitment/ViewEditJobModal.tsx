@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import axios from "axios";
-
+import { toast } from "../../Alert/Toast";
 const API_BASE = import.meta.env.VITE_API_URL;
 
 interface Props {
@@ -107,15 +107,26 @@ const ViewEditJobModal = ({ isOpen, onClose, job, mode }: Props) => {
     if (!validate()) return;
 
     if (mode === "add") {
-      await axios.post(`${API_BASE}/job-openings`, form, {
+      const res=await axios.post(`${API_BASE}/job-openings`, form, {
         headers: { Authorization: `Bearer ${token}` },
       });
+       toast({
+              type: "success",
+              title: "Job Added",
+              message: res.data?.message || "Job Added successfully.",
+            });
     }
+    
 
     if (mode === "edit") {
-      await axios.put(`${API_BASE}/job-openings/${job._id}`, form, {
+      const res=await axios.put(`${API_BASE}/job-openings/${job._id}`, form, {
         headers: { Authorization: `Bearer ${token}` },
       });
+       toast({
+              type: "success",
+              title: "Job Updated",
+              message: res.data?.message || "Salary structure updated successfully.",
+            });
     }
 
     handleClose();

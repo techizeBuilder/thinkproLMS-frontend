@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import { MoreVertical, Download, Send } from "lucide-react";
 import Loader from "../../Loader";
-
+import { toast } from "../../Alert/Toast";
 interface PayslipRow {
   _id: string;
   user: {
@@ -57,16 +57,24 @@ const Payslips = () => {
   /* ================= GENERATE PAYSLIPS (FROM PAYROLL) ================= */
   const generatePayslip = async () => {
     try {
-      await axios.post(
+      const res=await axios.post(
         `${API_BASE}/payslips/generate-from-payroll`,
         { month },
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
       fetchPayslips();
-      alert("Payslips generated from payroll successfully");
+      toast({
+              type: "success",
+              title: "Payslips Generated",
+              message: res.data?.message || "Payslips Generated successfully.",
+            });
     } catch (err: any) {
-      alert(err.response?.data?.message || "Payslip generation failed");
+      toast({
+              type: "error",
+              title: "Pyaslips Not Generated",
+              message: "Failed to Generated Payslips.",
+            });
     }
   };
 
