@@ -298,7 +298,12 @@ export default function LeadPageForm({
     }
     const payload: any = {
       ...form,
-      leadRemarks: undefined,
+      // Include leadRemarks for new leads, but exclude for updates (handled separately via API)
+      leadRemarks: isEdit ? undefined : (form.leadRemarks || []).map((r: any) => ({
+        text: r.text,
+        createdBy: r.createdBy?._id || r.createdBy,
+        createdAt: r.createdAt,
+      })),
       noOfStudents: form.noOfStudents ? Number(form.noOfStudents) : null,
       avgFeesPerYear: form.avgFeesPerYear ? Number(form.avgFeesPerYear) : null,
       annualContractValue: form.annualContractValue
@@ -363,45 +368,61 @@ export default function LeadPageForm({
     );
   };
   const handleAddRemark = async () => {
-  if (!lead?._id || !form.newRemark.trim()) return;
+    if (!form.newRemark.trim()) return;
 
-  try {
-    const res = await axiosInstance.post(
-      `/leads/${lead._id}/remarks`,
-      { text: form.newRemark }
-    );
-    
+    // If editing an existing lead, call the API
+    if (lead?._id) {
+      try {
+        const res = await axiosInstance.post(
+          `/leads/${lead._id}/remarks`,
+          { text: form.newRemark }
+        );
+        
+        // backend updated remarks return karega (best)
+        setForm((prev: any) => ({
+          ...prev,
+          leadRemarks: res.data.data.leadRemarks,
+          newRemark: "",
+        }));
+      } catch (err) {
+        alert("Failed to add remark");
+      }
+    } else {
+      // If creating a new lead, add remark to local state
+      const newRemark = {
+        _id: `temp-${Date.now()}`,
+        text: form.newRemark.trim(),
+        createdBy: user ? { _id: user.id, name: user.name, email: user.email } : null,
+        createdAt: new Date(),
+      };
+      
+      setForm((prev: any) => ({
+        ...prev,
+        leadRemarks: [...(prev.leadRemarks || []), newRemark],
+        newRemark: "",
+      }));
+    }
+  };
 
+  const saveEditedRemark = async () => {
+    if (!editingRemark || !lead?._id) return;
 
-    // backend updated remarks return karega (best)
-    setForm((prev: any) => ({
-      ...prev,
-      leadRemarks: res.data.data.leadRemarks,
-      newRemark: "",
-    }));
-  } catch (err) {
-    alert("Failed to add remark");
-  }
-};
-const saveEditedRemark = async () => {
-  if (!editingRemark || !lead?._id) return;
+    try {
+      const res = await axiosInstance.put(
+        `/leads/${lead._id}/remarks/${editingRemark._id}`,
+        { text: editedText }
+      );
 
-  try {
-    const res = await axiosInstance.put(
-      `/leads/${lead._id}/remarks/${editingRemark._id}`,
-      { text: editedText }
-    );
+      setForm((prev: any) => ({
+        ...prev,
+        leadRemarks: res.data.data.leadRemarks,
+      }));
 
-    setForm((prev: any) => ({
-      ...prev,
-      leadRemarks: res.data.data.leadRemarks,
-    }));
-
-    setEditingRemark(null);
-  } catch {
-    alert("Failed to update remark");
-  }
-};
+      setEditingRemark(null);
+    } catch {
+      alert("Failed to update remark");
+    }
+  };
 
   return (
     <div className="p-4">
