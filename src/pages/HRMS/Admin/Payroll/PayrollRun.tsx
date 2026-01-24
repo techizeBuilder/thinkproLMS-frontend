@@ -5,7 +5,7 @@ import axios from "axios";
 import { MoreVertical } from "lucide-react";
 import ViewPayrollModal from "./ViewPayrollModal";
 import Loader from "../../Loader";
-
+import { toast } from "../../Alert/Toast";
 const API_BASE = import.meta.env.VITE_API_URL;
 
 type PayrollStatus = "Draft" | "Processed" | "Paid" | "Rejected";
@@ -153,10 +153,21 @@ const PayrollRun = () => {
       });
 
       setPayroll(rows.filter(Boolean));
+      toast({
+      type: "success",
+      title: "Payroll Generated",
+      message: "Payroll has been generated successfully.",
+    });
       setLoading(false);
       setIsPayrollRun(false);
     } catch (error) {
       console.error("Payroll generation failed", error);
+      toast({
+      type: "error",
+      title: "Payroll Failed",
+      message:
+        "Failed to generate payroll. Please try again.",
+    });
     }
   };
 

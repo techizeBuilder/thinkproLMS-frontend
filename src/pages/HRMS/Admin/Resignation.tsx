@@ -17,7 +17,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-
+import { toast } from "../Alert/Toast";
 const API = import.meta.env.VITE_API_URL;
 
 /* ================= TYPES ================= */
@@ -92,39 +92,74 @@ const Resignation = () => {
     setOpen(true);
   };
 
-  const handleApprove = async () => {
-    if (!selected) return;
+const handleApprove = async () => {
+  if (!selected) return;
 
-    await axios.patch(
+  try {
+    const res = await axios.patch(
       `${API}/resignation/status/${selected._id}`,
       { status: "APPROVED" },
       {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
-      }
+      },
     );
+
+    toast({
+      type: "success",
+      title: "Resignation Approved",
+      message:
+        res.data?.message || "Resignation has been approved successfully.",
+    });
 
     setOpen(false);
     fetchResignations();
-  };
+  } catch (error: any) {
+    toast({
+      type: "error",
+      title: "Approval Failed",
+      message:
+        error?.response?.data?.message ||
+        "Unable to approve resignation. Please try again.",
+    });
+  }
+};
 
-  const handleReject = async () => {
-    if (!selected) return;
+const handleReject = async () => {
+  if (!selected) return;
 
-    await axios.patch(
+  try {
+    const res = await axios.patch(
       `${API}/resignation/status/${selected._id}`,
       { status: "REJECTED" },
       {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
-      }
+      },
     );
+
+    toast({
+      type: "success",
+      title: "Resignation Rejected",
+      message:
+        res.data?.message || "Resignation has been rejected successfully.",
+    });
 
     setOpen(false);
     fetchResignations();
-  };
+  } catch (error: any) {
+    toast({
+      type: "error",
+      title: "Rejection Failed",
+      message:
+        error?.response?.data?.message ||
+        "Unable to reject resignation. Please try again.",
+    });
+  }
+};
+
 
   return (
     <div className="p-6 space-y-6">

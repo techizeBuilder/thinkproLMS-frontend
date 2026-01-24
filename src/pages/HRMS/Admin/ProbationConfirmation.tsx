@@ -12,7 +12,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { useSearchParams } from "react-router-dom";
 import Loader from "../Loader";
-
+import { toast } from "../Alert/Toast";
 const API = import.meta.env.VITE_API_URL;
 
 export default function ProbationConfirmation() {
@@ -85,8 +85,9 @@ export default function ProbationConfirmation() {
 
   /* ================= STATUS CHANGE ================= */
 
-  const changeStatus = async (id: string, status: string) => {
-    await axios.patch(
+const changeStatus = async (id: string, status: string) => {
+  try {
+    const res = await axios.patch(
       `${API}/users/${id}`,
       {
         employmentStatus: status,
@@ -97,8 +98,27 @@ export default function ProbationConfirmation() {
       },
     );
 
+    toast({
+      type: "success",
+      title: "Status Updated",
+      message:
+        res.data?.message || `User status has been updated to ${status}.`,
+    });
+
     fetchData();
-  };
+  } catch (error: any) {
+    toast({
+      type: "error",
+      title: "Update Failed",
+      message:
+        error?.response?.data?.message ||
+        "Unable to update user status. Please try again.",
+    });
+  }
+};
+
+
+
 
   /* ================= VIEW ================= */
 

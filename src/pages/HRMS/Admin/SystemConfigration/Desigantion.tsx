@@ -5,7 +5,7 @@ import axios from "axios";
 import { MoreVertical } from "lucide-react";
 import DesignationModal from "./DesignationModal";
 import Loader from "../../Loader";
-
+import { toast } from "../../Alert/Toast";
 const API_BASE = import.meta.env.VITE_API_URL;
 
 export default function Designation() {
@@ -34,6 +34,11 @@ export default function Designation() {
     await axios.delete(`${API_BASE}/designations/${id}`, {
       headers: { Authorization: `Bearer ${token}` },
     });
+    toast({
+                  type: "success",
+                  title: "Designation Deleted",
+                  message: "The designation has been added successfully.",
+                });
     fetchData();
   };
     if (loading) {

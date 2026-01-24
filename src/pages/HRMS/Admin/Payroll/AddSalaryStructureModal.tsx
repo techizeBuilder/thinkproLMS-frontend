@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import axios from "axios";
-
+import { toast } from "../../Alert/Toast";
 interface Props {
   isOpen: boolean;
   onClose: () => void;
@@ -57,27 +57,48 @@ const AddSalaryStructureModal = ({ isOpen, onClose, editData }: Props) => {
 
   if (!isOpen) return null;
 
-  const handleSubmit = async () => {
-    try {
-      const payload = { employee, basic, hra, allowance, pf, tax };
+const handleSubmit = async () => {
+  try {
+    const payload = { employee, basic, hra, allowance, pf, tax };
 
-      if (editData) {
-        await axios.put(
-          `${API_BASE}/salary-structures/${editData._id}`,
-          payload,
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
-      } else {
-        await axios.post(`${API_BASE}/salary-structures`, payload, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-      }
+    let res;
 
-      onClose();
-    } catch {
-      alert("Save failed");
+    if (editData) {
+      res = await axios.put(
+        `${API_BASE}/salary-structures/${editData._id}`,
+        payload,
+        { headers: { Authorization: `Bearer ${token}` } },
+      );
+
+      toast({
+        type: "success",
+        title: "Salary Updated",
+        message: res.data?.message || "Salary structure updated successfully.",
+      });
+    } else {
+      res = await axios.post(`${API_BASE}/salary-structures`, payload, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      toast({
+        type: "success",
+        title: "Salary Added",
+        message: res.data?.message || "Salary structure added successfully.",
+      });
     }
-  };
+
+    onClose();
+  } catch (error: any) {
+    toast({
+      type: "error",
+      title: "Save Failed",
+      message:
+        error?.response?.data?.message ||
+        "Unable to save salary structure. Please try again.",
+    });
+  }
+};
+
 
   return (
     <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">

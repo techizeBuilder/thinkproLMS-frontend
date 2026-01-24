@@ -6,6 +6,7 @@ import { MoreVertical } from "lucide-react";
 import CompanyModal from "./CompanyModal";
 import DeleteCompanyModal from "./DeleteCompanyModel";
 import Loader from "../../Loader";
+import { toast } from "../../Alert/Toast";
 
 const API_BASE = import.meta.env.VITE_API_URL;
 
@@ -53,17 +54,32 @@ export default function Company() {
   }, []);
 
   // ✅ ACTUAL DELETE API
-  const handleDeleteCompany = async () => {
-    if (!companyToDelete) return;
+const handleDeleteCompany = async () => {
+  if (!companyToDelete) return;
 
+  try {
     await axios.delete(`${API_BASE}/companies/${companyToDelete._id}`, {
       headers: { Authorization: `Bearer ${token}` },
+    });
+
+    toast({
+      type: "success",
+      title: "Company Deleted",
+      message: `${companyToDelete.name} successfully removed`,
     });
 
     setOpenDeleteModal(false);
     setCompanyToDelete(null);
     fetchCompanies();
-  };
+  } catch (error) {
+    toast({
+      type: "error",
+      title: "Delete Failed",
+      message: "Company deleted Sucessfully",
+    });
+  }
+};
+
     if (loading) {
       return (
         <div className="relative min-h-screen">

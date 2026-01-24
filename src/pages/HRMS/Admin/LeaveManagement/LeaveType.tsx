@@ -6,6 +6,7 @@ import { MoreVertical } from "lucide-react";
 import AddLeaveTypeModal from "./AddLeaveType";
 import DeleteLeaveTypeModal from "./DeleteLeaveTypeModal";
 import Loader from "../../Loader";
+import { toast } from "../../Alert/Toast";
 
 interface LeaveType {
   _id: string;
@@ -50,20 +51,38 @@ const LeaveType = () => {
   }, []);
 
   /* ================= DELETE ================= */
-  const handleDelete = async () => {
-    if (!selectedLeave) return;
+const handleDelete = async () => {
+  if (!selectedLeave) return;
 
-    try {
-      await axios.delete(`${API_BASE}/leave-types/${selectedLeave._id}`, {
+  try {
+    const res = await axios.delete(
+      `${API_BASE}/leave-types/${selectedLeave._id}`,
+      {
         headers: { Authorization: `Bearer ${token}` },
-      });
-      setOpenDeleteModal(false);
-      setSelectedLeave(null);
-      fetchLeaveTypes();
-    } catch (error) {
-      console.error("Delete failed", error);
-    }
-  };
+      },
+    );
+
+    toast({
+      type: "success",
+      title: "Leave Type Deleted",
+      message: res.data?.message || "Leave type has been deleted successfully.",
+    });
+
+    setOpenDeleteModal(false);
+    setSelectedLeave(null);
+    fetchLeaveTypes();
+  } catch (error: any) {
+    toast({
+      type: "error",
+      title: "Delete Failed",
+      message:
+        error?.response?.data?.message ||
+        "Unable to delete leave type. Please try again.",
+    });
+  }
+};
+
+
    if (loading) {
       return (
         <div className="relative min-h-[300px]">

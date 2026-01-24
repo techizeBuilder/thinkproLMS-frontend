@@ -18,6 +18,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import Loader from "../Loader";
+import { toast } from "../Alert/Toast";
 
 const API_BASE = import.meta.env.VITE_API_URL;
 const ViewAPI = API_BASE.replace("/api", "");
@@ -139,11 +140,12 @@ export default function Document() {
 
   /* ================= VERIFY / REJECT ================= */
 
-  const handleVerify = async (
-    documentId: string,
-    status: "VERIFIED" | "REJECTED",
-  ) => {
-    await axios.patch(
+const handleVerify = async (
+  documentId: string,
+  status: "VERIFIED" | "REJECTED",
+) => {
+  try {
+    const res = await axios.patch(
       `${API_BASE}/documents/verify/${documentId}`,
       { status },
       {
@@ -153,10 +155,31 @@ export default function Document() {
       },
     );
 
+    // ✅ UPDATE UI AFTER SUCCESS
     setSelectedDocuments((prev) =>
       prev.map((doc) => (doc._id === documentId ? { ...doc, status } : doc)),
     );
-  };
+
+    toast({
+      type: "success",
+      title: status === "VERIFIED" ? "Document Verified" : "Document Rejected",
+      message:
+        res.data?.message ||
+        (status === "VERIFIED"
+          ? "The document has been verified successfully."
+          : "The document has been rejected successfully."),
+    });
+  } catch (error: any) {
+    toast({
+      type: "error",
+      title: "Verification Failed",
+      message:
+        error?.response?.data?.message ||
+        "Unable to update document status. Please try again.",
+    });
+  }
+};
+
 
   /* ================= GROUP DOCUMENTS ================= */
 

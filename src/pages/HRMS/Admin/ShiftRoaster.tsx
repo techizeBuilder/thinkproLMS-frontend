@@ -18,6 +18,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import Loader from "../Loader";
+import { toast } from "../Alert/Toast";
 const API_BASE = import.meta.env.VITE_API_URL;
 
 /* ================= TYPES ================= */
@@ -131,55 +132,77 @@ const ShiftRoster = () => {
 
   /* ================= SUBMIT ================= */
 
-  const handleSubmit = async () => {
-    try {
-      if (editingShiftId) {
-        await axios.put(
-          `${API_BASE}/shifts/${editingShiftId}`,
-          {
-            date: form.date,
-            shift: form.shift,
-          },
-          {
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem("token")}`,
-            },
-          },
-        );
-      } else {
-        await axios.post(
-          `${API_BASE}/shifts/bulk`,
-          {
-            userIds: form.userIds,
-            date: form.date,
-            shift: form.shift,
-          },
-          {
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem("token")}`,
-            },
-          },
-        );
-      }
-
-      setOpen(false);
-
-      const res = await axios.get(`${API_BASE}/shifts/week`, {
-        params: {
-          start: formatDate(weekStart),
-          page,
-          limit: LIMIT,
+const handleSubmit = async () => {
+  try {
+    if (editingShiftId) {
+      // ✅ UPDATE SHIFT
+      const res = await axios.put(
+        `${API_BASE}/shifts/${editingShiftId}`,
+        {
+          date: form.date,
+          shift: form.shift,
         },
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
         },
+      );
+
+      toast({
+        type: "success",
+        title: "Shift Updated",
+        message: res.data?.message || "Shift has been updated successfully.",
       });
+    } else {
+      // ✅ ASSIGN SHIFT (BULK)
+      const res = await axios.post(
+        `${API_BASE}/shifts/bulk`,
+        {
+          userIds: form.userIds,
+          date: form.date,
+          shift: form.shift,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        },
+      );
 
-      setShifts(res.data.shifts || []);
-    } catch {
-      alert("Failed to save shift");
+      toast({
+        type: "success",
+        title: "Shift Assigned",
+        message: res.data?.message || "Shift has been assigned successfully.",
+      });
     }
-  };
+
+    setOpen(false);
+
+    // 🔄 REFRESH WEEK SHIFTS
+    const res = await axios.get(`${API_BASE}/shifts/week`, {
+      params: {
+        start: formatDate(weekStart),
+        page,
+        limit: LIMIT,
+      },
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+      },
+    });
+
+    setShifts(res.data.shifts || []);
+  } catch (error: any) {
+    toast({
+      type: "error",
+      title: "Action Failed",
+      message:
+        error?.response?.data?.message ||
+        "Failed to save shift. Please try again.",
+    });
+  }
+};
+
 
   const getShiftForCell = (userId: string, date: string) =>
     shifts.find((s) => s.userId === userId && s.date === date);
