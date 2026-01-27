@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-
+import { toast } from "../../Alert/Toast";
 const API_BASE = import.meta.env.VITE_API_URL;
 
 interface User {
@@ -104,54 +104,78 @@ export default function AddGoalModal({
   };
 
   /* ================= SUBMIT ================= */
-  const handleSubmit = async () => {
-    if (!form.title || !form.assignedTo) {
-      alert("Title & Assigned User required");
-      return;
+const handleSubmit = async () => {
+  if (!form.title || !form.assignedTo) {
+    toast({
+      type: "error",
+      title: "Validation Error",
+      message: "Title & Assigned User are required",
+    });
+    return;
+  }
+
+  try {
+    setLoading(true);
+    let res;
+
+    if (editGoal) {
+      // 🔁 UPDATE
+      res = await axios.put(
+        `${API_BASE}/goals/${editGoal._id}`,
+        {
+          title: form.title,
+          description: form.description,
+          assignedTo: form.assignedTo,
+          deadline: form.deadline,
+        },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        },
+      );
+
+      toast({
+        type: "success",
+        title: "Goal Updated",
+        message: res.data?.message || "Goal updated successfully.",
+      });
+    } else {
+      // ➕ ADD
+      res = await axios.post(
+        `${API_BASE}/goals`,
+        {
+          title: form.title,
+          description: form.description,
+          assignedTo: form.assignedTo,
+          progress: 0,
+          deadline: form.deadline,
+        },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        },
+      );
+
+      toast({
+        type: "success",
+        title: "Goal Created",
+        message: res.data?.message || "Goal created successfully.",
+      });
     }
 
-    try {
-      setLoading(true);
+    onSuccess();
+    onClose();
+  } catch (error: any) {
+    toast({
+      type: "error",
+      title: "Save Failed",
+      message:
+        error?.response?.data?.message ||
+        "Failed to save goal. Please try again.",
+    });
+  } finally {
+    setLoading(false);
+  }
+};
 
-      if (editGoal) {
-        // 🔁 UPDATE
-        await axios.put(
-          `${API_BASE}/goals/${editGoal._id}`,
-          {
-            title: form.title,
-            description: form.description,
-            assignedTo: form.assignedTo,
-            deadline:form.deadline,
-          },
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
-        );
-      } else {
-        // ➕ ADD
-        await axios.post(
-          `${API_BASE}/goals`,
-          {
-            title: form.title,
-            description: form.description,
-            assignedTo: form.assignedTo,
-            progress: 0,
-            deadline: form.deadline,
-          },
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
-        );
-      }
-
-      onSuccess();
-      onClose();
-    } catch (err) {
-      console.error("Goal save failed", err);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   return (
     <Dialog open={open} onOpenChange={onClose}>

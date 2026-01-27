@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import ApplyLeaveModal from "./ApplyLeaveModal";
 import axios from "axios";
 import Loader from "../../Loader";
-
+import { toast } from "../../Alert/Toast";
 const Leave = () => {
   const API_BASE = import.meta.env.VITE_API_URL;
   const token = localStorage.getItem("token");
@@ -54,19 +54,36 @@ const Leave = () => {
 
   /* ================= DELETE ================= */
 
-  const confirmDelete = async () => {
-    try {
-      await axios.delete(`${API_BASE}/employee/leaves/${deleteLeave._id}`, {
+const confirmDelete = async () => {
+  try {
+    const res = await axios.delete(
+      `${API_BASE}/employee/leaves/${deleteLeave._id}`,
+      {
         headers: { Authorization: `Bearer ${token}` },
-      });
+      },
+    );
 
-      setDeleteModal(false);
-      setDeleteLeave(null);
-      fetchLeaves();
-    } catch (error) {
-      console.error("Failed to delete leave", error);
-    }
-  };
+    toast({
+      type: "success",
+      title: "Leave Deleted",
+      message: res.data?.message || "Leave request deleted successfully",
+    });
+
+    setDeleteModal(false);
+    setDeleteLeave(null);
+    fetchLeaves();
+  } catch (error: any) {
+    toast({
+      type: "error",
+      title: "Delete Failed",
+      message:
+        error?.response?.data?.message ||
+        "Failed to delete leave request. Please try again.",
+    });
+    console.error("Failed to delete leave", error);
+  }
+};
+
   if(loading)return<Loader/>;
   return (
     <div className="p-4">

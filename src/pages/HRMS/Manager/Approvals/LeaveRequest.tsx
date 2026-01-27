@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import LeaveViewModal from "./LeaveViewModal";
 import Loader from "../../Loader";
+import { toast } from "../../Alert/Toast";
 const LeaveRequest = () => {
   const API_BASE = import.meta.env.VITE_API_URL;
   const token = localStorage.getItem("token");
@@ -31,18 +32,36 @@ const LeaveRequest = () => {
   }, []);
 
   /* ================= UPDATE STATUS ================= */
-  const updateStatus = async (id: string, status: string) => {
-    try {
-      await axios.patch(
-        `${API_BASE}/employee/leaves/manager/leaves/${id}/status`,
-        { status },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-      fetchLeaves();
-    } catch (error) {
-      console.error("Failed to update status", error);
-    }
-  };
+const updateStatus = async (id: string, status: string) => {
+  try {
+    const res = await axios.patch(
+      `${API_BASE}/employee/leaves/manager/leaves/${id}/status`,
+      { status },
+      { headers: { Authorization: `Bearer ${token}` } },
+    );
+
+    toast({
+      type: "success",
+      title: status === "APPROVED" ? "Leave Approved" : "Leave Rejected",
+      message:
+        res.data?.message ||
+        `Leave has been ${status.toLowerCase()} successfully.`,
+    });
+
+    fetchLeaves();
+  } catch (error: any) {
+    console.error("Failed to update status", error);
+
+    toast({
+      type: "error",
+      title: "Action Failed",
+      message:
+        error?.response?.data?.message ||
+        "Unable to update leave status. Please try again.",
+    });
+  }
+};
+
 
   const formatDate = (date: string) =>
     new Date(date).toLocaleDateString("en-GB");

@@ -1,7 +1,7 @@
 /** @format */
 import axios from "axios";
 import { useEffect, useState } from "react";
-
+import { toast } from "../../Alert/Toast";
 const API_BASE = import.meta.env.VITE_API_URL;
 
 const AddTravelRequestModal = ({ open, onClose, data, onSuccess }: any) => {
@@ -51,29 +51,57 @@ const AddTravelRequestModal = ({ open, onClose, data, onSuccess }: any) => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const submit = async () => {
-    if (!validate()) return;
+const submit = async () => {
+  if (!validate()) return;
 
-    const payload = {
-      ...form,
-      budget: Number(form.budget),
-    };
+  const payload = {
+    ...form,
+    budget: Number(form.budget),
+  };
 
+  try {
     if (data) {
-      await axios.put(`${API_BASE}/travel-requests/${data._id}`, payload, {
-        headers: { Authorization: `Bearer ${token}` },
+      const res = await axios.put(
+        `${API_BASE}/travel-requests/${data._id}`,
+        payload,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        },
+      );
+
+      toast({
+        type: "success",
+        title: "Travel Request Updated",
+        message: res?.data?.message || "Travel request updated successfully",
       });
     } else {
-      await axios.post(
+      const res = await axios.post(
         `${API_BASE}/travel-requests`,
         { ...payload, status: "PENDING" },
         { headers: { Authorization: `Bearer ${token}` } },
       );
+
+      toast({
+        type: "success",
+        title: "Travel Request Submitted",
+        message: res?.data?.message || "Travel request submitted successfully",
+      });
     }
 
     onSuccess();
     onClose();
-  };
+  } catch (error: any) {
+    toast({
+      type: "error",
+      title: "Action Failed",
+      message:
+        error?.response?.data?.message ||
+        "Something went wrong. Please try again.",
+    });
+    console.error("Travel request submit failed", error);
+  }
+};
+
 
   if (!open) return null;
 

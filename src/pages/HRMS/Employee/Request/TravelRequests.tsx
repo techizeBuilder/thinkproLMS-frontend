@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import AddTravelRequestModal from "./AddTravelRequestModal";
 import UploadReceiptModal from "./UploadReciptModal";
+import { toast } from "../../Alert/Toast";
 const API_BASE = import.meta.env.VITE_API_URL;
 
 const TravelRequests = () => {
@@ -32,17 +33,35 @@ const TravelRequests = () => {
   }, []);
 
   /* ================= DELETE ================= */
-  const confirmDelete = async () => {
-    try {
-      await axios.delete(`${API_BASE}/travel-requests/${deleteItem._id}`, {
+const confirmDelete = async () => {
+  try {
+    const res = await axios.delete(
+      `${API_BASE}/travel-requests/${deleteItem._id}`,
+      {
         headers: { Authorization: `Bearer ${token}` },
-      });
-      setDeleteItem(null);
-      fetchRequests();
-    } catch (err) {
-      console.error("Delete failed");
-    }
-  };
+      },
+    );
+
+    toast({
+      type: "success",
+      title: "Travel Request Deleted",
+      message: res?.data?.message || "Travel request deleted successfully",
+    });
+
+    setDeleteItem(null);
+    fetchRequests();
+  } catch (error: any) {
+    toast({
+      type: "error",
+      title: "Delete Failed",
+      message:
+        error?.response?.data?.message ||
+        "Unable to delete travel request. Please try again.",
+    });
+    console.error("Delete failed", error);
+  }
+};
+
 
   /* ================= UI HELPERS ================= */
   const statusBadge = (status: string) => {

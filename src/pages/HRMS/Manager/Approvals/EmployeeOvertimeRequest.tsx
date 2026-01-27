@@ -21,7 +21,7 @@ import {
 } from "@/components/ui/dialog";
 import { Eye } from "lucide-react";
 import Loader from "../../Loader";
-
+import { toast } from "../../Alert/Toast";
 const API_BASE = import.meta.env.VITE_API_URL;
 
 interface User {
@@ -65,23 +65,40 @@ const EmployeeOvertimeRequests = () => {
   }, []);
 
   /* ================= STATUS UPDATE ================= */
-  const updateStatus = async (id: string, status: "APPROVED" | "REJECTED") => {
-    try {
-      setActionLoading(true);
+const updateStatus = async (id: string, status: "APPROVED" | "REJECTED") => {
+  try {
+    setActionLoading(true);
 
-      await axios.patch(
-        `${API_BASE}/overtime/${id}`,
-        { status },
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        },
-      );
+    const res = await axios.patch(
+      `${API_BASE}/overtime/${id}`,
+      { status },
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      },
+    );
 
-      fetchRequests();
-    } finally {
-      setActionLoading(false);
-    }
-  };
+    toast({
+      type: "success",
+      title: status === "APPROVED" ? "Overtime Approved" : "Overtime Rejected",
+      message:
+        res.data?.message ||
+        `Overtime request has been ${status.toLowerCase()} successfully.`,
+    });
+
+    fetchRequests();
+  } catch (error: any) {
+    toast({
+      type: "error",
+      title: "Action Failed",
+      message:
+        error?.response?.data?.message ||
+        "Unable to update overtime request. Please try again.",
+    });
+  } finally {
+    setActionLoading(false);
+  }
+};
+
 
   if (loading) return <Loader />;
 

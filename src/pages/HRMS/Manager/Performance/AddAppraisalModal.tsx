@@ -1,7 +1,7 @@
 /** @format */
 import axios from "axios";
 import { useEffect, useState } from "react";
-
+import { toast } from "../../Alert/Toast";
 const API_BASE = import.meta.env.VITE_API_URL;
 
 const AddAppraisalModal = ({ open, onClose, data, onSuccess }: any) => {
@@ -26,7 +26,7 @@ const AddAppraisalModal = ({ open, onClose, data, onSuccess }: any) => {
         type: data.type,
         startDate: data.startDate.split("T")[0],
         endDate: data.endDate.split("T")[0],
-        applicableFor: data.applicableFor,
+        applicableFor: data.applicableFor || "All Employees",
         status: data.status,
       });
     }
@@ -39,30 +39,59 @@ const AddAppraisalModal = ({ open, onClose, data, onSuccess }: any) => {
     if (!form.title.trim()) newErrors.title = "Title is required";
     if (!form.startDate) newErrors.startDate = "Start date is required";
     if (!form.endDate) newErrors.endDate = "End date is required";
-    if (!form.applicableFor.trim())
+    if (!form.applicableFor || !form.applicableFor.trim()) {
       newErrors.applicableFor = "Applicable for is required";
+    }
+
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
   /* ================= SUBMIT ================= */
-  const submit = async () => {
-    if (!validate()) return;
+const submit = async () => {
+  if (!validate()) return;
+
+  try {
+    let res;
 
     if (data) {
-      await axios.put(`${API_BASE}/appraisals/${data._id}`, form, {
+      res = await axios.put(`${API_BASE}/appraisals/${data._id}`, form, {
         headers: { Authorization: `Bearer ${token}` },
       });
+
+      toast({
+        type: "success",
+        title: "Appraisal Updated",
+        message:
+          res.data?.message || "Appraisal has been updated successfully.",
+      });
     } else {
-      await axios.post(`${API_BASE}/appraisals`, form, {
+      res = await axios.post(`${API_BASE}/appraisals`, form, {
         headers: { Authorization: `Bearer ${token}` },
+      });
+
+      toast({
+        type: "success",
+        title: "Appraisal Created",
+        message:
+          res.data?.message || "Appraisal has been created successfully.",
       });
     }
 
     onSuccess();
     onClose();
-  };
+  } catch (error: any) {
+    toast({
+      type: "error",
+      title: "Operation Failed",
+      message:
+        error?.response?.data?.message ||
+        "Unable to save appraisal. Please try again.",
+    });
+  }
+};
+
 
   if (!open) return null;
 

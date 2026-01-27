@@ -1,10 +1,17 @@
 /** @format */
 export default function SelfAppraisalViewModal({ open, onClose, data }: any) {
-  if (!open) return null;
+  // 🔒 SAFETY GUARD: modal tabhi render hoga jab open aur data dono hon
+  if (!open || !data) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-      <div className="bg-white rounded-2xl w-full max-w-2xl p-6 space-y-4 overflow-y-auto max-h-[90vh]">
+    <div
+      className="fixed inset-0 bg-black/40 flex items-center justify-center z-50"
+      onClick={onClose}
+    >
+      <div
+        className="bg-white rounded-2xl w-full max-w-2xl p-6 space-y-4 overflow-y-auto max-h-[90vh]"
+        onClick={(e) => e.stopPropagation()}
+      >
         <div className="flex justify-between items-center">
           <h2 className="text-xl font-semibold">Self Appraisal</h2>
           <button onClick={onClose} className="text-gray-500">
@@ -14,38 +21,31 @@ export default function SelfAppraisalViewModal({ open, onClose, data }: any) {
 
         <div className="space-y-3 text-sm text-gray-700">
           <p>
-            <b>Goals Achievement:</b> {data.goalsAchievement}
+            <b>Title:</b> {data.title}
           </p>
-
           <p>
-            <b>Goals Rating:</b> {data.goalsRating}/5
+            <b>Type:</b> {data.type}
           </p>
-
-          <div>
-            <b>Skills Rating:</b>
-            <ul className="ml-4 list-disc">
-              <li>Technical: {data.skillsRating.technical}</li>
-              <li>Communication: {data.skillsRating.communication}</li>
-              <li>Teamwork: {data.skillsRating.teamwork}</li>
-              <li>Problem Solving: {data.skillsRating.problemSolving}</li>
-            </ul>
-          </div>
-
           <p>
-            <b>Contributions:</b> {data.contributions}
+            <b>Status:</b> {data.status}
+          </p>
+          <p>
+            <b>Duration:</b> {new Date(data.startDate).toLocaleDateString()} -{" "}
+            {new Date(data.endDate).toLocaleDateString()}
+          </p>
+          <p>
+            <b>Applicable For:</b> {data.applicableFor}
+          </p>
+          <p>
+            <b>Progress:</b> {data.progress}%
           </p>
 
-          <p>
-            <b>Challenges:</b> {data.challenges}
-          </p>
-
-          <p>
-            <b>Learning:</b> {data.learning}
-          </p>
-
-          <p>
-            <b>Summary:</b> {data.summary}
-          </p>
+          {/* OPTIONAL INFO */}
+          {!data.goalsAchievement && (
+            <p className="text-xs text-gray-500 italic">
+              Self appraisal not submitted yet.
+            </p>
+          )}
         </div>
 
         <div className="text-right">

@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import AddExpenseModal from "./AddExpenseModal";
 import Loader from "../../Loader";
-
+import { toast } from "../../Alert/Toast";
 const API_BASE = import.meta.env.VITE_API_URL;
 
 const Expense = () => {
@@ -30,13 +30,32 @@ const Expense = () => {
   }, []);
 
   /* ================= DELETE ================= */
-  const confirmDelete = async () => {
-    await axios.delete(`${API_BASE}/expenses/${deleteId}`, {
+const confirmDelete = async () => {
+  try {
+    const res = await axios.delete(`${API_BASE}/expenses/${deleteId}`, {
       headers: { Authorization: `Bearer ${token}` },
     });
+
+    toast({
+      type: "success",
+      title: "Expense Deleted",
+      message: res?.data?.message || "Expense deleted successfully",
+    });
+
     setDeleteId(null);
     fetchExpenses();
-  };
+  } catch (error: any) {
+    toast({
+      type: "error",
+      title: "Delete Failed",
+      message:
+        error?.response?.data?.message ||
+        "Failed to delete expense. Please try again.",
+    });
+    console.error("Expense delete failed", error);
+  }
+};
+
   if(loading)return<Loader/>;
   return (
     <div className="p-4">

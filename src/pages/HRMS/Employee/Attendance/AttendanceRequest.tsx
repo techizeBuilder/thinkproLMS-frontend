@@ -5,7 +5,7 @@ import axios from "axios";
 import { Plus, Eye, Edit, Trash2, MoreVertical } from "lucide-react";
 import AttendanceRequestModal from "./AttendanceRequestModel";
 import Loader from "../../Loader";
-
+import { toast } from "../../Alert/Toast";
 const API = import.meta.env.VITE_API_URL;
 
 export default function AttendanceRequest() {
@@ -44,24 +44,51 @@ export default function AttendanceRequest() {
   };
 
   /* ---------- submit ---------- */
-  const submit = async () => {
+const submit = async () => {
+  try {
     if (mode === "ADD") {
-      await api.post("/attendance-request", form);
+      const res = await api.post("/attendance-request", form);
+      toast({
+        type: "success",
+        title: "Success",
+        message: res.data?.message || "Attendance request added successfully",
+      });
     }
 
     if (mode === "EDIT") {
-      await api.put(`/attendance-request/${selectedId}`, form);
+      const res = await api.put(`/attendance-request/${selectedId}`, form);
+      toast({
+        type: "success",
+        title: "Success",
+        message: res.data?.message || "Attendance request updated successfully",
+      });
     }
 
     if (mode === "DELETE") {
-      await api.delete(`/attendance-request/${selectedId}`);
+      const res = await api.delete(`/attendance-request/${selectedId}`);
+      toast({
+        type: "success",
+        title: "Success",
+        message: res.data?.message || "Attendance request deleted successfully",
+      });
     }
 
     setOpen(false);
     setSelectedId(null);
     setForm({});
     fetchRequests();
-  };
+  } catch (error: any) {
+    toast({
+      type: "error",
+      title: "Action Failed",
+      message:
+        error?.response?.data?.message ||
+        "Something went wrong, please try again",
+    });
+    console.error("Attendance request action failed", error);
+  }
+};
+
   if(loading)return<Loader/>;
   return (
     <div className="p-6 space-y-4">

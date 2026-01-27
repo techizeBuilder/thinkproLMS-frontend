@@ -4,7 +4,8 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import { Eye, CheckCircle } from "lucide-react";
 import Loader from "../../Loader";
-
+import { toast } from "../../Alert/Toast";
+import { confirmToast } from "../Confirm/ConfirmModal";
 type PayrollStatus = "Draft" | "Processed" | "Paid" | "Rejected";
 
 interface Employee {
@@ -92,24 +93,44 @@ const SalaryDisbursement = () => {
   };
 
   /* ================= MARK AS PAID ================= */
-  const confirmPaid = async (payrollId: string): Promise<void> => {
-    if (!window.confirm("Confirm salary paid?")) return;
+const confirmPaid = async (payrollId: string): Promise<void> => {
+  confirmToast({
+    title: "Confirm Payment",
+    message: "Are you sure you want to mark this salary as Paid?",
+    onConfirm: async () => {
+      try {
+        const res = await axios.patch(
+          `${API_BASE}/payroll/${payrollId}/status`,
+          { status: "Paid" },
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          },
+        );
 
-    try {
-      await axios.patch(
-        `${API_BASE}/payroll/${payrollId}/status`,
-        { status: "Paid" },
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
+        toast({
+          type: "success",
+          title: "Salary Paid",
+          message:
+            res?.data?.message ||
+            "Payroll status has been marked as Paid successfully.",
+        });
 
-      fetchPayroll();
-    } catch (error) {
-      console.error(error);
-      alert("Failed to update status");
-    }
-  };
+        fetchPayroll();
+      } catch (error: any) {
+        toast({
+          type: "error",
+          title: "Update Failed",
+          message:
+            error?.response?.data?.message ||
+            "Failed to update payroll status.",
+        });
+        console.error(error);
+      }
+    },
+  });
+};
+
+
   if(loading)return<Loader/>
   /* ================= UI ================= */
   return (

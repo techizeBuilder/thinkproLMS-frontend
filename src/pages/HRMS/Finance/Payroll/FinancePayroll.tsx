@@ -5,7 +5,7 @@ import axios from "axios";
 import { MoreVertical } from "lucide-react";
 import ViewPayrollModal from "../../Admin/Payroll/ViewPayrollModal";
 import Loader from "../../Loader";
-
+import { toast } from "../../Alert/Toast";
 const API_BASE = import.meta.env.VITE_API_URL;
 
 type PayrollStatus = "Draft" | "Processed" | "Paid" | "Rejected";
@@ -67,46 +67,71 @@ const FinancePayroll = () => {
   }, [month]);
 
   /* ================= UPDATE STATUS ================= */
-  const updateStatus = async (
-    payrollId: string,
-    status: PayrollStatus,
-    reason?: string
-  ) => {
-    try {
-      await axios.patch(
-        `${API_BASE}/payroll/${payrollId}/status`,
-        { status, rejectionReason: reason },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+const updateStatus = async (
+  payrollId: string,
+  status: PayrollStatus,
+  reason?: string,
+) => {
+  try {
+    const res = await axios.patch(
+      `${API_BASE}/payroll/${payrollId}/status`,
+      { status, rejectionReason: reason },
+      { headers: { Authorization: `Bearer ${token}` } },
+    );
 
-      setPayroll((prev) =>
-        prev.map((p) => (p.payrollId === payrollId ? { ...p, status } : p))
-      );
-      setLoading(false);
-    } catch (error) {
-      console.error(error);
-      alert("Status update failed");
-    }
-  };
+    setPayroll((prev) =>
+      prev.map((p) => (p.payrollId === payrollId ? { ...p, status } : p)),
+    );
 
-  const rejectPayroll = async (payrollId: string, reason: string) => {
-    try {
-      await axios.patch(
-        `${API_BASE}/payroll/${payrollId}/reject`,
-        { reason: reason },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+    toast({
+      type: "success",
+      title: "Payroll Updated",
+      message: res?.data?.message || `Payroll status updated to ${status}.`,
+    });
 
-      setPayroll((prev) =>
-        prev.map((p) =>
-          p.payrollId === payrollId ? { ...p, status: "Rejected" } : p
-        )
-      );
-    } catch (err) {
-      console.error(err);
-      alert("Reject failed");
-    }
-  };
+    setLoading(false);
+  } catch (error: any) {
+    toast({
+      type: "error",
+      title: "Update Failed",
+      message:
+        error?.response?.data?.message ||
+        "Status update failed. Please try again.",
+    });
+    console.error(error);
+  }
+};
+
+const rejectPayroll = async (payrollId: string, reason: string) => {
+  try {
+    const res = await axios.patch(
+      `${API_BASE}/payroll/${payrollId}/reject`,
+      { reason: reason },
+      { headers: { Authorization: `Bearer ${token}` } },
+    );
+
+    setPayroll((prev) =>
+      prev.map((p) =>
+        p.payrollId === payrollId ? { ...p, status: "Rejected" } : p,
+      ),
+    );
+
+    toast({
+      type: "success",
+      title: "Payroll Rejected",
+      message: res?.data?.message || "Payroll has been rejected successfully.",
+    });
+  } catch (error: any) {
+    toast({
+      type: "error",
+      title: "Rejection Failed",
+      message:
+        error?.response?.data?.message || "Reject failed. Please try again.",
+    });
+    console.error(error);
+  }
+};
+
 
   if(loading)return<Loader/>;
   /* ================= UI ================= */

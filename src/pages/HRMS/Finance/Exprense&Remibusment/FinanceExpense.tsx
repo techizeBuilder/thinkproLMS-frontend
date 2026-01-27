@@ -2,8 +2,9 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import Loader from "../../Loader";
-
+import { toast } from "../../Alert/Toast";
 const API_BASE = import.meta.env.VITE_API_URL;
+const ViewAPI = API_BASE.replace("/api", "");
 
 const STATUS_OPTIONS = ["PENDING", "APPROVED", "REJECTED"];
 
@@ -26,16 +27,36 @@ export default function FinanceExpenseRequest() {
     fetchExpenses();
   }, []);
 
-  const updateStatus = async (id: string, status: string) => {
-    await axios.put(
+const updateStatus = async (id: string, status: string) => {
+  try {
+    const res = await axios.put(
       `${API_BASE}/expenses/${id}/status`,
       { status },
       {
         headers: { Authorization: `Bearer ${token}` },
-      }
+      },
     );
+
+    toast({
+      type: "success",
+      title: "Expense Status Updated",
+      message:
+        res?.data?.message ||
+        `Expense has been ${status.toLowerCase()} successfully.`,
+    });
+
     fetchExpenses();
-  };
+  } catch (error: any) {
+    toast({
+      type: "error",
+      title: "Update Failed",
+      message:
+        error?.response?.data?.message ||
+        "Unable to update expense status. Please try again.",
+    });
+  }
+};
+
 
   const statusClasses = (status: string) => {
     switch (status) {
@@ -90,7 +111,7 @@ export default function FinanceExpenseRequest() {
                     value={exp.status}
                     onChange={(e) => updateStatus(exp._id, e.target.value)}
                     className={`px-2 py-1 rounded border text-xs font-semibold outline-none cursor-pointer ${statusClasses(
-                      exp.status
+                      exp.status,
                     )}`}
                   >
                     {STATUS_OPTIONS.map((status) => (
@@ -126,8 +147,14 @@ export default function FinanceExpenseRequest() {
 
       {/* ================= VIEW MODAL ================= */}
       {selectedExpense && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-white w-full max-w-lg rounded-lg p-5">
+        <div
+          className="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
+          onClick={() => setSelectedExpense(null)}
+        >
+          <div
+            className="bg-white w-full max-w-lg rounded-lg p-5"
+            onClick={(e) => e.stopPropagation()}
+          >
             <h3 className="text-lg font-semibold mb-4">Expense Details</h3>
 
             <div className="space-y-2 text-sm">
@@ -153,7 +180,7 @@ export default function FinanceExpenseRequest() {
 
               {selectedExpense.receipt && (
                 <a
-                  href={`http://localhost:8000${selectedExpense.receipt}`}
+                  href={`${ViewAPI}${selectedExpense.receipt}`}
                   target="_blank"
                   className="inline-block text-blue-600 underline mt-2"
                 >

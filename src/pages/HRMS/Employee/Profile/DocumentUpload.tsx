@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import { FileText, Upload, Eye, CheckCircle, AlertCircle } from "lucide-react";
 import Loader from "../../Loader";
-
+import { toast } from "../../Alert/Toast";
 const API = import.meta.env.VITE_API_URL;
 const ViewAPI = API.replace("/api", "");
 
@@ -93,30 +93,58 @@ const handleUpload = async (file: File, field: string, type: DocumentType) => {
 
     // ✅ IF DOCUMENT ALREADY EXISTS → UPDATE (PUT)
     if (existingDoc) {
-      await axios.put(`${API}/documents/update/${existingDoc._id}`, formData, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "multipart/form-data",
+      const res = await axios.put(
+        `${API}/documents/update/${existingDoc._id}`,
+        formData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "multipart/form-data",
+          },
         },
+      );
+
+      toast({
+        type: "success",
+        title: "Document Updated",
+        message: res.data?.message || "Document updated successfully",
       });
     }
     // ✅ FIRST TIME UPLOAD → CREATE (POST)
     else {
-      await axios.post(`${API}/documents/upload/${userId}`, formData, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "multipart/form-data",
+      const res = await axios.post(
+        `${API}/documents/upload/${userId}`,
+        formData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "multipart/form-data",
+          },
         },
+      );
+
+      toast({
+        type: "success",
+        title: "Document Uploaded",
+        message: res.data?.message || "Document uploaded successfully",
       });
     }
 
     await fetchDocuments();
-  } catch (error) {
+  } catch (error: any) {
+    toast({
+      type: "error",
+      title: "Upload Failed",
+      message:
+        error?.response?.data?.message ||
+        "Document upload failed, please try again",
+    });
     console.error("Upload failed", error);
   } finally {
     setUploading(null);
   }
 };
+
 
 
   /* ================= UI STATES ================= */

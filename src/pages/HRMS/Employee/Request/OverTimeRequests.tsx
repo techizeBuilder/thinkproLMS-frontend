@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import axios from "@/api/axiosInstance";
 import Loader from "../../Loader";
-
+import { toast } from "../../Alert/Toast";
 import {
   MoreVertical,
   Plus,
@@ -87,15 +87,34 @@ export default function EmployeeOvertimeRequest() {
     if (!validate()) return;
 
     try {
+      let res;
+
       if (editItem) {
-        await axios.patch(`/overtime/${editItem._id}`, form);
+        res = await axios.patch(`/overtime/${editItem._id}`, form);
       } else {
-        await axios.post("/overtime", form);
+        res = await axios.post("/overtime", form);
       }
+
+      toast({
+        type: "success",
+        title: editItem ? "Overtime Updated" : "Overtime Added",
+        message:
+          res?.data?.message ||
+          (editItem
+            ? "Overtime updated successfully."
+            : "Overtime added successfully."),
+      });
 
       setOpen(false);
       fetchData();
-    } catch (err) {
+    } catch (err: any) {
+      toast({
+        type: "error",
+        title: "Action Failed",
+        message:
+          err?.response?.data?.message ||
+          "Unable to save overtime. Please try again.",
+      });
       console.error(err);
     }
   };
@@ -106,10 +125,24 @@ export default function EmployeeOvertimeRequest() {
     if (!deleteItem) return;
 
     try {
-      await axios.delete(`/overtime/${deleteItem._id}`);
+      const res = await axios.delete(`/overtime/${deleteItem._id}`);
+
+      toast({
+        type: "success",
+        title: "Overtime Deleted",
+        message: res?.data?.message || "Overtime deleted successfully.",
+      });
+
       setDeleteOpen(false);
       fetchData();
-    } catch (err) {
+    } catch (err: any) {
+      toast({
+        type: "error",
+        title: "Delete Failed",
+        message:
+          err?.response?.data?.message ||
+          "Unable to delete overtime. Please try again.",
+      });
       console.error(err);
     }
   };

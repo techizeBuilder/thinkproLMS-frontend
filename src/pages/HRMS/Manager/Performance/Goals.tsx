@@ -5,7 +5,7 @@ import axios from "axios";
 import { MoreVertical } from "lucide-react";
 import AddGoalModal from "./AddGoalModal";
 import Loader from "../../Loader";
-
+import { toast } from "../../Alert/Toast";
 const API_BASE = import.meta.env.VITE_API_URL;
 
 interface Goal {
@@ -52,20 +52,35 @@ export default function Goals() {
   };
 
   /* ================= DELETE ================= */
-  const confirmDelete = async () => {
-    if (!deleteId) return;
+const confirmDelete = async () => {
+  if (!deleteId) return;
 
-    try {
-      await axios.delete(`${API_BASE}/goals/${deleteId}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      setOpenDelete(false);
-      setDeleteId(null);
-      fetchGoals();
-    } catch (err) {
-      console.error("Delete failed", err);
-    }
-  };
+  try {
+    const res = await axios.delete(`${API_BASE}/goals/${deleteId}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+
+    toast({
+      type: "success",
+      title: "Goal Deleted",
+      message: res.data?.message || "Goal deleted successfully",
+    });
+
+    setOpenDelete(false);
+    setDeleteId(null);
+    fetchGoals();
+  } catch (error: any) {
+    toast({
+      type: "error",
+      title: "Delete Failed",
+      message:
+        error?.response?.data?.message || "Delete failed, please try again",
+    });
+    console.error("Delete failed", error);
+  }
+};
+
+
   if(loading)return<Loader/>
   return (
     <div className="space-y-6">

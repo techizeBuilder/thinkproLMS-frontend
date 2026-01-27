@@ -1,6 +1,7 @@
 /** @format */
 import { useEffect, useState } from "react";
 import axios from "axios";
+import Loader from "../../Loader";
 
 const API = import.meta.env.VITE_API_URL;
 
@@ -19,18 +20,20 @@ const Stars = ({ value }: { value: number }) => {
 export default function MyFeedback() {
   const token = localStorage.getItem("token");
   const [list, setList] = useState<any[]>([]);
+  const [loading,setLoading]=useState(true);
 
   const fetchFeedback = async () => {
     const res = await axios.get(`${API}/feedback/my`, {
       headers: { Authorization: `Bearer ${token}` },
     });
     setList(res.data || []);
+    setLoading(false);
   };
 
   useEffect(() => {
     fetchFeedback();
   }, []);
-
+  if(loading)return<Loader/>;
   return (
     <div className="p-6">
       <h1 className="text-2xl font-semibold mb-6">My Appraisal Feedback</h1>

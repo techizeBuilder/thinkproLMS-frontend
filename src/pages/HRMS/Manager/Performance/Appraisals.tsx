@@ -3,7 +3,8 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import AddAppraisalModal from "./AddAppraisalModal";
 import Loader from "../../Loader";
-
+import { toast } from "../../Alert/Toast";
+import SelfAppraisalViewModal from "./SelfAppraisalViewModal";
 const API_BASE = import.meta.env.VITE_API_URL;
 
 type Appraisal = {
@@ -23,9 +24,10 @@ export default function Appraisals() {
   const [data, setData] = useState<Appraisal[]>([]);
   const [open, setOpen] = useState(false);
   const [editData, setEditData] = useState<Appraisal | null>(null);
+  const [openView, setOpenView] = useState(false);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [loading,setLoading]=useState(true);
-
+  const [viewData, setViewData] = useState<any>(null);
   /* ================= FETCH ================= */
   const fetchAppraisals = async () => {
     const res = await axios.get(`${API_BASE}/appraisals`, {
@@ -40,14 +42,33 @@ export default function Appraisals() {
   }, []);
 
   /* ================= DELETE ================= */
-  const confirmDelete = async () => {
-    if (!deleteId) return;
-    await axios.delete(`${API_BASE}/appraisals/${deleteId}`, {
+const confirmDelete = async () => {
+  if (!deleteId) return;
+
+  try {
+    const res = await axios.delete(`${API_BASE}/appraisals/${deleteId}`, {
       headers: { Authorization: `Bearer ${token}` },
     });
+
+    toast({
+      type: "success",
+      title: "Appraisal Deleted",
+      message: res.data?.message || "Appraisal deleted successfully.",
+    });
+
     setDeleteId(null);
     fetchAppraisals();
-  };
+  } catch (error: any) {
+    toast({
+      type: "error",
+      title: "Delete Failed",
+      message:
+        error?.response?.data?.message ||
+        "Unable to delete appraisal. Please try again.",
+    });
+  }
+};
+
   if(loading)return <Loader/>;
   /* ================= UI ================= */
   return (
@@ -103,8 +124,8 @@ export default function Appraisals() {
                     a.status === "ACTIVE"
                       ? "bg-blue-100 text-blue-700"
                       : a.status === "CLOSED"
-                      ? "bg-green-100 text-green-700"
-                      : "bg-gray-100 text-gray-700"
+                        ? "bg-green-100 text-green-700"
+                        : "bg-gray-100 text-gray-700"
                   }`}
                 >
                   {a.status}
@@ -130,12 +151,23 @@ export default function Appraisals() {
             <div className="flex gap-3 mt-5">
               <button
                 onClick={() => {
+                  console.log("VIEW CLICKED", a);
+                  setViewData(a);
+                  setOpenView(true);
+                }}
+                className="px-3 py-1.5 border rounded-md text-sm"
+              >
+                View
+              </button>
+
+              <button
+                onClick={() => {
                   setEditData(a);
                   setOpen(true);
                 }}
                 className="px-3 py-1.5 border rounded-md text-sm"
               >
-                View / Edit
+                Edit
               </button>
 
               {a.status !== "CLOSED" && (
@@ -158,6 +190,13 @@ export default function Appraisals() {
           onClose={() => setOpen(false)}
           data={editData}
           onSuccess={fetchAppraisals}
+        />
+      )}
+      {openView && (
+        <SelfAppraisalViewModal
+          open={openView}
+          onClose={() => setOpenView(false)}
+          data={viewData} // ✅ sahi
         />
       )}
 

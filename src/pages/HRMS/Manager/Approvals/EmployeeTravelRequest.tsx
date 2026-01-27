@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import Loader from "../../Loader";
-
+import { toast } from "../../Alert/Toast";
 const API_BASE = import.meta.env.VITE_API_URL;
 
 export default function EmployeeTravelRequest() {
@@ -25,18 +25,41 @@ export default function EmployeeTravelRequest() {
     fetchRequests();
   }, []);
 
-  const updateStatus = async (id: string, status: string) => {
-    await axios.patch(
+const updateStatus = async (id: string, status: string) => {
+  try {
+    const res = await axios.patch(
       `${API_BASE}/travel-requests/manager/${id}/status`,
       { status },
       {
         headers: {
           Authorization: `Bearer ${token}`,
         },
-      }
+      },
     );
+
+    toast({
+      type: "success",
+      title:
+        status === "APPROVED"
+          ? "Travel Request Approved"
+          : "Travel Request Rejected",
+      message:
+        res.data?.message ||
+        `Travel request has been ${status.toLowerCase()} successfully.`,
+    });
+
     fetchRequests();
-  };
+  } catch (error: any) {
+    toast({
+      type: "error",
+      title: "Update Failed",
+      message:
+        error?.response?.data?.message ||
+        "Unable to update travel request status. Please try again.",
+    });
+  }
+};
+
 
   const statusColor = (status: string) => {
     if (status === "APPROVED") return "bg-green-100 text-green-700";
@@ -83,7 +106,7 @@ export default function EmployeeTravelRequest() {
                     value={r.status}
                     onChange={(e) => updateStatus(r._id, e.target.value)}
                     className={`px-2 py-1 rounded text-xs font-semibold ${statusColor(
-                      r.status
+                      r.status,
                     )}`}
                   >
                     <option value="PENDING">PENDING</option>
@@ -112,8 +135,14 @@ export default function EmployeeTravelRequest() {
 
       {/* ================= VIEW MODAL ================= */}
       {viewData && (
-        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-          <div className="bg-white w-full max-w-md rounded-lg p-5">
+        <div
+          className="fixed inset-0 bg-black/40 flex items-center justify-center z-50"
+          onClick={() => setViewData(null)}
+        >
+          <div
+            className="bg-white w-full max-w-md rounded-lg p-5"
+            onClick={(e) => e.stopPropagation()}
+          >
             <h3 className="text-lg font-semibold mb-4">
               Travel Request Details
             </h3>

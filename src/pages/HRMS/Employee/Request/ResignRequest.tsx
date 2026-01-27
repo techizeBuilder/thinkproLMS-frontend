@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { Plus, MoreVertical, Eye, Pencil, Trash2, X } from "lucide-react";
-
+import { toast } from "../../Alert/Toast";
 const API = import.meta.env.VITE_API_URL;
 
 /* ---------------- TYPES ---------------- */
@@ -23,6 +23,7 @@ export default function ResignationRequest() {
   const [data, setData] = useState<Resignation[]>([]);
   const [open, setOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
+  const [errors, setErrors] = useState<any>({});
 
   const [viewItem, setViewItem] = useState<Resignation | null>(null);
   const [editItem, setEditItem] = useState<Resignation | null>(null);
@@ -51,41 +52,101 @@ export default function ResignationRequest() {
     fetchRequests();
   }, []);
 
+const validate = () => {
+  let newErrors: any = {};
+
+  if (!form.resignationType)
+    newErrors.resignationType = "Resignation type is required";
+
+  if (!form.reasonCategory)
+    newErrors.reasonCategory = "Reason category is required";
+
+  if (!form.reasonText) newErrors.reasonText = "Reason is required";
+
+  if (!form.expectedLastWorkingDay)
+    newErrors.expectedLastWorkingDay = "Expected last working day is required";
+
+  setErrors(newErrors);
+
+  return Object.keys(newErrors).length === 0;
+};
+
+
   /* ---------------- SAVE / UPDATE ---------------- */
-  const handleSubmit = async () => {
+const handleSubmit = async () => {
+  if (!validate()) return;
+  try {
+    let res;
+
     if (editItem) {
-      await axios.patch(`${API}/resignation/${editItem._id}`, form, {
+      res = await axios.patch(`${API}/resignation/${editItem._id}`, form, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
       });
     } else {
-      await axios.post(`${API}/resignation`, form, {
+      res = await axios.post(`${API}/resignation`, form, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
       });
     }
 
+    toast({
+      type: "success",
+      title: editItem ? "Resignation Updated" : "Resignation Submitted",
+      message:
+        res?.data?.message ||
+        (editItem
+          ? "Resignation updated successfully."
+          : "Resignation submitted successfully."),
+    });
+
     setOpen(false);
     resetState();
     fetchRequests();
-  };
+  } catch (error: any) {
+    toast({
+      type: "error",
+      title: "Action Failed",
+      message:
+        error?.response?.data?.message ||
+        "Unable to submit resignation. Please try again.",
+    });
+  }
+};
 
-  /* ---------------- DELETE ---------------- */
-  const handleDelete = async () => {
-    if (!deleteItem) return;
+/* ---------------- DELETE ---------------- */
+const handleDelete = async () => {
+  if (!deleteItem) return;
 
-    await axios.delete(`${API}/resignation/${deleteItem._id}`, {
+  try {
+    const res = await axios.delete(`${API}/resignation/${deleteItem._id}`, {
       headers: {
         Authorization: `Bearer ${localStorage.getItem("token")}`,
       },
     });
 
+    toast({
+      type: "success",
+      title: "Resignation Deleted",
+      message: res?.data?.message || "Resignation deleted successfully.",
+    });
+
     setDeleteOpen(false);
     setDeleteItem(null);
     fetchRequests();
-  };
+  } catch (error: any) {
+    toast({
+      type: "error",
+      title: "Delete Failed",
+      message:
+        error?.response?.data?.message ||
+        "Unable to delete resignation. Please try again.",
+    });
+  }
+};
+
 
   const resetState = () => {
     setForm({
@@ -246,11 +307,11 @@ export default function ResignationRequest() {
       {open && (
         <div
           className="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
-          onClick={() => setOpen(false)} // ✅ OUTSIDE CLICK CLOSE
+          onClick={() => setOpen(false)}
         >
           <div
             className="bg-white w-full max-w-xl rounded-xl p-6 relative"
-            onClick={(e) => e.stopPropagation()} // ✅ INSIDE CLICK SAFE
+            onClick={(e) => e.stopPropagation()}
           >
             <button
               onClick={() => setOpen(false)}
@@ -267,16 +328,22 @@ export default function ResignationRequest() {
                   : "Add Resignation"}
             </h2>
 
+            {/* ================= FORM ================= */}
             <div className="grid grid-cols-1 gap-4">
+              {/* Resignation Type */}
               <div>
-                <label className="text-sm font-medium">Resignation Type</label>
+                <label className="text-sm font-medium">
+                  Resignation Type <span className="text-red-500">*</span>
+                </label>
                 <select
                   disabled={!!viewItem}
                   value={form.resignationType}
                   onChange={(e) =>
                     setForm({ ...form, resignationType: e.target.value })
                   }
-                  className="w-full border p-2 rounded"
+                  className={`w-full border p-2 rounded ${
+                    errors.resignationType ? "border-red-500" : ""
+                  }`}
                 >
                   <option value="">Select</option>
                   <option value="Voluntary">Voluntary</option>
@@ -284,17 +351,27 @@ export default function ResignationRequest() {
                   <option value="Personal">Personal</option>
                   <option value="Career">Career Growth</option>
                 </select>
+                {errors.resignationType && (
+                  <p className="text-red-500 text-xs mt-1">
+                    {errors.resignationType}
+                  </p>
+                )}
               </div>
 
+              {/* Reason Category */}
               <div>
-                <label className="text-sm font-medium">Reason Category</label>
+                <label className="text-sm font-medium">
+                  Reason Category <span className="text-red-500">*</span>
+                </label>
                 <select
                   disabled={!!viewItem}
                   value={form.reasonCategory}
                   onChange={(e) =>
                     setForm({ ...form, reasonCategory: e.target.value })
                   }
-                  className="w-full border p-2 rounded"
+                  className={`w-full border p-2 rounded ${
+                    errors.reasonCategory ? "border-red-500" : ""
+                  }`}
                 >
                   <option value="">Select</option>
                   <option value="Salary">Salary</option>
@@ -302,23 +379,40 @@ export default function ResignationRequest() {
                   <option value="Environment">Work Environment</option>
                   <option value="Other">Other</option>
                 </select>
+                {errors.reasonCategory && (
+                  <p className="text-red-500 text-xs mt-1">
+                    {errors.reasonCategory}
+                  </p>
+                )}
               </div>
 
+              {/* Reason */}
               <div>
-                <label className="text-sm font-medium">Reason</label>
+                <label className="text-sm font-medium">
+                  Reason <span className="text-red-500">*</span>
+                </label>
                 <textarea
                   disabled={!!viewItem}
                   value={form.reasonText}
                   onChange={(e) =>
                     setForm({ ...form, reasonText: e.target.value })
                   }
-                  className="w-full border p-2 rounded"
+                  className={`w-full border p-2 rounded ${
+                    errors.reasonText ? "border-red-500" : ""
+                  }`}
                 />
+                {errors.reasonText && (
+                  <p className="text-red-500 text-xs mt-1">
+                    {errors.reasonText}
+                  </p>
+                )}
               </div>
 
+              {/* Expected Last Working Day */}
               <div>
                 <label className="text-sm font-medium">
-                  Expected Last Working Day
+                  Expected Last Working Day{" "}
+                  <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="date"
@@ -330,11 +424,19 @@ export default function ResignationRequest() {
                       expectedLastWorkingDay: e.target.value,
                     })
                   }
-                  className="w-full border p-2 rounded"
+                  className={`w-full border p-2 rounded ${
+                    errors.expectedLastWorkingDay ? "border-red-500" : ""
+                  }`}
                 />
+                {errors.expectedLastWorkingDay && (
+                  <p className="text-red-500 text-xs mt-1">
+                    {errors.expectedLastWorkingDay}
+                  </p>
+                )}
               </div>
             </div>
 
+            {/* ================= ACTION BUTTONS ================= */}
             {!viewItem && (
               <div className="flex justify-end gap-3 mt-6">
                 <button

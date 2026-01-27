@@ -523,10 +523,8 @@ export default function AppRouter() {
           <Route path="SuperAdmin/departments" element={<DepartmentPage />} />
           <Route path="SuperAdmin/designations" element={<Designation />} />
           <Route path="SuperAdmin/policies" element={<Policies />} />
-
           {/* MANAGER ROUTES */}
           <Route path="manager" element={<Navigate to="dashboard" replace />} />
-
           <Route path="manager/dashboard" element={<ManagerDashboard />} />
           <Route path="manager/team" element={<TeamMembers />} />
           <Route path="manager/leave-calendar" element={<HolidayCalendar />} />
@@ -562,10 +560,8 @@ export default function AppRouter() {
             path="manager/approvals/profile-updates"
             element={<EmployeeProfileUpdateRequest />}
           />
-
           {/* Employee ROUTES */}
           <Route path="employe" element={<Navigate to="dashboard" replace />} />
-
           <Route path="employee/dashboard" element={<EmployeeDashboard />} />
           <Route
             path="employee/profile/personal"
@@ -629,6 +625,7 @@ export default function AppRouter() {
           />
           <Route path="employee/performance/history" element={<MyFeedback />} />
           <Route path="employee/letters" element={<EmployeeLetters />} />
+          <Route path="finance" element={<Navigate to="dashboard" replace />} />
           <Route path="finance/dashboard" element={<FinanceDashboard />} />
           <Route path="finance/payroll/review" element={<FinancePayroll />} />
           <Route
@@ -649,7 +646,7 @@ export default function AppRouter() {
             element={<FinanceReimbursementRequests />}
           />
           {/* MANAGER ROUTES */}
-          <Route path="it" element={<Navigate to="onboarding" replace />} />
+          <Route path="it" element={<Navigate to="dashboard" replace />} />
           <Route path="it/dashboard" element={<ITAdminDashboard />} />
           <Route path="it/onboarding" element={<EmployeeOnboardingTask />} />
           <Route path="it/accounts" element={<AccountManagement />} />
@@ -665,6 +662,7 @@ export default function AppRouter() {
             element={<ITClearanceDashboard />}
           />
           {/* Admin ROUTES */}
+          <Route path="admin" element={<Navigate to="dashboard" replace />} />
           <Route path="admin/dashboard" element={<Dashboard />} />
           <Route
             path="admin/onboarding/workstation"
@@ -707,8 +705,8 @@ export default function AppRouter() {
             path="admin/offboarding/final-clearance"
             element={<FullFinalClearance />}
           />
-
           {/* Auditor ROUTES */}
+          <Route path="auditor" element={<Navigate to="dashboard" replace />} />
           <Route path="auditor/employees" element={<AutiorEmployee />} />
           <Route path="auditor/payroll" element={<AuditorPayroll />} />
           <Route path="auditor/attendance" element={<AttendanceLogs />} />

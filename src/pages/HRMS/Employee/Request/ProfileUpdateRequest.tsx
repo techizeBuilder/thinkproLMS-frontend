@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import axios from "@/api/axiosInstance";
 import Loader from "../../Loader";
-
+import { toast } from "../../Alert/Toast";
 import {
   MoreVertical,
   Plus,
@@ -84,15 +84,36 @@ export default function ProfileUpdateRequest() {
     if (!validate()) return;
 
     try {
+      let res;
+
       if (editItem) {
-        await axios.patch(`/profile-update/${editItem._id}`, form);
+        res = await axios.patch(`/profile-update/${editItem._id}`, form);
       } else {
-        await axios.post("/profile-update", form);
+        res = await axios.post("/profile-update", form);
       }
+
+      toast({
+        type: "success",
+        title: editItem
+          ? "Profile Update Requested"
+          : "Profile Update Submitted",
+        message:
+          res?.data?.message ||
+          (editItem
+            ? "Profile update request updated successfully."
+            : "Profile update request submitted successfully."),
+      });
 
       setOpen(false);
       fetchData();
-    } catch (err) {
+    } catch (err: any) {
+      toast({
+        type: "error",
+        title: "Action Failed",
+        message:
+          err?.response?.data?.message ||
+          "Unable to submit profile update. Please try again.",
+      });
       console.error(err);
     }
   };
@@ -103,10 +124,25 @@ export default function ProfileUpdateRequest() {
     if (!deleteItem) return;
 
     try {
-      await axios.delete(`/profile-update/${deleteItem._id}`);
+      const res = await axios.delete(`/profile-update/${deleteItem._id}`);
+
+      toast({
+        type: "success",
+        title: "Request Deleted",
+        message:
+          res?.data?.message || "Profile update request deleted successfully.",
+      });
+
       setDeleteOpen(false);
       fetchData();
-    } catch (err) {
+    } catch (err: any) {
+      toast({
+        type: "error",
+        title: "Delete Failed",
+        message:
+          err?.response?.data?.message ||
+          "Unable to delete request. Please try again.",
+      });
       console.error(err);
     }
   };

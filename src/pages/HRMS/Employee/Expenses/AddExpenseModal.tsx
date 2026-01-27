@@ -1,7 +1,7 @@
 /** @format */
 import axios from "axios";
 import { useEffect, useState } from "react";
-
+import { toast } from "../../Alert/Toast";
 const API_BASE = import.meta.env.VITE_API_URL;
 
 const AddExpenseModal = ({
@@ -46,24 +46,27 @@ const AddExpenseModal = ({
   }, [form.expenseType]);
 
   /* ================= SUBMIT ================= */
-  const submit = async () => {
-    const fd = new FormData();
+const submit = async () => {
+  const fd = new FormData();
 
-    Object.entries(form).forEach(([key, value]) => {
-      if (value) fd.append(key, value as string);
-    });
+  Object.entries(form).forEach(([key, value]) => {
+    if (value) fd.append(key, value as string);
+  });
 
-    if (receipt) fd.append("receipt", receipt);
+  if (receipt) fd.append("receipt", receipt);
+
+  try {
+    let res;
 
     if (isEdit) {
-      await axios.put(`${API_BASE}/expenses/${expense._id}/status`, fd, {
+      res = await axios.put(`${API_BASE}/expenses/${expense._id}/status`, fd, {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "multipart/form-data",
         },
       });
     } else {
-      await axios.post(`${API_BASE}/expenses`, fd, {
+      res = await axios.post(`${API_BASE}/expenses`, fd, {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "multipart/form-data",
@@ -71,9 +74,30 @@ const AddExpenseModal = ({
       });
     }
 
+    toast({
+      type: "success",
+      title: isEdit ? "Expense Updated" : "Expense Added",
+      message:
+        res?.data?.message ||
+        (isEdit
+          ? "Expense updated successfully"
+          : "Expense added successfully"),
+    });
+
     onSuccess();
     onClose();
-  };
+  } catch (error: any) {
+    toast({
+      type: "error",
+      title: "Action Failed",
+      message:
+        error?.response?.data?.message ||
+        "Failed to submit expense. Please try again.",
+    });
+    console.error("Expense submit failed", error);
+  }
+};
+
 
   if (!open) return null;
 

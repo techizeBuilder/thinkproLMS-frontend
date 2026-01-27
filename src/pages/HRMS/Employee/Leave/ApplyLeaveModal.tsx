@@ -1,7 +1,7 @@
 /** @format */
 import axios from "axios";
 import { useEffect, useState } from "react";
-
+import { toast } from "../../Alert/Toast";
 const API_BASE = import.meta.env.VITE_API_URL;
 
 interface LeaveType {
@@ -91,13 +91,24 @@ const ApplyLeaveModal = ({ open, onClose, data, onSuccess }: any) => {
 
   /* ================= SUBMIT ================= */
 
-  const submit = async () => {
+const submit = async () => {
+  try {
     if (data) {
-      await axios.put(`${API_BASE}/employee/leaves/${data._id}`, form, {
-        headers: { Authorization: `Bearer ${token}` },
+      const res = await axios.put(
+        `${API_BASE}/employee/leaves/${data._id}`,
+        form,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        },
+      );
+
+      toast({
+        type: "success",
+        title: "Leave Updated",
+        message: res.data?.message || "Leave request updated successfully",
       });
     } else {
-      await axios.post(
+      const res = await axios.post(
         `${API_BASE}/employee/leaves`,
         {
           ...form,
@@ -105,13 +116,30 @@ const ApplyLeaveModal = ({ open, onClose, data, onSuccess }: any) => {
         },
         {
           headers: { Authorization: `Bearer ${token}` },
-        }
+        },
       );
+
+      toast({
+        type: "success",
+        title: "Leave Applied",
+        message: res.data?.message || "Leave request submitted successfully",
+      });
     }
 
     onSuccess();
     onClose();
-  };
+  } catch (error: any) {
+    toast({
+      type: "error",
+      title: "Action Failed",
+      message:
+        error?.response?.data?.message ||
+        "Unable to submit leave request. Please try again.",
+    });
+    console.error("Leave submit failed", error);
+  }
+};
+
 
   if (!open) return null;
 

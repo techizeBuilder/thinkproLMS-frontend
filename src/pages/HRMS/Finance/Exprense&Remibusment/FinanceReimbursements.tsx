@@ -4,8 +4,10 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import { Eye } from "lucide-react";
 import Loader from "../../Loader";
+import { toast } from "../../Alert/Toast";
 
 const API_BASE = import.meta.env.VITE_API_URL as string;
+const ViewAPI = API_BASE.replace("/api", "");
 
 /* ================= TYPES ================= */
 
@@ -15,6 +17,7 @@ interface Employee {
   _id: string;
   name: string;
   email: string;
+  employeeId?: string;
 }
 
 interface Expense {
@@ -43,6 +46,23 @@ interface TravelRequest {
   createdAt: string;
 }
 
+/* ================= HELPERS ================= */
+
+const statusColor = (status: StatusType) => {
+  switch (status) {
+    case "PENDING":
+      return "bg-yellow-100 text-yellow-700";
+    case "APPROVED":
+      return "bg-green-100 text-green-700";
+    case "PAID":
+      return "bg-blue-100 text-blue-700";
+    case "REJECTED":
+      return "bg-red-100 text-red-700";
+    default:
+      return "";
+  }
+};
+
 /* ================= COMPONENT ================= */
 
 const FinanceReimbursementRequests = () => {
@@ -50,27 +70,24 @@ const FinanceReimbursementRequests = () => {
 
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [travels, setTravels] = useState<TravelRequest[]>([]);
-  const [loading, setLoading] = useState<boolean>(false);
-  const [viewExpense, setViewExpense] = useState<any>(null);
-  const [viewTravel, setViewTravel] = useState<any>(null);
+  const [loading, setLoading] = useState(false);
+  const [activeTab, setActiveTab] = useState<"EXPENSE" | "TRAVEL">("EXPENSE");
+  const [viewExpense, setViewExpense] = useState<Expense | null>(null);
+  const [viewTravel, setViewTravel] = useState<TravelRequest | null>(null);
 
-
-  /* ================= FETCH DATA ================= */
+  /* ================= FETCH ================= */
 
   const fetchExpenses = async () => {
-    const res = await axios.get<Expense[]>(`${API_BASE}/expenses/all`, {
+    const res = await axios.get(`${API_BASE}/expenses/all`, {
       headers: { Authorization: `Bearer ${token}` },
     });
     setExpenses(res.data);
   };
 
-  const fetchTravelRequests = async () => {
-    const res = await axios.get<TravelRequest[]>(
-      `${API_BASE}/travel-requests`,
-      {
-        headers: { Authorization: `Bearer ${token}` },
-      }
-    );
+  const fetchTravels = async () => {
+    const res = await axios.get(`${API_BASE}/travel-requests`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
     setTravels(res.data);
   };
 
@@ -78,7 +95,7 @@ const FinanceReimbursementRequests = () => {
     (async () => {
       try {
         setLoading(true);
-        await Promise.all([fetchExpenses(), fetchTravelRequests()]);
+        await Promise.all([fetchExpenses(), fetchTravels()]);
       } finally {
         setLoading(false);
       }
@@ -87,52 +104,80 @@ const FinanceReimbursementRequests = () => {
 
   /* ================= STATUS UPDATE ================= */
 
-  const updateExpenseStatus = async (
-    id: string,
-    status: StatusType
-  ): Promise<void> => {
-    await axios.put(
-      `${API_BASE}/expenses/${id}/status`,
-      { status },
-      { headers: { Authorization: `Bearer ${token}` } }
-    );
-    fetchExpenses();
+  const updateExpenseStatus = async (id: string, status: StatusType) => {
+    try {
+      await axios.put(
+        `${API_BASE}/expenses/${id}/status`,
+        { status },
+        { headers: { Authorization: `Bearer ${token}` } },
+      );
+      toast({ type: "success", title: "Expense Updated" });
+      fetchExpenses();
+    } catch (e: any) {
+      toast({ type: "error", title: "Update Failed" });
+    }
   };
 
-  const updateTravelStatus = async (
-    id: string,
-    status: StatusType
-  ): Promise<void> => {
-    await axios.patch(
-      `${API_BASE}/travel-requests/${id}/status`,
-      { status },
-      { headers: { Authorization: `Bearer ${token}` } }
-    );
-    fetchTravelRequests();
+  const updateTravelStatus = async (id: string, status: StatusType) => {
+    try {
+      await axios.patch(
+        `${API_BASE}/travel-requests/${id}/status`,
+        { status },
+        { headers: { Authorization: `Bearer ${token}` } },
+      );
+      toast({ type: "success", title: "Travel Updated" });
+      fetchTravels();
+    } catch (e: any) {
+      toast({ type: "error", title: "Update Failed" });
+    }
   };
 
-  /* ================= UI ================= */
- if(loading)return<Loader/>;
+  if (loading) return <Loader />;
+
   return (
-    <div className="p-6 space-y-10">
+    <div className="p-6 space-y-6">
+      {/* ================= HEADER ================= */}
       <div>
-        <h1 className="text-2xl font-semibold">
-          Finance – Reimbursement Requests
+        <h1 className="text-2xl font-bold text-gray-800">
+          Finance Reimbursement
         </h1>
         <p className="text-sm text-gray-500">
-          Expense & Travel reimbursement management
+          Manage Expense & Travel reimbursement requests
         </p>
       </div>
 
-      {/* ================= EXPENSE TABLE ================= */}
-      <section>
-        <h2 className="text-lg font-semibold mb-3">Expense Requests</h2>
+      {/* ================= TABS ================= */}
+      <div className="flex gap-4 border-b">
+        <button
+          onClick={() => setActiveTab("EXPENSE")}
+          className={`pb-2 font-medium ${
+            activeTab === "EXPENSE"
+              ? "border-b-2 border-blue-600 text-blue-600"
+              : "text-gray-500"
+          }`}
+        >
+          Expense Requests
+        </button>
 
+        <button
+          onClick={() => setActiveTab("TRAVEL")}
+          className={`pb-2 font-medium ${
+            activeTab === "TRAVEL"
+              ? "border-b-2 border-blue-600 text-blue-600"
+              : "text-gray-500"
+          }`}
+        >
+          Travel Requests
+        </button>
+      </div>
+
+      {/* ================= EXPENSE TABLE ================= */}
+      {activeTab === "EXPENSE" && (
         <div className="bg-white shadow rounded-lg overflow-x-auto">
           <table className="w-full text-center">
             <thead className="bg-gray-100">
               <tr>
-                <th className="p-3">Sr</th>
+                <th className="p-3">Sr.No</th>
                 <th className="p-3">Employee</th>
                 <th className="p-3">Category</th>
                 <th className="p-3">Amount</th>
@@ -141,7 +186,6 @@ const FinanceReimbursementRequests = () => {
                 <th className="p-3">Action</th>
               </tr>
             </thead>
-
             <tbody>
               {expenses.map((e, i) => (
                 <tr key={e._id} className="border-t">
@@ -152,7 +196,6 @@ const FinanceReimbursementRequests = () => {
                   <td className="p-3">
                     {new Date(e.date).toLocaleDateString()}
                   </td>
-
                   <td className="p-3">
                     <select
                       value={e.status}
@@ -160,10 +203,12 @@ const FinanceReimbursementRequests = () => {
                       onChange={(ev) =>
                         updateExpenseStatus(
                           e._id,
-                          ev.target.value as StatusType
+                          ev.target.value as StatusType,
                         )
                       }
-                      className="border px-2 py-1 rounded"
+                      className={`px-2 py-1 rounded text-sm ${statusColor(
+                        e.status,
+                      )}`}
                     >
                       <option value="PENDING">Pending</option>
                       <option value="APPROVED">Approved</option>
@@ -171,7 +216,6 @@ const FinanceReimbursementRequests = () => {
                       <option value="REJECTED">Rejected</option>
                     </select>
                   </td>
-
                   <td className="p-3">
                     <button
                       onClick={() => setViewExpense(e)}
@@ -185,17 +229,15 @@ const FinanceReimbursementRequests = () => {
             </tbody>
           </table>
         </div>
-      </section>
+      )}
 
       {/* ================= TRAVEL TABLE ================= */}
-      <section>
-        <h2 className="text-lg font-semibold mb-3">Travel Requests</h2>
-
+      {activeTab === "TRAVEL" && (
         <div className="bg-white shadow rounded-lg overflow-x-auto">
           <table className="w-full text-center">
             <thead className="bg-gray-100">
               <tr>
-                <th className="p-3">Sr</th>
+                <th className="p-3">#</th>
                 <th className="p-3">Employee</th>
                 <th className="p-3">Destination</th>
                 <th className="p-3">Dates</th>
@@ -204,7 +246,6 @@ const FinanceReimbursementRequests = () => {
                 <th className="p-3">Action</th>
               </tr>
             </thead>
-
             <tbody>
               {travels.map((t, i) => (
                 <tr key={t._id} className="border-t">
@@ -216,7 +257,6 @@ const FinanceReimbursementRequests = () => {
                     {new Date(t.toDate).toLocaleDateString()}
                   </td>
                   <td className="p-3">₹{t.budget}</td>
-
                   <td className="p-3">
                     <select
                       value={t.status}
@@ -224,7 +264,9 @@ const FinanceReimbursementRequests = () => {
                       onChange={(ev) =>
                         updateTravelStatus(t._id, ev.target.value as StatusType)
                       }
-                      className="border px-2 py-1 rounded"
+                      className={`px-2 py-1 rounded text-sm ${statusColor(
+                        t.status,
+                      )}`}
                     >
                       <option value="PENDING">Pending</option>
                       <option value="APPROVED">Approved</option>
@@ -232,7 +274,6 @@ const FinanceReimbursementRequests = () => {
                       <option value="REJECTED">Rejected</option>
                     </select>
                   </td>
-
                   <td className="p-3">
                     <button
                       onClick={() => setViewTravel(t)}
@@ -246,12 +287,18 @@ const FinanceReimbursementRequests = () => {
             </tbody>
           </table>
         </div>
-      </section>
+      )}
 
-      {/* ================= VIEW MODAL ================= */}
+      {/* ================= MODALS (same as before) ================= */}
       {viewExpense && (
-        <div className="fixed inset-0 bg-black/50 flex justify-center items-center z-50">
-          <div className="bg-white w-[600px] p-6 rounded-lg">
+        <div
+          className="fixed inset-0 bg-black/50 flex justify-center items-center z-50"
+          onClick={() => setViewExpense(null)}
+        >
+          <div
+            className="bg-white w-[600px] p-6 rounded-lg"
+            onClick={(e) => e.stopPropagation()}
+          >
             <h2 className="text-xl font-semibold mb-4">Expense Details</h2>
 
             <div className="space-y-2 text-sm">
@@ -285,7 +332,7 @@ const FinanceReimbursementRequests = () => {
 
               {viewExpense.receipt && (
                 <a
-                  href={`${API_BASE}${viewExpense.receipt}`}
+                  href={`${ViewAPI}${viewExpense.receipt}`}
                   target="_blank"
                   className="text-blue-600 underline"
                 >
@@ -306,8 +353,14 @@ const FinanceReimbursementRequests = () => {
         </div>
       )}
       {viewTravel && (
-        <div className="fixed inset-0 bg-black/50 flex justify-center items-center z-50">
-          <div className="bg-white w-[600px] p-6 rounded-lg">
+        <div
+          className="fixed inset-0 bg-black/50 flex justify-center items-center z-50"
+          onClick={() => setViewTravel(null)}
+        >
+          <div
+            className="bg-white w-[600px] p-6 rounded-lg"
+            onClick={(e) => e.stopPropagation()}
+          >
             <h2 className="text-xl font-semibold mb-4">
               Travel Request Details
             </h2>
@@ -358,8 +411,6 @@ const FinanceReimbursementRequests = () => {
           </div>
         </div>
       )}
-
-      {loading && <p className="text-gray-500">Loading...</p>}
     </div>
   );
 };

@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import Loader from "../../Loader";
-
+import { toast } from "../../Alert/Toast";
 const API_BASE = import.meta.env.VITE_API_URL;
 
 const EmployeeAttendanceRequest = () => {
@@ -25,12 +25,32 @@ const EmployeeAttendanceRequest = () => {
   }, []);
 
   const updateStatus = async (id: string, status: string) => {
-    await axios.patch(
-      `${API_BASE}/attendance-request/${id}/status`,
-      { status },
-      { headers: { Authorization: `Bearer ${token}` } }
-    );
-    fetchRequests();
+    try {
+      const res = await axios.patch(
+        `${API_BASE}/attendance-request/${id}/status`,
+        { status },
+        { headers: { Authorization: `Bearer ${token}` } },
+      );
+
+      toast({
+        type: "success",
+        title:
+          status === "APPROVED" ? "Attendance Approved" : "Attendance Rejected",
+        message:
+          res.data?.message ||
+          `Attendance request has been ${status.toLowerCase()} successfully.`,
+      });
+
+      fetchRequests();
+    } catch (error: any) {
+      toast({
+        type: "error",
+        title: "Update Failed",
+        message:
+          error?.response?.data?.message ||
+          "Unable to update attendance request. Please try again.",
+      });
+    }
   };
 
   const formatDate = (d: string) => new Date(d).toLocaleDateString("en-GB");
@@ -107,8 +127,14 @@ const EmployeeAttendanceRequest = () => {
 
       {/* ================= VIEW MODAL ================= */}
       {view && (
-        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 w-full max-w-md">
+        <div
+          className="fixed inset-0 bg-black/40 flex items-center justify-center z-50"
+          onClick={() => setView(null)}
+        >
+          <div
+            className="bg-white rounded-lg p-6 w-full max-w-md"
+            onClick={(e) => e.stopPropagation()}
+          >
             <h3 className="text-lg font-semibold mb-4">
               Attendance Request Detail
             </h3>

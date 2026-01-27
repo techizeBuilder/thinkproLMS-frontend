@@ -14,7 +14,7 @@ import {
   X,
 } from "lucide-react";
 import Loader from "../../Loader";
-
+import { toast } from "../../Alert/Toast";
 const API = import.meta.env.VITE_API_URL;
 
 interface UserType {
@@ -76,12 +76,31 @@ export default function PersonalInformation() {
     }
   };
 
-  const updateUser = async (payload: Partial<UserType>) => {
-    await axios.patch(`${API}/users/${userId}`, payload, {
+const updateUser = async (payload: Partial<UserType>) => {
+  try {
+    const res = await axios.patch(`${API}/users/${userId}`, payload, {
       headers: { Authorization: `Bearer ${token}` },
     });
+
+    toast({
+      type: "success",
+      title: "Profile Updated",
+      message: res.data?.message || "User updated successfully",
+    });
+
     fetchUser();
-  };
+  } catch (error: any) {
+    toast({
+      type: "error",
+      title: "Update Failed",
+      message:
+        error?.response?.data?.message ||
+        "Failed to update user, please try again",
+    });
+    console.error("Update user failed", error);
+  }
+};
+
 
   useEffect(() => {
     fetchUser();

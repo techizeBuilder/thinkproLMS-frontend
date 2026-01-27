@@ -5,6 +5,7 @@ import axios from "axios";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { toast } from "../../Alert/Toast";
 import {
   Table,
   TableBody,
@@ -71,23 +72,43 @@ const EmployeeProfileUpdateRequest = () => {
 
   /* ================= UPDATE STATUS ================= */
 
-  const updateStatus = async (id: string, status: "APPROVED" | "REJECTED") => {
-    try {
-      setActionLoading(true);
+const updateStatus = async (id: string, status: "APPROVED" | "REJECTED") => {
+  try {
+    setActionLoading(true);
 
-      await axios.patch(
-        `${API_BASE}/profile-update/${id}`,
-        { status },
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        },
-      );
+    const res = await axios.patch(
+      `${API_BASE}/profile-update/${id}`,
+      { status },
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      },
+    );
 
-      fetchRequests();
-    } finally {
-      setActionLoading(false);
-    }
-  };
+    toast({
+      type: "success",
+      title:
+        status === "APPROVED"
+          ? "Profile Update Approved"
+          : "Profile Update Rejected",
+      message:
+        res.data?.message ||
+        `Profile update request has been ${status.toLowerCase()} successfully.`,
+    });
+
+    fetchRequests();
+  } catch (error: any) {
+    toast({
+      type: "error",
+      title: "Action Failed",
+      message:
+        error?.response?.data?.message ||
+        "Unable to update profile request. Please try again.",
+    });
+  } finally {
+    setActionLoading(false);
+  }
+};
+
 
   if (loading) return <Loader />;
 

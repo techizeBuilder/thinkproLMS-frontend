@@ -2,8 +2,10 @@
 
 import { useEffect, useState } from "react";
 import axios from "axios";
+import Loader from "../../Loader";
 
 const API = import.meta.env.VITE_API_URL;
+const ViewAPI = API.replace("/api", "");
 
 type LetterType = "OFFER" | "EXPERIENCE" | "TRAINING";
 
@@ -59,13 +61,13 @@ export default function EmployeeLetters() {
 
   const handleDownload = (filePath: string, originalName: string) => {
     const link = document.createElement("a");
-    link.href = `http://localhost:8000/${filePath}`;
+    link.href = `${ViewAPI}/${filePath}`;
     link.setAttribute("download", originalName);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
   };
-
+  if(loading)return<Loader/>;
   return (
     <div className="p-6">
       {/* PAGE TITLE */}
@@ -133,7 +135,7 @@ export default function EmployeeLetters() {
               {/* ACTIONS */}
               <div className="flex gap-3">
                 <a
-                  href={`http://localhost:8000/${letter.filePath}`}
+                  href={`${ViewAPI}/${letter.filePath}`}
                   target="_blank"
                   rel="noreferrer"
                   className="flex-1 text-center text-sm py-2 rounded-lg border border-gray-300 hover:bg-gray-50"

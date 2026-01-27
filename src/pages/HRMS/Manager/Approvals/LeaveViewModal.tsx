@@ -20,8 +20,12 @@ const LeaveViewModal = ({ open, onClose, data }: Props) => {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-3">
-      <div className="bg-white w-full max-w-lg rounded-xl shadow-lg relative animate-fadeIn">
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-3"
+      onClick={onClose}
+    >
+      <div className="bg-white w-full max-w-lg rounded-xl shadow-lg relative animate-fadeIn"
+       onClick={(e) => e.stopPropagation()} >
         {/* Header */}
         <div className="flex items-center justify-between border-b p-4">
           <h3 className="text-lg font-semibold">Leave Request Details</h3>
@@ -62,7 +66,7 @@ const LeaveViewModal = ({ open, onClose, data }: Props) => {
               <p className="text-gray-500">Status</p>
               <span
                 className={`inline-block px-3 py-1 rounded-full text-xs font-semibold ${statusBadge(
-                  data.status
+                  data.status,
                 )}`}
               >
                 {data.status}

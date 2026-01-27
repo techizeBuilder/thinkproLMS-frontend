@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import SelfAppraisalModal from "./SelfAppraisalModal";
+import Loader from "../../Loader";
 
 const API_BASE = import.meta.env.VITE_API_URL;
 
@@ -27,6 +28,7 @@ export default function MyAppraisals() {
   const [selectedAppraisal, setSelectedAppraisal] = useState<Appraisal | null>(
     null
   );
+  const [loading,setLoading]=useState(true);
 
   /* ================= FETCH ================= */
   const fetchMyAppraisals = async () => {
@@ -35,6 +37,7 @@ export default function MyAppraisals() {
         headers: { Authorization: `Bearer ${token}` },
       });
       setAppraisals(res.data || []);
+      setLoading(false);
     } catch (err) {
       console.error("Failed to fetch appraisals");
     }
@@ -43,7 +46,7 @@ export default function MyAppraisals() {
   useEffect(() => {
     fetchMyAppraisals();
   }, []);
-
+  if(loading)return<Loader/>;
   /* ================= UI ================= */
   return (
     <div className="p-6 space-y-5">

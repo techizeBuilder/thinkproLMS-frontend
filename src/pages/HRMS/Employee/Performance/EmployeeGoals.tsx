@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import GoalModal from "./GoalModal";
+import Loader from "../../Loader";
 
 const API_BASE = import.meta.env.VITE_API_URL;
 
@@ -11,6 +12,7 @@ const EmployeeGoals = () => {
   const [goals, setGoals] = useState<any[]>([]);
   const [open, setOpen] = useState(false);
   const [selected, setSelected] = useState<any>(null);
+  const [loading,setLoading]=useState(true);
 
   /* ================= FETCH GOALS ================= */
   const fetchGoals = async () => {
@@ -19,6 +21,7 @@ const EmployeeGoals = () => {
         headers: { Authorization: `Bearer ${token}` },
       });
       setGoals(res.data || []);
+      setLoading(false);
     } catch (err) {
       console.error("Failed to fetch goals");
     }
@@ -41,7 +44,7 @@ const EmployeeGoals = () => {
     if (p === "MEDIUM") return "text-yellow-600";
     return "text-green-600";
   };
-
+  if(loading)return<Loader/>;
   return (
     <div className="p-4">
       {/* HEADER */}
