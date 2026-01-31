@@ -159,6 +159,7 @@ export default function LeadsTable({ onAddNew, onEdit}: LeadsTableProps) {
   const navigate = useNavigate();
   const location = useLocation();
   const isUrlSyncDone = useRef(false);
+  const hasLoadedOnce = useRef(false);
   const [searchParams, setSearchParams] = useSearchParams();
    const loggedInUser = JSON.parse(localStorage.getItem("user") || "{}");
    const loggedInRole = loggedInUser?.role;
@@ -299,6 +300,12 @@ export default function LeadsTable({ onAddNew, onEdit}: LeadsTableProps) {
      }
    };
 
+   const setPageParam = (nextPage: number) => {
+     const params = new URLSearchParams(searchParams);
+     params.set("page", String(nextPage));
+     setSearchParams(params);
+   };
+
 
    const updateParam = (key: string, value: string | string[]) => {
      const params = new URLSearchParams(searchParams);
@@ -348,8 +355,10 @@ export default function LeadsTable({ onAddNew, onEdit}: LeadsTableProps) {
 
     setPage(Number(searchParams.get("page") || 1));
       isUrlSyncDone.current = true;
-      fetchLeads(true);
-  }, [searchParams]);
+      const isInitialLoad = !hasLoadedOnce.current;
+      hasLoadedOnce.current = true;
+      fetchLeads(isInitialLoad);
+  }, [searchParams, pageSize]);
 
 
  
@@ -1243,7 +1252,10 @@ const sortedLeads = [...leads].sort((a: any, b: any) => {
             <Label>Rows per page</Label>
             <Select
               value={String(pageSize)}
-              onValueChange={(v) => setPageSize(Number(v))}
+              onValueChange={(v) => {
+                setPageSize(Number(v));
+                setPageParam(1);
+              }}
             >
               <SelectTrigger className="h-9 w-[90px]">
                 <SelectValue />
@@ -1261,7 +1273,7 @@ const sortedLeads = [...leads].sort((a: any, b: any) => {
             <Button
               variant="outline"
               disabled={page <= 1 || loading || tableLoading}
-              onClick={() => setPage((p) => Math.max(1, p - 1))}
+              onClick={() => setPageParam(Math.max(1, page - 1))}
             >
               Prev
             </Button>
@@ -1271,7 +1283,7 @@ const sortedLeads = [...leads].sort((a: any, b: any) => {
             <Button
               variant="outline"
               disabled={page >= pages || loading || tableLoading}
-              onClick={() => setPage((p) => Math.min(pages, p + 1))}
+              onClick={() => setPageParam(Math.min(pages, page + 1))}
             >
               Next
             </Button>
