@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import axios from "axios";
-
+import { toast } from "../../Alert/Toast";
 const API_BASE = import.meta.env.VITE_API_URL;
 
 export interface Company {
@@ -124,25 +124,49 @@ export default function BranchModal({ isOpen, mode, branch, onClose }: Props) {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = async () => {
-    if (mode === "view") return;
+const handleSubmit = async () => {
+  if (mode === "view") return;
+  if (!validateForm()) return;
 
-    if (!validateForm()) return;
-
+  try {
     if (mode === "add") {
-      await axios.post(`${API_BASE}/branches`, form, {
+      const res = await axios.post(`${API_BASE}/branches`, form, {
         headers: { Authorization: `Bearer ${token}` },
+      });
+
+      toast({
+        type: "success",
+        title: "Branch Created",
+        message: res.data?.message || "Branch created successfully",
       });
     }
 
     if (mode === "edit" && branch) {
-      await axios.put(`${API_BASE}/branches/${branch._id}`, form, {
+      const res = await axios.put(`${API_BASE}/branches/${branch._id}`, form, {
         headers: { Authorization: `Bearer ${token}` },
+      });
+
+      toast({
+        type: "success",
+        title: "Branch Updated",
+        message: res.data?.message || "Branch updated successfully",
       });
     }
 
     onClose();
-  };
+  } catch (error: any) {
+    toast({
+      type: "error",
+      title: "Operation Failed",
+      message:
+        error?.response?.data?.message ||
+        (mode === "add"
+          ? "Unable to create branch. Please try again."
+          : "Unable to update branch. Please try again."),
+    });
+  }
+};
+
 
   if (!isOpen) return null;
 

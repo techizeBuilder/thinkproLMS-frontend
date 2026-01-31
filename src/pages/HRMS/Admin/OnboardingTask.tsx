@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import Loader from "../Loader";
+import { toast } from "../Alert/Toast";
 
 /* ================= TYPES ================= */
 const API_BASE = import.meta.env.VITE_API_URL;
@@ -108,40 +109,57 @@ const OnboardingTasks = () => {
 
   /* ================= ADD TASK ================= */
 
-  const addTask = async () => {
-    let newErrors = {
-      employeeId: "",
-      departmentId: "",
-      task: "",
-    };
-
-    if (!form.employeeId) newErrors.employeeId = "Employee is required";
-    if (!form.departmentId) newErrors.departmentId = "Department is required";
-    if (!form.task.trim()) newErrors.task = "Task is required";
-
-    setErrors(newErrors);
-
-    if (Object.values(newErrors).some((e) => e !== "")) return;
-
-    try {
-      await axios.post(
-        `${API_BASE}/onboarding-tasks`,
-        {
-          employeeId: form.employeeId,
-          departmentId: form.departmentId,
-          task: form.task,
-        },
-        getAuthHeaders()
-      );
-
-      setOpen(false);
-      setForm({ employeeId: "", departmentId: "", task: "" });
-      setErrors({ employeeId: "", departmentId: "", task: "" });
-      fetchAll();
-    } catch (error) {
-      console.error("Failed to add task", error);
-    }
+const addTask = async () => {
+  let newErrors = {
+    employeeId: "",
+    departmentId: "",
+    task: "",
   };
+
+  if (!form.employeeId) newErrors.employeeId = "Employee is required";
+  if (!form.departmentId) newErrors.departmentId = "Department is required";
+  if (!form.task.trim()) newErrors.task = "Task is required";
+
+  setErrors(newErrors);
+
+  if (Object.values(newErrors).some((e) => e !== "")) return;
+
+  try {
+    const res = await axios.post(
+      `${API_BASE}/onboarding-tasks`,
+      {
+        employeeId: form.employeeId,
+        departmentId: form.departmentId,
+        task: form.task,
+      },
+      getAuthHeaders(),
+    );
+
+    // ✅ SUCCESS ALERT
+    toast({
+      type: "success",
+      title: "Task Assigned",
+      message: res.data?.message || "Task has been assigned successfully.",
+    });
+
+    setOpen(false);
+    setForm({ employeeId: "", departmentId: "", task: "" });
+    setErrors({ employeeId: "", departmentId: "", task: "" });
+    fetchAll();
+  } catch (error: any) {
+    // ❌ ERROR ALERT
+    toast({
+      type: "error",
+      title: "Failed",
+      message:
+        error?.response?.data?.message ||
+        "Failed to assign task. Please try again.",
+    });
+
+    console.error("Failed to add task", error);
+  }
+};
+
 
   /* ================= STATUS BADGE ================= */
 

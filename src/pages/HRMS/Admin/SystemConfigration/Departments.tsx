@@ -5,7 +5,7 @@ import axios from "axios";
 import { MoreVertical } from "lucide-react";
 import DepartmentModal from "./DepartmentModal";
 import Loader from "../../Loader";
-
+import { toast } from "../../Alert/Toast";
 const API_BASE = import.meta.env.VITE_API_URL;
 
 export interface Department {
@@ -44,6 +44,11 @@ export default function DepartmentPage() {
     await axios.delete(`${API_BASE}/departments/${id}`, {
       headers: { Authorization: `Bearer ${token}` },
     });
+     toast({
+            type: "success",
+            title: "Department Deleted",
+            message: "The branch has been deleted successfully.",
+          });
     fetchDepartments();
   };
     if (loading) {

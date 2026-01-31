@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { LeadMentorForm } from "./LeadMentorForm";
-
+import { toast } from "../Alert/Toast";
 const API_BASE = import.meta.env.VITE_API_URL;
 
 const ROLE_OPTIONS = [
@@ -139,8 +139,7 @@ const handleSubmit = async (e: any) => {
   try {
     setLoading(true);
 
-    // ✅ STEP 1: CREATE USER (JSON ONLY)
-    await axios.post(
+    const res = await axios.post(
       `${API_BASE}/users`,
       {
         // BASIC
@@ -166,11 +165,16 @@ const handleSubmit = async (e: any) => {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
         },
-      }
+      },
     );
 
-    alert("User created successfully");
+    toast({
+      type: "success",
+      title: "User Created",
+      message: res.data?.message || "User has been created successfully.",
+    });
 
+    // ✅ RESET FORM
     setFormData({
       name: "",
       email: "",
@@ -191,18 +195,20 @@ const handleSubmit = async (e: any) => {
       employmentType: "",
     });
 
-
-
     setErrors({});
-
-    // ✅ CLEAR FILE INPUTS
-  } catch (err) {
-    console.error(err);
-    alert("Something went wrong");
+  } catch (error: any) {
+    toast({
+      type: "error",
+      title: "User Creation Failed",
+      message:
+        error?.response?.data?.message ||
+        "Unable to create user. Please try again.",
+    });
   } finally {
     setLoading(false);
   }
 };
+
 
 
 
